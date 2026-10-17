@@ -66,7 +66,13 @@ Covered: valid/invalid signup, duplicate email (case-insensitive), password hash
 endpoints, user JWT ⇒ no admin access, admin session logout, CSRF on every state-changing route, rate limiting,
 DB-level constraints and index usage, validation, and the unified error format.
 A 24-step real-browser run (signup → edit → admin search → deactivate → blocked login → reactivate, forged
-client state, mobile layout) was executed against both servers; screenshots are in `docs/screenshots/`.
+client state, mobile layout) lives in `e2e/run_e2e.py`; screenshots are in `docs/screenshots/`. To rerun it
+(`pip install playwright`, both servers up, `seed_demo` done):
+```bash
+# backend with a relaxed login limit, because one run uses ~8 of the 10/min allowed by default
+THROTTLE_LOGIN=1000/min python manage.py runserver
+python e2e/run_e2e.py "<admin password>" docs/screenshots
+```
 
 ## API
 

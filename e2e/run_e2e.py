@@ -2,6 +2,11 @@
 
 Prereqs: backend on :8000 and frontend on :3000 running, `seed_demo` already run, `pip install playwright`.
 Usage:  python e2e/run_e2e.py <admin_password> <screenshots_dir>
+
+Rate limiting: one run makes ~8 login/refresh calls and the API allows 10/min per IP by default
+(that limit is a feature, and is unit-tested). A single run passes with defaults; to run the script
+repeatedly, start the BACKEND with `THROTTLE_LOGIN=1000/min`, or wait 60 s between runs.
+Re-runnable: each run signs up a fresh, uniquely named member.
 """
 import json, sys, time
 from playwright.sync_api import sync_playwright, expect
@@ -96,7 +101,9 @@ with sync_playwright() as p:
     a.fill("#email", "admin@example.test"); a.fill("#password", ADMIN_PW); a.click("button:has-text('Sign in')")
     a.wait_for_url("**/admin")
 
-    a.fill("[aria-label='Search name or email']", "e2e tester")
+    # Search by the unique email: earlier runs leave other "E2E Tester" members behind, so a name
+    # search would (correctly) return several rows and make this script non re-runnable.
+    a.fill("[aria-label='Search name or email']", EMAIL)
     expect(a.locator("table tbody tr")).to_have_count(1)
     check("admin search finds the new member", EMAIL in a.content())
     a.select_option("[aria-label='Status']", "active")
