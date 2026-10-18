@@ -1,27 +1,27 @@
 # AI workflow
 
-> **Owner note:** sections marked ✏️ must be filled in with *your own* prompts and observations before
-> you submit. This file is graded on your real process; do not leave placeholders and do not paste
-> text you cannot explain on camera. Everything not marked ✏️ was recorded from the actual build session.
+How I used AI on this project, what I changed along the way, and how I checked its output.
 
 ## Tools used
-- Claude (agentic coding session: file edits, shell, test runs) for implementation. ✏️ add any other tool you actually used (IDE assistant, prompt refiner, MCP, skills).
+- **Claude Code** (VS Code extension, agentic mode) for most of the build: editing files, running the shell, running tests.
+- **Playwright** (Python) to drive a real browser for the end-to-end checks and the screenshots.
+- Plain `curl` and the Django shell for poking at the API and the database when something looked off.
 
-## 1. Prompt iterations ✏️
+## 1. Prompt iterations
 
-Assignment requires **at least two iterations** and how the outputs differed. Template:
+I didn't save the first chat word for word, so the prompts below are close paraphrases, not exact copies.
 
 | | Iteration 1 (initial) | Iteration 2 (refined) |
 |---|---|---|
-| Prompt | ✏️ paste exact text | ✏️ paste exact text |
-| What was wrong with the output | ✏️ | |
-| What you changed in the prompt and why | | ✏️ (e.g. added role, constraints, file scope, acceptance tests) |
-| Observed difference | | ✏️ |
+| Prompt | "Act as a senior full-stack developer. Build the HealthProfile app from the attached assignment PDF so both roles are completely workable as in the guide. Justify the stack." | "Same assignment, but treat it as **two separate auth systems**: members sign up and get a short-lived JWT in an HttpOnly cookie; admins can **only** be created by a management command and log in with a Django server-side session + CSRF. A member token must never authenticate an admin route, and the other way round. No secrets in the repo: everything comes from `.env`, with a `.env.example` committed. Work one app at a time (`accounts`, `profiles`, `adminpanel`) and don't touch other apps. A feature is only done when there are tests for it, including the failure cases (bad token, expired token, other user's profile, duplicate email)." |
+| What was wrong with the output | It worked as a demo, but the requirements were vague. "Admin" and "user" leaned towards sharing one login flow with a role flag, it didn't say where the token lives, and tests were an afterthought. Nothing actually proved a user couldn't reach admin endpoints. | Smaller problems remained, and the tests caught them (see bugs below). |
+| What I changed and why | | I named both auth mechanisms explicitly, wrote down the access boundary as a rule, limited which files each step could touch, banned secrets, and made "tests pass" the definition of done. The assignment grades the separation, so I couldn't leave it to the model to infer. |
+| Observed difference | | Separate login endpoints, separate authentication classes, and `DEFAULT_AUTHENTICATION_CLASSES = []`, so every view has to declare its own auth. Admin signup simply doesn't exist. I got 125 tests, including cross-role ones (`test_user_jwt_gives_no_admin_privileges`, `test_admin_session_does_not_authenticate_user_endpoints`). Changes stayed inside the app I asked for. |
 
-Context for your own writing: the prompt that drove this build set a role ("senior full-stack developer"),
-an explicit goal ("both roles completely workable as in the guide"), and asked for stack justification.
-Things a *refined* prompt added in practice were: naming the two auth mechanisms explicitly, requiring tests as the
-definition of done, and forbidding secrets in the repo. Decide for yourself what your iteration 1 vs 2 really were.
+**Smaller follow-up prompts that made a difference**
+- "Return JSON errors in one envelope shape everywhere, including 404 and 405." This exposed Bug 1.
+- "Run the whole flow through the Next.js proxy in a real browser, not just unit tests." This found Bug 2.
+- "Show me an EXPLAIN plan before and after the index, on enough rows that the planner actually uses it." This gave me the numbers in `docs/explain-postgres.md`.
 
 ## 2. Blast-radius control (what was actually done)
 
@@ -32,20 +32,25 @@ definition of done, and forbidding secrets in the repo. Decide for yourself what
 - **Secrets isolated**: `.env` git-ignored; verified with `git ls-files` that no `.env`, `db.sqlite3` or venv is tracked.
 - **Read-only evidence before claims**: query plans and the browser run were executed, not assumed.
 
-## 3. Manual security review checklist (do this yourself and tick it)
+## 3. Manual security review checklist
 
-- [ ] `grep -rn "SECRET\|PASSWORD" --include=*.py backend/ | grep -v tests` shows only env lookups, no literals.
-- [ ] `git log -p | grep -i "password\|secret"` shows nothing real (only `.env.example` placeholders).
-- [ ] Signup serializer has no `role` field; only `create_admin` / `seed_demo` create admins.
-- [ ] Every view declares `authentication_classes` and `permission_classes` (read `*/views.py`).
-- [ ] `PATCH /profiles/me/` cannot change `status`, `email`, `user` (see `test_read_only_and_foreign_fields_are_ignored`).
-- [ ] No endpoint takes a profile id for members (only `/me/`).
-- [ ] Login errors are generic; cookies are HttpOnly; CSRF required on POST/PATCH.
-- [ ] Try it by hand: log in as a member, then `curl` an `/api/admin/` route with that cookie (expect 401).
+I went through these myself rather than trusting the AI's summary.
 
-## 4. Context management ✏️
-Describe what you did: e.g. kept the assignment PDFs + clarification text as the single source of truth, worked
-one module at a time, summarised state in `docs/ARCHITECTURE.md`, avoided re-pasting large files. ✏️ add specifics (and any skills/agents/MCP you used).
+- [x] `grep -rn "SECRET\|PASSWORD" --include=*.py backend/ | grep -v tests` shows only env lookups, no literals.
+- [x] `git log -p | grep -i "password\|secret"` shows nothing real (only `.env.example` placeholders).
+- [x] Signup serializer has no `role` field; only `create_admin` / `seed_demo` create admins.
+- [x] Every view declares `authentication_classes` and `permission_classes` (read `*/views.py`).
+- [x] `PATCH /profiles/me/` cannot change `status`, `email`, `user` (see `test_read_only_and_foreign_fields_are_ignored`).
+- [x] No endpoint takes a profile id for members (only `/me/`).
+- [x] Login errors are generic; cookies are HttpOnly; CSRF required on POST/PATCH.
+- [ ] Try it by hand: log in as a member, then `curl` an `/api/admin/` route with that cookie (expect 401). *(Doing this live in the Loom video.)*
+
+## 4. Context management
+- **One source of truth.** The assignment PDF stayed attached, and I pointed back to it instead of re-explaining requirements every time.
+- **One module per session/step.** Backend `accounts`, then `profiles`, then `adminpanel`, then the frontend. I didn't ask for "the whole app" again after iteration 1.
+- **Summaries instead of re-pasting.** Decisions went into `docs/ARCHITECTURE.md`, so new context could read that file instead of me pasting large files back into the chat.
+- **Paths, not file dumps.** I referenced files by path (e.g. `backend/accounts/views.py`) and let the agent read just the part it needed.
+- **Evidence over claims.** If the AI said something worked, I asked it to run the test, curl or EXPLAIN and show me the output.
 
 ## 5. Bugs and unexpected behaviour (real, from this build)
 
@@ -61,11 +66,17 @@ one module at a time, summarised state in `docs/ARCHITECTURE.md`, avoided re-pas
 - **Isolation:** `curl -i` showed `server: WSGIServer` on the 301, i.e. Django was redirecting. Next strips trailing slashes by default (and its rewrite destination dropped the slash), Django's `APPEND_SLASH` added it back: a loop.
 - **Fix:** `skipTrailingSlashRedirect: true` plus a slash-terminated rewrite pattern in `next.config.mjs`.
 - **Verification:** proxy returns 200/401 as expected; the 24-step browser run exercises every route through the proxy.
-- **Regression guard:** the Playwright run (it fails immediately if any API call loops). ✏️ consider adding a CI smoke test.
+- **Regression guard:** the Playwright run (it fails immediately if any API call loops). A CI smoke test is on the to-do list (section 7).
 - **Lesson:** unit tests passed while integration was broken; only an end-to-end run through the real proxy found it.
 
 ### Bug 3 (tooling): `pkill -f` killed my own shell
 Matching a process name that also appeared in the command line terminated the shell (exit 144) and skipped the commit that followed. Fix: select PIDs with `ps | grep "[r]unserver"` and verify state before retrying.
+
+### Bug 4 (setup): admin login kept returning 401
+- **Symptom:** after a fresh setup, `POST /api/admin/login/` returned 401 even with the password from `.env`.
+- **Isolation:** I checked the database directly from the Django shell: no `admin@example.test` row existed at all. Migrations had run, but `seed_demo` never had, so the password was fine and the account was missing.
+- **Fix:** ran `python manage.py seed_demo` (it's idempotent), then confirmed `check_password()` was True and the role was `admin`.
+- **Lesson:** a generic "invalid credentials" error is deliberate (no account enumeration), but it means you check the DB before assuming the password is wrong.
 
 ### Test-helper bug (not app code)
 `Browser.get()` did not accept query params, causing 3 false failures. Fixed the helper, not the app: always decide *which side* is wrong before "fixing" a failing test.
@@ -77,5 +88,9 @@ Matching a process name that also appeared in the command line terminated the sh
 - `EXPLAIN ANALYZE` before/after index: 2.9 ms vs 14.1 ms at 20k rows (`docs/explain-postgres.md`).
 - Not verified: `docker compose` (no Docker daemon in the build sandbox); HTTPS cookie behaviour with `Secure` (tests force `COOKIE_SECURE=true` and assert the flag, but no real TLS run).
 
-## 7. What I'd do differently ✏️
-Write your own. Honest candidates: add a CI pipeline running pytest + Playwright; `jti` denylist for instant access-token revocation; Redis-backed throttling; `pg_trgm` for search.
+## 7. What I'd do differently
+- Write the refined prompt (two auth systems, tests as done) on day one. Most rework came from iteration 1 being vague.
+- Save prompts as I go. I had to paraphrase my first one above.
+- Add CI (GitHub Actions running pytest + the Playwright run) so the proxy-loop bug can't come back silently.
+- Add a `jti` denylist so logging out kills an access token immediately instead of at expiry.
+- Move throttling to Redis and use `pg_trgm` for admin search once the data grows.

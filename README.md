@@ -116,4 +116,3 @@ Secrets only via environment variables (`backend/.env.example` is the template; 
 Argon2id hashing · HttpOnly/Secure/SameSite cookies · CSRF on all unsafe routes · throttled auth endpoints ·
 generic login errors (no enumeration) · role stored server-side and checked on every request · DB CHECK/UNIQUE constraints.
 See "Known limitations" in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for what this prototype deliberately does not do.
-# internship
