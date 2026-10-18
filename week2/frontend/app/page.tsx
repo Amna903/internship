@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DISCLAIMER, Shell } from "@/components/Shell";
+import { Shell } from "@/components/Shell";
 
 export default function Home() {
   return (
@@ -11,6 +11,11 @@ export default function Home() {
           paths: members use short-lived tokens, administrators use server-side sessions.
         </p>
       </section>
+      <div className="card">
+        <h2>Find a wellness professional</h2>
+        <p className="muted small">Search fictional nutritionists, physiotherapists, coaches and more by specialty, city, day and fee.</p>
+        <p><Link className="btn" href="/professionals">Browse professionals</Link></p>
+      </div>
       <div className="choices">
         <div className="card">
           <h2>Member</h2>
@@ -26,7 +31,6 @@ export default function Home() {
           <p><Link className="btn ghost" href="/admin/login">Admin sign in</Link></p>
         </div>
       </div>
-      <p className="alert warn small">{DISCLAIMER}</p>
     </Shell>
   );
 }
