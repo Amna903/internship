@@ -1,4 +1,73 @@
-# HealthProfile
+# HealthProfile: Week 2 (professional directory)
+
+Week 2 builds on the Week 1 app (copied unchanged into this folder, so everything below still works) and adds
+**CareConnect**: a multi-page directory for finding fictional wellness professionals and requesting an
+appointment. All Week 2 features are frontend-only and need no backend.
+
+![Directory](docs/screenshots/w2-01-directory.png)
+
+## Week 2 feature checklist
+
+| Requirement | Where |
+|---|---|
+| `/professionals` and `/professionals/[id]` routes (App Router) | `frontend/app/professionals/` |
+| Single typed JSON source (professionals, specialties, locations, fees, availability) | `frontend/data/professionals.json` + `frontend/lib/professionals.ts` |
+| JSON validated at import time (unknown references, bad times, duplicate ids, online-only + in-person…) | `validateDirectory()` in `lib/professionals.ts` |
+| Multi-criteria search + filters (text, specialties (multi), location, visit type, day, max fee) | `components/professionals/ProfessionalFilters.tsx`, `lib/filters.ts` |
+| Sorting (name, fee ↑/↓, experience) | `lib/filters.ts` |
+| Empty state + one-click reset | `app/professionals/page.tsx` |
+| Query-parameter persistence (refresh / share / back-forward) | URL is the filter state |
+| Multi-step appointment request (4 steps, validation, Previous/Next, review, no real booking) | `components/professionals/AppointmentRequestForm.tsx`, `lib/appointment.ts` |
+| Draft persisted locally (survives refresh) | `localStorage` key `hp.appointmentDraft.v1.<id>` |
+| Favourites with local persistence + `/saved` page | `lib/favorites.ts`, `app/saved/` |
+| Accessible navigation menu (skip link, `aria-current`, mobile disclosure, Escape) | `components/ui/SiteNav.tsx`, `components/ui/Layout.tsx` |
+| Reusable typed components: Card, Filter, FormField, Stepper, Badge, Layout | `frontend/components/ui/` |
+| Shared design tokens / CSS variables | top of `frontend/app/globals.css` |
+| Invalid professional id → not-found UI (HTTP 404) | `app/professionals/[id]/not-found.tsx` |
+| Client/server boundaries + state-management choice documented | [docs/WEEK2.md](docs/WEEK2.md) |
+
+**Acceptance checks**, verified in a real browser by `e2e/run_week2_e2e.py` (33/33 passing):
+direct navigation to a profile URL ✓ · filters combine and reset, URL reflects them ✓ · form errors are
+accessible (error summary with focus, `aria-invalid`, `aria-describedby`) ✓ · draft survives refresh ✓ ·
+mobile layout without horizontal scroll ✓.
+
+## Run Week 2
+
+```bash
+cd frontend
+npm install
+npm run dev            # http://localhost:3000/professionals
+```
+(The backend is only needed for the Week 1 member/admin pages; see "Quick start" below.)
+
+## Week 2 tests
+
+```bash
+cd frontend
+npm test               # 33 unit tests (Vitest): data validation, filters, URL round-trip, form rules
+npm run typecheck
+npm run build          # also fails if data/professionals.json is invalid
+
+# Real-browser acceptance run (needs: pip install playwright && playwright install chromium)
+npm run build && npm start      # in one terminal
+python ../e2e/run_week2_e2e.py http://127.0.0.1:3000 ../docs/screenshots
+```
+
+| | |
+|---|---|
+| ![Form errors](docs/screenshots/w2-04-form-errors.png) | ![Mobile](docs/screenshots/w2-06-mobile.png) |
+
+## Week 2 limitations
+
+- Favourites and drafts live in this browser only (`localStorage`); they are not tied to the Week 1 account
+  and don't sync across devices. Intentional for this week: Week 3 adds an API.
+- Availability is a weekly template, not real dated slots, and nothing prevents double requests.
+- Search is a simple substring match across a 16-item list; it would move server-side with real data.
+- On small screens the filter panel is long; a collapsible "Filters" drawer would be the next improvement.
+
+---
+
+# Week 1: role-based profile builder
 
 Role-based HealthTech profile app with **two independent authentication systems**:
 
@@ -107,7 +176,12 @@ backend/
   adminpanel/   admin session auth + dashboard endpoints
   tests/        pytest suite
 frontend/       Next.js app (member pages, /admin pages, lib/api.ts)
-docs/           ARCHITECTURE.md, API.md, ai-workflow.md, explain-postgres.md, screenshots/
+  app/professionals/, app/saved/   Week 2 routes
+  components/ui/                   Week 2 reusable components
+  data/, lib/                      directory JSON, filters, form model, local storage
+  tests/                           Vitest unit tests
+e2e/            run_e2e.py (Week 1), run_week2_e2e.py (Week 2)
+docs/           WEEK2.md, ARCHITECTURE.md, API.md, ai-workflow.md, explain-postgres.md, screenshots/
 ```
 
 ## Security notes

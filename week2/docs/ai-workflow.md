@@ -94,3 +94,44 @@ Matching a process name that also appeared in the command line terminated the sh
 - Add CI (GitHub Actions running pytest + the Playwright run) so the proxy-loop bug can't come back silently.
 - Add a `jti` denylist so logging out kills an access token immediately instead of at expiry.
 - Move throttling to Redis and use `pg_trgm` for admin search once the data grows.
+
+---
+
+# Week 2: professional directory
+
+## Prompt iterations
+
+| | Iteration 1 | Iteration 2 (how I steered the work) |
+|---|---|---|
+| Prompt | "Make a folder for week 2 and start working on the Week 2 assignment as a senior full stack engineer." (with the Weeks 2–6 PDF attached) | Follow-ups that narrowed it: keep Week 1 frozen and build on a copy; the URL is the only filter state; validate the JSON, don't trust it; tests and a real-browser run are the definition of done. |
+| What the first prompt left open | Where Week 2 lives relative to Week 1, which state library to use, and how "done" is proven. The brief also says "CareConnect" while our app is "HealthProfile". | |
+| What changed | | Copying `week1/` → `week2/` as its own commit keeps the Week 1 submission untouched and makes the Week 2 diff readable. Choosing URL + `localStorage` instead of a global store removed a whole category of sync bugs. Writing the browser acceptance script from the PDF's acceptance checks turned "looks done" into 33 pass/fail checks. |
+
+## Blast radius
+- Week 2 is a separate folder, and the copy is its own commit (`chore(week2): start Week 2 from a copy…`).
+- Only three existing frontend files changed (home page link, appended CSS, `Shell` → `Layout` adapter). Backend untouched. See `docs/WEEK2.md`.
+- Business rules live in pure modules (`lib/filters.ts`, `lib/appointment.ts`, `lib/professionals.ts`), so components stay thin and the rules are unit-tested without a browser.
+
+## Bugs found by verification (real, from this build)
+
+### Bug 1: ticking a specialty chip didn't tick
+- **Symptom:** the browser test failed on its second step: `Locator.check: Clicking the checkbox did not change its state`. Unit tests were all green.
+- **Isolation:** the checkbox was controlled by the URL. Clicking called `router.replace` inside a transition, so the box stayed unticked until the server re-render came back. A real user sees lag. Two fast clicks could also lose the first one, because the second built on the old URL.
+- **Fix:** render the controls from `useOptimistic(committedFilters)` and set the optimistic value in the same transition as the navigation.
+- **Regression guard:** the browser run's first filter step (`.check()` on a chip, then combine with a location) fails without the fix and passes with it.
+- **Lesson:** "the URL is the state" is right, but URL updates are async; the UI needs an optimistic layer.
+
+### Bug 2: error summary didn't always get focus
+- **Symptom:** 32/33. "Error summary receives focus" failed.
+- **Isolation:** focus was moved in `requestAnimationFrame` right after `setErrors`, which raced React's commit of the summary element.
+- **Fix:** count failed attempts in state and focus inside a `useEffect` keyed on that count. It runs after the summary is in the DOM, every time (even when the errors are identical).
+- **Regression guard:** the browser test waits on `to_be_focused()` and then asserts `document.activeElement`.
+
+### Bug 3 (tooling): `npx next start` started the wrong Next.js
+- Run from the wrong working directory, `npx` downloaded Next 16 instead of using the project's 15.5.4, and it failed with "no production build". Fix: call `./node_modules/.bin/next` explicitly. Lesson: never let `npx` silently fetch a tool version.
+
+## Verification performed
+- `npm test`: 33 Vitest unit tests (data validation incl. broken fixtures, filter parsing/round-trip/AND logic/sorting, form rules, corrupted-draft handling).
+- `npm run typecheck` and `npm run build`: clean (16 profile pages + 16 request pages pre-rendered).
+- `e2e/run_week2_e2e.py`: 33/33 against the production build (filters + URL + reset + empty state + garbage params, 200/404 routes, favourites persistence, form errors/focus/ARIA, draft survives refresh, mobile menu + no horizontal scroll, no uncaught JS errors).
+- Screenshots reviewed by eye (desktop list, form errors, mobile).
