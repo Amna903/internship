@@ -189,3 +189,6 @@ table.availability td { white-space: normal; }
 .progress { height: 10px; border-radius: 999px; background: var(--neutral-soft); overflow: hidden; margin: var(--space-2) 0; }
 .progress > span { display: block; height: 100%; background: var(--brand); border-radius: inherit; }
 td.wrap { white-space: normal; overflow-wrap: anywhere; min-width: 180px; }
+
+/* Week 3: prediction result */
+.result-number { font-size: 2.4rem; font-weight: 700; margin: 0; }

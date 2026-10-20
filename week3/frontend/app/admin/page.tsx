@@ -51,7 +51,7 @@ export default function AdminDashboard() {
   }
 
   const pages = data ? Math.max(1, Math.ceil(data.count / 10)) : 1;
-  const nav = (<><span className="muted small">{adminEmail}</span><button className="btn ghost small" onClick={logout}>Sign out</button></>);
+  const nav = (<><Link href="/admin/predictions">No-show model</Link><span className="muted small">{adminEmail}</span><button className="btn ghost small" onClick={logout}>Sign out</button></>);
 
   return (
     <Shell nav={nav}>

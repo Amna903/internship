@@ -111,6 +111,8 @@ export const adminApi = {
   detail: (id: string | number) => api<AdminProfileDetail>("GET", `/api/admin/profiles/${id}/`),
   setStatus: (id: string | number, action: "activate" | "deactivate") => api<AdminProfileDetail>("POST", `/api/admin/profiles/${id}/${action}/`),
   auditEvents: (params: Record<string, string>) => api<Page<AuditEvent>>("GET", "/api/admin/audit-events/?" + new URLSearchParams(params)),
+  predictNoShow: (input: NoShowInput) => api<NoShowResponse>("POST", "/api/v1/predictions/no-show/", input),
+  noShowModel: () => api<ModelCard>("GET", "/api/v1/models/no-show/"),
 };
 
 export const SECTION_LABELS: Record<string, string> = {
@@ -118,3 +120,22 @@ export const SECTION_LABELS: Record<string, string> = {
   emergency_contact: "Emergency contact (name, relationship and phone)",
   wellness_preferences: "Wellness preferences (contact preference and at least one goal)",
 };
+
+// ---- Week 3: no-show model (admin session) ----
+export interface NoShowInput {
+  lead_time_days: number; appointment_weekday: string; appointment_hour: number; age_band: string;
+  visit_type: string; booking_channel: string; reminder_sent: boolean; prior_appointments: number;
+  prior_no_shows: number; distance_km: number | null;
+}
+export interface NoShowResponse {
+  model_version: string;
+  prediction: { no_show_probability: number; risk_band: "low" | "medium" | "high"; decision_threshold: number; baseline_no_show_rate: number };
+  disclaimer: string;
+}
+export interface ModelMetrics { roc_auc: number; pr_auc: number; brier: number; precision?: number; recall?: number; f1?: number }
+export interface ModelCard {
+  model_version: string; selected_model: string; task: string; decision_threshold: number; train_no_show_rate: number;
+  test_metrics: Record<string, ModelMetrics>;
+  data: { rows: number; split: string; split_rows: Record<string, number> };
+  disclaimer: string;
+}
