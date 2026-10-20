@@ -1,7 +1,100 @@
-# HealthProfile: Week 2
+# HealthProfile: Week 3 (ML pipeline and prediction API)
 
-Week 2 builds on the Week 1 app (copied into this folder; everything in the Week 1 section below still works).
-It has two parts:
+Week 3 builds on Week 2 (copied into this folder; every Week 1 and Week 2 feature below still works) and adds
+an **educational appointment no-show model**: a reproducible scikit-learn pipeline trained on synthetic data,
+served by a versioned, validated API, and shown in the admin dashboard.
+
+> Not a diagnostic tool. It estimates whether a *fictional appointment* may be missed (to plan reminders),
+> was trained on synthetic data, and has no clinical validity.
+
+![No-show estimate in the admin dashboard](docs/screenshots/w3-01-no-show-estimate.png)
+
+## Week 3 checklist
+
+| Requirement | How / where |
+|---|---|
+| Synthetic or approved non-sensitive data; provenance, license, schema, limitations | Seeded generator `backend/ml/data.py`; [docs/DATA_CARD.md](docs/DATA_CARD.md) |
+| Exploratory analysis, missing values, train/validation/test split | `python -m ml.eda` → [backend/ml/reports/eda.md](backend/ml/reports/eda.md); median imputation + missing indicator (fit on train only); patient-grouped 60/20/20 split |
+| Baseline + at least one improved scikit-learn model, non-diagnostic task | Floor (`DummyClassifier`), baseline (logistic, raw inputs), improved (logistic + engineered features; gradient boosting) |
+| Compare with appropriate metrics, error analysis, no leakage | PR-AUC / ROC-AUC / Brier, threshold metrics, per-group errors, calibration: [backend/ml/reports/metrics.md](backend/ml/reports/metrics.md). Leakage: `checked_in` and ids excluded, patient-grouped split, preprocessing inside the pipeline, test scored once (all tested) |
+| Versioned inference endpoint + output in the dashboard | `POST /api/v1/predictions/no-show/`, `GET /api/v1/models/no-show/`; admin page `/admin/predictions` |
+| No clinical claims | Disclaimer in API response, UI and docs |
+| Preprocessing and model saved together, reproducibly | One sklearn `Pipeline` in `ml/artifacts/no-show-1.0.0.joblib` + metadata JSON (data hash, metrics, seed, library versions, artifact SHA-256) |
+| Validate inference schema; malformed and out-of-range input | Strict DRF serializer: unknown keys, types, ranges, `prior_no_shows ≤ prior_appointments`, nullable distance; broken JSON → 400 |
+| Pinned dependencies, recorded seeds, class imbalance and bias documented | Exact pins in `backend/requirements.txt`; seed 42 in `ml/config.py` and metadata; [docs/DATA_CARD.md](docs/DATA_CARD.md) |
+| **Acceptance:** training script reproduces the artifact | `pytest -m slow` retrains in a fresh process and asserts the same data hash, metrics and artifact SHA-256 |
+| **Acceptance:** inference returns validated output + model version | `{"model_version": "no-show-1.0.0", "prediction": {...}, "disclaimer": ...}` (tests in `tests/test_predictions_api.py`) |
+| **Acceptance:** README has metrics, dataset limitations, sample request/response | Below |
+
+### Metrics (test set: 3,967 appointments of patients never seen in training, 16.5% no-show)
+
+| Model | ROC-AUC | PR-AUC | Brier |
+|---|---|---|---|
+| Floor: always predict the average | 0.500 | 0.165 | 0.138 |
+| Baseline: logistic regression, raw inputs | 0.705 | 0.358 | 0.124 |
+| **Served: logistic regression + engineered features** | **0.712** | **0.371** | **0.123** |
+| Gradient boosting + engineered features | 0.707 | 0.356 | 0.124 |
+| Oracle ceiling (the generator's true probability) | 0.717 | 0.372 | 0.123 |
+
+Threshold 0.236 (picked on validation by F1): precision 0.365, recall 0.452, F1 0.404.
+The served model is within 1% of the best achievable ROC-AUC; what's left is noise in the synthetic data.
+Design notes and error analysis: [docs/WEEK3.md](docs/WEEK3.md).
+
+### Dataset limitations (short version)
+
+Synthetic: the model can only learn the effects we planted, so the metrics say nothing about real clinics.
+No time dimension, missingness is random by construction, and age is a planted driver: young people are
+flagged far more often (false-positive rate 29.5% for 18–24 vs 4.6% for 55–64), so the output is only fit
+for supportive actions like an extra reminder. Full list: [docs/DATA_CARD.md](docs/DATA_CARD.md).
+
+### Sample request / response
+
+```bash
+curl -b jar.txt -H "X-CSRFToken: $CSRF" -H 'Content-Type: application/json' \
+  -d '{"lead_time_days":14,"appointment_weekday":"tuesday","appointment_hour":10,"age_band":"35-44",
+       "visit_type":"in_person","booking_channel":"web","reminder_sent":true,
+       "prior_appointments":4,"prior_no_shows":0,"distance_km":6.5}' \
+  http://127.0.0.1:8000/api/v1/predictions/no-show/
+```
+`200` (header `X-Request-ID: a7a6d9c4…`)
+```json
+{"model_version": "no-show-1.0.0",
+ "prediction": {"no_show_probability": 0.0829, "risk_band": "low",
+                "decision_threshold": 0.2363, "baseline_no_show_rate": 0.1664},
+ "disclaimer": "Educational prototype trained on synthetic data. Estimates appointment attendance only; not a medical assessment and not clinically validated."}
+```
+`risk_band`: `high` at or above the threshold, `medium` above the average no-show rate, otherwise `low`.
+
+Errors (same envelope as the rest of the API):
+- unknown key → `400 {"error":{"code":"validation_error",…,"details":{"lead_time":["Unknown field."]}}}`
+- out of range → `400 … {"appointment_hour":["Ensure this value is greater than or equal to 7."]}`
+- broken JSON → `400 parse_error` · member/anonymous → `401` · no CSRF → `403` · over 60/min → `429`
+- model missing, tampered or built for another scikit-learn → `503 model_unavailable`
+
+### Run and test Week 3
+
+```bash
+cd backend
+pip install -r requirements-dev.txt     # includes the pinned ML stack
+python manage.py migrate && python manage.py seed_demo
+python -m ml.eda && python -m ml.train  # optional: the trained model is committed; this rebuilds it identically
+python manage.py runserver
+pytest                                  # 190 tests (incl. the slow full-retrain reproducibility check)
+
+cd ../frontend && npm install && npm run dev   # http://localhost:3000/admin/predictions (sign in as admin)
+
+# Real-browser check (both servers up)
+python e2e/run_week3_e2e.py "<admin password>" docs/screenshots   # 13 checks
+```
+
+**Verification:** `pytest` 190 passed · `run_week3_e2e.py` 13/13 · earlier browser suites still green
+(`run_e2e.py` 24/24, `run_audit_e2e.py` 11/11, `run_week2_e2e.py` 33/33) · `npm run typecheck`, `npm test` 33/33, `npm run build` clean.
+
+---
+
+# Week 2
+
+Week 2 built on the Week 1 app. It has two parts:
 
 1. **Role-Based Health Profiles and Database Engineering** (Full-Stack AI/ML track): profile completion
    status, audit events for profile edits and admin actions, new composite indexes with EXPLAIN evidence.
@@ -198,6 +291,8 @@ Examples with request/response bodies: [docs/API.md](docs/API.md).
 | `GET /api/admin/me/` | admin session | Who am I (used by the UI on every load) |
 | `GET /api/admin/profiles/` | admin session | List; `?search=&status=&completion=&ordering=&page=&page_size=` |
 | `GET /api/admin/audit-events/` | admin session | Audit trail; `?action=&profile=&page=&page_size=` (read-only) |
+| `POST /api/v1/predictions/no-show/` | admin session | Week 3: no-show estimate (validated input, versioned output) |
+| `GET /api/v1/models/no-show/` | admin session | Week 3: model card (version, metrics, schema) |
 | `GET /api/admin/profiles/{id}/` | admin session | Detail |
 | `POST /api/admin/profiles/{id}/deactivate/` · `/activate/` | admin session | Change status |
 
@@ -212,6 +307,8 @@ backend/
   accounts/     User model, JWT-cookie auth, signup/login/refresh/logout, create_admin
   profiles/     HealthProfile model, completion rules, /profiles/me, seed_demo, explain_queries
   audit/        append-only AuditEvent model, record_event() service (Week 2)
+  ml/           Week 3: data generator, features, train, eda, inference; artifacts/ and reports/
+  predictions/  Week 3: versioned no-show API (serializer, views)
   adminpanel/   admin session auth + dashboard endpoints
   tests/        pytest suite
 frontend/       Next.js app (member pages, /admin pages, lib/api.ts)

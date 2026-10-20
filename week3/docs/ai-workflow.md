@@ -184,3 +184,50 @@ three frontend pages.
   audit on every action, values never stored, append-only, request id, role boundaries).
 - `e2e/run_audit_e2e.py`: 11/11 against the production build. Week 1 run 24/24, CareConnect run 33/33.
 - EXPLAIN with and without each new index on 20k profiles / 60k events (`docs/explain-postgres.md`).
+
+---
+
+# Week 3: ML pipeline and prediction API
+
+## Prompt (paraphrased)
+
+> "Now Week 3" + the Full-Stack AI/ML PDF. The AI first checked the PDF against the repo (which is how the
+> Week 2 gap above was found), fixed Week 2, then planned Week 3 from the acceptance checks backwards:
+> reproducible artifact, validated versioned output, README metrics + limitations + sample request.
+
+Constraints I held it to: synthetic data only; preprocessing saved inside the model; every choice on
+validation, test scored once; exact dependency pins; no clinical wording anywhere; Week 1/2 tests stay green.
+
+## Blast radius
+- Week 3 is its own folder, copied from Week 2 in its own commit.
+- New code in new places: `backend/ml/` (pure Python, no Django), `backend/predictions/` (API),
+  `frontend/app/admin/predictions/`. Existing files touched: settings (app, throttle, artifact dir), root
+  urls (`/api/v1/`), one new audit action (+ migration), one nav link, `lib/api.ts` types, CSS appended.
+- All 149 Week 2 tests and the three earlier browser suites were re-run on Week 3.
+
+## What verification caught
+1. **The "improved" model wasn't better.** First run: gradient boosting vs logistic regression PR-AUC
+   0.3265 vs 0.3263 on validation, and *worse* on test. Rather than tune until a number went up, I changed
+   what "improved" means: baseline = logistic on raw inputs; improvement = five features each backed by an
+   EDA table. That gave a real, consistent gain (validation PR-AUC 0.304 → 0.345; test 0.358 → 0.371).
+2. **Was the model weak or the data noisy?** Added an "oracle ceiling" (score of the generator's true
+   probability): 0.717 ROC-AUC vs 0.712 served. So the model is near the limit; noise is the cap.
+3. **EDA captions over-claimed.** I'd written "no-show rate flattens past 60 days" and "distance only matters
+   in person"; the tables showed it keeps rising and distance matters only beyond 20 km. Reworded to match.
+4. **Four failing tests, four different causes:** (a) a substring check flagged the legit feature
+   `prior_no_shows` as the target `no_show`; (b) a "train median ≠ full median" check was false because
+   0.1-km medians coincide → switched to the scaler's mean, a continuous statistic; (c) two runs differed only
+   in the data *file name* recorded in metadata; (d) the full retrain matched data hash and metrics but not
+   the artifact bytes. Fresh processes always produced the committed SHA-256; only inside pytest (after other
+   models were trained in the same process) did pickle bytes differ. The test now trains in a subprocess,
+   like a reviewer would.
+5. **UI test expectation was wrong, not the app:** DRF runs the cross-field rule (`prior_no_shows ≤
+   prior_appointments`) only after per-field checks pass, so the browser test now checks the two in sequence.
+6. **Model card hid a candidate:** the API listed 4 of 5 models (dropped gradient boosting). Showing all is
+   more honest; fixed the API, not the test.
+
+## Context management
+- The AI read the existing code before each change instead of me pasting it.
+- ML code is plain Python with no Django imports, so it's testable and reviewable on its own.
+- Generated evidence (EDA, metrics, metadata JSON) is committed as files, so the next session reads numbers
+  instead of re-deriving them.
