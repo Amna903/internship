@@ -18,6 +18,7 @@ class AuditEvent(models.Model):
         ADMIN_PROFILE_VIEWED = "admin.profile_viewed", "Admin viewed profile"
         ADMIN_PROFILE_DEACTIVATED = "admin.profile_deactivated", "Admin deactivated profile"
         ADMIN_PROFILE_ACTIVATED = "admin.profile_activated", "Admin reactivated profile"
+        ADMIN_PREDICTION = "admin.prediction", "Admin requested a no-show estimate"
 
     created_at = models.DateTimeField(auto_now_add=True)
     # SET_NULL keeps the trail when an account is deleted; actor_role still says what kind of actor it was.

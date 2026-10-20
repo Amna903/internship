@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     "profiles",
     "adminpanel",
     "audit",
+    "predictions",
 ]
 
 MIDDLEWARE = [
@@ -161,6 +162,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "login": os.environ.get("THROTTLE_LOGIN", "10/min"),
         "signup": os.environ.get("THROTTLE_SIGNUP", "20/hour"),
+        "predict": os.environ.get("THROTTLE_PREDICT", "60/min"),
     },
 }
 
@@ -195,6 +197,9 @@ if not DEBUG:
 # --------------------------------------------------------------------------
 # Misc
 # --------------------------------------------------------------------------
+# Trained model (Week 3). Only this directory is ever unpickled; see ml/inference.py.
+ML_ARTIFACT_DIR = Path(os.environ.get("ML_ARTIFACT_DIR") or BASE_DIR / "ml" / "artifacts")
+
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = False
