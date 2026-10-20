@@ -184,3 +184,8 @@ table.availability td { white-space: normal; }
 .error-summary:focus { outline: 2px solid var(--danger); outline-offset: 2px; }
 .form-nav { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); margin-top: var(--space-5); flex-wrap: wrap; }
 .summary { margin-bottom: var(--space-4); }
+
+/* Profile completion bar */
+.progress { height: 10px; border-radius: 999px; background: var(--neutral-soft); overflow: hidden; margin: var(--space-2) 0; }
+.progress > span { display: block; height: 100%; background: var(--brand); border-radius: inherit; }
+td.wrap { white-space: normal; overflow-wrap: anywhere; min-width: 180px; }

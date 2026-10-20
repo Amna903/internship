@@ -135,3 +135,52 @@ Matching a process name that also appeared in the command line terminated the sh
 - `npm run typecheck` and `npm run build`: clean (16 profile pages + 16 request pages pre-rendered).
 - `e2e/run_week2_e2e.py`: 33/33 against the production build (filters + URL + reset + empty state + garbage params, 200/404 routes, favourites persistence, form errors/focus/ARIA, draft survives refresh, mobile menu + no horizontal scroll, no uncaught JS errors).
 - Screenshots reviewed by eye (desktop list, form errors, mobile).
+
+---
+
+# Week 2 (Full-Stack AI/ML track): completion status and audit events
+
+## How this part started: wrong brief
+
+I first built Week 2 from the **frontend** PDF (CareConnect). When I attached the **Full-Stack AI/ML**
+PDF to start Week 3, the AI compared it with the repo before writing anything and flagged that the
+AI/ML Week 2 asks for things the code didn't have: audit events and profile completion status. I chose
+to fix Week 2 first and keep CareConnect as a bonus. Lesson: put the exact brief in the first prompt,
+and ask the AI to diff the brief against the repo before planning.
+
+## Prompt (paraphrased)
+
+> "I'm on the AI/ML track. Fix Week 2 first: add audit events for profile edits and admin actions
+> (no secrets or sensitive payloads) and a profile completion status, then build Week 3."
+
+The AI read the existing models, views, tests and seed command before editing, and kept the change
+inside `profiles/`, `adminpanel/`, one line in `accounts/views.py` (signup event), a new `audit/` app and
+three frontend pages.
+
+## Blast radius
+- New behaviour in new modules: `audit/` (model, service, serializer), `profiles/completion.py`, `config/middleware.py`.
+- Existing views got one `record_event(...)` call each, inside the same transaction as the change.
+- The 125 existing tests were run **before** writing any new tests: all still passed, so nothing old broke.
+- The Week 1 browser run (24/24) and CareConnect browser run (33/33) were re-run against the changed app.
+
+## Issues found by verification
+1. **Renamed migration broke every test (125 errors).** I renamed `0002_healthprofile_completion_status_and_more`
+   to `0002_completion_status`, but `audit/0001` still depended on the old name.
+   `pytest -x` showed `NodeNotFoundError`; fixed the dependency.
+2. **"Admin viewed profile" logged twice.** Seen in the screenshot, not in tests. Cause: React StrictMode runs
+   effects twice in `next dev`. Confirmed by re-running against `next build && next start`: one event per visit.
+   Left as is; it's dev-only.
+3. **Redundant index.** `EXPLAIN` on PostgreSQL showed Django's automatic FK index on `audit_auditevent.profile_id`
+   next to my composite `(profile_id, created_at)`. Dropping it changed nothing in the plan, so the FK is now
+   `db_index=False`: one less index to update on every audit insert.
+4. **Tooling:** the temporary Postgres wouldn't start (Unix socket path over 103 bytes) → TCP-only.
+   zsh doesn't word-split `$P` → used a shell function. `psql -c "BEGIN; …; ROLLBACK"` prints only the last
+   result → piped the statements on stdin instead.
+5. **Screenshot showed the bottom of the page** (after save the page was scrolled) and the audit "Fields" column was
+   clipped → scroll to top before the screenshot, and let that column wrap.
+
+## Verification
+- `pytest`: 149 passed on SQLite and on PostgreSQL 14 (24 new: completion rules, API, admin filter, bulk seed,
+  audit on every action, values never stored, append-only, request id, role boundaries).
+- `e2e/run_audit_e2e.py`: 11/11 against the production build. Week 1 run 24/24, CareConnect run 33/33.
+- EXPLAIN with and without each new index on 20k profiles / 60k events (`docs/explain-postgres.md`).

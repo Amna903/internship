@@ -62,3 +62,34 @@ plus `Set-Cookie: hp_admin_session=…; HttpOnly; SameSite=Lax`. Member credenti
 **Logout** `POST /admin/logout/` → `{"detail":"Logged out."}`; the session row is deleted.
 
 Using a member JWT (or no credentials) on any `/admin/*` route → `401`.
+
+## Week 2 additions: profile completion and audit events
+
+**Completion** is part of every profile response (`GET/PATCH /profiles/me/`, admin detail). It is
+computed by the server and read-only: sending `completion` or `completion_status` in a PATCH is ignored.
+```json
+"completion": {"status": "incomplete", "percent": 67, "missing_sections": ["emergency_contact"]}
+```
+Sections: `demographics` (name + DOB or age range), `emergency_contact` (name, relationship and phone),
+`wellness_preferences` (contact preference + at least one goal).
+
+**Filter admin list by completion** `GET /admin/profiles/?completion=incomplete&page_size=1`
+```json
+{"count":1,"next":null,"previous":null,"results":[{"id":6,"user_id":7,"email":"carlos.mendez@example.test",
+ "full_name":"Carlos Mendez","age_range":"25-34","contact_preference":"email","status":"active",
+ "completion_status":"incomplete","created_at":"…"}]}
+```
+
+**Audit trail** `GET /admin/audit-events/?action=profile.updated&profile=10&page=1&page_size=10` (admin session only, read-only)
+```json
+{"count":6,"next":"…&page=2","previous":null,"results":[{"id":26,"created_at":"…","action":"profile.updated",
+ "action_label":"Profile updated","actor_email":"e2e1792471739@example.test","actor_role":"user","profile_id":10,
+ "changed_fields":["allergies","contact_preference","date_of_birth","emergency_contact_name",
+ "emergency_contact_phone","emergency_contact_relationship","wellness_goals"],
+ "request_id":"b26b521bebc747399276ccf9d16829e7"}]}
+```
+Field **names** only, never values. `request_id` matches the `X-Request-ID` response header of the request that caused the event.
+Actions: `profile.created`, `profile.updated`, `admin.login`, `admin.logout`, `admin.profile_viewed`,
+`admin.profile_deactivated`, `admin.profile_activated`.
+Unknown action → `400` `{"error":{"code":"validation_error",…,"details":{"action":["Must be one of: …"]}}}`.
+Member JWT or no credentials → `401`. `POST` → `405` (append-only).

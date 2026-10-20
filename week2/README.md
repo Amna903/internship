@@ -1,12 +1,49 @@
-# HealthProfile: Week 2 (professional directory)
+# HealthProfile: Week 2
 
-Week 2 builds on the Week 1 app (copied unchanged into this folder, so everything below still works) and adds
-**CareConnect**: a multi-page directory for finding fictional wellness professionals and requesting an
-appointment. All Week 2 features are frontend-only and need no backend.
+Week 2 builds on the Week 1 app (copied into this folder; everything in the Week 1 section below still works).
+It has two parts:
+
+1. **Role-Based Health Profiles and Database Engineering** (Full-Stack AI/ML track): profile completion
+   status, audit events for profile edits and admin actions, new composite indexes with EXPLAIN evidence.
+2. **CareConnect** (bonus, from the frontend brief): a directory for finding fictional wellness
+   professionals and requesting an appointment. Frontend-only.
+
+## Week 2 checklist: Role-Based Health Profiles and Database Engineering
+
+| Requirement | How / where |
+|---|---|
+| User signup + JWT login; admins only via management command + session login | Kept from Week 1: `accounts/`, `adminpanel/`, `create_admin`. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| Profile sections: demographics (fictional), emergency contact, wellness preferences | `profiles/models.py`, edited on `/profile` |
+| **Profile completion status** | `profiles/completion.py` (pure rules) → stored `completion_status` column, recomputed on every save; API returns `{status, percent, missing_sections}`; progress bar on `/profile`; admin filter `?completion=` |
+| User-owned profile CRUD | `GET/POST/PATCH /api/profiles/me/`: always resolved from the token, there is no `/profiles/<id>` for members |
+| Admin-only listing/search | `GET /api/admin/profiles/?search=&status=&completion=&ordering=&page=` |
+| **Audit events** for profile edits and admin actions, no secrets or sensitive payloads | `audit/` app: append-only `AuditEvent` (actor, role, action, profile, changed field **names**, request id). Recorded on signup, profile create/update, admin login/logout, profile view, deactivate/activate. `GET /api/admin/audit-events/`; "Activity" table on the admin profile page |
+| Pagination, filtering, migrations, API docs | DRF pagination; filters validated (bad values → 400); migrations `profiles/0002_completion_status` (with data backfill) and `audit/0001_initial`; Swagger at `/api/docs/`, examples in [docs/API.md](docs/API.md) |
+| Hashed passwords, JWT expiry/refresh, secure token storage, CSRF for admin sessions | Argon2id; 10-min access / 7-day rotating single-use refresh in HttpOnly cookies; CSRF on every unsafe route |
+| Normalized relations, FKs, unique/indexed fields, composite indexes justified by query patterns | `User 1—1 HealthProfile 1—* AuditEvent`; composite indexes `(status, created_at)`, `(completion_status, created_at)`, `(profile, created_at)`, `(action, created_at)`. Each comment in the model names the query it serves |
+| No horizontal privilege escalation | Members only reach `/profiles/me/`; tests `test_profiles.py`, `test_user_auth.py` |
+| Validate input, hide sensitive fields, test role boundaries | Serializer validation; `completion` and `status` read-only; audit stores no values (test `test_values_and_secrets_are_never_stored`) |
+| **Acceptance:** user can't reach another profile or admin routes | `test_user_jwt_gives_no_admin_privileges`, `test_users_and_anonymous_cannot_read_the_audit_log`, browser checks |
+| **Acceptance:** admin session and user JWT paths stay distinct | `test_admin_session_does_not_authenticate_user_endpoints`, `DEFAULT_AUTHENTICATION_CLASSES = []` |
+| **Acceptance:** migrations, indexes and EXPLAIN evidence | [docs/explain-postgres.md](docs/explain-postgres.md): completion list 5.5 ms → 0.20 ms, audit history 7.0 ms → 0.08 ms (PostgreSQL, 20k profiles / 60k events) |
+
+![Audit trail on the admin profile page](docs/screenshots/w2-08-admin-audit-trail.png)
+
+**Verification:** `pytest` 149 passed (SQLite and PostgreSQL) · `e2e/run_audit_e2e.py` 11/11 ·
+`e2e/run_e2e.py` 24/24 (Week 1 flows still work) · `e2e/run_week2_e2e.py` 33/33.
+
+```bash
+# Real-browser check of completion + audit (backend and frontend running, seed_demo done)
+python e2e/run_audit_e2e.py "<admin password>" docs/screenshots
+python backend/manage.py explain_queries     # query plans for every indexed lookup
+```
+
+---
+
+## CareConnect checklist (bonus, frontend brief)
 
 ![Directory](docs/screenshots/w2-01-directory.png)
 
-## Week 2 feature checklist
 
 | Requirement | Where |
 |---|---|
@@ -126,7 +163,7 @@ ADMIN_PASSWORD='a-strong-passphrase' python manage.py create_admin --email you@e
 ## Tests
 
 ```bash
-cd backend && pytest        # 125 tests, ~2 s; also green on PostgreSQL 16
+cd backend && pytest        # 149 tests (125 Week 1 + 24 Week 2), ~2 s; also green on PostgreSQL
 cd frontend && npm run typecheck && npm run build
 ```
 
@@ -159,7 +196,8 @@ Examples with request/response bodies: [docs/API.md](docs/API.md).
 | `POST /api/admin/login/` | none | Admin login → session cookie |
 | `POST /api/admin/logout/` | none | Destroy session |
 | `GET /api/admin/me/` | admin session | Who am I (used by the UI on every load) |
-| `GET /api/admin/profiles/` | admin session | List; `?search=&status=&ordering=&page=&page_size=` |
+| `GET /api/admin/profiles/` | admin session | List; `?search=&status=&completion=&ordering=&page=&page_size=` |
+| `GET /api/admin/audit-events/` | admin session | Audit trail; `?action=&profile=&page=&page_size=` (read-only) |
 | `GET /api/admin/profiles/{id}/` | admin session | Detail |
 | `POST /api/admin/profiles/{id}/deactivate/` · `/activate/` | admin session | Change status |
 
@@ -172,7 +210,8 @@ All unsafe requests need `X-CSRFToken` (value of the `csrftoken` cookie). Errors
 backend/
   config/       settings (env-driven), error envelope, urls
   accounts/     User model, JWT-cookie auth, signup/login/refresh/logout, create_admin
-  profiles/     HealthProfile model, /profiles/me, seed_demo, explain_queries
+  profiles/     HealthProfile model, completion rules, /profiles/me, seed_demo, explain_queries
+  audit/        append-only AuditEvent model, record_event() service (Week 2)
   adminpanel/   admin session auth + dashboard endpoints
   tests/        pytest suite
 frontend/       Next.js app (member pages, /admin pages, lib/api.ts)

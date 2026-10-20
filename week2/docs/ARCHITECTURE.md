@@ -77,6 +77,8 @@ two mechanisms cannot be mixed by accident, and a new view with no authenticator
 ```mermaid
 erDiagram
   ACCOUNTS_USER ||--o| PROFILES_HEALTHPROFILE : "has one (members only)"
+  PROFILES_HEALTHPROFILE ||--o{ AUDIT_AUDITEVENT : "history (SET NULL)"
+  ACCOUNTS_USER ||--o{ AUDIT_AUDITEVENT : "actor (SET NULL)"
   ACCOUNTS_USER {
     bigint id PK
     varchar email UK "CHECK email = lower(email)"
@@ -100,9 +102,20 @@ erDiagram
     varchar emergency_contact_relationship
     text lifestyle_notes
     varchar status "CHECK in (active, deactivated); IDX (status, created_at DESC)"
+    varchar completion_status "derived on save; CHECK; IDX (completion_status, created_at DESC)"
     timestamptz deactivated_at
     timestamptz created_at
     timestamptz updated_at
+  }
+  AUDIT_AUDITEVENT {
+    bigint id PK
+    timestamptz created_at
+    bigint actor_id FK "ON DELETE SET NULL"
+    varchar actor_role "CHECK in (user, admin)"
+    varchar action "IDX (action, created_at DESC)"
+    bigint profile_id FK "ON DELETE SET NULL; IDX (profile_id, created_at DESC)"
+    jsonb changed_fields "field names only"
+    varchar request_id
   }
 ```
 
@@ -117,11 +130,33 @@ Also present (from libraries): `django_session` (admin sessions) and
 | `UNIQUE(user_id)` | Exactly one profile per member. |
 | `CHECK(dob IS NULL OR age_range = '')` | Prevents contradictory age data. |
 | `CHECK(role IN ...)`, `CHECK(status IN ...)` | Bad enum values cannot be stored. |
+| `hp_completion_created_idx (completion_status, created_at DESC)` | Week 2: admin "incomplete profiles, newest first" follow-up list. 5.5 ms → 0.20 ms at 20k rows. |
+| `audit_profile_created_idx (profile_id, created_at DESC)` | Week 2: "history of this profile" on the admin detail page. 7.0 ms → 0.08 ms at 60k events. Replaces Django's default FK index (`db_index=False`), which EXPLAIN showed was redundant. |
+| `audit_action_created_idx (action, created_at DESC)` | Week 2: audit list filtered by action ("all deactivations"), newest first. |
+
+### Week 2 design notes
+
+- **Completion is stored, not computed per request.** The rules live in one pure module
+  (`profiles/completion.py`); `HealthProfile.save()` writes the result to `completion_status` (and adds it
+  to `update_fields`, so partial saves can't leave it stale). Storing it lets admins filter and the DB
+  index it. `bulk_create` skips `save()`, so the seeder computes it explicitly; migration `0002` backfills
+  existing rows. The detailed `percent` / `missing_sections` are computed on read from the same rules.
+- **Audit events are append-only and value-free.** `AuditEvent.save()` refuses updates and `delete()`
+  refuses deletes; the API is GET-only. Only field *names* are stored, so the log can't leak a phone
+  number, note or password. Each event carries the request's `X-Request-ID` (set by
+  `config/middleware.py`) so a log line, an audit row and a bug report can be linked.
+- **The edit and its audit row commit together** (`transaction.atomic`): there is never an edit without
+  a record, or a record of an edit that rolled back. No-op saves and rejected edits record nothing.
+- **Viewing is audited too** (`admin.profile_viewed`): reading someone's data is an action. List views
+  aren't, to avoid one row per page of results.
 
 Search (`icontains` on name/email) cannot use a B-tree index; at larger scale use `pg_trgm` GIN.
 I did not add one: it would be an unmeasured index for a 6-row demo.
 
 ## Known limitations (be upfront about these in the demo)
+
+- **Audit log growth:** no retention policy yet (needs one: e.g. archive after N months). Failed admin
+  logins are not audited, to avoid storing typed emails; throttling covers brute force.
 
 - **Access JWT outlives logout** for up to 10 minutes if a copy was stolen before logout (the
   refresh token *is* revoked and the cookie is cleared). Mitigation: short lifetime; stronger option is a `jti` denylist check.

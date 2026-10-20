@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { DISCLAIMER, FieldError, Shell } from "@/components/Shell";
-import { ApiError, Profile, userApi } from "@/lib/api";
+import { ApiError, Profile, SECTION_LABELS, userApi } from "@/lib/api";
 
 const AGE_RANGES = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"];
 const toLines = (items: string[]) => items.join("\n");
@@ -86,6 +86,23 @@ export default function ProfilePage() {
       <h1>My profile</h1>
       <p className="muted small">Signed in as {profile.email} · <span className="badge">{profile.status}</span></p>
       <p className="alert warn small">{DISCLAIMER}</p>
+
+      <section className="card" aria-labelledby="completion-heading">
+        <h2 id="completion-heading">Profile completion</h2>
+        <div className="progress" role="progressbar" aria-valuenow={profile.completion.percent} aria-valuemin={0} aria-valuemax={100} aria-label="Profile completion">
+          <span style={{ width: `${profile.completion.percent}%` }} />
+        </div>
+        <p className="small">
+          {profile.completion.percent}% complete ·{" "}
+          <span className={`badge ${profile.completion.status === "complete" ? "" : "tone-warn"}`}>{profile.completion.status}</span>
+        </p>
+        {profile.completion.missing_sections.length > 0 && (
+          <>
+            <p className="small muted">Still to fill in:</p>
+            <ul className="small">{profile.completion.missing_sections.map((s) => <li key={s}>{SECTION_LABELS[s] ?? s}</li>)}</ul>
+          </>
+        )}
+      </section>
 
       <form className="card" onSubmit={save} noValidate>
         {message && <div className={`alert ${message.kind}`} role="status">{message.text}</div>}

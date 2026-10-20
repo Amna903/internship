@@ -13,6 +13,7 @@ export default function AdminDashboard() {
   const [search, setSearch] = useState("");
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
+  const [completion, setCompletion] = useState("");
   const [ordering, setOrdering] = useState("-created_at");
   const [page, setPage] = useState(1);
   const [error, setError] = useState("");
@@ -28,13 +29,14 @@ export default function AdminDashboard() {
       const params: Record<string, string> = { page: String(page), ordering };
       if (query) params.search = query;
       if (status) params.status = status;
+      if (completion) params.completion = completion;
       setData(await adminApi.list(params));
     } catch (err) {
       if (err instanceof ApiError && (err.status === 401 || err.status === 403)) router.replace("/admin/login");
       else if (err instanceof ApiError && err.status === 404 && page > 1) setPage(1); // page past the end after filtering
       else setError("Could not load profiles.");
     }
-  }, [page, query, status, ordering, router]);
+  }, [page, query, status, completion, ordering, router]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -62,6 +64,9 @@ export default function AdminDashboard() {
           <select aria-label="Status" value={status} onChange={(e) => { setPage(1); setStatus(e.target.value); }}>
             <option value="">All statuses</option><option value="active">Active</option><option value="deactivated">Deactivated</option>
           </select>
+          <select aria-label="Completion" value={completion} onChange={(e) => { setPage(1); setCompletion(e.target.value); }}>
+            <option value="">Any completion</option><option value="incomplete">Incomplete</option><option value="complete">Complete</option>
+          </select>
           <select aria-label="Sort" value={ordering} onChange={(e) => { setPage(1); setOrdering(e.target.value); }}>
             <option value="-created_at">Newest first</option><option value="created_at">Oldest first</option>
             <option value="full_name">Name A–Z</option><option value="-full_name">Name Z–A</option>
@@ -72,7 +77,7 @@ export default function AdminDashboard() {
 
         <div className="table-wrap">
           <table>
-            <thead><tr><th>Name</th><th>Email</th><th>Age</th><th>Contact</th><th>Status</th><th>Joined</th><th /></tr></thead>
+            <thead><tr><th>Name</th><th>Email</th><th>Age</th><th>Contact</th><th>Status</th><th>Completion</th><th>Joined</th><th /></tr></thead>
             <tbody>
               {data?.results.map((p) => (
                 <tr key={p.id}>
@@ -81,11 +86,12 @@ export default function AdminDashboard() {
                   <td>{p.age_range || "—"}</td>
                   <td>{p.contact_preference}</td>
                   <td><span className={`badge ${p.status === "active" ? "" : "off"}`}>{p.status}</span></td>
+                  <td><span className={`badge ${p.completion_status === "complete" ? "" : "tone-warn"}`}>{p.completion_status}</span></td>
                   <td>{new Date(p.created_at).toLocaleDateString()}</td>
                   <td><Link href={`/admin/profiles/${p.id}`}>View</Link></td>
                 </tr>
               ))}
-              {data && data.results.length === 0 && <tr><td colSpan={7} className="muted">No profiles match.</td></tr>}
+              {data && data.results.length === 0 && <tr><td colSpan={8} className="muted">No profiles match.</td></tr>}
             </tbody>
           </table>
         </div>

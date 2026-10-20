@@ -5,6 +5,9 @@
 export type Role = "user" | "admin";
 export interface UserSummary { id: number; email: string; role: Role }
 
+export type CompletionStatus = "complete" | "incomplete";
+export interface Completion { status: CompletionStatus; percent: number; missing_sections: string[] }
+
 export interface Profile {
   email: string;
   full_name: string;
@@ -18,13 +21,18 @@ export interface Profile {
   emergency_contact_relationship: string;
   lifestyle_notes: string;
   status: "active" | "deactivated";
+  completion: Completion;
   created_at: string;
   updated_at: string;
 }
 
 export interface AdminProfileRow {
   id: number; user_id: number; email: string; full_name: string; age_range: string;
-  contact_preference: string; status: "active" | "deactivated"; created_at: string;
+  contact_preference: string; status: "active" | "deactivated"; completion_status: CompletionStatus; created_at: string;
+}
+export interface AuditEvent {
+  id: number; created_at: string; action: string; action_label: string; actor_email: string | null;
+  actor_role: "user" | "admin"; profile_id: number | null; changed_fields: string[]; request_id: string;
 }
 export interface AdminProfileDetail extends Profile {
   id: number; user_id: number; deactivated_at: string | null; account_active: boolean; last_login: string | null;
@@ -102,4 +110,11 @@ export const adminApi = {
   list: (params: Record<string, string>) => api<Page<AdminProfileRow>>("GET", "/api/admin/profiles/?" + new URLSearchParams(params)),
   detail: (id: string | number) => api<AdminProfileDetail>("GET", `/api/admin/profiles/${id}/`),
   setStatus: (id: string | number, action: "activate" | "deactivate") => api<AdminProfileDetail>("POST", `/api/admin/profiles/${id}/${action}/`),
+  auditEvents: (params: Record<string, string>) => api<Page<AuditEvent>>("GET", "/api/admin/audit-events/?" + new URLSearchParams(params)),
+};
+
+export const SECTION_LABELS: Record<string, string> = {
+  demographics: "Demographics (name and date of birth or age range)",
+  emergency_contact: "Emergency contact (name, relationship and phone)",
+  wellness_preferences: "Wellness preferences (contact preference and at least one goal)",
 };
