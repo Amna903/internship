@@ -11,6 +11,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from accounts.models import User
+from profiles.completion import evaluate
 from profiles.models import HealthProfile
 
 # (name, email-local-part, date_of_birth | None, age_range, contact, goals, allergies, ec name, ec phone, relation, notes)
@@ -30,9 +31,10 @@ DEMO_USERS = [
     ("Lena Fischer", "lena.fischer", date(2001, 6, 21), "", "none",
      ["Try meal prepping", "Drink more water"], ["Shellfish"],
      "Jonas Fischer", "+1 555 010 0105", "Friend", "Student, irregular schedule."),
+    # Deliberately left without an emergency contact so the demo has an incomplete profile.
     ("Carlos Mendez", "carlos.mendez", None, "25-34", "email",
      ["Lower stress", "Meditate 10 min/day"], [],
-     "Lucia Mendez", "+1 555 010 0106", "Sister", ""),
+     "", "", "", ""),
 ]
 
 _FIRST = ["Alex", "Bina", "Chen", "Dara", "Eli", "Farah", "Gus", "Hana", "Ivan", "Jia", "Kofi", "Lia", "Mo", "Nia"]
@@ -96,17 +98,21 @@ class Command(BaseCommand):
         profiles = []
         for user in fresh:
             deactivated = rng.random() < 0.1
-            profiles.append(
-                HealthProfile(
-                    user=user,
-                    full_name=f"{rng.choice(_FIRST)} {rng.choice(_LAST)}",
-                    age_range=rng.choice(HealthProfile.AgeRange.values),
-                    contact_preference=rng.choice(HealthProfile.ContactPreference.values),
-                    wellness_goals=rng.sample(_GOALS, 2),
-                    status=HealthProfile.Status.DEACTIVATED if deactivated else HealthProfile.Status.ACTIVE,
-                    deactivated_at=now if deactivated else None,
-                )
+            has_contact = rng.random() < 0.6
+            profile = HealthProfile(
+                user=user,
+                full_name=f"{rng.choice(_FIRST)} {rng.choice(_LAST)}",
+                age_range=rng.choice(HealthProfile.AgeRange.values),
+                contact_preference=rng.choice(HealthProfile.ContactPreference.values),
+                wellness_goals=rng.sample(_GOALS, 2),
+                emergency_contact_name=f"{rng.choice(_FIRST)} {rng.choice(_LAST)}" if has_contact else "",
+                emergency_contact_phone="+1 555 010 0199" if has_contact else "",
+                emergency_contact_relationship="Friend" if has_contact else "",
+                status=HealthProfile.Status.DEACTIVATED if deactivated else HealthProfile.Status.ACTIVE,
+                deactivated_at=now if deactivated else None,
             )
+            profile.completion_status = evaluate(profile).status  # bulk_create skips save()
+            profiles.append(profile)
         HealthProfile.objects.bulk_create(profiles)
         # bulk_create bypasses auto_now_add's per-row clock; spread created_at so ordering is meaningful.
         for offset, profile in enumerate(HealthProfile.objects.filter(user__in=fresh).order_by("id")):

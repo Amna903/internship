@@ -59,9 +59,11 @@ INSTALLED_APPS = [
     "accounts",
     "profiles",
     "adminpanel",
+    "audit",
 ]
 
 MIDDLEWARE = [
+    "config.middleware.RequestIDMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",

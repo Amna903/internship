@@ -8,6 +8,12 @@ from .models import HealthProfile
 PHONE_VALIDATOR = RegexValidator(r"^\+?[0-9 ()\-]{7,20}$", "Enter a valid phone number (digits, spaces, + ( ) -).")
 
 
+class CompletionSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=HealthProfile.CompletionStatus.choices)
+    percent = serializers.IntegerField(min_value=0, max_value=100)
+    missing_sections = serializers.ListField(child=serializers.CharField())
+
+
 class HealthProfileSerializer(serializers.ModelSerializer):
     """Profile as seen and edited by its owner.
 
@@ -23,6 +29,7 @@ class HealthProfileSerializer(serializers.ModelSerializer):
     emergency_contact_phone = serializers.CharField(
         max_length=30, required=False, allow_blank=True, validators=[PHONE_VALIDATOR]
     )
+    completion = CompletionSerializer(read_only=True)
 
     class Meta:
         model = HealthProfile
@@ -39,10 +46,11 @@ class HealthProfileSerializer(serializers.ModelSerializer):
             "emergency_contact_relationship",
             "lifestyle_notes",
             "status",
+            "completion",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["status", "created_at", "updated_at"]
+        read_only_fields = ["status", "completion", "created_at", "updated_at"]
         extra_kwargs = {
             "full_name": {"min_length": 2},
             "lifestyle_notes": {"max_length": 1000},
@@ -78,7 +86,10 @@ class AdminProfileListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HealthProfile
-        fields = ["id", "user_id", "email", "full_name", "age_range", "contact_preference", "status", "created_at"]
+        fields = [
+            "id", "user_id", "email", "full_name", "age_range", "contact_preference", "status",
+            "completion_status", "created_at",
+        ]
         read_only_fields = fields
 
 

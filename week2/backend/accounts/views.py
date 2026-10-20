@@ -15,6 +15,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from audit.models import AuditEvent
+from audit.services import record_event
 from config.api import CsrfProtectedAPIView
 from config.exceptions import error_response
 
@@ -55,7 +57,9 @@ class SignupView(CsrfProtectedAPIView):
         serializer = SignupSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         try:
-            user = register_user(**serializer.validated_data)
+            with transaction.atomic():
+                user = register_user(**serializer.validated_data)
+                record_event(request, AuditEvent.Action.PROFILE_CREATED, actor=user, profile=user.profile)
         except IntegrityError:  # lost a race with a concurrent signup for the same email
             raise ValidationError({"email": ["An account with this email already exists."]})
         return Response({"user": UserSummarySerializer(user).data}, status=status.HTTP_201_CREATED)

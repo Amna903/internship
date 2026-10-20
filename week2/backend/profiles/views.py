@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import transaction
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.exceptions import NotFound
@@ -7,10 +8,19 @@ from rest_framework.views import APIView
 
 from accounts.authentication import CookieJWTAuthentication
 from accounts.permissions import IsStandardUser
+from audit.models import AuditEvent
+from audit.services import record_event
 from config.exceptions import Conflict
 
 from .models import HealthProfile
 from .serializers import HealthProfileSerializer
+
+
+# Fields whose changes are audited (by name only, never by value).
+TRACKED_FIELDS = [
+    name for name in HealthProfileSerializer.Meta.fields
+    if name not in HealthProfileSerializer.Meta.read_only_fields and name != "email"
+]
 
 
 class MeProfileView(APIView):
@@ -38,9 +48,15 @@ class MeProfileView(APIView):
         responses={200: HealthProfileSerializer, 400: OpenApiResponse(description="Validation error")},
     )
     def patch(self, request):
-        serializer = HealthProfileSerializer(self._profile(request), data=request.data, partial=True)
+        profile = self._profile(request)
+        serializer = HealthProfileSerializer(profile, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        before = {name: getattr(profile, name) for name in TRACKED_FIELDS}
+        with transaction.atomic():
+            serializer.save()
+            changed = [name for name in TRACKED_FIELDS if getattr(profile, name) != before[name]]
+            if changed:  # a no-op save is not an edit
+                record_event(request, AuditEvent.Action.PROFILE_UPDATED, profile=profile, changed_fields=changed)
         return Response(serializer.data)
 
     @extend_schema(
@@ -53,5 +69,7 @@ class MeProfileView(APIView):
             raise Conflict("A profile already exists for this account. Use PATCH to update it.")
         serializer = HealthProfileSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(user=request.user)
+        with transaction.atomic():
+            profile = serializer.save(user=request.user)
+            record_event(request, AuditEvent.Action.PROFILE_CREATED, profile=profile)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
