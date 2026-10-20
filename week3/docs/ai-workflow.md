@@ -247,3 +247,14 @@ Prompt (paraphrased): "improve the frontend: make it look cool, aesthetic, prett
   floating preview card hiding text, colliding meter labels, the sticky header appearing mid-page in full-page
   screenshots (scroll to top first), and a progress bar captured mid-animation.
 - **Regression:** every browser suite re-run against the production build after the restyle; all green.
+
+---
+
+# Completing CRUD: delete own profile
+
+A re-check of the brief line by line found that "user-owned profile **CRUD** endpoints" was only C, R and U.
+Added `DELETE /api/profiles/me/`: deletes the caller's profile only (there is still no id in the URL), keeps the
+account, records `profile.deleted` in the same transaction, and needs CSRF like every other write. UI: a
+"Delete my profile" section with a confirm dialog, and an empty state that lets the member create a new profile.
+Tests: 6 API tests (own-only, audited without data, recreate, second delete 404, CSRF, admin/anonymous blocked)
+and 4 browser checks (delete, persists after reload, recreate at 0%, visible to admins in the audit log).

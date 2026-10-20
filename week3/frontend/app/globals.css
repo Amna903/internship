@@ -414,6 +414,10 @@ table.availability td { white-space: normal; }
 .model-pill { display: inline-flex; gap: 6px; align-items: center; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .78rem; padding: 3px 9px; border-radius: 8px; background: var(--neutral-soft); color: var(--neutral-ink); }
 tr.selected td { background: var(--brand-softer); font-weight: 650; }
 
+/* Destructive actions sit apart, with a quiet red edge */
+.danger-zone { border-color: color-mix(in srgb, var(--danger) 28%, var(--line)); }
+.danger-zone h2 { color: var(--danger); }
+
 /* ---------- Motion preferences ---------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }

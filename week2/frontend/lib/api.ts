@@ -100,6 +100,8 @@ export const userApi = {
   logout: () => api<{ detail: string }>("POST", "/api/auth/user/logout/"),
   getProfile: () => api<Profile>("GET", "/api/profiles/me/", undefined, { refresh: true }),
   updateProfile: (patch: Partial<Profile>) => api<Profile>("PATCH", "/api/profiles/me/", patch, { refresh: true }),
+  createProfile: (full_name: string) => api<Profile>("POST", "/api/profiles/me/", { full_name }, { refresh: true }),
+  deleteProfile: () => api<null>("DELETE", "/api/profiles/me/", undefined, { refresh: true }),
 };
 
 // ---- admin (server-side session cookie) ----

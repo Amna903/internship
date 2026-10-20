@@ -82,6 +82,21 @@ with sync_playwright() as p:
 
     r = page.request.get(f"{BASE}/api/admin/audit-events/")
     check("member cannot read the audit log (401)", r.status == 401)
+
+    # ---------- member deletes their own profile (the D in CRUD) ----------
+    page.goto(f"{BASE}/profile"); expect(page.locator("#full_name")).to_be_visible()
+    page.once("dialog", lambda d: d.accept())
+    page.click("button:has-text('Delete my profile')")
+    expect(page.locator("h1")).to_have_text("You don't have a profile")
+    check("member can delete their own profile (confirm dialog, then empty state)", True)
+    page.reload(); expect(page.locator("h1")).to_have_text("You don't have a profile")
+    check("deletion persists across reload", True)
+    page.fill("#new_name", "Audit Tester Again"); page.click("button:has-text('Create profile')")
+    expect(page.locator("#full_name")).to_have_value("Audit Tester Again")
+    check("member can create a fresh profile afterwards (back to 0%)",
+          page.get_by_role("progressbar", name="Profile completion").get_attribute("aria-valuenow") == "0")
+    r = a.request.get(f"{BASE}/api/admin/audit-events/?action=profile.deleted")
+    check("deletion is in the audit log for admins", r.status == 200 and r.json()["count"] >= 1)
     browser.close()
 
 passed = sum(ok for _, ok in results)

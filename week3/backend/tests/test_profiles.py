@@ -3,6 +3,7 @@ import datetime
 import pytest
 
 from accounts.models import User
+from audit.models import AuditEvent
 from profiles.models import HealthProfile
 
 from .conftest import Browser, user_login
@@ -153,3 +154,45 @@ class TestCrossUserAccess:
         b_token = b.cookies["hp_access"].value
         a.cookies["hp_access"] = b_token  # the token still identifies b, never a
         assert a.get(ME).json()["email"] == other_user.email
+
+
+@pytest.mark.django_db
+class TestDeleteOwnProfile:
+    """The D in CRUD: a member can delete their own profile, and only their own."""
+
+    def test_member_deletes_own_profile_and_account_remains(self, user_browser, user, other_user):
+        resp = user_browser.client.delete(ME, HTTP_X_CSRFTOKEN=user_browser.cookies["csrftoken"].value)
+        assert resp.status_code == 204
+        assert not HealthProfile.objects.filter(user=user).exists()
+        assert HealthProfile.objects.filter(user=other_user).exists()  # nobody else touched
+        user.refresh_from_db()
+        assert user.is_active  # account kept; profile only
+        assert user_browser.get(ME).status_code == 404
+
+    def test_delete_is_audited_without_profile_data(self, user_browser, user):
+        name = user.profile.full_name
+        user_browser.client.delete(ME, HTTP_X_CSRFTOKEN=user_browser.cookies["csrftoken"].value)
+        event = AuditEvent.objects.get(action="profile.deleted")
+        assert event.actor == user and event.actor_role == "user"
+        assert event.profile is None  # the row it pointed to is gone (SET NULL)
+        assert name not in str(event.changed_fields)
+
+    def test_member_can_create_a_new_profile_after_deleting(self, user_browser):
+        user_browser.client.delete(ME, HTTP_X_CSRFTOKEN=user_browser.cookies["csrftoken"].value)
+        resp = user_browser.post(ME, {"full_name": "Fresh Start"})
+        assert resp.status_code == 201 and resp.json()["completion"]["percent"] == 0
+
+    def test_second_delete_is_404(self, user_browser):
+        csrf = user_browser.cookies["csrftoken"].value
+        assert user_browser.client.delete(ME, HTTP_X_CSRFTOKEN=csrf).status_code == 204
+        assert user_browser.client.delete(ME, HTTP_X_CSRFTOKEN=csrf).status_code == 404
+
+    def test_delete_requires_csrf(self, user_browser, user):
+        assert user_browser.client.delete(ME).status_code == 403
+        assert HealthProfile.objects.filter(user=user).exists()
+
+    def test_anonymous_and_admin_cannot_delete_through_member_route(self, browser, admin_browser, user):
+        assert browser.client.delete(ME, HTTP_X_CSRFTOKEN=browser.cookies["csrftoken"].value).status_code == 401
+        resp = admin_browser.client.delete(ME, HTTP_X_CSRFTOKEN=admin_browser.cookies["csrftoken"].value)
+        assert resp.status_code in (401, 403)
+        assert HealthProfile.objects.filter(user=user).exists()

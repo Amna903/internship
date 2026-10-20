@@ -13,6 +13,7 @@ class AuditEvent(models.Model):
     class Action(models.TextChoices):
         PROFILE_CREATED = "profile.created", "Profile created"
         PROFILE_UPDATED = "profile.updated", "Profile updated"
+        PROFILE_DELETED = "profile.deleted", "Profile deleted by its owner"
         ADMIN_LOGIN = "admin.login", "Admin signed in"
         ADMIN_LOGOUT = "admin.logout", "Admin signed out"
         ADMIN_PROFILE_VIEWED = "admin.profile_viewed", "Admin viewed profile"

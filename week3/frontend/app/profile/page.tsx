@@ -33,12 +33,15 @@ export default function ProfilePage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const [noProfile, setNoProfile] = useState(false);
+  const [newName, setNewName] = useState("");
 
   useEffect(() => {
     userApi.getProfile()
       .then((p) => { setProfile(p); setForm(toForm(p)); })
       .catch((err) => {
         if (err instanceof ApiError && err.status === 401) router.replace("/login");
+        else if (err instanceof ApiError && err.status === 404) setNoProfile(true);
         else setMessage({ kind: "error", text: "Could not load your profile." });
       });
   }, [router]);
@@ -77,7 +80,50 @@ export default function ProfilePage() {
     } finally { setBusy(false); }
   }
 
+  async function deleteProfile() {
+    if (!confirm("Delete your profile? Your goals, preferences and emergency contact will be removed. Your account stays, and you can create a new profile later.")) return;
+    setBusy(true); setMessage(null);
+    try {
+      await userApi.deleteProfile();
+      setProfile(null); setForm(null); setNoProfile(true);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) return router.replace("/login");
+      setMessage({ kind: "error", text: "Could not delete your profile. Please try again." });
+    } finally { setBusy(false); }
+  }
+
+  async function createProfile(e: FormEvent) {
+    e.preventDefault();
+    setBusy(true); setErrors({});
+    try {
+      const created = await userApi.createProfile(newName);
+      setProfile(created); setForm(toForm(created)); setNoProfile(false);
+      setMessage({ kind: "ok", text: "Profile created. Fill in the sections below to complete it." });
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) return router.replace("/login");
+      setErrors(err instanceof ApiError ? err.fieldErrors : {});
+    } finally { setBusy(false); }
+  }
+
   const nav = <button className="btn ghost small" onClick={logout}>Sign out</button>;
+  if (noProfile) {
+    return (
+      <Shell nav={nav}>
+        <div className="auth">
+          <form className="card" onSubmit={createProfile} noValidate>
+            <div className="auth-head">
+              <h1>You don&apos;t have a profile</h1>
+              <p className="muted small">Your account is still active. Create a new profile to get started again.</p>
+            </div>
+            <label htmlFor="new_name">Full name</label>
+            <input id="new_name" value={newName} onChange={(e) => setNewName(e.target.value)} autoComplete="name" />
+            <FieldError errors={errors} name="full_name" />
+            <button className="btn block" disabled={busy}>{busy ? "Creating…" : "Create profile"}</button>
+          </form>
+        </div>
+      </Shell>
+    );
+  }
   if (!profile || !form) {
     return <Shell nav={nav}>{message ? <div className="alert error">{message.text}</div> : <p className="muted">Loading…</p>}</Shell>;
   }
@@ -188,6 +234,15 @@ export default function ProfilePage() {
 
         <button className="btn block" disabled={busy}>{busy ? "Saving…" : "Save profile"}</button>
       </form>
+
+      <section className="card danger-zone" aria-labelledby="delete-heading">
+        <h2 id="delete-heading">Delete profile</h2>
+        <p className="muted small">
+          Removes your wellness profile. Your account stays, so you can sign in and start a new profile. The audit
+          trail keeps a note that you deleted it, without any of your details.
+        </p>
+        <button type="button" className="btn danger small" onClick={deleteProfile} disabled={busy}>Delete my profile</button>
+      </section>
     </Shell>
   );
 }

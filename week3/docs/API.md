@@ -45,6 +45,10 @@ curl -s -b $J -X PATCH -H "X-CSRFToken: $CSRF" -H 'Content-Type: application/jso
 Invalid → `400` `{"error":{"code":"validation_error",…,"details":{"emergency_contact_phone":["Enter a valid phone number…"]}}}`
 No cookie → `401` `not_authenticated` · expired/invalid token → `401` `token_not_valid` · missing CSRF → `403` `csrf_failed`.
 
+**Delete own profile** `DELETE /profiles/me/` (CSRF header required) → `204`, empty body. The account stays and
+can sign in; `GET` then returns `404` and `POST /profiles/me/` with `{"full_name": "…"}` creates a new profile (`201`).
+Writes a `profile.deleted` audit event (actor + time, no profile data). Second delete → `404`; no CSRF → `403`.
+
 **Refresh** `POST /auth/user/refresh/` (rotates; old refresh token becomes unusable) · **Logout** `POST /auth/user/logout/` → `{"detail":"Logged out."}`
 
 ## Admin flow (server-side session)

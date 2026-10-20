@@ -60,6 +60,20 @@ class MeProfileView(APIView):
         return Response(serializer.data)
 
     @extend_schema(
+        request=None,
+        responses={204: OpenApiResponse(description="Profile deleted"), 404: OpenApiResponse(description="No profile")},
+    )
+    def delete(self, request):
+        """Delete the caller's own profile. The account stays (they can sign in and create a new profile);
+        the audit trail keeps a ``profile.deleted`` row with no profile data in it."""
+        profile = self._profile(request)
+        with transaction.atomic():
+            # Recorded before the delete so the event can be written; the FK is then nulled (SET_NULL).
+            record_event(request, AuditEvent.Action.PROFILE_DELETED, profile=profile)
+            profile.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(
         request=HealthProfileSerializer,
         responses={201: HealthProfileSerializer, 409: OpenApiResponse(description="Profile already exists")},
     )

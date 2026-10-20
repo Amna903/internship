@@ -79,7 +79,7 @@ pip install -r requirements-dev.txt     # includes the pinned ML stack
 python manage.py migrate && python manage.py seed_demo
 python -m ml.eda && python -m ml.train  # optional: the trained model is committed; this rebuilds it identically
 python manage.py runserver
-pytest                                  # 190 tests (incl. the slow full-retrain reproducibility check)
+pytest                                  # 196 tests (incl. the slow full-retrain reproducibility check)
 
 cd ../frontend && npm install && npm run dev   # http://localhost:3000/admin/predictions (sign in as admin)
 
@@ -87,8 +87,8 @@ cd ../frontend && npm install && npm run dev   # http://localhost:3000/admin/pre
 python e2e/run_week3_e2e.py "<admin password>" docs/screenshots   # 13 checks
 ```
 
-**Verification:** `pytest` 190 passed · `run_week3_e2e.py` 13/13 · earlier browser suites still green
-(`run_e2e.py` 24/24, `run_audit_e2e.py` 11/11, `run_week2_e2e.py` 33/33) · `npm run typecheck`, `npm test` 33/33, `npm run build` clean.
+**Verification:** `pytest` 196 passed · `run_week3_e2e.py` 13/13 · earlier browser suites still green
+(`run_e2e.py` 24/24, `run_audit_e2e.py` 15/15, `run_week2_e2e.py` 33/33) · `npm run typecheck`, `npm test` 33/33, `npm run build` clean.
 
 ---
 
@@ -108,7 +108,7 @@ Week 2 built on the Week 1 app. It has two parts:
 | User signup + JWT login; admins only via management command + session login | Kept from Week 1: `accounts/`, `adminpanel/`, `create_admin`. See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Profile sections: demographics (fictional), emergency contact, wellness preferences | `profiles/models.py`, edited on `/profile` |
 | **Profile completion status** | `profiles/completion.py` (pure rules) → stored `completion_status` column, recomputed on every save; API returns `{status, percent, missing_sections}`; progress bar on `/profile`; admin filter `?completion=` |
-| User-owned profile CRUD | `GET/POST/PATCH /api/profiles/me/`: always resolved from the token, there is no `/profiles/<id>` for members |
+| User-owned profile CRUD | `POST/GET/PATCH/DELETE /api/profiles/me/` (create, read, update, delete): always resolved from the token, there is no `/profiles/<id>` for members. Delete removes the profile, keeps the account, and is audited as `profile.deleted` |
 | Admin-only listing/search | `GET /api/admin/profiles/?search=&status=&completion=&ordering=&page=` |
 | **Audit events** for profile edits and admin actions, no secrets or sensitive payloads | `audit/` app: append-only `AuditEvent` (actor, role, action, profile, changed field **names**, request id). Recorded on signup, profile create/update, admin login/logout, profile view, deactivate/activate. `GET /api/admin/audit-events/`; "Activity" table on the admin profile page |
 | Pagination, filtering, migrations, API docs | DRF pagination; filters validated (bad values → 400); migrations `profiles/0002_completion_status` (with data backfill) and `audit/0001_initial`; Swagger at `/api/docs/`, examples in [docs/API.md](docs/API.md) |
@@ -122,7 +122,7 @@ Week 2 built on the Week 1 app. It has two parts:
 
 ![Audit trail on the admin profile page](docs/screenshots/w2-08-admin-audit-trail.png)
 
-**Verification:** `pytest` 149 passed (SQLite and PostgreSQL) · `e2e/run_audit_e2e.py` 11/11 ·
+**Verification:** `pytest` 155 passed · `e2e/run_audit_e2e.py` 15/15 (incl. delete → recreate) ·
 `e2e/run_e2e.py` 24/24 (Week 1 flows still work) · `e2e/run_week2_e2e.py` 33/33.
 
 ```bash
@@ -256,7 +256,7 @@ ADMIN_PASSWORD='a-strong-passphrase' python manage.py create_admin --email you@e
 ## Tests
 
 ```bash
-cd backend && pytest        # 149 tests (125 Week 1 + 24 Week 2), ~2 s; also green on PostgreSQL
+cd backend && pytest        # 155 tests (125 Week 1 + 30 Week 2), ~2 s; also green on PostgreSQL
 cd frontend && npm run typecheck && npm run build
 ```
 
@@ -285,7 +285,7 @@ Examples with request/response bodies: [docs/API.md](docs/API.md).
 | `POST /api/auth/user/login/` | none | Member login → JWT cookies |
 | `POST /api/auth/user/refresh/` | refresh cookie | Rotate tokens |
 | `POST /api/auth/user/logout/` | none | Revoke refresh token, clear cookies |
-| `GET/PATCH/POST /api/profiles/me/` | member JWT | Own profile only |
+| `GET/PATCH/POST/DELETE /api/profiles/me/` | member JWT | Own profile only (full CRUD) |
 | `POST /api/admin/login/` | none | Admin login → session cookie |
 | `POST /api/admin/logout/` | none | Destroy session |
 | `GET /api/admin/me/` | admin session | Who am I (used by the UI on every load) |
