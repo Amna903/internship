@@ -1,0 +1,25 @@
+from django.conf import settings
+from django.http import JsonResponse
+from django.urls import include, path
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
+handler404 = "config.exceptions.not_found"
+handler500 = "config.exceptions.server_error"
+
+
+def health(request):
+    return JsonResponse({"status": "ok"})
+
+
+urlpatterns = [
+    path("api/health/", health, name="health"),
+    path("api/", include("accounts.urls")),
+    path("api/", include("profiles.urls")),
+    path("api/admin/", include("adminpanel.urls")),
+]
+
+if settings.ENABLE_API_DOCS:
+    urlpatterns += [
+        path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+        path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
+    ]
