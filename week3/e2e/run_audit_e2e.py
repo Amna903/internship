@@ -43,6 +43,7 @@ with sync_playwright() as p:
     expect(bar).to_have_attribute("aria-valuenow", "100")
     check("complete profile shows 100% and a 'complete' badge", "Still to fill in" not in page.content())
     page.evaluate("window.scrollTo(0, 0)")
+    page.wait_for_timeout(700)  # let the progress bar finish its fill animation
     page.screenshot(path=f"{SHOTS}/w2-07-profile-completion.png")
 
     # ---------- admin: completion filter and audit trail ----------
@@ -74,6 +75,7 @@ with sync_playwright() as p:
     a.click("button:has-text('Deactivate profile')")
     expect(activity.locator("tbody tr", has_text="Admin deactivated profile")).to_have_count(1)
     check("deactivation appears in the trail straight away", True)
+    a.evaluate("window.scrollTo(0, 0)")
     a.screenshot(path=f"{SHOTS}/w2-08-admin-audit-trail.png", full_page=True)
     a.click("button:has-text('Reactivate profile')")
     expect(activity.locator("tbody tr", has_text="Admin reactivated profile")).to_have_count(1)

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { FieldError, Shell } from "@/components/Shell";
+import { Icon } from "@/components/ui/Icon";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { adminApi, ApiError, ModelCard, NoShowInput, NoShowResponse } from "@/lib/api";
 
 const WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
@@ -73,15 +75,19 @@ export default function NoShowPage() {
 
   return (
     <Shell nav={<Link href="/admin">← All profiles</Link>}>
-      <h1>Appointment no-show estimate</h1>
+      <PageHeader
+        eyebrow={<><Icon name="chart" /> Model {card ? card.model_version : "no-show"}</>}
+        title="Appointment no-show estimate"
+        lead="Estimate how likely a fictional appointment is to be missed, to decide who gets an extra reminder."
+      />
       <p className="alert warn small">
-        Educational prototype trained on synthetic data. It estimates whether an appointment might be missed, to plan
-        reminders. It is not a medical assessment and must not be used for clinical decisions.
+        <Icon name="alert" />
+        <span>Educational prototype trained on synthetic data. It is not a medical assessment and must not be used for clinical decisions.</span>
       </p>
 
       <form className="card" onSubmit={submit} noValidate>
         {message && <div className="alert error" role="alert">{message}</div>}
-        <h2>Appointment (fictional)</h2>
+        <div className="form-section first"><h2>Appointment (fictional)</h2></div>
         <div className="grid">
           <div>
             <label htmlFor="lead">Days between booking and visit</label>
@@ -119,7 +125,7 @@ export default function NoShowPage() {
           </div>
         </div>
 
-        <h2 style={{ marginTop: 24 }}>History (fictional)</h2>
+        <div className="form-section"><h2>History (fictional)</h2></div>
         <div className="grid">
           <div>
             <label htmlFor="age">Age band</label>
@@ -149,16 +155,27 @@ export default function NoShowPage() {
       {p && result && (
         <section className="card" aria-live="polite" aria-labelledby="result-heading">
           <h2 id="result-heading">Estimate</h2>
-          <p className="result-number">{pct(p.no_show_probability)}</p>
-          <p>
-            <span className={`badge ${p.risk_band === "high" ? "tone-danger" : p.risk_band === "medium" ? "tone-warn" : ""}`}>
-              {p.risk_band} risk
-            </span>{" "}
-            <span className="small muted">
-              Average no-show rate {pct(p.baseline_no_show_rate)} · flagged as high at {pct(p.decision_threshold)} or more
-            </span>
-          </p>
-          <p className="small muted">Model {result.model_version}. {result.disclaimer}</p>
+          <div className="result">
+            <div>
+              <p className="result-number">{pct(p.no_show_probability)}</p>
+              <div className="result-caption">chance of a no-show</div>
+            </div>
+            <div>
+              <span className={`badge ${p.risk_band === "high" ? "tone-danger" : p.risk_band === "medium" ? "tone-warn" : ""}`}>
+                {p.risk_band} risk
+              </span>
+              <div className="meter" aria-hidden="true">
+                <span className="tick left" style={{ left: `${p.baseline_no_show_rate * 100}%` }}><span>average</span></span>
+                <span className="tick" style={{ left: `${p.decision_threshold * 100}%` }}><span>high</span></span>
+                <span className="marker" style={{ left: `${p.no_show_probability * 100}%` }} />
+              </div>
+              <div className="meter-scale" aria-hidden="true"><span>0%</span><span>50%</span><span>100%</span></div>
+              <p className="small muted" style={{ marginTop: 10 }}>
+                Average no-show rate {pct(p.baseline_no_show_rate)} · flagged as high at {pct(p.decision_threshold)} or more
+              </p>
+            </div>
+          </div>
+          <p className="small muted" style={{ marginTop: 12 }}><span className="model-pill">{result.model_version}</span> {result.disclaimer}</p>
         </section>
       )}
 
@@ -171,7 +188,7 @@ export default function NoShowPage() {
               <thead><tr><th>Model (test set)</th><th>ROC-AUC</th><th>PR-AUC</th><th>Brier</th></tr></thead>
               <tbody>
                 {Object.entries(card.test_metrics).map(([name, m]) => (
-                  <tr key={name}>
+                  <tr key={name} className={name === card.selected_model ? "selected" : undefined}>
                     <td className="wrap">{MODEL_LABELS[name] ?? name}</td>
                     <td>{m.roc_auc}</td><td>{m.pr_auc}</td><td>{m.brier}</td>
                   </tr>

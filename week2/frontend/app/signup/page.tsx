@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { FieldError, Shell } from "@/components/Shell";
+import { BrandMark } from "@/components/ui/BrandMark";
 import { ApiError, userApi } from "@/lib/api";
 
 export default function SignupPage() {
@@ -32,9 +33,13 @@ export default function SignupPage() {
 
   return (
     <Shell nav={<Link href="/login">Sign in</Link>}>
-      <form className="card narrow" onSubmit={submit} noValidate>
-        <h1>Create account</h1>
-        <p className="muted small">Use a fictional name and email for this demo.</p>
+      <div className="auth">
+      <form className="card" onSubmit={submit} noValidate>
+        <div className="auth-head">
+          <BrandMark />
+          <h1>Create account</h1>
+          <p className="muted small">Use a fictional name and email for this demo.</p>
+        </div>
         {message && <div className="alert error" role="alert">{message}</div>}
 
         <label htmlFor="name">Full name</label>
@@ -51,7 +56,9 @@ export default function SignupPage() {
         <FieldError errors={errors} name="password" />
 
         <button className="btn block" disabled={busy}>{busy ? "Creating…" : "Create account"}</button>
+        <p className="small muted auth-foot">Already have an account? <Link href="/login">Sign in</Link></p>
       </form>
+      </div>
     </Shell>
   );
 }

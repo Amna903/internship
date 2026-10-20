@@ -48,6 +48,7 @@ with sync_playwright() as p:
     expect(page.locator(".badge", has_text="high risk")).to_be_visible()
     high = percent(page)
     check(f"riskier booking scores higher ({low}% -> {high}%) and is flagged high", high > low)
+    page.evaluate("window.scrollTo(0, 0)")
     page.screenshot(path=f"{SHOTS}/w3-01-no-show-estimate.png", full_page=True)
 
     # Field-level ranges are checked first; the cross-field rule runs once every field is valid (DRF order).
@@ -56,6 +57,7 @@ with sync_playwright() as p:
     expect(page.locator(".field-error", has_text="greater than or equal to 7")).to_be_visible()
     check("out-of-range hour gets a field error", True)
     check("no estimate is shown for invalid input", page.locator(".result-number").count() == 0)
+    page.evaluate("window.scrollTo(0, 0)")
     page.screenshot(path=f"{SHOTS}/w3-02-validation.png")
     page.fill("#hour", "10")
     page.click("button:has-text('Estimate no-show risk')")

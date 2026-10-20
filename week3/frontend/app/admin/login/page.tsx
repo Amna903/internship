@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { BrandMark } from "@/components/ui/BrandMark";
 import { adminApi, ApiError } from "@/lib/api";
 
 export default function AdminLoginPage() {
@@ -28,9 +29,14 @@ export default function AdminLoginPage() {
 
   return (
     <Shell nav={<Link href="/login">Member sign in</Link>}>
-      <form className="card narrow" onSubmit={submit}>
-        <h1>Admin sign in</h1>
-        <p className="muted small">Server-side session. Nothing about your role is stored in the browser.</p>
+      <div className="auth">
+      <form className="card" onSubmit={submit}>
+        <div className="auth-head">
+          <BrandMark />
+          <div className="eyebrow" style={{ justifyContent: "center", width: "100%" }}>Staff console</div>
+          <h1>Admin sign in</h1>
+          <p className="muted small">Server-side session. Nothing about your role is stored in the browser.</p>
+        </div>
         {error && <div className="alert error" role="alert">{error}</div>}
         <label htmlFor="email">Email</label>
         <input id="email" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required />
@@ -38,6 +44,8 @@ export default function AdminLoginPage() {
         <input id="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         <button className="btn block" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
       </form>
+      <p className="small muted auth-foot">Admin accounts are created by the team. There is no sign-up.</p>
+      </div>
     </Shell>
   );
 }

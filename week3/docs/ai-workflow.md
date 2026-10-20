@@ -231,3 +231,19 @@ validation, test scored once; exact dependency pins; no clinical wording anywher
 - ML code is plain Python with no Django imports, so it's testable and reviewable on its own.
 - Generated evidence (EDA, metrics, metadata JSON) is committed as files, so the next session reads numbers
   instead of re-deriving them.
+
+---
+
+# UI refresh
+
+Prompt (paraphrased): "improve the frontend: make it look cool, aesthetic, pretty and professional."
+
+- **Constraint I kept:** class names and visible text that the browser tests rely on stay the same, so the
+  restyle is mostly one rewritten `app/globals.css` (tokens for colour, radius, shadow and type, light and dark)
+  plus a few small components (`BrandMark`, `Icon`, `Avatar`, `PageHeader`). No new npm dependencies; fonts
+  (Inter, Instrument Serif) are self-hosted by `next/font` at build time.
+- **Checked by screenshots, not by eye on the code:** light, dark and 390-px mobile. They caught a completion
+  ring stretched into an ellipse (a flex rule meant for its sibling), a stray space in the logo wordmark, a
+  floating preview card hiding text, colliding meter labels, the sticky header appearing mid-page in full-page
+  screenshots (scroll to top first), and a progress bar captured mid-animation.
+- **Regression:** every browser suite re-run against the production build after the restyle; all green.

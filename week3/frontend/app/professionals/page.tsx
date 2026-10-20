@@ -5,6 +5,7 @@ import { ProfessionalCard } from "@/components/professionals/ProfessionalCard";
 import { ProfessionalFilters } from "@/components/professionals/ProfessionalFilters";
 import { Card } from "@/components/ui/Card";
 import { Layout } from "@/components/ui/Layout";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { activeFilterCount, applyFilters, parseFilters } from "@/lib/filters";
 import { professionals } from "@/lib/professionals";
 
@@ -22,8 +23,11 @@ export default async function ProfessionalsPage({ searchParams }: Props) {
 
   return (
     <Layout>
-      <h1>Find a wellness professional</h1>
-      <p className="muted">Browse fictional professionals by specialty, location, availability and fee.</p>
+      <PageHeader
+        eyebrow="Directory"
+        title="Find a wellness professional"
+        lead="Browse fictional professionals by specialty, location, availability and fee."
+      />
 
       <Suspense>
         <ProfessionalFilters />

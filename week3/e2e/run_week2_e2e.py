@@ -30,6 +30,7 @@ with sync_playwright() as p:
     page.goto(f"{BASE}/professionals")
     total = count(page)
     check(f"list renders all professionals from JSON ({total})", total >= 12)
+    page.evaluate("window.scrollTo(0, 0)")
     page.screenshot(path=f"{SHOTS}/w2-01-directory.png", full_page=True)
 
     page.get_by_role("checkbox", name="Nutrition & dietetics").check()
@@ -65,6 +66,7 @@ with sync_playwright() as p:
 
     page.goto(f"{BASE}/professionals?location=online&visit=in_person")
     check("impossible combination shows the empty state", page.get_by_text("No professionals match these filters").is_visible())
+    page.evaluate("window.scrollTo(0, 0)")
     page.screenshot(path=f"{SHOTS}/w2-02-empty-state.png")
     page.goto(f"{BASE}/professionals?location=atlantis&sort=random&maxFee=-1")
     check("garbage query params are ignored, not crashing", count(page) == total)
@@ -73,6 +75,7 @@ with sync_playwright() as p:
     resp = page.goto(f"{BASE}/professionals/ayesha-siddiqui")
     check("direct navigation to a profile URL works (200)", resp.status == 200 and page.locator("h1").inner_text() == "Ayesha Siddiqui")
     check("profile page has a meaningful <title>", "Ayesha Siddiqui" in page.title())
+    page.evaluate("window.scrollTo(0, 0)")
     page.screenshot(path=f"{SHOTS}/w2-03-detail.png", full_page=True)
 
     resp = page.goto(f"{BASE}/professionals/not-a-real-person")
@@ -103,6 +106,7 @@ with sync_playwright() as p:
     check("invalid select is aria-invalid and described by its error",
           page.locator("#reason").get_attribute("aria-invalid") == "true"
           and "reason-error" in (page.locator("#reason").get_attribute("aria-describedby") or ""))
+    page.evaluate("window.scrollTo(0, 0)")
     page.screenshot(path=f"{SHOTS}/w2-04-form-errors.png", full_page=True)
     summary.get_by_role("link").first.click()
     check("error link moves focus to the field", page.evaluate("document.activeElement.id") == "visitType-in_person")
@@ -137,6 +141,7 @@ with sync_playwright() as p:
     page.get_by_label("I understand this is a demo").check()
     page.get_by_role("button", name="Send request").click()
     expect(page.get_by_text("Request ready (demo)")).to_be_visible()
+    page.evaluate("window.scrollTo(0, 0)")
     page.screenshot(path=f"{SHOTS}/w2-05-form-done.png", full_page=True)
     stored = page.evaluate("localStorage.getItem('hp.appointmentDraft.v1.ayesha-siddiqui')")
     check("draft is cleared after submit", stored is None)
@@ -152,6 +157,7 @@ with sync_playwright() as p:
     mp.keyboard.press("Tab"); mp.keyboard.press("Escape")
     check("mobile: Escape closes the menu", toggle.get_attribute("aria-expanded") == "false")
     check("mobile: no horizontal scroll", mp.evaluate("document.documentElement.scrollWidth <= window.innerWidth"))
+    mp.evaluate("window.scrollTo(0, 0)")
     mp.screenshot(path=f"{SHOTS}/w2-06-mobile.png", full_page=True)
     mp.goto(f"{BASE}/professionals/sana-malik/request")
     check("mobile: form has no horizontal scroll", mp.evaluate("document.documentElement.scrollWidth <= window.innerWidth"))

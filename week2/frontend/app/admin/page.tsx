@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { Avatar } from "@/components/ui/Avatar";
+import { Icon, type IconName } from "@/components/ui/Icon";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { adminApi, AdminProfileRow, ApiError, Page } from "@/lib/api";
 
 export default function AdminDashboard() {
@@ -17,10 +20,17 @@ export default function AdminDashboard() {
   const [ordering, setOrdering] = useState("-created_at");
   const [page, setPage] = useState(1);
   const [error, setError] = useState("");
+  const [stats, setStats] = useState<{ total: number | null; incomplete: number | null; deactivated: number | null }>(
+    { total: null, incomplete: null, deactivated: null },
+  );
 
   // The server decides who is an admin. If this call fails, we are not one, whatever the UI says.
   useEffect(() => {
     adminApi.me().then((r) => setAdminEmail(r.user.email)).catch(() => router.replace("/admin/login"));
+    // Three cheap count queries (page_size=1) for the summary tiles.
+    const count = (params: Record<string, string>) => adminApi.list({ page_size: "1", ...params }).then((r) => r.count).catch(() => null);
+    Promise.all([count({}), count({ completion: "incomplete" }), count({ status: "deactivated" })])
+      .then(([total, incomplete, deactivated]) => setStats({ total, incomplete, deactivated }));
   }, [router]);
 
   const load = useCallback(async () => {
@@ -52,11 +62,23 @@ export default function AdminDashboard() {
 
   const pages = data ? Math.max(1, Math.ceil(data.count / 10)) : 1;
   const nav = (<><span className="muted small">{adminEmail}</span><button className="btn ghost small" onClick={logout}>Sign out</button></>);
+  const tile = (label: string, value: number | null, icon: IconName, tone: string, note: string) => (
+    <div className={`stat ${tone}`}>
+      <div className="stat-label"><span className="icon-chip"><Icon name={icon} /></span>{label}</div>
+      <div className="stat-value">{value === null ? "–" : value.toLocaleString()}</div>
+      <div className="stat-note">{note}</div>
+    </div>
+  );
 
   return (
     <Shell nav={nav}>
-      <h1>Member profiles</h1>
-      <p className="muted small">{data ? `${data.count} profile${data.count === 1 ? "" : "s"}` : "Loading…"}</p>
+      <PageHeader eyebrow="Admin console" title="Member profiles" lead="Search, filter and review synthetic member profiles. Every view and change is audited." />
+
+      <div className="stats" aria-label="Summary">
+        {tile("Total profiles", stats.total, "users", "", "All synthetic members")}
+        {tile("Incomplete", stats.incomplete, "alert", "warn", "Need a follow-up")}
+        {tile("Deactivated", stats.deactivated, "pause", "danger", "Cannot sign in")}
+      </div>
 
       <div className="card">
         <div className="toolbar">
@@ -72,17 +94,22 @@ export default function AdminDashboard() {
             <option value="full_name">Name A–Z</option><option value="-full_name">Name Z–A</option>
           </select>
         </div>
+        <p className="muted small" role="status">{data ? `${data.count} profile${data.count === 1 ? "" : "s"} match` : "Loading…"}</p>
 
         {error && <div className="alert error" role="alert">{error}</div>}
 
         <div className="table-wrap">
           <table>
-            <thead><tr><th>Name</th><th>Email</th><th>Age</th><th>Contact</th><th>Status</th><th>Completion</th><th>Joined</th><th /></tr></thead>
+            <thead><tr><th>Member</th><th>Age</th><th>Contact</th><th>Status</th><th>Completion</th><th>Joined</th><th /></tr></thead>
             <tbody>
               {data?.results.map((p) => (
                 <tr key={p.id}>
-                  <td>{p.full_name}</td>
-                  <td>{p.email}</td>
+                  <td>
+                    <div className="person">
+                      <Avatar name={p.full_name} />
+                      <div><strong>{p.full_name}</strong><span className="muted">{p.email}</span></div>
+                    </div>
+                  </td>
                   <td>{p.age_range || "—"}</td>
                   <td>{p.contact_preference}</td>
                   <td><span className={`badge ${p.status === "active" ? "" : "off"}`}>{p.status}</span></td>
@@ -91,7 +118,7 @@ export default function AdminDashboard() {
                   <td><Link href={`/admin/profiles/${p.id}`}>View</Link></td>
                 </tr>
               ))}
-              {data && data.results.length === 0 && <tr><td colSpan={8} className="muted">No profiles match.</td></tr>}
+              {data && data.results.length === 0 && <tr><td colSpan={7} className="muted">No profiles match.</td></tr>}
             </tbody>
           </table>
         </div>

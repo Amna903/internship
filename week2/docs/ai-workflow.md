@@ -184,3 +184,19 @@ three frontend pages.
   audit on every action, values never stored, append-only, request id, role boundaries).
 - `e2e/run_audit_e2e.py`: 11/11 against the production build. Week 1 run 24/24, CareConnect run 33/33.
 - EXPLAIN with and without each new index on 20k profiles / 60k events (`docs/explain-postgres.md`).
+
+---
+
+# UI refresh
+
+Prompt (paraphrased): "improve the frontend: make it look cool, aesthetic, pretty and professional."
+
+- **Constraint I kept:** class names and visible text that the browser tests rely on stay the same, so the
+  restyle is mostly one rewritten `app/globals.css` (tokens for colour, radius, shadow and type, light and dark)
+  plus a few small components (`BrandMark`, `Icon`, `Avatar`, `PageHeader`). No new npm dependencies; fonts
+  (Inter, Instrument Serif) are self-hosted by `next/font` at build time.
+- **Checked by screenshots, not by eye on the code:** light, dark and 390-px mobile. They caught a completion
+  ring stretched into an ellipse (a flex rule meant for its sibling), a stray space in the logo wordmark, a
+  floating preview card hiding text, colliding meter labels, the sticky header appearing mid-page in full-page
+  screenshots (scroll to top first), and a progress bar captured mid-animation.
+- **Regression:** every browser suite re-run against the production build after the restyle; all green.

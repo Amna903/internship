@@ -33,6 +33,7 @@ with sync_playwright() as p:
     page.click("button:has-text('Create account')")
     expect(page.locator(".field-error").first).to_be_visible()
     check("signup shows server-side password validation", "password" in page.content().lower())
+    page.evaluate("window.scrollTo(0, 0)")
     page.screenshot(path=f"{SHOTS}/02-signup-validation.png")
 
     page.fill("#password", PW); page.click("button:has-text('Create account')")
@@ -50,6 +51,7 @@ with sync_playwright() as p:
     page.fill("#ecn", "Pat Tester"); page.fill("#ecr", "Sibling"); page.fill("#ecp", "+1 555 010 0188")
     page.click("button:has-text('Save profile')")
     expect(page.locator(".alert.ok")).to_be_visible()
+    page.evaluate("window.scrollTo(0, 0)")
     page.screenshot(path=f"{SHOTS}/03-profile-saved.png", full_page=True)
     page.reload(); expect(page.locator("#goals")).to_have_value("Walk more\nSleep 8 hours")
     check("profile edits persist across reload", True)
@@ -91,6 +93,7 @@ with sync_playwright() as p:
     a.wait_for_url("**/admin"); expect(a.locator("table tbody tr").first).to_be_visible()
     acookies = {c["name"]: c for c in actx.cookies()}
     check("admin gets HttpOnly session cookie, no JWT", acookies["hp_admin_session"]["httpOnly"] and "hp_access" not in acookies)
+    a.evaluate("window.scrollTo(0, 0)")
     a.screenshot(path=f"{SHOTS}/04-admin-dashboard.png")
 
     # forging client state does nothing
@@ -115,6 +118,7 @@ with sync_playwright() as p:
     expect(a.locator("table tbody tr")).to_have_count(1)
     a.click("a:has-text('View')"); expect(a.locator("h1")).to_have_text("E2E Tester")
     check("detail shows emergency contact + goals", "Pat Tester" in a.content() and "Walk more" in a.content())
+    a.evaluate("window.scrollTo(0, 0)")
     a.screenshot(path=f"{SHOTS}/05-admin-detail.png", full_page=True)
 
     a.once("dialog", lambda d: d.accept())

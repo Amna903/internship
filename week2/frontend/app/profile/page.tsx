@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { DISCLAIMER, FieldError, Shell } from "@/components/Shell";
+import { Avatar } from "@/components/ui/Avatar";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { ApiError, Profile, SECTION_LABELS, userApi } from "@/lib/api";
 
 const AGE_RANGES = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"];
@@ -83,31 +85,40 @@ export default function ProfilePage() {
 
   return (
     <Shell nav={nav}>
-      <h1>My profile</h1>
-      <p className="muted small">Signed in as {profile.email} · <span className="badge">{profile.status}</span></p>
+      <PageHeader
+        eyebrow="Member"
+        leading={<Avatar name={profile.full_name || profile.email} size="lg" />}
+        title="My profile"
+        lead={<>Signed in as {profile.email} · <span className="badge">{profile.status}</span></>}
+      />
       <p className="alert warn small">{DISCLAIMER}</p>
 
       <section className="card" aria-labelledby="completion-heading">
-        <h2 id="completion-heading">Profile completion</h2>
-        <div className="progress" role="progressbar" aria-valuenow={profile.completion.percent} aria-valuemin={0} aria-valuemax={100} aria-label="Profile completion">
-          <span style={{ width: `${profile.completion.percent}%` }} />
+        <div className="completion">
+          <div className="ring" style={{ ["--p" as string]: profile.completion.percent }} aria-hidden="true"><span>{profile.completion.percent}%</span></div>
+          <div>
+            <h2 id="completion-heading" style={{ marginBottom: 4 }}>Profile completion</h2>
+            <div className="progress" role="progressbar" aria-valuenow={profile.completion.percent} aria-valuemin={0} aria-valuemax={100} aria-label="Profile completion">
+              <span style={{ width: `${profile.completion.percent}%` }} />
+            </div>
+            <p className="small" style={{ margin: 0 }}>
+              {profile.completion.percent}% complete ·{" "}
+              <span className={`badge ${profile.completion.status === "complete" ? "" : "tone-warn"}`}>{profile.completion.status}</span>
+            </p>
+            {profile.completion.missing_sections.length > 0 && (
+              <>
+                <p className="small muted" style={{ margin: "10px 0 0" }}>Still to fill in:</p>
+                <ul className="missing">{profile.completion.missing_sections.map((s) => <li key={s}>{SECTION_LABELS[s] ?? s}</li>)}</ul>
+              </>
+            )}
+          </div>
         </div>
-        <p className="small">
-          {profile.completion.percent}% complete ·{" "}
-          <span className={`badge ${profile.completion.status === "complete" ? "" : "tone-warn"}`}>{profile.completion.status}</span>
-        </p>
-        {profile.completion.missing_sections.length > 0 && (
-          <>
-            <p className="small muted">Still to fill in:</p>
-            <ul className="small">{profile.completion.missing_sections.map((s) => <li key={s}>{SECTION_LABELS[s] ?? s}</li>)}</ul>
-          </>
-        )}
       </section>
 
       <form className="card" onSubmit={save} noValidate>
         {message && <div className={`alert ${message.kind}`} role="status">{message.text}</div>}
 
-        <h2>About you</h2>
+        <div className="form-section first"><h2>About you</h2></div>
         <label htmlFor="full_name">Full name</label>
         <input id="full_name" value={form.full_name} onChange={(e) => set("full_name", e.target.value)} />
         <FieldError errors={errors} name="full_name" />
@@ -143,7 +154,7 @@ export default function ProfilePage() {
         </select>
         <FieldError errors={errors} name="contact_preference" />
 
-        <h2 style={{ marginTop: 24 }}>Wellness</h2>
+        <div className="form-section"><h2>Wellness</h2></div>
         <label htmlFor="goals">Wellness goals</label>
         <textarea id="goals" value={form.goals} onChange={(e) => set("goals", e.target.value)} />
         <div className="hint">One per line, up to 10.</div>
@@ -158,7 +169,7 @@ export default function ProfilePage() {
         <textarea id="notes" value={form.notes} onChange={(e) => set("notes", e.target.value)} maxLength={1000} />
         <FieldError errors={errors} name="lifestyle_notes" />
 
-        <h2 style={{ marginTop: 24 }}>Emergency contact (fictional)</h2>
+        <div className="form-section"><h2>Emergency contact (fictional)</h2></div>
         <div className="grid">
           <div>
             <label htmlFor="ecn">Name</label>
