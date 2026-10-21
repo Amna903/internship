@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { Avatar } from "@/components/ui/Avatar";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { adminApi, AdminProfileDetail, ApiError, AuditEvent, SECTION_LABELS } from "@/lib/api";
+import { adminApi, AdminProfileDetail, ApiError, AuditEvent, SECTION_LABELS, isAbort } from "@/lib/api";
 
 const dash = (v: string | null | undefined) => (v ? v : "—");
 const list = (v: string[]) => (v.length ? v.join(", ") : "—");
@@ -21,9 +21,18 @@ export default function AdminProfileDetailPage() {
   const [events, setEvents] = useState<AuditEvent[] | null>(null);
 
   // Loaded after the detail call, so the trail already includes this admin's "viewed" event.
+  // Only the newest activity request may update the list: each call aborts the one before it,
+  // so after quick activate/deactivate clicks an older trail can never replace a newer one.
+  const eventsCtrl = useRef<AbortController | null>(null);
   const loadEvents = useCallback(() => {
-    adminApi.auditEvents({ profile: id, page_size: "20" }).then((r) => setEvents(r.results)).catch(() => setEvents([]));
+    eventsCtrl.current?.abort();
+    const ctrl = (eventsCtrl.current = new AbortController());
+    adminApi.auditEvents({ profile: id, page_size: "20" }, ctrl.signal).then(
+      (r) => { if (eventsCtrl.current === ctrl) setEvents(r.results); },
+      (err) => { if (eventsCtrl.current === ctrl && !isAbort(err)) setEvents([]); },
+    );
   }, [id]);
+  useEffect(() => () => eventsCtrl.current?.abort(), []);
 
   useEffect(() => {
     adminApi.detail(id).then((d) => { setP(d); loadEvents(); }).catch((err) => {

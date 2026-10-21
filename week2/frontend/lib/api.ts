@@ -1,6 +1,8 @@
 // Thin fetch wrapper. All auth lives in HttpOnly cookies the browser manages; this file never sees
 // or stores a token. It only (a) echoes the CSRF cookie in a header and (b) retries once after a
-// silent refresh when the short-lived user access cookie has expired.
+// silent refresh when the short-lived user access cookie has expired. Concurrent 401s share a single
+// in-flight refresh, because refresh tokens rotate: a second parallel refresh would present an
+// already-blacklisted token and log the user out.
 
 export type Role = "user" | "admin";
 export interface UserSummary { id: number; email: string; role: Role }
@@ -32,7 +34,7 @@ export interface AdminProfileRow {
 }
 export interface AuditEvent {
   id: number; created_at: string; action: string; action_label: string; actor_email: string | null;
-  actor_role: "user" | "admin"; profile_id: number | null; changed_fields: string[]; request_id: string;
+  actor_role: "user" | "admin" | "anonymous"; target_email: string | null; profile_id: number | null; changed_fields: string[]; request_id: string;
 }
 export interface AdminProfileDetail extends Profile {
   id: number; user_id: number; deactivated_at: string | null; account_active: boolean; last_login: string | null;
@@ -65,11 +67,23 @@ async function ensureCsrf(): Promise<string> {
   return token;
 }
 
-async function raw(method: string, path: string, body?: unknown): Promise<Response> {
+async function raw(method: string, path: string, body?: unknown, signal?: AbortSignal): Promise<Response> {
   const headers: Record<string, string> = { Accept: "application/json" };
   if (body !== undefined) headers["Content-Type"] = "application/json";
   if (method !== "GET") headers["X-CSRFToken"] = await ensureCsrf();
-  return fetch(path, { method, headers, credentials: "same-origin", body: body === undefined ? undefined : JSON.stringify(body) });
+  return fetch(path, { method, headers, credentials: "same-origin", signal, body: body === undefined ? undefined : JSON.stringify(body) });
+}
+
+let refreshInFlight: Promise<boolean> | null = null;
+
+/** Rotate the user cookies. Every caller that arrives while a refresh is running awaits the same one. */
+export function refreshSession(): Promise<boolean> {
+  if (!refreshInFlight) {
+    refreshInFlight = raw("POST", "/api/auth/user/refresh/")
+      .then((r) => r.ok, () => false)
+      .finally(() => { refreshInFlight = null; });
+  }
+  return refreshInFlight;
 }
 
 async function parse<T>(res: Response): Promise<T> {
@@ -83,15 +97,22 @@ async function parse<T>(res: Response): Promise<T> {
   return data as T;
 }
 
-/** `refresh: true` is for the standard-user flow only: on 401, rotate cookies once and retry. */
-export async function api<T>(method: string, path: string, body?: unknown, opts: { refresh?: boolean } = {}): Promise<T> {
-  let res = await raw(method, path, body);
-  if (res.status === 401 && opts.refresh) {
-    const refreshed = await raw("POST", "/api/auth/user/refresh/");
-    if (refreshed.ok) res = await raw(method, path, body);
+export interface RequestOpts {
+  /** Standard-user flow only: on 401, wait for the shared refresh and retry exactly once. */
+  refresh?: boolean;
+  /** Abort the request (e.g. a superseded search). Rejects with a DOMException named "AbortError". */
+  signal?: AbortSignal;
+}
+
+export async function api<T>(method: string, path: string, body?: unknown, opts: RequestOpts = {}): Promise<T> {
+  let res = await raw(method, path, body, opts.signal);
+  if (res.status === 401 && opts.refresh && (await refreshSession())) {
+    res = await raw(method, path, body, opts.signal);
   }
   return parse<T>(res);
 }
+
+export const isAbort = (err: unknown) => err instanceof DOMException && err.name === "AbortError";
 
 // ---- standard user (JWT cookies) ----
 export const userApi = {
@@ -109,10 +130,12 @@ export const adminApi = {
   login: (email: string, password: string) => api<{ user: UserSummary }>("POST", "/api/admin/login/", { email, password }),
   logout: () => api<{ detail: string }>("POST", "/api/admin/logout/"),
   me: () => api<{ user: UserSummary }>("GET", "/api/admin/me/"),
-  list: (params: Record<string, string>) => api<Page<AdminProfileRow>>("GET", "/api/admin/profiles/?" + new URLSearchParams(params)),
+  list: (params: Record<string, string>, signal?: AbortSignal) =>
+    api<Page<AdminProfileRow>>("GET", "/api/admin/profiles/?" + new URLSearchParams(params), undefined, { signal }),
   detail: (id: string | number) => api<AdminProfileDetail>("GET", `/api/admin/profiles/${id}/`),
   setStatus: (id: string | number, action: "activate" | "deactivate") => api<AdminProfileDetail>("POST", `/api/admin/profiles/${id}/${action}/`),
-  auditEvents: (params: Record<string, string>) => api<Page<AuditEvent>>("GET", "/api/admin/audit-events/?" + new URLSearchParams(params)),
+  auditEvents: (params: Record<string, string>, signal?: AbortSignal) =>
+    api<Page<AuditEvent>>("GET", "/api/admin/audit-events/?" + new URLSearchParams(params), undefined, { signal }),
 };
 
 export const SECTION_LABELS: Record<string, string> = {
