@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, get_user, login, logout
 from django.db import transaction
+from django.db.models import Exists, OuterRef
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
@@ -190,7 +191,12 @@ class AdminAuditEventListView(generics.ListAPIView):
     pagination_class = AdminPagination
 
     def get_queryset(self):
-        queryset = AuditEvent.objects.select_related("actor")
+        # Deletion markers come from EXISTS subqueries, not joins: joining the profile would drop events
+        # of deleted profiles when filtering by profile, and would read profile contents for no reason.
+        queryset = AuditEvent.objects.select_related("actor").annotate(
+            profile_exists=Exists(HealthProfile.objects.filter(pk=OuterRef("profile_id"))),
+            actor_exists=Exists(User.objects.filter(pk=OuterRef("actor_id"))),
+        )
         params = self.request.query_params
         action = params.get("action")
         if action:
@@ -201,7 +207,7 @@ class AdminAuditEventListView(generics.ListAPIView):
         if profile_id:
             if not profile_id.isdigit():
                 raise ValidationError({"profile": ["Must be a profile id."]})
-            queryset = queryset.filter(subject_profile_id=int(profile_id))
+            queryset = queryset.filter(profile_id=int(profile_id))
         return queryset
 
     @extend_schema(

@@ -1,6 +1,7 @@
 import json
 
 import pytest
+from django.db import DatabaseError, connection, transaction
 
 from audit.models import AuditEvent
 
@@ -138,13 +139,87 @@ class TestAppendOnlyAndRequestId:
         assert bad["X-Request-ID"] != "<script>alert(1)</script>" and len(bad["X-Request-ID"]) == 32
 
 
-@pytest.mark.django_db
-def test_history_survives_profile_deletion(user_browser, user, admin_browser):
-    pid = user.profile.id
-    user_browser.patch(ME, {"lifestyle_notes": "walks daily"})
-    admin_browser.get(f"/api/admin/profiles/{pid}/")
-    user_browser.client.delete(ME, HTTP_X_CSRFTOKEN=user_browser.cookies["csrftoken"].value)
+def immutability_triggers():
+    if connection.vendor == "postgresql":
+        sql = "SELECT tgname FROM pg_trigger WHERE tgrelid = 'audit_auditevent'::regclass AND NOT tgisinternal"
+    else:
+        sql = "SELECT name FROM sqlite_master WHERE type = 'trigger' AND tbl_name = 'audit_auditevent'"
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
+        return {row[0] for row in cursor.fetchall()}
 
-    rows = admin_browser.get(AUDIT, {"profile": pid}).json()["results"]
-    assert [r["action"] for r in rows] == ["profile.deleted", "admin.profile_viewed", "profile.updated"]
-    assert {r["profile_id"] for r in rows} == {pid}
+
+@pytest.mark.django_db
+class TestDeletionKeepsAttribution:
+    """Deleting a profile or an account never rewrites the audit trail; the API marks it instead."""
+
+    def test_history_survives_profile_deletion_with_marker(self, user_browser, user, admin_browser):
+        pid = user.profile.id
+        user_browser.patch(ME, {"lifestyle_notes": "walks daily"})
+        admin_browser.get(f"/api/admin/profiles/{pid}/")
+        before = list(AuditEvent.objects.filter(profile_id=pid).values())
+        user_browser.client.delete(ME, HTTP_X_CSRFTOKEN=user_browser.cookies["csrftoken"].value)
+
+        # Rows written before the delete are byte-for-byte unchanged (no SET NULL cascade).
+        assert list(AuditEvent.objects.filter(profile_id=pid).exclude(action="profile.deleted").values()) == before
+        rows = admin_browser.get(AUDIT, {"profile": pid}).json()["results"]
+        assert [r["action"] for r in rows] == ["profile.deleted", "admin.profile_viewed", "profile.updated"]
+        assert {(r["profile_id"], r["profile_deleted"]) for r in rows} == {(pid, True)}
+        assert rows[0]["actor_email"] == user.email and rows[0]["actor_deleted"] is False
+
+    def test_live_profile_is_not_marked_deleted(self, user_browser, user, admin_browser):
+        user_browser.patch(ME, {"lifestyle_notes": "walks daily"})
+        row = admin_browser.get(AUDIT, {"profile": user.profile.id}).json()["results"][-1]
+        assert row["profile_deleted"] is False
+
+    def test_deleted_account_keeps_its_id_with_a_marker(self, user_browser, user, admin_browser):
+        user_browser.patch(ME, {"lifestyle_notes": "walks daily"})
+        uid, pid = user.id, user.profile.id
+        user.delete()  # no API does this today; this pins what happens if an operator does
+        row = admin_browser.get(AUDIT, {"profile": pid}).json()["results"][0]
+        assert (row["actor_id"], row["actor_deleted"], row["actor_email"]) == (uid, True, None)
+        assert row["actor_role"] == "user"
+
+
+@pytest.mark.django_db
+class TestDatabaseEnforcesAppendOnly:
+    """The model's save()/delete() guards are convenience only. These paths skip them, and the
+    database triggers from audit/0004 are what stop them."""
+
+    @pytest.fixture
+    def event(self, user_browser):
+        user_browser.patch(ME, {"full_name": "Changed Name"})
+        return AuditEvent.objects.get()
+
+    def test_triggers_are_installed(self):
+        expected = {"audit_event_no_change", "audit_event_no_truncate"} if connection.vendor == "postgresql" \
+            else {"audit_event_no_update", "audit_event_no_delete"}
+        assert expected <= immutability_triggers()
+
+    @pytest.mark.parametrize("attempt", [
+        lambda e: AuditEvent.objects.filter(pk=e.pk).update(action="admin.login"),
+        lambda e: AuditEvent.objects.filter(pk=e.pk).delete(),
+        lambda e: AuditEvent.objects.all().delete(),
+        lambda e: AuditEvent.objects.bulk_update([AuditEvent(pk=e.pk, action="admin.login")], ["action"]),
+        lambda e: connection.cursor().execute("UPDATE audit_auditevent SET changed_fields = '[]'"),
+        lambda e: connection.cursor().execute("DELETE FROM audit_auditevent"),
+    ], ids=["queryset.update", "queryset.delete", "delete-all", "bulk_update", "raw-update", "raw-delete"])
+    def test_bypass_paths_are_rejected_by_the_database(self, event, attempt):
+        before = list(AuditEvent.objects.values())
+        with pytest.raises(DatabaseError, match="append-only"):
+            with transaction.atomic():
+                attempt(event)
+        assert list(AuditEvent.objects.values()) == before
+
+    @pytest.mark.skipif("connection.vendor != 'postgresql'", reason="TRUNCATE exists only on PostgreSQL")
+    def test_truncate_is_rejected_on_postgresql(self, event):
+        with pytest.raises(DatabaseError, match="append-only"):
+            with transaction.atomic():
+                connection.cursor().execute("TRUNCATE audit_auditevent")
+        assert AuditEvent.objects.count() == 1
+
+    def test_inserts_still_work(self, event, user_browser):
+        user_browser.patch(ME, {"full_name": "Changed Again"})
+        assert AuditEvent.objects.count() == 2
+
+

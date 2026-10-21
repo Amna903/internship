@@ -11,7 +11,6 @@ def record_event(request, action: str, *, actor=None, profile=None, changed_fiel
         actor_role=actor.role,
         action=action,
         profile=profile,
-        subject_profile_id=profile.pk if profile is not None else None,
         changed_fields=sorted(set(changed_fields)),
         request_id=getattr(request, "request_id", ""),
     )

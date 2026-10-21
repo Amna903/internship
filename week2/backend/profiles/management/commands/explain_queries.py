@@ -21,10 +21,8 @@ class Command(BaseCommand):
                 HealthProfile.objects.order_by("full_name")[:10],
             "4. Incomplete profiles, newest first  (composite index hp_completion_created_idx)":
                 HealthProfile.objects.filter(completion_status="incomplete").order_by("-created_at")[:10],
-            "5. Audit history of one profile, incl. after deletion  (composite index audit_subject_created_idx)":
-                AuditEvent.objects.filter(subject_profile_id=1).order_by("-created_at")[:20],
-            "6. Nulling the FK when a profile is deleted  (composite index audit_profile_created_idx)":
-                AuditEvent.objects.filter(profile_id=1).values("id"),
+            "5. Audit history of one profile  (composite index audit_profile_created_idx)":
+                AuditEvent.objects.filter(profile_id=1).order_by("-created_at")[:20],
         }
         self.stdout.write(f"Database: {connection.vendor} | profiles: {HealthProfile.objects.count()}\n")
         with transaction.atomic():
