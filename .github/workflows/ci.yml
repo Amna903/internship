@@ -1,0 +1,86 @@
+# Runs on every push and pull request. Each week is a self-contained app, so each is checked on its own.
+# To make failures block merging, mark the "ci-passed" job as a required status check in the
+# repository's branch protection rule for main (Settings → Branches).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: backend (${{ matrix.week }}, ${{ matrix.db }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        week: [week1, week2, week3]
+        db: [postgres, sqlite]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ci" --health-interval 5s --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: ${{ matrix.week }}/backend
+    env:
+      # Only for the postgres leg; the sqlite leg leaves it empty and settings fall back to SQLite.
+      DATABASE_URL: ${{ matrix.db == 'postgres' && 'postgres://ci:ci@localhost:5432/ci' || '' }}
+      DJANGO_SETTINGS_MODULE: config.settings_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: ${{ matrix.week }}/backend/requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Migrations are complete (no model change without a migration)
+        run: python manage.py makemigrations --check --dry-run
+      - name: Tests
+        run: python -m pytest -q
+
+  frontend:
+    name: frontend (${{ matrix.week }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        week: [week1, week2, week3]
+    defaults:
+      run:
+        working-directory: ${{ matrix.week }}/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ${{ matrix.week }}/frontend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  # Single required check for branch protection: fails if any job above failed or was cancelled.
+  ci-passed:
+    if: always()
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          [ "${{ needs.backend.result }}" = "success" ] && [ "${{ needs.frontend.result }}" = "success" ]
