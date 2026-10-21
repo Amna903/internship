@@ -29,7 +29,9 @@ It has two parts:
 
 ![Audit trail on the admin profile page](docs/screenshots/w2-08-admin-audit-trail.png)
 
-**Verification:** `pytest` 173 passed (incl. [review fixes](docs/review-fixes.md)) · `npm test` 37 passed · `e2e/run_audit_e2e.py` 15/15 (incl. delete → recreate) ·
+**Evidence:** [requirement → code → test → demo checklist](docs/REQUIREMENTS.md) · [review fixes](docs/review-fixes.md) · CI: `.github/workflows/ci.yml`
+
+**Verification (run by Claude Code in development; CI re-runs it on every push):** `pytest` 192 passed + 1 PostgreSQL-only skip (SQLite), full suite also on PostgreSQL 14.21 · `npm test` 37 passed · browser runs from **before** the review fixes, not re-run since: `e2e/run_audit_e2e.py` 15/15 (incl. delete → recreate) ·
 `e2e/run_e2e.py` 24/24 (Week 1 flows still work) · `e2e/run_week2_e2e.py` 33/33.
 
 ```bash

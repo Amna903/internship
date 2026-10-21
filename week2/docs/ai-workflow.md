@@ -211,3 +211,42 @@ account, records `profile.deleted` in the same transaction, and needs CSRF like 
 "Delete my profile" section with a confirm dialog, and an empty state that lets the member create a new profile.
 Tests: 6 API tests (own-only, audited without data, recreate, second delete 404, CSRF, admin/anonymous blocked)
 and 4 browser checks (delete, persists after reload, recreate at 0%, visible to admins in the audit log).
+
+---
+
+# Review-fix round (2026-10-21): auditable record
+
+**Tool.** Claude Code (Claude Opus 5.5, agentic mode in VS Code). It edited files, ran tests and ran the
+PostgreSQL benchmark. Everything below marked "AI ran" was executed by the agent, not by me.
+
+**Prompts, kept verbatim in substance.**
+1. Original: the mentor's Week 1 review pasted as-is, then "now week 2 have any such … weakness which
+   can be covered?" and "yes".
+2. Refined: the mentor's Week 2 review pasted as-is. It named the priorities (requirement checklist,
+   audit deletion/immutability tests, CI first). The agent was asked to turn each point into a focused
+   change with a test that fails before and passes after.
+
+**Allowed scope.** `week2/` (backend, frontend, docs) and `.github/workflows/ci.yml`. Week 1 was only
+read. Week 3 was not touched (CI runs its existing tests). No secrets, no `.env` edits, nothing pushed
+without asking.
+
+**What the AI ran (observed output, not summaries).**
+- `pytest` on SQLite and on PostgreSQL 14.21 after each change, plus each new test against the previous
+  commit to confirm it failed there.
+- `benchmark_admin_queries` on a throwaway PostgreSQL database (`docs/benchmarks/`).
+- Every CI step locally: `makemigrations --check`, `npm test`, `npm run typecheck`, `npm run build`.
+
+**Problems the agent hit and fixed along the way.**
+- The `RAISE` message in the PostgreSQL trigger contains `%`, which psycopg read as a query
+  placeholder. Fixed with `params=None`.
+- Filtering audit events by profile while joining the profile table turned the join into an INNER JOIN
+  and hid deleted profiles' events. Replaced with `EXISTS` subqueries.
+- An existing test (`test_after_logout_browser_is_unauthenticated`) deleted the access cookie before
+  checking, which hid that a copied access token kept working after logout. This led to fix B4.
+
+**What I still have to do myself (not done by the AI).**
+- [ ] Review each commit's diff line by line: `git log --oneline` then `git show <hash>`.
+- [ ] Re-run `pytest` and `npm test` on my machine and fill the "Me" column in `REQUIREMENTS.md`.
+- [ ] Re-run the benchmark (commands in `explain-postgres.md`) and compare with the committed output.
+- [ ] Be able to explain without notes: why DB triggers and not model methods, why stable ids instead
+  of foreign keys, what logout revokes, and why the COUNT query doesn't use the index.
