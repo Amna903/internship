@@ -29,7 +29,7 @@ It has two parts:
 
 ![Audit trail on the admin profile page](docs/screenshots/w2-08-admin-audit-trail.png)
 
-**Verification:** `pytest` 155 passed · `e2e/run_audit_e2e.py` 15/15 (incl. delete → recreate) ·
+**Verification:** `pytest` 173 passed (incl. [review fixes](docs/review-fixes.md)) · `npm test` 37 passed · `e2e/run_audit_e2e.py` 15/15 (incl. delete → recreate) ·
 `e2e/run_e2e.py` 24/24 (Week 1 flows still work) · `e2e/run_week2_e2e.py` 33/33.
 
 ```bash

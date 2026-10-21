@@ -76,6 +76,12 @@ Execution Time: 5.534 ms
 
 ## 5. One profile's audit history: `WHERE profile_id=? ORDER BY created_at DESC LIMIT 20`
 
+> **Update (review fixes):** the history filter now uses `subject_profile_id`, a copy of the id that
+> survives profile deletion, with its own index `audit_subject_created_idx` of the same shape. The
+> PostgreSQL timings below were measured on the earlier `profile_id` query and have not been re-run;
+> `python manage.py explain_queries` confirms the new query uses the new index (SQLite). The
+> `profile_id` index stays, because deleting a profile must find its rows to set the FK to NULL.
+
 Index: `audit_profile_created_idx` on `(profile_id, created_at DESC)`.
 
 **With the index: 0.08 ms, 20 buffers.**

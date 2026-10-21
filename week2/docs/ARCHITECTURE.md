@@ -111,9 +111,10 @@ erDiagram
     bigint id PK
     timestamptz created_at
     bigint actor_id FK "ON DELETE SET NULL"
-    varchar actor_role "CHECK in (user, admin)"
+    varchar actor_role "CHECK in (user, admin, anonymous)"
     varchar action "IDX (action, created_at DESC)"
     bigint profile_id FK "ON DELETE SET NULL; IDX (profile_id, created_at DESC)"
+    bigint subject_profile_id "copy of profile id, survives delete; IDX (subject_profile_id, created_at DESC)"
     jsonb changed_fields "field names only"
     varchar request_id
   }
@@ -131,7 +132,8 @@ Also present (from libraries): `django_session` (admin sessions) and
 | `CHECK(dob IS NULL OR age_range = '')` | Prevents contradictory age data. |
 | `CHECK(role IN ...)`, `CHECK(status IN ...)` | Bad enum values cannot be stored. |
 | `hp_completion_created_idx (completion_status, created_at DESC)` | Week 2: admin "incomplete profiles, newest first" follow-up list. 5.5 ms → 0.20 ms at 20k rows. |
-| `audit_profile_created_idx (profile_id, created_at DESC)` | Week 2: "history of this profile" on the admin detail page. 7.0 ms → 0.08 ms at 60k events. Replaces Django's default FK index (`db_index=False`), which EXPLAIN showed was redundant. |
+| `audit_profile_created_idx (profile_id, created_at DESC)` | Week 2: originally served "history of this profile" (7.0 ms → 0.08 ms at 60k events). Now kept so that deleting a profile can find and null its FK rows without a full scan. Replaces Django's default FK index (`db_index=False`). |
+| `audit_subject_created_idx (subject_profile_id, created_at DESC)` | Week 2 review fix: "history of this profile" now filters on `subject_profile_id`, which survives profile deletion. Same shape as the index above, so the same plan applies. |
 | `audit_action_created_idx (action, created_at DESC)` | Week 2: audit list filtered by action ("all deactivations"), newest first. |
 
 ### Week 2 design notes
