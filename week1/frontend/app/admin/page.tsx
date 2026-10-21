@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Shell } from "@/components/Shell";
-import { adminApi, AdminProfileRow, ApiError, Page } from "@/lib/api";
+import { adminApi, AdminProfileRow, ApiError, isAbort, Page } from "@/lib/api";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -22,21 +22,26 @@ export default function AdminDashboard() {
     adminApi.me().then((r) => setAdminEmail(r.user.email)).catch(() => router.replace("/admin/login"));
   }, [router]);
 
-  const load = useCallback(async () => {
+  // Each change of filters aborts the previous request, so a slow older response can never
+  // overwrite newer results. The `stale` flag covers a response that lands just before the abort.
+  useEffect(() => {
+    const ctrl = new AbortController();
+    let stale = false;
+    const params: Record<string, string> = { page: String(page), ordering };
+    if (query) params.search = query;
+    if (status) params.status = status;
     setError("");
-    try {
-      const params: Record<string, string> = { page: String(page), ordering };
-      if (query) params.search = query;
-      if (status) params.status = status;
-      setData(await adminApi.list(params));
-    } catch (err) {
-      if (err instanceof ApiError && (err.status === 401 || err.status === 403)) router.replace("/admin/login");
-      else if (err instanceof ApiError && err.status === 404 && page > 1) setPage(1); // page past the end after filtering
-      else setError("Could not load profiles.");
-    }
+    adminApi.list(params, ctrl.signal).then(
+      (res) => { if (!stale) setData(res); },
+      (err) => {
+        if (stale || isAbort(err)) return;
+        if (err instanceof ApiError && (err.status === 401 || err.status === 403)) router.replace("/admin/login");
+        else if (err instanceof ApiError && err.status === 404 && page > 1) setPage(1); // page past the end after filtering
+        else setError("Could not load profiles.");
+      },
+    );
+    return () => { stale = true; ctrl.abort(); };
   }, [page, query, status, ordering, router]);
-
-  useEffect(() => { load(); }, [load]);
 
   // Debounce the search box so we do not fire a request per keystroke.
   useEffect(() => {

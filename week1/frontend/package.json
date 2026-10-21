@@ -6,7 +6,8 @@
     "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start -p 3000",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "rm -rf .test-build && tsc -p tsconfig.test.json && echo '{\"type\":\"module\"}' > .test-build/package.json && node --test .test-build/tests/"
   },
   "dependencies": {
     "next": "15.5.4",

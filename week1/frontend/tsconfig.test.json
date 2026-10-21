@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "noEmit": false, "incremental": false, "outDir": ".test-build", "module": "es2022", "moduleResolution": "node", "plugins": [] },
+  "include": ["lib/api.ts", "tests/**/*.ts"]
+}
