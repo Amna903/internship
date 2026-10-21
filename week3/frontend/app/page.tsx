@@ -5,8 +5,8 @@ import { Icon, type IconName } from "@/components/ui/Icon";
 const FEATURES: { icon: IconName; title: string; body: string; href: string; cta: string }[] = [
   { icon: "user", title: "Your wellness profile", body: "Goals, contact preferences and an emergency contact, with a completion score that shows what's left.", href: "/signup", cta: "Create a profile" },
   { icon: "search", title: "Find a professional", body: "Filter fictional nutritionists, physiotherapists and coaches by specialty, city, day and fee.", href: "/professionals", cta: "Browse the directory" },
-  { icon: "chart", title: "No-show estimate", body: "An educational model trained on synthetic data helps staff decide who gets an extra reminder.", href: "/admin/predictions", cta: "Open (admins)" },
-  { icon: "list", title: "Audit trail", body: "Every profile edit and admin action is recorded with field names only, never the values.", href: "/admin", cta: "Admin console" },
+  { icon: "shield", title: "Admin console", body: "Search and filter profiles by status and completion, and follow up on the ones that need it.", href: "/admin", cta: "Admin sign in" },
+  { icon: "list", title: "Audit trail", body: "Every profile edit and admin action is recorded with field names only, never the values.", href: "/admin/login", cta: "See it (admins)" },
 ];
 
 export default function Home() {
@@ -27,7 +27,7 @@ export default function Home() {
           <div className="trust">
             <span><Icon name="lock" /> HttpOnly, short-lived tokens</span>
             <span><Icon name="shield" /> Separate admin sessions</span>
-            <span><Icon name="check" /> 220+ automated tests</span>
+            <span><Icon name="check" /> 180+ automated tests</span>
           </div>
         </div>
 
@@ -51,9 +51,9 @@ export default function Home() {
             </div>
           </div>
           <div className="float">
-            <div className="muted small">Next appointment</div>
-            <div style={{ fontWeight: 750, fontSize: "1.4rem", letterSpacing: "-.02em" }}>8.3%</div>
-            <div className="small">no-show estimate · <span className="badge">low risk</span></div>
+            <div className="muted small">Audit trail</div>
+            <div style={{ fontWeight: 750, fontSize: "1.4rem", letterSpacing: "-.02em" }}>Profile updated</div>
+            <div className="small">wellness_goals · <span className="badge">just now</span></div>
           </div>
         </div>
       </section>

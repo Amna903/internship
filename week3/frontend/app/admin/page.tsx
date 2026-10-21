@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { Avatar } from "@/components/ui/Avatar";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { adminApi, AdminProfileRow, ApiError, Page } from "@/lib/api";
+import { adminApi, AdminProfileRow, ApiError, isAbort, Page } from "@/lib/api";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -33,22 +33,27 @@ export default function AdminDashboard() {
       .then(([total, incomplete, deactivated]) => setStats({ total, incomplete, deactivated }));
   }, [router]);
 
-  const load = useCallback(async () => {
+  // Each change of filters aborts the previous request, so a slow older response can never
+  // overwrite newer results. The `stale` flag covers a response that lands just before the abort.
+  useEffect(() => {
+    const ctrl = new AbortController();
+    let stale = false;
+    const params: Record<string, string> = { page: String(page), ordering };
+    if (query) params.search = query;
+    if (status) params.status = status;
+    if (completion) params.completion = completion;
     setError("");
-    try {
-      const params: Record<string, string> = { page: String(page), ordering };
-      if (query) params.search = query;
-      if (status) params.status = status;
-      if (completion) params.completion = completion;
-      setData(await adminApi.list(params));
-    } catch (err) {
-      if (err instanceof ApiError && (err.status === 401 || err.status === 403)) router.replace("/admin/login");
-      else if (err instanceof ApiError && err.status === 404 && page > 1) setPage(1); // page past the end after filtering
-      else setError("Could not load profiles.");
-    }
+    adminApi.list(params, ctrl.signal).then(
+      (res) => { if (!stale) setData(res); },
+      (err) => {
+        if (stale || isAbort(err)) return;
+        if (err instanceof ApiError && (err.status === 401 || err.status === 403)) router.replace("/admin/login");
+        else if (err instanceof ApiError && err.status === 404 && page > 1) setPage(1); // page past the end after filtering
+        else setError("Could not load profiles.");
+      },
+    );
+    return () => { stale = true; ctrl.abort(); };
   }, [page, query, status, completion, ordering, router]);
-
-  useEffect(() => { load(); }, [load]);
 
   // Debounce the search box so we do not fire a request per keystroke.
   useEffect(() => {
@@ -61,7 +66,7 @@ export default function AdminDashboard() {
   }
 
   const pages = data ? Math.max(1, Math.ceil(data.count / 10)) : 1;
-  const nav = (<><Link href="/admin/predictions">No-show model</Link><span className="muted small">{adminEmail}</span><button className="btn ghost small" onClick={logout}>Sign out</button></>);
+  const nav = (<><span className="muted small">{adminEmail}</span><button className="btn ghost small" onClick={logout}>Sign out</button></>);
   const tile = (label: string, value: number | null, icon: IconName, tone: string, note: string) => (
     <div className={`stat ${tone}`}>
       <div className="stat-label"><span className="icon-chip"><Icon name={icon} /></span>{label}</div>

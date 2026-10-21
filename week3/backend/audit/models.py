@@ -15,22 +15,27 @@ class AuditEvent(models.Model):
         PROFILE_UPDATED = "profile.updated", "Profile updated"
         PROFILE_DELETED = "profile.deleted", "Profile deleted by its owner"
         ADMIN_LOGIN = "admin.login", "Admin signed in"
+        ADMIN_LOGIN_FAILED = "admin.login_failed", "Failed admin sign-in"
         ADMIN_LOGOUT = "admin.logout", "Admin signed out"
         ADMIN_PROFILE_VIEWED = "admin.profile_viewed", "Admin viewed profile"
         ADMIN_PROFILE_DEACTIVATED = "admin.profile_deactivated", "Admin deactivated profile"
         ADMIN_PROFILE_ACTIVATED = "admin.profile_activated", "Admin reactivated profile"
-        ADMIN_PREDICTION = "admin.prediction", "Admin requested a no-show estimate"
 
     created_at = models.DateTimeField(auto_now_add=True)
-    # SET_NULL keeps the trail when an account is deleted; actor_role still says what kind of actor it was.
-    actor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    # Stable identifiers, not live links: DO_NOTHING + db_constraint=False means deleting the user or
+    # profile never rewrites an audit row (a SET NULL cascade would be an UPDATE, which the database
+    # triggers below forbid). The ids stay; the API reports a deleted subject as a deletion marker.
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, db_constraint=False, null=True, related_name="+",
+    )
+    # "anonymous" is only used for failed sign-ins, where nobody is authenticated.
     actor_role = models.CharField(max_length=10)
     action = models.CharField(max_length=40, choices=Action.choices)
     # db_index=False: the composite (profile, -created_at) index below already starts with profile_id,
     # so Django's default single-column FK index would be pure write overhead (measured: unused).
     profile = models.ForeignKey(
-        "profiles.HealthProfile", on_delete=models.SET_NULL, null=True, blank=True,
-        related_name="audit_events", db_index=False,
+        "profiles.HealthProfile", on_delete=models.DO_NOTHING, db_constraint=False, null=True, blank=True,
+        related_name="+", db_index=False,
     )
     changed_fields = models.JSONField(default=list, blank=True)  # field *names* only
     request_id = models.CharField(max_length=64, blank=True)
@@ -44,9 +49,12 @@ class AuditEvent(models.Model):
             models.Index(fields=["action", "-created_at"], name="audit_action_created_idx"),
         ]
         constraints = [
-            models.CheckConstraint(condition=Q(actor_role__in=["user", "admin"]), name="audit_actor_role_valid"),
+            models.CheckConstraint(condition=Q(actor_role__in=["user", "admin", "anonymous"]), name="audit_actor_role_valid"),
         ]
 
+    # These two guards give a clear error in application code. They are NOT what makes the log
+    # append-only: QuerySet.update()/delete(), bulk operations and raw SQL skip them. The database
+    # triggers created in migration 0004 reject every UPDATE and DELETE on this table.
     def save(self, *args, **kwargs):
         if not self._state.adding:
             raise ValueError("Audit events are append-only.")

@@ -43,7 +43,7 @@ The browser only talks to Next.js. Next forwards `/api/*` to Django, so every co
 | Credential after login | JWT access (10 min) + refresh (7 d) in **HttpOnly** cookies | Server-side session id in an **HttpOnly** cookie (30 min idle) |
 | DRF authenticator | `CookieJWTAuthentication` | `AdminSessionAuthentication` |
 | Permission | `IsStandardUser` (role == user) | `IsAdminRole` (role == admin) |
-| Logout | Refresh token blacklisted, cookies cleared | Session row deleted server-side |
+| Logout | Refresh token blacklisted, **current access token denylisted**, cookies cleared | Session row deleted server-side |
 | CSRF | Enforced on unsafe methods | Enforced on unsafe methods |
 
 `DEFAULT_AUTHENTICATION_CLASSES` is **empty**. Every view names its authenticator explicitly, so the
@@ -72,13 +72,38 @@ two mechanisms cannot be mixed by accident, and a new view with no authenticator
 - Login is CSRF-protected too (prevents login-CSRF); `csrf_protect` is re-applied because DRF
   views are `csrf_exempt` by default.
 
+### Account, profile, credentials: how they relate and what ends them
+
+```
+User (account: email, password hash, role, is_active)
+ ├── 1:1 HealthProfile        (members only; can be deleted and re-created; the account stays)
+ ├── member credentials:      access JWT (10 min) + refresh JWT (7 d, single use), HttpOnly cookies
+ │                            stateless; checked against User.is_active and the denylist per request
+ └── admin credentials:       session id cookie → django_session row (30 min idle)
+AuditEvent → actor id, profile id   (stable ids, never rewritten; API adds *_deleted markers)
+```
+
+| Event | Refresh token | Access token (this browser) | Copies of it elsewhere | Admin session | Account / profile |
+|---|---|---|---|---|---|
+| Member logout | blacklisted | denylisted (`RevokedAccessToken`) | rejected (same jti) | untouched | untouched |
+| Member logs out on another device | untouched | untouched | n/a | untouched | untouched |
+| Refresh (rotation) | old one blacklisted | new one issued | old access stays valid until it expires (≤ 10 min) | untouched | untouched |
+| Access token expires | still valid → silent refresh | rejected (`exp`) | rejected | untouched | untouched |
+| Admin deactivates profile | refresh refused | rejected on next request (`is_active`) | rejected | untouched | profile `deactivated`, account inactive |
+| Member deletes profile | still valid | still valid | still valid | untouched | profile row gone, account stays, audit keeps the id |
+| Admin logout | n/a | n/a | n/a | row deleted; replayed id → 401 | untouched |
+
+Each row has a test in `tests/test_user_auth.py::TestLogoutAndRevocationLifecycle`, `test_profiles.py`
+or `test_audit.py`. None of this depends on the frontend: the tests replay copied cookies from a
+separate client, which is what a direct API request does.
+
 ## Database
 
 ```mermaid
 erDiagram
   ACCOUNTS_USER ||--o| PROFILES_HEALTHPROFILE : "has one (members only)"
-  PROFILES_HEALTHPROFILE ||--o{ AUDIT_AUDITEVENT : "history (SET NULL)"
-  ACCOUNTS_USER ||--o{ AUDIT_AUDITEVENT : "actor (SET NULL)"
+  PROFILES_HEALTHPROFILE ||--o{ AUDIT_AUDITEVENT : "history (stable id, no FK constraint)"
+  ACCOUNTS_USER ||--o{ AUDIT_AUDITEVENT : "actor (stable id, no FK constraint)"
   ACCOUNTS_USER {
     bigint id PK
     varchar email UK "CHECK email = lower(email)"
@@ -110,10 +135,10 @@ erDiagram
   AUDIT_AUDITEVENT {
     bigint id PK
     timestamptz created_at
-    bigint actor_id FK "ON DELETE SET NULL"
-    varchar actor_role "CHECK in (user, admin)"
+    bigint actor_id "stable id, no DB constraint (never rewritten)"
+    varchar actor_role "CHECK in (user, admin, anonymous)"
     varchar action "IDX (action, created_at DESC)"
-    bigint profile_id FK "ON DELETE SET NULL; IDX (profile_id, created_at DESC)"
+    bigint profile_id "stable id, no DB constraint; IDX (profile_id, created_at DESC)"
     jsonb changed_fields "field names only"
     varchar request_id
   }
@@ -131,7 +156,8 @@ Also present (from libraries): `django_session` (admin sessions) and
 | `CHECK(dob IS NULL OR age_range = '')` | Prevents contradictory age data. |
 | `CHECK(role IN ...)`, `CHECK(status IN ...)` | Bad enum values cannot be stored. |
 | `hp_completion_created_idx (completion_status, created_at DESC)` | Week 2: admin "incomplete profiles, newest first" follow-up list. 5.5 ms → 0.20 ms at 20k rows. |
-| `audit_profile_created_idx (profile_id, created_at DESC)` | Week 2: "history of this profile" on the admin detail page. 7.0 ms → 0.08 ms at 60k events. Replaces Django's default FK index (`db_index=False`), which EXPLAIN showed was redundant. |
+| `audit_profile_created_idx (profile_id, created_at DESC)` | Week 2: "history of this profile" on the admin detail page, including after the profile is deleted. 5.8 ms → 0.06 ms at 60k events (`benchmark_admin_queries`). Replaces Django's default FK index (`db_index=False`). |
+| Triggers `audit_event_no_change` / `_no_truncate` (PostgreSQL), `audit_event_no_update` / `_no_delete` (SQLite) | The audit table is append-only **in the database**: every UPDATE, DELETE (and TRUNCATE on PostgreSQL) is rejected, whatever code path issues it. Migration `audit/0004`. |
 | `audit_action_created_idx (action, created_at DESC)` | Week 2: audit list filtered by action ("all deactivations"), newest first. |
 
 ### Week 2 design notes
@@ -155,16 +181,20 @@ I did not add one: it would be an unmeasured index for a 6-row demo.
 
 ## Known limitations (be upfront about these in the demo)
 
-- **Audit log growth:** no retention policy yet (needs one: e.g. archive after N months). Failed admin
-  logins are not audited, to avoid storing typed emails; throttling covers brute force.
-
-- **Access JWT outlives logout** for up to 10 minutes if a copy was stolen before logout (the
-  refresh token *is* revoked and the cookie is cleared). Mitigation: short lifetime; stronger option is a `jti` denylist check.
+- **Audit log growth:** no retention policy yet (needs one: e.g. archive after N months). Because the
+  table is append-only in the database, archiving will need a deliberate, privileged procedure.
+- **Append-only has limits:** the triggers stop the application and anyone using its DB role, but a
+  database superuser can drop them. Production should give the app role only INSERT/SELECT on the
+  audit table and ship events to separate storage. Not implemented here.
+- **After a refresh**, the previous access token stays valid until it expires (≤ 10 min). Logout and
+  deactivation revoke immediately; rotation does not.
 - **Throttle counters are per-process** (`LocMemCache`). Use Redis in production, and configure the
   client-IP header correctly behind a proxy.
 - No email verification, password reset, MFA or account lockout (only throttling).
-- Admin list search is `icontains`, which scans; see above.
-- `docker-compose.yml` is provided but I could not run Docker in my sandbox. I verified PostgreSQL
-  16 directly instead (all 125 tests pass on it; `EXPLAIN` evidence in `docs/`).
+- Admin list search is `icontains`, which scans (~20 ms at 20k rows, `docs/explain-postgres.md`); a
+  `pg_trgm` index is the next step.
+- `docker-compose.yml` is provided but was not run (no Docker on the development machine). CI runs
+  the full suite on PostgreSQL 16 and SQLite (`.github/workflows/ci.yml`); it was also run locally
+  on PostgreSQL 14.21.
 - Wellness data is still personal data; real use would need encryption at rest, audit logging and
   legal review (GDPR/HIPAA as applicable). Out of scope for this prototype.

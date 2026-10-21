@@ -174,7 +174,8 @@ class TestDeleteOwnProfile:
         user_browser.client.delete(ME, HTTP_X_CSRFTOKEN=user_browser.cookies["csrftoken"].value)
         event = AuditEvent.objects.get(action="profile.deleted")
         assert event.actor == user and event.actor_role == "user"
-        assert event.profile is None  # the row it pointed to is gone (SET NULL)
+        # The id is kept as a stable identifier (no SET NULL cascade); the profile row itself is gone.
+        assert event.profile_id is not None and not HealthProfile.objects.filter(pk=event.profile_id).exists()
         assert name not in str(event.changed_fields)
 
     def test_member_can_create_a_new_profile_after_deleting(self, user_browser):

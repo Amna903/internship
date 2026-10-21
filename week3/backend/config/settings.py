@@ -15,11 +15,26 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Real environment variables always win over .env (override=False).
-load_dotenv(BASE_DIR / ".env")
+# HP_SKIP_DOTENV lets the config tests check the environment exactly as a server would see it.
+if not os.environ.get("HP_SKIP_DOTENV"):
+    load_dotenv(BASE_DIR / ".env")
+
+
+# Every configuration problem is collected here and raised together at the end of this module,
+# so a misconfigured deployment fails at startup with one message listing everything to fix.
+CONFIG_ERRORS: list[str] = []
 
 
 def env_bool(name: str, default: bool = False) -> bool:
-    return os.environ.get(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
+    raw = os.environ.get(name, "").strip().lower()
+    if not raw:
+        return default
+    if raw in {"1", "true", "yes", "on"}:
+        return True
+    if raw in {"0", "false", "no", "off"}:
+        return False
+    CONFIG_ERRORS.append(f"{name}={raw!r} is not a boolean (use true/false).")
+    return default
 
 
 def env_list(name: str, default: str = "") -> list[str]:
@@ -27,7 +42,26 @@ def env_list(name: str, default: str = "") -> list[str]:
 
 
 def env_int(name: str, default: int) -> int:
-    return int(os.environ.get(name, default))
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        return int(raw)
+    except ValueError:
+        CONFIG_ERRORS.append(f"{name}={raw!r} is not an integer.")
+        return default
+
+
+def env_required(name: str) -> str:
+    value = os.environ.get(name, "").strip()
+    if not value:
+        CONFIG_ERRORS.append(f"{name} is required when DJANGO_DEBUG is off.")
+    return value
+
+
+def check_secret(name: str, value: str) -> None:
+    if value and (value.startswith("replace-me") or len(value) < 32):
+        CONFIG_ERRORS.append(f"{name} must be a real random value of at least 32 characters.")
 
 
 # --------------------------------------------------------------------------
@@ -40,14 +74,30 @@ if not SECRET_KEY:
     raise ImproperlyConfigured(
         "DJANGO_SECRET_KEY is not set. Run `python scripts/init_env.py` to create a .env file."
     )
-if not DEBUG and (SECRET_KEY.startswith("replace-me") or len(SECRET_KEY) < 32):
-    raise ImproperlyConfigured("DJANGO_SECRET_KEY must be a real random value (>= 32 chars) when DEBUG is off.")
 
 # JWTs are signed with their own key so that a leak of one key does not compromise the other mechanism.
-JWT_SIGNING_KEY = os.environ.get("JWT_SIGNING_KEY") or SECRET_KEY
+# Local DEBUG runs may fall back to SECRET_KEY; production must set a separate key explicitly.
+JWT_SIGNING_KEY = os.environ.get("JWT_SIGNING_KEY", "").strip()
 
-ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
-CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
+if DEBUG:
+    JWT_SIGNING_KEY = JWT_SIGNING_KEY or SECRET_KEY
+    ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
+    CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000")
+else:
+    check_secret("DJANGO_SECRET_KEY", SECRET_KEY)
+    if not JWT_SIGNING_KEY:
+        env_required("JWT_SIGNING_KEY")
+    check_secret("JWT_SIGNING_KEY", JWT_SIGNING_KEY)
+    if JWT_SIGNING_KEY and JWT_SIGNING_KEY == SECRET_KEY:
+        CONFIG_ERRORS.append("JWT_SIGNING_KEY must differ from DJANGO_SECRET_KEY.")
+    # No localhost defaults in production: the deployment must say which hosts and origins it serves.
+    ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS")
+    CSRF_TRUSTED_ORIGINS = env_list("CSRF_TRUSTED_ORIGINS")
+    for name, value in (("DJANGO_ALLOWED_HOSTS", ALLOWED_HOSTS), ("CSRF_TRUSTED_ORIGINS", CSRF_TRUSTED_ORIGINS)):
+        if not value:
+            env_required(name)
+    if "*" in ALLOWED_HOSTS:
+        CONFIG_ERRORS.append("DJANGO_ALLOWED_HOSTS must list real hostnames, not '*'.")
 
 INSTALLED_APPS = [
     "django.contrib.contenttypes",
@@ -60,7 +110,6 @@ INSTALLED_APPS = [
     "profiles",
     "adminpanel",
     "audit",
-    "predictions",
 ]
 
 MIDDLEWARE = [
@@ -114,19 +163,26 @@ AUTH_PASSWORD_VALIDATORS = [
 # --------------------------------------------------------------------------
 # Cookies, sessions (admin flow) and CSRF
 # --------------------------------------------------------------------------
+# One explicit policy for every cookie we set (JWT, admin session, CSRF).
 COOKIE_SECURE = env_bool("COOKIE_SECURE", not DEBUG)
+COOKIE_SAMESITE = os.environ.get("COOKIE_SAMESITE", "Lax").strip().capitalize()
+if COOKIE_SAMESITE not in {"Lax", "Strict"}:
+    # "None" would send auth cookies on cross-site requests; this app is same-origin by design.
+    CONFIG_ERRORS.append(f"COOKIE_SAMESITE must be Lax or Strict, got {COOKIE_SAMESITE!r}.")
+if not DEBUG and not COOKIE_SECURE:
+    CONFIG_ERRORS.append("COOKIE_SECURE cannot be false when DJANGO_DEBUG is off (auth cookies would travel over plain HTTP).")
 
 SESSION_COOKIE_NAME = "hp_admin_session"
 SESSION_COOKIE_AGE = env_int("ADMIN_SESSION_MINUTES", 30) * 60  # idle timeout (sliding, see below)
 SESSION_SAVE_EVERY_REQUEST = True  # every request pushes the expiry forward -> idle timeout
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = COOKIE_SAMESITE
 SESSION_COOKIE_SECURE = COOKIE_SECURE
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 CSRF_COOKIE_NAME = "csrftoken"
 CSRF_COOKIE_HTTPONLY = False  # the SPA must read it to echo it in the X-CSRFToken header
-CSRF_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = COOKIE_SAMESITE
 CSRF_COOKIE_SECURE = COOKIE_SECURE
 CSRF_FAILURE_VIEW = "config.exceptions.csrf_failure"
 
@@ -162,7 +218,6 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "login": os.environ.get("THROTTLE_LOGIN", "10/min"),
         "signup": os.environ.get("THROTTLE_SIGNUP", "20/hour"),
-        "predict": os.environ.get("THROTTLE_PREDICT", "60/min"),
     },
 }
 
@@ -190,16 +245,13 @@ X_FRAME_OPTIONS = "DENY"
 SECURE_SSL_REDIRECT = env_bool("SECURE_SSL_REDIRECT", False)
 if env_bool("BEHIND_TLS_PROXY", False):
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-if not DEBUG:
-    SECURE_HSTS_SECONDS = env_int("SECURE_HSTS_SECONDS", 0)  # raise once HTTPS is verified
-    SECURE_REFERRER_POLICY = "same-origin"
+SECURE_REFERRER_POLICY = "same-origin"
+# HSTS is opt-in because it is sticky in browsers: set it once HTTPS is verified end to end.
+SECURE_HSTS_SECONDS = env_int("SECURE_HSTS_SECONDS", 0) if not DEBUG else 0
 
 # --------------------------------------------------------------------------
 # Misc
 # --------------------------------------------------------------------------
-# Trained model (Week 3). Only this directory is ever unpickled; see ml/inference.py.
-ML_ARTIFACT_DIR = Path(os.environ.get("ML_ARTIFACT_DIR") or BASE_DIR / "ml" / "artifacts")
-
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = False
@@ -215,3 +267,6 @@ LOGGING = {
     "handlers": {"console": {"class": "logging.StreamHandler"}},
     "root": {"handlers": ["console"], "level": "INFO"},
 }
+
+if CONFIG_ERRORS:
+    raise ImproperlyConfigured("Invalid configuration:\n  - " + "\n  - ".join(CONFIG_ERRORS))

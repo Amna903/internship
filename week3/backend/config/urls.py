@@ -16,8 +16,6 @@ urlpatterns = [
     path("api/", include("accounts.urls")),
     path("api/", include("profiles.urls")),
     path("api/admin/", include("adminpanel.urls")),
-    # Versioned so a v2 model/schema can run beside v1 while clients migrate.
-    path("api/v1/", include("predictions.urls")),
 ]
 
 if settings.ENABLE_API_DOCS:

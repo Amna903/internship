@@ -11,6 +11,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from accounts.models import User
+from audit.models import AuditEvent
 from profiles.completion import evaluate
 from profiles.models import HealthProfile
 
@@ -47,6 +48,10 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--bulk", type=int, default=0, help="Also create N synthetic filler users (for EXPLAIN demos).")
+        parser.add_argument(
+            "--bulk-audit", type=int, default=0,
+            help="Also create N synthetic audit events spread over the bulk profiles (for EXPLAIN demos).",
+        )
 
     def handle(self, *args, **options):
         admin_email = os.environ.get("SEED_ADMIN_EMAIL", "admin@example.test").strip().lower()
@@ -79,6 +84,8 @@ class Command(BaseCommand):
 
             if options["bulk"]:
                 self._bulk(options["bulk"])
+            if options["bulk_audit"]:
+                self._bulk_audit(options["bulk_audit"])
 
         for line in generated:
             self.stdout.write(self.style.WARNING(f"  {line}"))
@@ -120,3 +127,36 @@ class Command(BaseCommand):
             profile.save(update_fields=["created_at"])
         User.objects.filter(pk__in=[u.pk for u in fresh if u.profile.status == "deactivated"]).update(is_active=False)
         self.stdout.write(f"Created {count} bulk filler users")
+
+    def _bulk_audit(self, count: int):
+        """Filler audit events, deterministic (seed 42), timestamps spread over the last ~60 days.
+
+        Inserts only: the audit table rejects UPDATE, so created_at is set at insert time instead of
+        afterwards. auto_now_add is switched off just for this bulk insert.
+        """
+        rng = random.Random(42)
+        profiles = list(HealthProfile.objects.filter(user__email__startswith="bulk").values_list("id", "user_id"))
+        if not profiles:
+            self.stdout.write(self.style.WARNING("No bulk profiles: run with --bulk first."))
+            return
+        admin = User.objects.filter(role=User.Role.ADMIN).first()
+        now = timezone.now()
+        events = []
+        for i in range(count):
+            profile_id, owner_id = rng.choice(profiles)
+            by_admin = admin is not None and rng.random() < 0.3
+            events.append(AuditEvent(
+                actor_id=admin.id if by_admin else owner_id,
+                actor_role="admin" if by_admin else "user",
+                action=AuditEvent.Action.ADMIN_PROFILE_VIEWED if by_admin else AuditEvent.Action.PROFILE_UPDATED,
+                profile_id=profile_id,
+                changed_fields=[] if by_admin else ["lifestyle_notes"],
+                created_at=now - timedelta(seconds=rng.randint(0, 60 * 24 * 3600)),
+            ))
+        created_at = AuditEvent._meta.get_field("created_at")
+        created_at.auto_now_add = False
+        try:
+            AuditEvent.objects.bulk_create(events, batch_size=5000)
+        finally:
+            created_at.auto_now_add = True
+        self.stdout.write(f"Created {count} bulk audit events")

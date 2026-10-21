@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, get_user, login, logout
 from django.db import transaction
+from django.db.models import Exists, OuterRef
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema
@@ -17,7 +18,7 @@ from accounts.permissions import IsAdminRole
 from accounts.serializers import LoginSerializer, UserSummarySerializer
 from audit.models import AuditEvent
 from audit.serializers import AuditEventSerializer
-from audit.services import record_event
+from audit.services import record_event, record_failed_admin_login
 from config.api import CsrfProtectedAPIView
 from profiles.models import HealthProfile
 from profiles.serializers import AdminProfileDetailSerializer, AdminProfileListSerializer
@@ -48,6 +49,7 @@ class AdminLoginView(CsrfProtectedAPIView):
 
         user = authenticate(request=request, username=creds["email"], password=creds["password"])
         if user is None or user.role != User.Role.ADMIN:
+            record_failed_admin_login(request, creds["email"])
             raise AuthenticationFailed("Invalid email or password.", code="invalid_credentials")
 
         login(request, user)  # rotates the session key (anti-fixation) and the CSRF token
@@ -189,7 +191,12 @@ class AdminAuditEventListView(generics.ListAPIView):
     pagination_class = AdminPagination
 
     def get_queryset(self):
-        queryset = AuditEvent.objects.select_related("actor")
+        # Deletion markers come from EXISTS subqueries, not joins: joining the profile would drop events
+        # of deleted profiles when filtering by profile, and would read profile contents for no reason.
+        queryset = AuditEvent.objects.select_related("actor").annotate(
+            profile_exists=Exists(HealthProfile.objects.filter(pk=OuterRef("profile_id"))),
+            actor_exists=Exists(User.objects.filter(pk=OuterRef("actor_id"))),
+        )
         params = self.request.query_params
         action = params.get("action")
         if action:

@@ -187,53 +187,6 @@ three frontend pages.
 
 ---
 
-# Week 3: ML pipeline and prediction API
-
-## Prompt (paraphrased)
-
-> "Now Week 3" + the Full-Stack AI/ML PDF. The AI first checked the PDF against the repo (which is how the
-> Week 2 gap above was found), fixed Week 2, then planned Week 3 from the acceptance checks backwards:
-> reproducible artifact, validated versioned output, README metrics + limitations + sample request.
-
-Constraints I held it to: synthetic data only; preprocessing saved inside the model; every choice on
-validation, test scored once; exact dependency pins; no clinical wording anywhere; Week 1/2 tests stay green.
-
-## Blast radius
-- Week 3 is its own folder, copied from Week 2 in its own commit.
-- New code in new places: `backend/ml/` (pure Python, no Django), `backend/predictions/` (API),
-  `frontend/app/admin/predictions/`. Existing files touched: settings (app, throttle, artifact dir), root
-  urls (`/api/v1/`), one new audit action (+ migration), one nav link, `lib/api.ts` types, CSS appended.
-- All 149 Week 2 tests and the three earlier browser suites were re-run on Week 3.
-
-## What verification caught
-1. **The "improved" model wasn't better.** First run: gradient boosting vs logistic regression PR-AUC
-   0.3265 vs 0.3263 on validation, and *worse* on test. Rather than tune until a number went up, I changed
-   what "improved" means: baseline = logistic on raw inputs; improvement = five features each backed by an
-   EDA table. That gave a real, consistent gain (validation PR-AUC 0.304 → 0.345; test 0.358 → 0.371).
-2. **Was the model weak or the data noisy?** Added an "oracle ceiling" (score of the generator's true
-   probability): 0.717 ROC-AUC vs 0.712 served. So the model is near the limit; noise is the cap.
-3. **EDA captions over-claimed.** I'd written "no-show rate flattens past 60 days" and "distance only matters
-   in person"; the tables showed it keeps rising and distance matters only beyond 20 km. Reworded to match.
-4. **Four failing tests, four different causes:** (a) a substring check flagged the legit feature
-   `prior_no_shows` as the target `no_show`; (b) a "train median ≠ full median" check was false because
-   0.1-km medians coincide → switched to the scaler's mean, a continuous statistic; (c) two runs differed only
-   in the data *file name* recorded in metadata; (d) the full retrain matched data hash and metrics but not
-   the artifact bytes. Fresh processes always produced the committed SHA-256; only inside pytest (after other
-   models were trained in the same process) did pickle bytes differ. The test now trains in a subprocess,
-   like a reviewer would.
-5. **UI test expectation was wrong, not the app:** DRF runs the cross-field rule (`prior_no_shows ≤
-   prior_appointments`) only after per-field checks pass, so the browser test now checks the two in sequence.
-6. **Model card hid a candidate:** the API listed 4 of 5 models (dropped gradient boosting). Showing all is
-   more honest; fixed the API, not the test.
-
-## Context management
-- The AI read the existing code before each change instead of me pasting it.
-- ML code is plain Python with no Django imports, so it's testable and reviewable on its own.
-- Generated evidence (EDA, metrics, metadata JSON) is committed as files, so the next session reads numbers
-  instead of re-deriving them.
-
----
-
 # UI refresh
 
 Prompt (paraphrased): "improve the frontend: make it look cool, aesthetic, pretty and professional."
@@ -258,3 +211,42 @@ account, records `profile.deleted` in the same transaction, and needs CSRF like 
 "Delete my profile" section with a confirm dialog, and an empty state that lets the member create a new profile.
 Tests: 6 API tests (own-only, audited without data, recreate, second delete 404, CSRF, admin/anonymous blocked)
 and 4 browser checks (delete, persists after reload, recreate at 0%, visible to admins in the audit log).
+
+---
+
+# Review-fix round (2026-10-21): auditable record
+
+**Tool.** Claude Code (Claude Opus 5.5, agentic mode in VS Code). It edited files, ran tests and ran the
+PostgreSQL benchmark. Everything below marked "AI ran" was executed by the agent, not by me.
+
+**Prompts, kept verbatim in substance.**
+1. Original: the mentor's Week 1 review pasted as-is, then "now week 2 have any such … weakness which
+   can be covered?" and "yes".
+2. Refined: the mentor's Week 2 review pasted as-is. It named the priorities (requirement checklist,
+   audit deletion/immutability tests, CI first). The agent was asked to turn each point into a focused
+   change with a test that fails before and passes after.
+
+**Allowed scope.** `week2/` (backend, frontend, docs) and `.github/workflows/ci.yml`. Week 1 was only
+read. Week 3 was not touched (CI runs its existing tests). No secrets, no `.env` edits, nothing pushed
+without asking.
+
+**What the AI ran (observed output, not summaries).**
+- `pytest` on SQLite and on PostgreSQL 14.21 after each change, plus each new test against the previous
+  commit to confirm it failed there.
+- `benchmark_admin_queries` on a throwaway PostgreSQL database (`docs/benchmarks/`).
+- Every CI step locally: `makemigrations --check`, `npm test`, `npm run typecheck`, `npm run build`.
+
+**Problems the agent hit and fixed along the way.**
+- The `RAISE` message in the PostgreSQL trigger contains `%`, which psycopg read as a query
+  placeholder. Fixed with `params=None`.
+- Filtering audit events by profile while joining the profile table turned the join into an INNER JOIN
+  and hid deleted profiles' events. Replaced with `EXISTS` subqueries.
+- An existing test (`test_after_logout_browser_is_unauthenticated`) deleted the access cookie before
+  checking, which hid that a copied access token kept working after logout. This led to fix B4.
+
+**What I still have to do myself (not done by the AI).**
+- [ ] Review each commit's diff line by line: `git log --oneline` then `git show <hash>`.
+- [ ] Re-run `pytest` and `npm test` on my machine and fill the "Me" column in `REQUIREMENTS-week2.md`.
+- [ ] Re-run the benchmark (commands in `explain-postgres.md`) and compare with the committed output.
+- [ ] Be able to explain without notes: why DB triggers and not model methods, why stable ids instead
+  of foreign keys, what logout revokes, and why the COUNT query doesn't use the index.

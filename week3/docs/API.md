@@ -97,23 +97,3 @@ Actions: `profile.created`, `profile.updated`, `admin.login`, `admin.logout`, `a
 `admin.profile_deactivated`, `admin.profile_activated`.
 Unknown action → `400` `{"error":{"code":"validation_error",…,"details":{"action":["Must be one of: …"]}}}`.
 Member JWT or no credentials → `401`. `POST` → `405` (append-only).
-
-## Week 3: no-show model (admin session, versioned)
-
-`POST /v1/predictions/no-show/` and `GET /v1/models/no-show/`: full request/response examples and every
-error case are in the README ("Sample request / response"). Schema:
-
-| Field | Type | Rule |
-|---|---|---|
-| `lead_time_days` | int | 0–365 |
-| `appointment_weekday` | str | monday … saturday |
-| `appointment_hour` | int | 7–20 |
-| `age_band` | str | 18-24, 25-34, 35-44, 45-54, 55-64, 65+ |
-| `visit_type` | str | in_person, video, phone |
-| `booking_channel` | str | web, phone, app |
-| `reminder_sent` | bool | |
-| `prior_appointments` | int | 0–200 |
-| `prior_no_shows` | int | 0–200 and ≤ `prior_appointments` |
-| `distance_km` | float \| null | optional, 0–500; null/omitted is imputed |
-
-Any other key → 400 `Unknown field.`

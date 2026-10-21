@@ -6,12 +6,3 @@ dj-database-url>=2.3
 psycopg[binary]>=3.2
 python-dotenv>=1.0
 argon2-cffi>=23.1
-
-# Week 3 ML. Pinned EXACTLY: the saved model is a pickle and only loads with the same scikit-learn
-# (ml/inference.py refuses a mismatch). Change these only together with `python -m ml.train`.
-scikit-learn==1.9.1
-numpy==2.5.4
-pandas==3.0.6
-scipy==1.18.1
-joblib==1.6.0
-threadpoolctl==3.7.0
