@@ -17,7 +17,7 @@ from accounts.permissions import IsAdminRole
 from accounts.serializers import LoginSerializer, UserSummarySerializer
 from audit.models import AuditEvent
 from audit.serializers import AuditEventSerializer
-from audit.services import record_event
+from audit.services import record_event, record_failed_admin_login
 from config.api import CsrfProtectedAPIView
 from profiles.models import HealthProfile
 from profiles.serializers import AdminProfileDetailSerializer, AdminProfileListSerializer
@@ -48,6 +48,7 @@ class AdminLoginView(CsrfProtectedAPIView):
 
         user = authenticate(request=request, username=creds["email"], password=creds["password"])
         if user is None or user.role != User.Role.ADMIN:
+            record_failed_admin_login(request, creds["email"])
             raise AuthenticationFailed("Invalid email or password.", code="invalid_credentials")
 
         login(request, user)  # rotates the session key (anti-fixation) and the CSRF token
@@ -200,7 +201,7 @@ class AdminAuditEventListView(generics.ListAPIView):
         if profile_id:
             if not profile_id.isdigit():
                 raise ValidationError({"profile": ["Must be a profile id."]})
-            queryset = queryset.filter(profile_id=int(profile_id))
+            queryset = queryset.filter(subject_profile_id=int(profile_id))
         return queryset
 
     @extend_schema(

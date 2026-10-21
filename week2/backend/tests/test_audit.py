@@ -68,9 +68,27 @@ class TestAdminActionEvents:
         assert set(AuditEvent.objects.values_list("actor_role", flat=True)) == {"admin"}
         assert AuditEvent.objects.get(action="admin.profile_deactivated").changed_fields == ["status"]
 
-    def test_failed_admin_login_records_nothing(self, browser, admin):
+    def test_failed_admin_login_is_recorded_against_the_targeted_account(self, browser, admin):
         assert admin_login(browser, admin.email, "wrong-password-123").status_code == 401
-        assert not AuditEvent.objects.exists()
+        event = AuditEvent.objects.get()
+        assert (event.action, event.actor_role, event.actor_id) == ("admin.login_failed", "anonymous", admin.id)
+
+    def test_failed_login_for_unknown_email_stores_nothing_typed(self, browser):
+        typed = "my-Secret-Pass-9@typo.test"
+        assert admin_login(browser, typed, "whatever-123456").status_code == 401
+        event = AuditEvent.objects.get()
+        assert (event.action, event.actor_id) == ("admin.login_failed", None)
+        row = json.dumps(list(AuditEvent.objects.values()), default=str)
+        assert "Secret" not in row and "typo" not in row
+
+    def test_member_trying_admin_login_is_recorded(self, browser, user):
+        assert admin_login(browser, user.email).status_code == 401
+        assert AuditEvent.objects.get().action == "admin.login_failed"
+
+    def test_failed_login_is_shown_as_target_not_actor(self, browser, admin, admin_browser):
+        admin_login(browser, admin.email, "wrong-password-123")
+        row = admin_browser.get(AUDIT, {"action": "admin.login_failed"}).json()["results"][0]
+        assert row["actor_email"] is None and row["target_email"] == admin.email
 
 
 @pytest.mark.django_db
@@ -118,3 +136,15 @@ class TestAppendOnlyAndRequestId:
         assert good["X-Request-ID"] == "trace-abc-12345"
         bad = browser.get("/api/health/", HTTP_X_REQUEST_ID="<script>alert(1)</script>")
         assert bad["X-Request-ID"] != "<script>alert(1)</script>" and len(bad["X-Request-ID"]) == 32
+
+
+@pytest.mark.django_db
+def test_history_survives_profile_deletion(user_browser, user, admin_browser):
+    pid = user.profile.id
+    user_browser.patch(ME, {"lifestyle_notes": "walks daily"})
+    admin_browser.get(f"/api/admin/profiles/{pid}/")
+    user_browser.client.delete(ME, HTTP_X_CSRFTOKEN=user_browser.cookies["csrftoken"].value)
+
+    rows = admin_browser.get(AUDIT, {"profile": pid}).json()["results"]
+    assert [r["action"] for r in rows] == ["profile.deleted", "admin.profile_viewed", "profile.updated"]
+    assert {r["profile_id"] for r in rows} == {pid}
