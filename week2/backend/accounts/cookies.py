@@ -2,7 +2,6 @@ from django.conf import settings
 
 # The refresh cookie is only ever needed by refresh/logout, so browsers send it nowhere else.
 REFRESH_COOKIE_PATH = "/api/auth/user/"
-_SAMESITE = "Lax"
 
 
 def access_lifetime_seconds() -> int:
@@ -10,7 +9,7 @@ def access_lifetime_seconds() -> int:
 
 
 def set_auth_cookies(response, access_token, refresh_token):
-    common = {"httponly": True, "secure": settings.COOKIE_SECURE, "samesite": _SAMESITE}
+    common = {"httponly": True, "secure": settings.COOKIE_SECURE, "samesite": settings.COOKIE_SAMESITE}
     response.set_cookie(
         settings.JWT_ACCESS_COOKIE,
         str(access_token),
@@ -28,5 +27,5 @@ def set_auth_cookies(response, access_token, refresh_token):
 
 
 def clear_auth_cookies(response):
-    response.delete_cookie(settings.JWT_ACCESS_COOKIE, path="/", samesite=_SAMESITE)
-    response.delete_cookie(settings.JWT_REFRESH_COOKIE, path=REFRESH_COOKIE_PATH, samesite=_SAMESITE)
+    response.delete_cookie(settings.JWT_ACCESS_COOKIE, path="/", samesite=settings.COOKIE_SAMESITE)
+    response.delete_cookie(settings.JWT_REFRESH_COOKIE, path=REFRESH_COOKIE_PATH, samesite=settings.COOKIE_SAMESITE)
