@@ -75,3 +75,18 @@ class User(AbstractBaseUser):
 
     def __str__(self) -> str:
         return self.email
+
+
+class RevokedAccessToken(models.Model):
+    """Access tokens revoked by logout before their natural expiry.
+
+    JWTs are stateless, so without this a copy of the access cookie would keep working for up to
+    ACCESS_TOKEN_LIFETIME after the member logged out. Rows are only needed until the token would
+    have expired anyway, so logout also purges expired rows.
+    """
+
+    jti = models.CharField(max_length=64, unique=True)
+    expires_at = models.DateTimeField(db_index=True)
+
+    def __str__(self) -> str:
+        return self.jti

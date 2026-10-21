@@ -1,8 +1,11 @@
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
+import datetime
+
 from django.db import IntegrityError, transaction
 from django.middleware.csrf import get_token
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from drf_spectacular.utils import OpenApiResponse, extend_schema
@@ -13,7 +16,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 from audit.models import AuditEvent
 from audit.services import record_event
@@ -21,7 +24,7 @@ from config.api import CsrfProtectedAPIView
 from config.exceptions import error_response
 
 from .cookies import access_lifetime_seconds, clear_auth_cookies, set_auth_cookies
-from .models import User
+from .models import RevokedAccessToken, User
 from .serializers import LoginSerializer, SignupSerializer, UserSummarySerializer
 from .services import register_user
 
@@ -126,7 +129,11 @@ class UserRefreshView(CsrfProtectedAPIView):
 
 
 class UserLogoutView(CsrfProtectedAPIView):
-    """Blacklist the refresh token and clear both cookies. Idempotent."""
+    """Revoke this browser's tokens and clear both cookies. Idempotent.
+
+    Revokes: the refresh token (blacklisted) and the current access token (denylisted until it would
+    have expired). Does not touch the member's other signed-in browsers or devices.
+    """
 
     authentication_classes: list = []
     permission_classes = [AllowAny]
@@ -139,6 +146,16 @@ class UserLogoutView(CsrfProtectedAPIView):
                 RefreshToken(raw).blacklist()
             except TokenError:
                 pass  # already expired / blacklisted: nothing left to revoke
+        raw_access = request.COOKIES.get(settings.JWT_ACCESS_COOKIE)
+        if raw_access:
+            try:
+                access = AccessToken(raw_access)
+            except TokenError:
+                pass  # expired or invalid: it already authenticates nothing
+            else:
+                expires_at = datetime.datetime.fromtimestamp(access["exp"], tz=datetime.timezone.utc)
+                RevokedAccessToken.objects.get_or_create(jti=access["jti"], defaults={"expires_at": expires_at})
+        RevokedAccessToken.objects.filter(expires_at__lt=timezone.now()).delete()
         response = Response({"detail": "Logged out."})
         clear_auth_cookies(response)
         return response

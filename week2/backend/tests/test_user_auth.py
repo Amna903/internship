@@ -168,3 +168,78 @@ class TestRefreshAndLogout:
 def test_admin_session_does_not_authenticate_user_endpoints(admin, browser):
     assert admin_login(browser, admin.email).status_code == 200
     assert browser.get(ME).status_code == 401
+
+
+@pytest.mark.django_db
+class TestLogoutAndRevocationLifecycle:
+    """What each kind of sign-out actually invalidates, checked with copied ("stolen") credentials
+    replayed from a separate client, i.e. a direct API request that ignores the frontend."""
+
+    @staticmethod
+    def replay(cookie_name, value):
+        thief = Browser()
+        thief.cookies[cookie_name] = value
+        return thief
+
+    def test_access_token_copied_before_logout_is_rejected_after_logout(self, user_browser):
+        copied = user_browser.cookies["hp_access"].value
+        assert self.replay("hp_access", copied).get(ME).status_code == 200
+        user_browser.post("/api/auth/user/logout/")
+        resp = self.replay("hp_access", copied).get(ME)
+        assert resp.status_code == 401 and resp.json()["error"]["code"] == "token_revoked"
+
+    def test_copied_access_token_cannot_change_the_profile_after_logout(self, user_browser, user):
+        thief = self.replay("hp_access", user_browser.cookies["hp_access"].value)
+        thief.get("/api/auth/csrf/")
+        user_browser.post("/api/auth/user/logout/")
+        assert thief.patch(ME, {"full_name": "Hijacked"}).status_code == 401
+        user.profile.refresh_from_db()
+        assert user.profile.full_name != "Hijacked"
+
+    def test_known_limit_previous_access_token_survives_a_refresh_until_expiry(self, user_browser):
+        """Pinned on purpose (see ARCHITECTURE.md): rotation does not revoke the old access token."""
+        old_access = user_browser.cookies["hp_access"].value
+        assert user_browser.post("/api/auth/user/refresh/").status_code == 200
+        assert self.replay("hp_access", old_access).get(ME).status_code == 200
+
+    def test_deleting_the_profile_keeps_the_account_signed_in(self, user_browser):
+        user_browser.client.delete(ME, HTTP_X_CSRFTOKEN=user_browser.cookies["csrftoken"].value)
+        assert user_browser.get(ME).status_code == 404  # authenticated, just no profile
+        assert user_browser.post("/api/auth/user/refresh/").status_code == 200
+
+    def test_logout_signs_out_only_this_browser(self, user, user_browser):
+        other_device = Browser()
+        assert user_login(other_device, user.email).status_code == 200
+        user_browser.post("/api/auth/user/logout/")
+        assert other_device.get(ME).status_code == 200
+
+    def test_logout_with_an_already_expired_access_token_still_succeeds(self, browser, user):
+        browser.cookies["hp_access"] = expired_access_token(user)
+        assert browser.post("/api/auth/user/logout/").status_code == 200
+
+    def test_expired_revocations_are_purged_on_logout(self, user_browser, user):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from accounts.models import RevokedAccessToken
+        RevokedAccessToken.objects.create(jti="old", expires_at=timezone.now() - timedelta(minutes=1))
+        user_browser.post("/api/auth/user/logout/")
+        assert RevokedAccessToken.objects.count() == 1  # only the token this logout just revoked
+        assert not RevokedAccessToken.objects.filter(jti="old").exists()
+
+    def test_admin_session_id_copied_before_logout_is_rejected_after_logout(self, admin_browser):
+        copied = admin_browser.cookies["hp_admin_session"].value
+        assert self.replay("hp_admin_session", copied).get("/api/admin/me/").status_code == 200
+        admin_browser.post("/api/admin/logout/")
+        assert self.replay("hp_admin_session", copied).get("/api/admin/me/").status_code == 401
+
+    def test_member_and_admin_sign_outs_are_independent(self, user, admin):
+        member, admin_b = Browser(), Browser()
+        user_login(member, user.email)
+        admin_login(admin_b, admin.email)
+        member.post("/api/auth/user/logout/")
+        assert admin_b.get("/api/admin/me/").status_code == 200  # JWT logout never touches sessions
+        user_login(member, user.email)
+        admin_b.post("/api/admin/logout/")
+        assert member.get(ME).status_code == 200  # session logout never touches JWTs
