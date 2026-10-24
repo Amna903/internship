@@ -26,8 +26,8 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 
 | # | Requirement (brief wording) | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|
-| F1 | Choose synthetic or explicitly approved public non-sensitive data | ☐ | | | | |
-| F2 | Document provenance, license, schema and limitations | ☐ | | | | |
+| F1 | Choose synthetic or explicitly approved public non-sensitive data | ☑ | `backend/ml/data.py` (seeded NumPy generator) | `tests/test_ml_data.py::test_schema_is_exactly_ids_features_oracle_and_label` | | |
+| F2 | Document provenance, license, schema and limitations | ☑ | [DATA_CARD.md](DATA_CARD.md) | manual: every section present | | |
 | F3 | Perform exploratory analysis | ☐ | | | | |
 | F4 | Missing-value handling | ☐ | | | | |
 | F5 | Train/validation/test split | ☐ | | | | |
@@ -47,10 +47,10 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 | E2 | Save preprocessing and model together in a reproducible pipeline | ☐ | | | | |
 | E3 | Validate inference schema | ☐ | | | | |
 | E4 | Handle malformed and out-of-range inputs | ☐ | | | | |
-| E5 | Pin dependencies | ☐ | | | | |
-| E6 | Record random seeds | ☐ | | | | |
-| E7 | Document class imbalance | ☐ | | | | |
-| E8 | Document dataset bias | ☐ | | | | |
+| E5 | Pin dependencies | ◐ | `backend/requirements.txt` (exact `==` for the ML stack) | version check comes with model loading (Step 6) | | |
+| E6 | Record random seeds | ◐ | `ml/config.py` `SEED = 42`; dataset hash in DATA_CARD | `test_same_seed_gives_identical_data`, `test_different_seed_gives_different_data` (training seed: Step 4) | | |
+| E7 | Document class imbalance | ☑ | DATA_CARD "Class imbalance" (16.4%) | `test_class_imbalance_is_in_the_documented_band` | | |
+| E8 | Document dataset bias | ◐ | DATA_CARD "Bias" (age) | `test_age_bias_is_present` (per-group model errors: Step 5) | | |
 
 ## Acceptance checks
 
