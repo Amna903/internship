@@ -29,13 +29,13 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 | F1 | Choose synthetic or explicitly approved public non-sensitive data | ☑ | `backend/ml/data.py` (seeded NumPy generator) | `tests/test_ml_data.py::test_schema_is_exactly_ids_features_oracle_and_label` | | |
 | F2 | Document provenance, license, schema and limitations | ☑ | [DATA_CARD.md](DATA_CARD.md) | manual: every section present | | |
 | F3 | Perform exploratory analysis | ☑ | `backend/ml/eda.py` → [ml/reports/eda.md](../backend/ml/reports/eda.md) | `tests/test_ml_eda.py` (8 tests: deterministic, up to date, numbers match the data) | | |
-| F4 | Missing-value handling | ◐ | Analysed in eda.md §3; decision: train-only median imputation + `distance_missing` flag (built in Step 3) | (Step 3) | | |
-| F5 | Train/validation/test split | ◐ | Decision in eda.md §8: 60/20/20 grouped by `patient_id` (built in Step 3) | (Step 3) | | |
+| F4 | Missing-value handling | ☑ | `ml/preprocess.py`: `SimpleImputer(median, add_indicator=True)` fitted on train only; analysis in eda.md §3 | `test_imputation_median_comes_from_training_split_only`, `test_output_has_no_missing_values_and_a_missing_flag` | | |
+| F5 | Train/validation/test split | ☑ | `ml/split.py`: 60/20/20 `GroupShuffleSplit` by `patient_id`, seed 42 (`python -m ml.split`) | `test_no_patient_appears_in_two_parts`, `test_every_row_lands_in_exactly_one_part`, `test_split_is_reproducible`, `test_parts_are_roughly_60_20_20_and_representative` | | |
 | F6 | Train a baseline scikit-learn model for a non-diagnostic task | ☐ | | | | |
 | F7 | At least one improved scikit-learn model | ☐ | | | | |
 | F8 | Compare models with appropriate metrics | ☐ | | | | |
 | F9 | Error analysis | ☐ | | | | |
-| F10 | Prevent data leakage | ◐ | Column roles in `ml/config.py`; single-feature leakage check in eda.md §8 | `test_ids_label_and_oracle_are_never_features`, `test_leakage_check_catches_a_column_that_encodes_the_answer` (split and pipeline: Step 3) | | |
+| F10 | Prevent data leakage | ◐ | Column roles (`ml/config.py`); `ColumnGuard`; patient-grouped split; all fitting inside one Pipeline on train only; leakage check in eda.md §8 | `tests/test_ml_preprocess.py` (forbidden columns rejected, train-only statistics, no refit on validation/test); test set scored once: Step 4 | | |
 | F11 | Expose a versioned inference endpoint | ☐ | | | | |
 | F12 | Show model output in the HealthTech dashboard | ☐ | | | | |
 
@@ -44,7 +44,7 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 | # | Requirement | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|
 | E1 | Do not claim clinical validity or provide medical diagnosis | ☐ | | | | |
-| E2 | Save preprocessing and model together in a reproducible pipeline | ☐ | | | | |
+| E2 | Save preprocessing and model together in a reproducible pipeline | ◐ | `ml/preprocess.py` builds preprocessing as the first half of one `Pipeline` (saving: Step 6) | `test_engineering_learns_nothing_from_data` | | |
 | E3 | Validate inference schema | ☐ | | | | |
 | E4 | Handle malformed and out-of-range inputs | ☐ | | | | |
 | E5 | Pin dependencies | ◐ | `backend/requirements.txt` (exact `==` for the ML stack) | version check comes with model loading (Step 6) | | |
