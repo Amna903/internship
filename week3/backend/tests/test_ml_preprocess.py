@@ -153,3 +153,32 @@ def test_missing_feature_is_rejected_not_silently_dropped(parts):
 def test_unseen_category_at_prediction_time_does_not_crash(fitted):
     pipeline, _ = fitted
     assert np.isfinite(pipeline.transform(row(booking_channel="carrier_pigeon"))).all()
+
+
+# ---------------- Save / reload (custom transformers must survive joblib) ----------------
+
+def test_fitted_pipeline_survives_joblib_save_and_reload_in_a_fresh_process(fitted, parts, tmp_path):
+    """ColumnGuard, EngineeredFeatures and _as_float are our own code. Loading a joblib file needs them
+    importable under the same module path, so this reloads in a separate Python process (a fresh
+    interpreter has none of this test's objects in memory) and compares the output exactly."""
+    import json
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    import joblib
+
+    pipeline, _ = fitted
+    path, rows = tmp_path / "pipeline.joblib", tmp_path / "rows.csv"
+    joblib.dump(pipeline, path)
+    model_input(parts[2]).head(200).to_csv(rows, index=False)
+    code = (
+        "import joblib, json, sys, pandas as pd; "
+        "p = joblib.load(sys.argv[1]); X = pd.read_csv(sys.argv[2]); "
+        "print(json.dumps(p.transform(X).tolist()))"
+    )
+    backend = Path(__file__).resolve().parent.parent
+    result = subprocess.run([sys.executable, "-c", code, str(path), str(rows)], cwd=backend,
+                            capture_output=True, text=True, check=True)
+    reloaded = np.array(json.loads(result.stdout))
+    np.testing.assert_allclose(reloaded, pipeline.transform(pd.read_csv(rows)), rtol=0, atol=1e-12)
