@@ -28,14 +28,14 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 |---|---|---|---|---|---|---|
 | F1 | Choose synthetic or explicitly approved public non-sensitive data | ☑ | `backend/ml/data.py` (seeded NumPy generator) | `tests/test_ml_data.py::test_schema_is_exactly_ids_features_oracle_and_label` | | |
 | F2 | Document provenance, license, schema and limitations | ☑ | [DATA_CARD.md](DATA_CARD.md) | manual: every section present | | |
-| F3 | Perform exploratory analysis | ☐ | | | | |
-| F4 | Missing-value handling | ☐ | | | | |
-| F5 | Train/validation/test split | ☐ | | | | |
+| F3 | Perform exploratory analysis | ☑ | `backend/ml/eda.py` → [ml/reports/eda.md](../backend/ml/reports/eda.md) | `tests/test_ml_eda.py` (8 tests: deterministic, up to date, numbers match the data) | | |
+| F4 | Missing-value handling | ◐ | Analysed in eda.md §3; decision: train-only median imputation + `distance_missing` flag (built in Step 3) | (Step 3) | | |
+| F5 | Train/validation/test split | ◐ | Decision in eda.md §8: 60/20/20 grouped by `patient_id` (built in Step 3) | (Step 3) | | |
 | F6 | Train a baseline scikit-learn model for a non-diagnostic task | ☐ | | | | |
 | F7 | At least one improved scikit-learn model | ☐ | | | | |
 | F8 | Compare models with appropriate metrics | ☐ | | | | |
 | F9 | Error analysis | ☐ | | | | |
-| F10 | Prevent data leakage | ☐ | | | | |
+| F10 | Prevent data leakage | ◐ | Column roles in `ml/config.py`; single-feature leakage check in eda.md §8 | `test_ids_label_and_oracle_are_never_features`, `test_leakage_check_catches_a_column_that_encodes_the_answer` (split and pipeline: Step 3) | | |
 | F11 | Expose a versioned inference endpoint | ☐ | | | | |
 | F12 | Show model output in the HealthTech dashboard | ☐ | | | | |
 
