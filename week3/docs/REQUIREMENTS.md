@@ -44,10 +44,10 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 | # | Requirement | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|
 | E1 | Do not claim clinical validity or provide medical diagnosis | ☐ | | | | |
-| E2 | Save preprocessing and model together in a reproducible pipeline | ◐ | `ml/preprocess.py` builds preprocessing as the first half of one `Pipeline` (saving: Step 6) | `test_engineering_learns_nothing_from_data` | | |
+| E2 | Save preprocessing and model together in a reproducible pipeline | ☑ | `ml/artifact.py` → `ml/artifacts/no-show-1.0.0.joblib` (guard + features + preprocessing + model in one Pipeline) + `.json` metadata | `test_committed_model_equals_a_freshly_trained_one`, `test_committed_file_loads_in_a_fresh_process` | | |
 | E3 | Validate inference schema | ☐ | | | | |
 | E4 | Handle malformed and out-of-range inputs | ☐ | | | | |
-| E5 | Pin dependencies | ◐ | `backend/requirements.txt` (exact `==` for the ML stack) | version check comes with model loading (Step 6) | | |
+| E5 | Pin dependencies | ☑ | `backend/requirements.txt` exact `==` pins; versions recorded in the metadata; loader refuses a different scikit-learn | `test_pinned_requirements_match_the_versions_the_model_was_built_with`, `test_wrong_scikit_learn_version_is_refused` | | |
 | E6 | Record random seeds | ☑ | `SEED = 42` (`ml/config.py`) drives data, split and every model (`random_state`); recorded in DATA_CARD and metrics.md | `test_same_seed_gives_identical_data`, `test_split_is_reproducible`, `test_training_is_deterministic` | | |
 | E7 | Document class imbalance | ☑ | DATA_CARD "Class imbalance" (16.4%) | `test_class_imbalance_is_in_the_documented_band` | | |
 | E8 | Document dataset bias | ☑ | DATA_CARD "Bias" with measured model numbers; errors.md §4 (gaps, mitigation options: drop age analysed, per-group thresholds rejected, supportive use adopted) | `test_age_bias_is_present`, `test_fairness_gaps_by_hand`, `test_analysis_does_not_depend_on_test_labels` | | |
@@ -56,7 +56,7 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 
 | # | Check | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|
-| A1 | Training script can reproduce model artifact | ☐ | | | | |
+| A1 | Training script can reproduce model artifact | ☑ | `python -m ml.artifact`; reproducibility levels 1–4 in README | `test_rebuild_reproduces_data_metrics_and_predictions` (fresh process), `test_rebuild_is_byte_identical_on_the_same_platform` | | |
 | A2 | Inference API returns validated output and model version | ☐ | | | | |
 | A3 | README includes metrics, dataset limitations and sample request/response | ☐ | | | | |
 

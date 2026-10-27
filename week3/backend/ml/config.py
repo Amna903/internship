@@ -30,3 +30,32 @@ VISIT_TYPES = ["in_person", "telehealth"]
 BOOKING_CHANNELS = ["web", "phone", "app"]
 HOUR_RANGE = (7, 19)  # clinic opening hours, inclusive
 LEAD_TIME_MAX_DAYS = 90
+
+# ---- Model release (Step 6) ----
+MODEL_NAME = "no-show"
+MODEL_VERSION = "1.0.0"  # major: inputs change · minor: retrained, same inputs · patch: metadata only
+ARTIFACT_DIR = ML_DIR / "artifacts"
+
+DISCLAIMER = (
+    "Educational prototype trained on synthetic data. Estimates whether a fictional appointment may be "
+    "missed, to help plan reminders. Not a medical assessment and not clinically validated."
+)
+# Plain, non-clinical wording: the only action the estimate can support is an extra reminder.
+ACTIONS = {
+    "extra_reminder_suggested": "Extra reminder suggested",
+    "standard_reminder": "Standard reminder",
+}
+
+# Input schema shared by the saved model's metadata and the API's validation (Step 7).
+FEATURE_SCHEMA = {
+    "lead_time_days": {"type": "integer", "min": 0, "max": LEAD_TIME_MAX_DAYS},
+    "appointment_weekday": {"type": "category", "values": WEEKDAYS},
+    "appointment_hour": {"type": "integer", "min": HOUR_RANGE[0], "max": HOUR_RANGE[1]},
+    "age_band": {"type": "category", "values": AGE_BANDS},
+    "visit_type": {"type": "category", "values": VISIT_TYPES},
+    "booking_channel": {"type": "category", "values": BOOKING_CHANNELS},
+    "reminder_sent": {"type": "boolean"},
+    "prior_appointments": {"type": "integer", "min": 0, "max": 500},
+    "prior_no_shows": {"type": "integer", "min": 0, "max": 500, "at_most": "prior_appointments"},
+    "distance_km": {"type": "number", "min": 0, "max": 500, "nullable": True},
+}

@@ -5,6 +5,55 @@ Week 3 builds on Week 2, which was copied into this folder with all its review f
 **Task:** an educational, synthetic **appointment no-show likelihood** model. It is not diagnostic and has no clinical validity.
 **Progress:** [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) lists every line of the Week 3 brief, with its code, test and demo evidence.
 
+## Week 3 model release
+
+The served model is `backend/ml/artifacts/no-show-1.0.0.joblib`: one scikit-learn Pipeline holding
+the input guard, the engineered features, preprocessing and the logistic regression together.
+`no-show-1.0.0.json` sits next to it, recording:
+- the seed and the dataset SHA-256
+- the feature schema
+- the decision threshold
+- the metrics
+- the exact library versions
+- the file's SHA-256
+
+Both files are committed, so the API works straight after cloning.
+
+**Rebuild it** (the same files come out, see below):
+
+```bash
+cd backend
+python -m ml.artifact
+```
+
+**What "reproducible" means here**, checked by `tests/test_ml_artifact.py`:
+
+| Level | What matches | Where |
+|---|---|---|
+| 1 | Dataset SHA-256 | everywhere |
+| 2 | Metrics and threshold in the metadata | everywhere (CI checks on Linux) |
+| 3 | Predicted probabilities, within 1e-9 | everywhere |
+| 4 | The `.joblib` file, byte for byte | same platform and library versions as the committed build (macOS arm64). Floating-point results can differ in the last bits across CPUs. |
+
+**Safe loading** (`ml/inference.py`). The file is opened only after all of these checks pass, and any
+failure becomes `ModelUnavailable`, which the API turns into a 503:
+- both files exist;
+- the metadata names this version and our exact feature schema;
+- the installed scikit-learn is the exact version the model was saved with;
+- the file's SHA-256 matches the metadata.
+
+The SHA-256 check catches accidental corruption or mismatched files. It is not protection against a
+deliberate attacker, because the fingerprint is stored in the `.json` next to the file. Real protection
+comes from only loading our own committed file, never an uploaded one. That matters because joblib,
+like pickle, can run code while loading.
+
+**Output wording.** The estimate supports one low-cost action, so the API says
+"Extra reminder suggested" or "Standard reminder". It never says "high risk", and the disclaimer is
+always shown next to the suggestion.
+
+**Versions.** major = the inputs change (breaks callers) · minor = retrained on the same inputs ·
+patch = metadata only.
+
 ---
 
 # Week 2: Role-Based Health Profiles and Database Engineering

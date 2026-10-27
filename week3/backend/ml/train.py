@@ -69,6 +69,7 @@ class Improvement:
 class TrainingResult:
     data_sha256: str
     split_sizes: dict
+    train_no_show_rate: float
     validation: dict  # Candidate -> Scores
     oracle_validation: Scores
     chosen: Candidate
@@ -185,6 +186,7 @@ def run(df: pd.DataFrame | None = None) -> TrainingResult:
     return TrainingResult(
         data_sha256=dataset_hash(df),
         split_sizes={"train": len(train), "validation": len(validation), "test": len(test)},
+        train_no_show_rate=float(y_train.mean()),
         validation=val_scores,
         oracle_validation=score(y_val, validation[config.ORACLE]),
         chosen=chosen,

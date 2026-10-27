@@ -1,0 +1,125 @@
+{
+  "artifact_sha256": "2c5ab3ec32a672ebe01e327598381f10641a42135a4ce31fce11eeb968566aa8",
+  "built_on": {
+    "machine": "arm64",
+    "platform": "darwin"
+  },
+  "decision": {
+    "actions": {
+      "extra_reminder_suggested": "Extra reminder suggested",
+      "standard_reminder": "Standard reminder"
+    },
+    "rule": "probability >= threshold -> extra_reminder_suggested, else standard_reminder",
+    "threshold": 0.168755
+  },
+  "disclaimer": "Educational prototype trained on synthetic data. Estimates whether a fictional appointment may be missed, to help plan reminders. Not a medical assessment and not clinically validated.",
+  "estimator": "logreg_engineered (C=0.1)",
+  "features": {
+    "age_band": {
+      "type": "category",
+      "values": [
+        "18-24",
+        "25-34",
+        "35-44",
+        "45-54",
+        "55-64",
+        "65+"
+      ]
+    },
+    "appointment_hour": {
+      "max": 19,
+      "min": 7,
+      "type": "integer"
+    },
+    "appointment_weekday": {
+      "type": "category",
+      "values": [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday"
+      ]
+    },
+    "booking_channel": {
+      "type": "category",
+      "values": [
+        "web",
+        "phone",
+        "app"
+      ]
+    },
+    "distance_km": {
+      "max": 500,
+      "min": 0,
+      "nullable": true,
+      "type": "number"
+    },
+    "lead_time_days": {
+      "max": 90,
+      "min": 0,
+      "type": "integer"
+    },
+    "prior_appointments": {
+      "max": 500,
+      "min": 0,
+      "type": "integer"
+    },
+    "prior_no_shows": {
+      "at_most": "prior_appointments",
+      "max": 500,
+      "min": 0,
+      "type": "integer"
+    },
+    "reminder_sent": {
+      "type": "boolean"
+    },
+    "visit_type": {
+      "type": "category",
+      "values": [
+        "in_person",
+        "telehealth"
+      ]
+    }
+  },
+  "libraries": {
+    "joblib": "1.6.0",
+    "numpy": "2.5.4",
+    "pandas": "3.0.6",
+    "python": "3.14.0",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1"
+  },
+  "metrics": {
+    "report": "ml/reports/metrics.md",
+    "test": {
+      "brier": 0.130702,
+      "pr_auc": 0.280133,
+      "roc_auc": 0.662684
+    },
+    "test_threshold": {
+      "precision": 0.246349,
+      "recall": 0.596923
+    },
+    "validation": {
+      "brier": 0.129222,
+      "pr_auc": 0.275772,
+      "roc_auc": 0.654963
+    }
+  },
+  "model": "no-show-1.0.0",
+  "seed": 42,
+  "task": "Synthetic appointment no-show likelihood (binary). Not diagnostic.",
+  "training_data": {
+    "average_no_show_rate": 0.164523,
+    "generator": "ml/data.py",
+    "sha256": "f458e62a1442a732194b813a3800bb059c656f164d47d485ad800085557e189e",
+    "split_rows": {
+      "test": 3952,
+      "train": 12126,
+      "validation": 3998
+    }
+  },
+  "version": "1.0.0"
+}
