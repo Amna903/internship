@@ -31,11 +31,11 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 | F3 | Perform exploratory analysis | ☑ | `backend/ml/eda.py` → [ml/reports/eda.md](../backend/ml/reports/eda.md) | `tests/test_ml_eda.py` (8 tests: deterministic, up to date, numbers match the data) | | |
 | F4 | Missing-value handling | ☑ | `ml/preprocess.py`: `SimpleImputer(median, add_indicator=True)` fitted on train only; analysis in eda.md §3 | `test_imputation_median_comes_from_training_split_only`, `test_output_has_no_missing_values_and_a_missing_flag` | | |
 | F5 | Train/validation/test split | ☑ | `ml/split.py`: 60/20/20 `GroupShuffleSplit` by `patient_id`, seed 42 (`python -m ml.split`) | `test_no_patient_appears_in_two_parts`, `test_every_row_lands_in_exactly_one_part`, `test_split_is_reproducible`, `test_parts_are_roughly_60_20_20_and_representative` | | |
-| F6 | Train a baseline scikit-learn model for a non-diagnostic task | ☐ | | | | |
-| F7 | At least one improved scikit-learn model | ☐ | | | | |
-| F8 | Compare models with appropriate metrics | ☐ | | | | |
+| F6 | Train a baseline scikit-learn model for a non-diagnostic task | ☑ | `ml/models.py`: floor `DummyClassifier`; baseline `LogisticRegression` on raw features (no-show likelihood, not diagnostic) | `test_every_real_model_beats_the_floor_on_validation` | | |
+| F7 | At least one improved scikit-learn model | ☑ | `ml/models.py`: logistic regression + engineered features (chosen) and `HistGradientBoostingClassifier` | `test_engineered_features_beat_the_raw_baseline`, `test_the_grid_covers_floor_baseline_and_two_improved_families` | | |
+| F8 | Compare models with appropriate metrics | ◐ | `ml/train.py` → [ml/reports/metrics.md](../backend/ml/reports/metrics.md): PR-AUC, ROC-AUC, Brier, threshold precision/recall/F1, oracle ceiling | `test_no_model_beats_the_oracle_ceiling`, `test_committed_report_is_up_to_date` (calibration table: Step 5) | | |
 | F9 | Error analysis | ☐ | | | | |
-| F10 | Prevent data leakage | ◐ | Column roles (`ml/config.py`); `ColumnGuard`; patient-grouped split; all fitting inside one Pipeline on train only; leakage check in eda.md §8 | `tests/test_ml_preprocess.py` (forbidden columns rejected, train-only statistics, no refit on validation/test); test set scored once: Step 4 | | |
+| F10 | Prevent data leakage | ☑ | Column roles + `ColumnGuard`; patient-grouped split; train-only fitting; choices on validation only; test scored once (`evaluate_on_test`) | `tests/test_ml_preprocess.py`; `test_choice_and_threshold_do_not_depend_on_test_labels`, `test_test_set_is_scored_in_exactly_one_place`, `test_no_model_beats_the_oracle_ceiling` | | |
 | F11 | Expose a versioned inference endpoint | ☐ | | | | |
 | F12 | Show model output in the HealthTech dashboard | ☐ | | | | |
 
@@ -48,7 +48,7 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 | E3 | Validate inference schema | ☐ | | | | |
 | E4 | Handle malformed and out-of-range inputs | ☐ | | | | |
 | E5 | Pin dependencies | ◐ | `backend/requirements.txt` (exact `==` for the ML stack) | version check comes with model loading (Step 6) | | |
-| E6 | Record random seeds | ◐ | `ml/config.py` `SEED = 42`; dataset hash in DATA_CARD | `test_same_seed_gives_identical_data`, `test_different_seed_gives_different_data` (training seed: Step 4) | | |
+| E6 | Record random seeds | ☑ | `SEED = 42` (`ml/config.py`) drives data, split and every model (`random_state`); recorded in DATA_CARD and metrics.md | `test_same_seed_gives_identical_data`, `test_split_is_reproducible`, `test_training_is_deterministic` | | |
 | E7 | Document class imbalance | ☑ | DATA_CARD "Class imbalance" (16.4%) | `test_class_imbalance_is_in_the_documented_band` | | |
 | E8 | Document dataset bias | ◐ | DATA_CARD "Bias" (age) | `test_age_bias_is_present` (per-group model errors: Step 5) | | |
 
