@@ -250,3 +250,129 @@ without asking.
 - [ ] Re-run the benchmark (commands in `explain-postgres.md`) and compare with the committed output.
 - [ ] Be able to explain without notes: why DB triggers and not model methods, why stable ids instead
   of foreign keys, what logout revokes, and why the COUNT query doesn't use the index.
+
+---
+
+# Week 3: machine-learning pipeline and prediction API (2026-10-24 to 2026-10-27)
+
+**Tools:** Claude Code (Claude Opus 5.5, agentic mode in VS Code) wrote the code and ran the commands
+listed below. I directed every step, reviewed the checklists before any code was written, and sent
+corrections, which are listed under "Refinements". Everything marked "AI ran" was executed by the agent;
+"I ran" is listed separately at the end.
+
+## 1. How the work was structured (context management)
+
+- **The brief first.** I gave the agent the full-stack brief PDF (the Week 3 section) and asked for a
+  checklist of what is required *before* any code. That is my Week 2 mentor's lesson: Week 2 started
+  from the wrong brief. Result: [REQUIREMENTS.md](REQUIREMENTS.md), with one row per brief line and
+  columns for code, test, demo moment and "re-run by me".
+- **Base reset.** I chose to replace the old `week3/` with the reviewed Week 2 code; the old folder
+  stays in git history. All 192 Week 1–2 tests were confirmed green in the new folder before any ML
+  code.
+- **One step at a time.** For each of Steps 1–11 the cycle was the same:
+  1. the agent proposed a checklist with library choices and rejected alternatives;
+  2. I reviewed it, often with corrections;
+  3. it built;
+  4. it reported results in plain language;
+  5. I re-ran the commands myself.
+
+  I asked for comparisons ("is this the best approach, and why?") before Step 1, and the agent
+  compared the options (synthetic generator vs public dataset vs LLM-made data; which model, which
+  metric, which file format) before choosing.
+- **Reports instead of re-explaining.** Each step writes a committed, deterministic report (`eda.md`,
+  `metrics.md`, `errors.md`, the model metadata), so later steps read the file rather than relying on
+  chat history.
+- **CI as the gate.** After CI was added, the rule was: push each step, wait for CI to be green, and
+  only then start the next step.
+
+## 2. Actual prompts and refinements
+
+My messages were in Urdu/English. They are quoted or closely translated here.
+
+| When | What I asked or corrected | What changed |
+|---|---|---|
+| Start | "assume week 3 wasn't done at all, now according to the requirements make the checklist" + the brief PDF | 14-step checklist from the brief |
+| Step 1 | "is this the best approach, if yes why, and how?", then "no coding-related comparison yet? which model, which thing?" | Synthetic generator compared with a public dataset and with LLM-made data; formula given a curve, an interaction and a hidden habit, so an improved model has something real to find; oracle ceiling added |
+| Step 3 | "use log1p for lead time (lead time can be 0), and handle prior_appointments = 0 in the no-show ratio without dividing by zero. Add tests for both." | `log1p` + ratio 0 with a separate `has_history` flag (so "new patient" ≠ "never missed"); tests that fail with the naive version (`-inf`, `nan`) |
+| Step 3 → 4 | "Did you add a joblib save/reload test for the pipeline with the custom transformers?" and "push now, the laptop is the only copy" | The test had not been added; added (reload in a fresh process). 14 unpushed commits pushed; CI was green on its first GitHub run |
+| Step 4 | "if 'improved beats baseline' fails, that's a finding, not a code bug; don't force the test to pass, report it" | The test now checks that the report tells the truth; added a bootstrap 95% interval and a computed verdict |
+| Step 5 | "the 3-point calibration rule may give false alarms with ~400 rows per bin; account for sampling noise" and "if recalibration triggers, don't change the shipped model, because the test set was already used" | Bonferroni limit (|z| > 2.81); on this data a naive 2-SE rule would have raised two false alarms. No model change after the test; drop-age analysed only |
+| Step 6 | "the fingerprint is in the .json too, so be honest: it catches accidents, not attackers" and "'High risk' sounds clinical; use plain, non-clinical terms" | README and code say what the SHA-256 does and does not do; output is "Extra reminder suggested" / "Standard reminder", enforced by tests |
+| Step 7 | "who supplies prior_no_shows? Write: the caller supplies the history counts; the API does not look them up" and "tick K3 only when admin login, CSRF, rate limit and input-free audit all pass" | The sentence appears in the README, API docs, schema and model card; K3 ticked only after its four tests passed |
+| Step 8 | "add 2–3 'Fill example' buttons with synthetic presets, one per result, so the Loom demo is quick" | 3 presets; a backend test checks that each preset gives the result its label promises |
+| Throughout | "CI should finish first" | The next step starts only after the previous push is green |
+
+## 3. Blast radius (what each step was allowed to touch)
+
+Every step touched only the files listed. Nothing outside `week3/` changed except the shared CI file.
+Week 1 and Week 2 were never edited.
+
+| Step | Files | Commit |
+|---|---|---|
+| 0 | `week3/` replaced by a copy of `week2/`; `docs/REQUIREMENTS.md` | `6961ab5` |
+| 1 | `ml/config.py`, `ml/data.py`, `requirements.txt` pins, `docs/DATA_CARD.md`, `tests/test_ml_data.py` | `4c1afd8` |
+| 2 | `ml/eda.py`, `ml/reports/eda.md`, `tests/test_ml_eda.py` | `f2b1ede` |
+| 3 | `ml/split.py`, `ml/features.py`, `ml/preprocess.py`, `tests/test_ml_preprocess.py` | `9341dc5`, `e904476` |
+| 4 | `ml/models.py`, `ml/train.py`, `ml/reports/metrics.md`, `tests/test_ml_train.py` | `d8ac671`, `ea9ad48` |
+| 5 | `ml/errors.py`, `ml/reports/errors.md`, DATA_CARD bias numbers, `tests/test_ml_errors.py` | `425ce70` |
+| 6 | `ml/artifact.py`, `ml/inference.py`, `ml/artifacts/*`, `tests/test_ml_artifact.py` | `7e3d0d1` |
+| 7 | new `predictions/` app, audit migration `0005`, settings/urls, `docs/API.md`, `tests/test_predictions_api.py` | `5ae227b` |
+| 8 | `frontend/app/admin/predictions/`, `lib/prediction.ts`, `lib/noShowSchema.json`, tests, `e2e/run_week3_e2e.py` | `c4dea58` |
+| 9–10 | README, `docs/WEEK3.md`, `docs/ARCHITECTURE.md`, `tests/test_docs.py` | `63293c3` |
+| 11 | `ml/verify_release.py`, `.github/workflows/ci.yml` (new job) | `8a02397` |
+
+The riskiest change was migration `0005` on the append-only audit table: adding a column can make
+SQLite rebuild the table, which drops its triggers. The agent printed the SQL first (`sqlmigrate`) and
+confirmed it is a plain `ALTER TABLE ADD COLUMN`. A test checks the triggers survive on SQLite and
+PostgreSQL.
+
+## 4. Debugging: real problems found and fixed
+
+| Problem | How it showed up | Fix |
+|---|---|---|
+| EDA overclaim: "no link between missing distance and no-show" | The report itself showed a 2.1-point gap | Added a significance test (p = 0.03); stated honestly that it is a false alarm, because the blanks are random by construction |
+| EDA wording contradicted itself ("unlikely chance" … "sampling noise") | Reading the generated report | Rewritten |
+| Markdown tables not rendering | Missing blank line before two tables | Fixed |
+| `get_feature_names_out` missing on the custom transformers | Smoke run crashed | Implemented on `ColumnGuard` and `EngineeredFeatures` |
+| Engineered columns in the wrong order | `input_features is not equal to feature_names_in_` | `engineer()` always returns a fixed column order |
+| `Candidate` couldn't be a dict key | `TypeError: unhashable type: 'dict'` | Settings stored as a tuple |
+| Flaky audit test | Searched the whole row for "19", which the timestamp can contain | Checks each column explicitly |
+| API reported only the first of several errors | Captured real output for the docs | All errors returned together; test added |
+| Wrong error code in the docs (`csrf_failed`) | Checked the real response | Documented `permission_denied` |
+| A test helper matched the wrong README row ("Baseline + improved …") | `test_docs.py` failed | Search limited to the Metrics section |
+| No-show rate written as 16.4% for the test set | Cross-checked against the reports | Corrected to 16.5% (16.4% is the whole dataset) |
+| Login selector `button[type=submit]` not found | Browser run timed out | Matched the existing scripts (`has-text('Sign in')`) |
+
+## 5. Verification
+
+**Fail-before evidence.** Edge-case tests were run against the naive version (`log(0) = -inf`,
+`0/0 = nan`). The docs-number test was proven by changing 0.280 to 0.290 in the README: it failed, and
+passed again after restoring. Each refusal path in the model loader is checked to never unpickle the
+file.
+
+**AI ran:**
+- the backend suite after every step: 383 passed + 1 PostgreSQL-only skip on SQLite, and the full
+  suite on local PostgreSQL 14.21;
+- frontend: 53 tests, typecheck, `next build`;
+- `python -m ml.verify_release`: all levels PASS, including the byte-identical model file on macOS;
+- the real-browser check: 17/17, with the agent opening and reading the screenshots, not only the
+  script output.
+
+**CI ran (every push):** backend on PostgreSQL 16 and SQLite for Weeks 1–3, frontend checks, and the
+"ML reproducibility (week3)" job on Linux.
+
+**I ran:** see the "Me" column in [REQUIREMENTS.md](REQUIREMENTS.md). My own runs so far: Step 1
+(`ml.data`: same SHA-256 `f458e62a…`, 14 tests), Step 2 (`ml.eda`, 8 tests).
+
+**Still to do myself before submitting:**
+- [ ] Read each Week 3 commit's diff: `git show <hash>` for the commits in section 3
+- [ ] Re-run `pytest`, `npm test` and `python -m ml.verify_release`, and fill the "Me" column
+- [ ] Run the `curl` sample from the README against my own backend
+- [ ] Explain without notes:
+  - why the split is by patient
+  - why PR-AUC and not accuracy
+  - what the oracle ceiling shows
+  - why the test set is used once
+  - why the calibration limit is 2.81
+  - why the SHA-256 isn't attacker-proof
+  - why the audit stores the model version but not the inputs
