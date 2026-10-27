@@ -43,10 +43,23 @@ def test_no_model_beats_the_oracle_ceiling(result):
         assert s.brier > result.oracle_validation.brier, candidate.label
 
 
-def test_engineered_features_beat_the_raw_baseline(result):
-    best = {name: max(s.pr_auc for c, s in result.validation.items() if c.name == name)
-            for name in ("logreg_raw", "logreg_engineered")}
-    assert best["logreg_engineered"] > best["logreg_raw"]
+def test_report_states_whatever_the_improvement_numbers_show(result):
+    """Not "the improved model must win": if it ever loses, that is a finding the report must state,
+    and nobody should tweak code until this passes. This checks the report tells the truth."""
+    imp = result.improvement
+    report = train.build_report(result)
+    assert imp.verdict in report
+    assert f"{imp.difference:+.3f}" in report and f"[{imp.low:+.3f}, {imp.high:+.3f}]" in report
+    assert imp.low <= imp.difference <= imp.high
+
+
+@pytest.mark.parametrize("difference, low, high, expected", [
+    (0.020, 0.005, 0.035, "a real improvement"),
+    (0.010, -0.004, 0.024, "not clearly better"),
+    (-0.010, -0.025, 0.004, "no improvement"),
+])
+def test_verdict_wording_for_every_outcome(difference, low, high, expected):
+    assert train.Improvement(difference, low, high, 1000).verdict.startswith(expected)
 
 
 def test_the_grid_covers_floor_baseline_and_two_improved_families():
@@ -107,3 +120,25 @@ def test_training_is_deterministic(df, result):
 def test_committed_report_is_up_to_date(result):
     # Fails if data, split, models or report changed without re-running `python -m ml.train`.
     assert train.REPORT.read_text() == train.build_report(result)
+
+
+def test_full_model_survives_joblib_save_and_reload_in_a_fresh_process(df, result, tmp_path):
+    """Preprocessing (custom ColumnGuard and EngineeredFeatures) + classifier, reloaded in a new Python
+    process exactly as the API will load it, must give identical probabilities."""
+    import json
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    import joblib
+    import pandas as pd
+
+    path, rows = tmp_path / "model.joblib", tmp_path / "rows.csv"
+    joblib.dump(result.chosen_pipeline, path)
+    model_input(split(df)[2]).head(300).to_csv(rows, index=False)
+    code = ("import joblib, json, sys, pandas as pd; m = joblib.load(sys.argv[1]); "
+            "print(json.dumps(m.predict_proba(pd.read_csv(sys.argv[2]))[:, 1].tolist()))")
+    out = subprocess.run([sys.executable, "-c", code, str(path), str(rows)],
+                         cwd=Path(__file__).resolve().parent.parent, capture_output=True, text=True, check=True)
+    np.testing.assert_allclose(json.loads(out.stdout), result.chosen_pipeline.predict_proba(pd.read_csv(rows))[:, 1],
+                               rtol=0, atol=1e-12)

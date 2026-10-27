@@ -47,6 +47,25 @@ class Threshold:
 
 
 @dataclass
+class Improvement:
+    """Chosen model minus baseline, test PR-AUC, with a 95% interval from a patient-level bootstrap."""
+    difference: float
+    low: float
+    high: float
+    resamples: int
+
+    @property
+    def verdict(self) -> str:
+        # Whatever the numbers say is reported as-is. A failed improvement is a finding, not a bug.
+        if self.low > 0:
+            return "a real improvement: the whole 95% interval is above zero"
+        if self.difference > 0:
+            return ("not clearly better: the chosen model scored higher, but the 95% interval includes zero, "
+                    "so the gain could be luck")
+        return "no improvement: the chosen model did not beat the baseline on test. This is a finding, reported as-is"
+
+
+@dataclass
 class TrainingResult:
     data_sha256: str
     split_sizes: dict
@@ -57,6 +76,7 @@ class TrainingResult:
     threshold: Threshold
     test: dict  # label -> Scores (floor, best baseline, chosen, best of each family, oracle)
     test_threshold: Threshold
+    improvement: "Improvement"  # chosen vs baseline on test, with a bootstrap confidence interval
     fitted: dict  # Candidate -> fitted Pipeline
 
 
@@ -103,13 +123,38 @@ def best_of(validation: dict, family: str = None, name: str = None) -> Candidate
     return max(pool, key=lambda c: pool[c].pr_auc)
 
 
+BOOTSTRAP_RESAMPLES = 1000
+
+
+def bootstrap_difference(y, chosen_probability, baseline_probability, groups) -> Improvement:
+    """Resample whole patients (their appointments are related), recompute both PR-AUCs on the same
+    resample, and take the 2.5th and 97.5th percentiles of the difference."""
+    y, groups = np.asarray(y, dtype=int), np.asarray(groups)
+    chosen_probability, baseline_probability = np.asarray(chosen_probability), np.asarray(baseline_probability)
+    patients = np.unique(groups)
+    rows_of = {p: np.flatnonzero(groups == p) for p in patients}
+    rng = np.random.default_rng(config.SEED)
+    differences = []
+    for _ in range(BOOTSTRAP_RESAMPLES):
+        idx = np.concatenate([rows_of[p] for p in rng.choice(patients, size=patients.size, replace=True)])
+        if y[idx].min() == y[idx].max():
+            continue  # a resample with one class only has no PR-AUC
+        differences.append(average_precision_score(y[idx], chosen_probability[idx])
+                           - average_precision_score(y[idx], baseline_probability[idx]))
+    point = average_precision_score(y, chosen_probability) - average_precision_score(y, baseline_probability)
+    low, high = np.percentile(differences, [2.5, 97.5])
+    return Improvement(float(point), float(low), float(high), len(differences))
+
+
 def evaluate_on_test(fitted: dict, picks: dict, test: pd.DataFrame, threshold: float):
     """The ONLY place test rows are scored. Called once, after every decision is final."""
     X, y = model_input(test), test[config.LABEL]
     results = {label: score(y, fitted[c].predict_proba(X)[:, 1]) for label, c in picks.items()}
     results["oracle ceiling (true probability)"] = score(y, test[config.ORACLE])
     chosen_probability = fitted[picks["chosen"]].predict_proba(X)[:, 1]
-    return results, apply_threshold(y, chosen_probability, threshold)
+    baseline_probability = fitted[picks["baseline"]].predict_proba(X)[:, 1]
+    improvement = bootstrap_difference(y, chosen_probability, baseline_probability, test["patient_id"])
+    return results, apply_threshold(y, chosen_probability, threshold), improvement
 
 
 def run(df: pd.DataFrame | None = None) -> TrainingResult:
@@ -135,7 +180,7 @@ def run(df: pd.DataFrame | None = None) -> TrainingResult:
         "best gradient boosting": best_of(val_scores, name="gradient_boosting"),
         "chosen": chosen,
     }
-    test_scores, test_threshold = evaluate_on_test(fitted, picks, test, threshold_value)
+    test_scores, test_threshold, improvement = evaluate_on_test(fitted, picks, test, threshold_value)
 
     return TrainingResult(
         data_sha256=dataset_hash(df),
@@ -148,6 +193,7 @@ def run(df: pd.DataFrame | None = None) -> TrainingResult:
         test={("chosen: " + chosen.label if k == "chosen" else f"{k}: {picks[k].label}" if k in picks else k): v
               for k, v in test_scores.items()},
         test_threshold=test_threshold,
+        improvement=improvement,
         fitted=fitted,
     )
 
@@ -184,6 +230,13 @@ def build_report(result: TrainingResult) -> str:
     chosen_val = result.validation[result.chosen]
     baseline_test = next(s for k, s in result.test.items() if k.startswith("baseline"))
     chosen_test = next(s for k, s in result.test.items() if k.startswith("chosen"))
+    imp = result.improvement
+    engineered_sentence = (
+        "The engineered features (log lead time, no-show rate, has-history, reminder × lead time) helped the "
+        "logistic regression capture the curve, habit and interaction found in the EDA."
+        if imp.low > 0 else
+        "The engineered features did not produce a clear gain over the raw baseline on test; see section 5."
+    )
 
     return f"""# Model comparison: synthetic appointment no-shows
 
@@ -244,13 +297,24 @@ In words: of the appointments the model flags, about {100 * tt.precision:.0f}% a
 PR-AUC on test: chosen {chosen_test.pr_auc:.3f} vs baseline {baseline_test.pr_auc:.3f} vs oracle
 {oracle_test.pr_auc:.3f}. Test rows were not used for tuning, model choice or the threshold.
 
-## 5. What this shows
+## 5. Did the improved model really beat the baseline?
 
-- Every real model beats the floor by a wide margin, so there is genuine signal in the features.
-- The engineered features (log lead time, no-show rate, has-history, reminder × lead time) let the
-  logistic regression capture the curve, habit and interaction the EDA found.
+Test PR-AUC, chosen minus baseline: **{imp.difference:+.3f}**, 95% interval
+**[{imp.low:+.3f}, {imp.high:+.3f}]** (bootstrap over whole patients, {imp.resamples} resamples, seed {config.SEED}).
+
+Verdict: **{imp.verdict}.**
+
+This verdict is computed from the numbers every time the report is generated. If a change to the data
+or the models ever makes the improvement disappear, the report says so; the code is not adjusted
+until it passes.
+
+## 6. What this shows
+
+- Every real model beats the floor, so there is genuine signal in the features.
+- {engineered_sentence}
 - The gap to the oracle ceiling is what is left: mostly the hidden per-patient reliability, which no
   feature can fully reveal, plus the coin-flip noise built into every outcome.
+- Gradient boosting with depth 6 scored below depth 3: the extra depth fits noise in the training rows.
 - Error analysis by age band and calibration: see Step 5.
 """
 
@@ -259,7 +323,7 @@ def main():
     result = run()
     REPORT.parent.mkdir(parents=True, exist_ok=True)
     REPORT.write_text(build_report(result))
-    print(build_report(result).split("## 5.")[0])
+    print(build_report(result).split("## 6.")[0])
     print(f"written to: {REPORT}")
 
 

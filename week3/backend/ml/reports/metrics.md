@@ -74,11 +74,22 @@ In words: of the appointments the model flags, about 25% are real no-shows
 PR-AUC on test: chosen 0.280 vs baseline 0.267 vs oracle
 0.321. Test rows were not used for tuning, model choice or the threshold.
 
-## 5. What this shows
+## 5. Did the improved model really beat the baseline?
 
-- Every real model beats the floor by a wide margin, so there is genuine signal in the features.
-- The engineered features (log lead time, no-show rate, has-history, reminder × lead time) let the
-  logistic regression capture the curve, habit and interaction the EDA found.
+Test PR-AUC, chosen minus baseline: **+0.013**, 95% interval
+**[+0.001, +0.025]** (bootstrap over whole patients, 1000 resamples, seed 42).
+
+Verdict: **a real improvement: the whole 95% interval is above zero.**
+
+This verdict is computed from the numbers every time the report is generated. If a change to the data
+or the models ever makes the improvement disappear, the report says so; the code is not adjusted
+until it passes.
+
+## 6. What this shows
+
+- Every real model beats the floor, so there is genuine signal in the features.
+- The engineered features (log lead time, no-show rate, has-history, reminder × lead time) helped the logistic regression capture the curve, habit and interaction found in the EDA.
 - The gap to the oracle ceiling is what is left: mostly the hidden per-patient reliability, which no
   feature can fully reveal, plus the coin-flip noise built into every outcome.
+- Gradient boosting with depth 6 scored below depth 3: the extra depth fits noise in the training rows.
 - Error analysis by age band and calibration: see Step 5.
