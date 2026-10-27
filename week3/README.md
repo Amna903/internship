@@ -1,81 +1,268 @@
-# HealthProfile: Week 3 (ML pipeline and prediction API), in progress
+# HealthProfile: Week 3 (machine-learning pipeline and prediction API)
 
-Week 3 builds on Week 2, which was copied into this folder with all its review fixes. Every Week 1 and Week 2 feature below still works, and the tests confirm it.
+> **Educational prototype on synthetic data.** It estimates whether a *fictional* appointment may be
+> missed, to help decide on an extra reminder. It is not a medical assessment, makes no diagnosis and
+> has no clinical validity.
 
-**Task:** an educational, synthetic **appointment no-show likelihood** model. It is not diagnostic and has no clinical validity.
-**Progress:** [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) lists every line of the Week 3 brief, with its code, test and demo evidence.
+Week 3 adds a reproducible scikit-learn pipeline, trained on a seeded synthetic dataset and served by a
+versioned, admin-only API, with its output shown in the admin dashboard. It builds on Week 2 (copied
+into this folder with all its review fixes). Every Week 1 and Week 2 feature further down still works,
+and the tests confirm it.
 
-## Week 3 model release
+![No-show estimate in the admin dashboard](docs/screenshots/w3-01-estimate-extra-reminder.png)
 
-The served model is `backend/ml/artifacts/no-show-1.0.0.joblib`: one scikit-learn Pipeline holding
-the input guard, the engineered features, preprocessing and the logistic regression together.
-`no-show-1.0.0.json` sits next to it, recording:
-- the seed and the dataset SHA-256
-- the feature schema
-- the decision threshold
-- the metrics
-- the exact library versions
-- the file's SHA-256
+## Week 3 checklist
 
-Both files are committed, so the API works straight after cloning.
+Each row is one line of the Week 3 brief. The full table, with every test name and a column for checks
+I re-ran myself, is in [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md).
 
-**Rebuild it** (the same files come out, see below):
+| Brief requirement | Where it is built | Proof |
+|---|---|---|
+| Synthetic data; provenance, licence, schema, limitations | `backend/ml/data.py` (seed 42) · [DATA_CARD](docs/DATA_CARD.md) | `tests/test_ml_data.py` |
+| Exploratory analysis | `ml/eda.py` → [eda.md](backend/ml/reports/eda.md) | `tests/test_ml_eda.py` |
+| Missing-value handling | median imputation learned from training rows only, plus a "was missing" flag (`ml/preprocess.py`) | `tests/test_ml_preprocess.py` |
+| Train / validation / test split | 60/20/20, grouped by patient (`ml/split.py`) | no patient in two parts (test) |
+| Baseline + improved scikit-learn models | floor → logistic regression (baseline) → logistic regression + engineered features, and gradient boosting (`ml/models.py`) | `tests/test_ml_train.py` |
+| Appropriate metrics and error analysis | PR-AUC, ROC-AUC, Brier, oracle ceiling, bootstrap interval → [metrics.md](backend/ml/reports/metrics.md); per-group errors, calibration, bias → [errors.md](backend/ml/reports/errors.md) | `tests/test_ml_train.py`, `tests/test_ml_errors.py` |
+| No data leakage | column guard, patient-grouped split, training-only fitting, choices on validation only, test set scored once | leakage tests in `test_ml_preprocess.py` and `test_ml_train.py` |
+| Versioned inference endpoint | `POST /api/v1/predictions/no-show/`, `GET /api/v1/models/no-show/` | `tests/test_predictions_api.py` |
+| Output shown in the dashboard | `/admin/predictions` | unit, contract and real-browser tests |
+| No clinical claims | disclaimer beside every result; plain wording ("Extra reminder suggested", never "high risk") | wording tests in backend, frontend and browser |
+| Preprocessing + model saved together, reproducibly | one Pipeline in `ml/artifacts/no-show-1.0.0.joblib` + `.json` metadata | `tests/test_ml_artifact.py` |
+| Validated schema; malformed and out-of-range input | strict serializer generated from one shared schema | 68 API tests |
+| Pinned dependencies, recorded seeds, imbalance and bias documented | exact `==` pins · `SEED = 42` · [DATA_CARD](docs/DATA_CARD.md) | pins checked against the model's metadata |
+| **Acceptance:** training reproduces the model file | `python -m ml.artifact` | rebuilt in a fresh process: same data, metrics and predictions; byte-identical on the building platform |
+| **Acceptance:** API returns validated output and model version | see the sample below | `test_returns_model_version_prediction_and_disclaimer` |
+| **Acceptance:** README has metrics, limitations, sample request/response | the next three sections | `tests/test_docs.py` checks the numbers here match the generated reports |
+
+## Metrics (test set, scored once, after every choice)
+
+Synthetic data: these numbers show how well a model recovers the formula that generated the data. They
+say nothing about real clinics. The test set holds 3,952 appointments of 1,000 patients who were never in
+training. 16.5% of them are no-shows.
+
+| model | PR-AUC ↑ | ROC-AUC ↑ | Brier ↓ | gap closed (floor → oracle) |
+|---|---|---|---|---|
+| Floor: always predicts the average | 0.164 | 0.500 | 0.1374 | 0% |
+| Baseline: logistic regression, raw inputs | 0.267 | 0.649 | 0.1320 | 66% |
+| Gradient boosting + engineered features | 0.268 | 0.662 | 0.1315 | 66% |
+| **Served: logistic regression + engineered features** | **0.280** | **0.663** | **0.1307** | **74%** |
+| Oracle ceiling: the generator's true probability | 0.321 | 0.714 | 0.1264 | 100% |
+
+- **Main metric: PR-AUC.** No-shows are the 16% minority, so accuracy would mislead: always saying
+  "attends" scores 84% and is useless.
+- **Is the improvement real?** Served minus baseline, test PR-AUC: **+0.013**, 95% interval
+  **[+0.001, +0.025]** (bootstrap over whole patients). Real, but small.
+- **Decision cut-off: 16.9%**, chosen on validation (F1). On the test set the model flags 39.9% of
+  appointments for an extra reminder. It catches **59.7%** of the no-shows, and **24.6%** of the flagged
+  appointments really are no-shows (against 16.5% by chance). That is acceptable only because the
+  action is cheap: one extra message.
+- **Calibration:** expected calibration error 1.41 points, and no bin outside the sampling-noise limit,
+  so no recalibration.
+- **Every planted direction was learned:** longer lead time ↑, reminder ↓, younger ↑, telehealth ↓,
+  distance ↑, past no-shows ↑ ([errors.md §6](backend/ml/reports/errors.md)).
+
+Full tables: [metrics.md](backend/ml/reports/metrics.md) · [errors.md](backend/ml/reports/errors.md).
+
+## Dataset limitations (short version; full list in the [data card](docs/DATA_CARD.md))
+
+- **Synthetic only.** The model can only learn effects that were planted, and the effect sizes are
+  invented.
+- **Age bias, planted and measured.** On validation, 71.8% of 18–24-year-olds who attended were flagged,
+  against 24.0% of 55–64-year-olds. Removing age was analysed (PR-AUC 0.276 → 0.260) but not shipped,
+  because the test set had already been used. The output may only drive supportive actions (an extra
+  reminder), never refusals, penalties or priority.
+- **Class imbalance:** 16.4% no-shows.
+- **Missing values are completely random** (7.7% of distances). In real data, a missing value often
+  means something.
+- **No time dimension:** no dates, seasons or trends, and the split is not by time.
+- About two-thirds of errors (66.5% on validation) would happen **even with perfect knowledge** of the true probability, because
+  each outcome is a weighted coin flip.
+
+## Sample request and response
+
+The caller supplies the appointment history counts; the API does not look them up. It requires an admin
+session, the CSRF token and at most 60 requests a minute. Every estimate is audited with the model
+version, never the inputs.
 
 ```bash
 cd backend
+rm -f jar.txt
+curl -s -c jar.txt -b jar.txt http://127.0.0.1:8000/api/auth/csrf/ > /dev/null
+CSRF=$(grep csrftoken jar.txt | awk '{print $7}')
+curl -s -c jar.txt -b jar.txt -H "X-CSRFToken: $CSRF" -H "Content-Type: application/json" -d '{"email":"admin@example.test","password":"YOUR_ADMIN_PASSWORD"}' http://127.0.0.1:8000/api/admin/login/
+CSRF=$(grep csrftoken jar.txt | awk '{print $7}')
+curl -s -b jar.txt -H "X-CSRFToken: $CSRF" -H "Content-Type: application/json" -d '{"lead_time_days":14,"appointment_weekday":"tuesday","appointment_hour":10,"age_band":"35-44","visit_type":"in_person","booking_channel":"web","reminder_sent":true,"prior_appointments":4,"prior_no_shows":0,"distance_km":6.5}' http://127.0.0.1:8000/api/v1/predictions/no-show/
+```
+
+`200`
+```json
+{"model_version": "no-show-1.0.0",
+ "prediction": {"no_show_probability": 0.1279, "suggested_action": "standard_reminder",
+                "suggested_action_label": "Standard reminder", "decision_threshold": 0.1688,
+                "average_no_show_rate": 0.1645},
+ "disclaimer": "Educational prototype trained on synthetic data. Estimates whether a fictional appointment may be missed, to help plan reminders. Not a medical assessment and not clinically validated."}
+```
+
+Errors use the same envelope as the rest of the API:
+- an unknown field, a wrong type or an out-of-range value gives `400 validation_error`, with every
+  problem listed in one response, e.g. `{"appointment_hour": ["Ensure this value is less than or equal to 19."]}`;
+- more no-shows than appointments gives `400` on `prior_no_shows`;
+- broken JSON gives `400 parse_error`, and a body over 4 KB gives `413`;
+- no admin session (including a member's token) gives `401`; no CSRF token gives `403`; too many
+  requests give `429`;
+- a missing, corrupted or mismatched model file gives `503 model_unavailable`.
+
+Every input and every error: [docs/API.md](docs/API.md#week-3-no-show-estimate-api-admin-only).
+
+## Architecture and decisions
+
+```
+ml/data.py ─▶ ml/eda.py ─▶ ml/split.py ─▶ ml/preprocess.py + ml/features.py ─▶ ml/train.py ─▶ ml/errors.py
+ seeded         report       60/20/20 by     one Pipeline: guard, engineered       compare on      error analysis
+ generator      (eda.md)     patient         features, impute, scale, one-hot      validation,     (errors.md)
+                                                                                   test once
+                                                                                       │
+                                                       ml/artifact.py ◀────────────────┘
+                                                       no-show-1.0.0.joblib + .json (SHA-256, versions)
+                                                              │  ml/inference.py: verify, then load once
+                                                              ▼
+       Next.js /admin/predictions ──proxy──▶ Django /api/v1/predictions/no-show/ (admin session, CSRF,
+       (form, examples, result + disclaimer)            rate limit, strict schema, audit) ──▶ model
+```
+
+| Decision | Why | Rejected alternative |
+|---|---|---|
+| Seeded synthetic generator with a known formula | No privacy or licence risk; reproducible; the true probability gives an **oracle ceiling** and lets us check what the model learned | A public dataset (needs explicit approval, real records); data made by an LLM (not reproducible) |
+| A curve, an interaction and a hidden habit in the formula | Gives an improved model something real to find, so the comparison means something | A purely linear formula (the baseline would already be perfect) |
+| Split by patient | The same person in train and test would let the model "recognise" people | A random row split |
+| All preprocessing inside one Pipeline, fitted on training rows | Nothing learned from validation or test; saved together with the model | Preprocessing the whole dataset up front |
+| PR-AUC + Brier, with the cut-off chosen on validation | Imbalance; honest probabilities | Accuracy; a fixed 0.5 cut-off |
+| No class weighting | It inflates every probability ("16% means 16%" would break) | `class_weight="balanced"` |
+| Logistic regression chosen over gradient boosting | Higher validation PR-AUC, and simpler models win near-ties by a rule written before training: explainable | Picking the fanciest model |
+| Test set touched once; no changes after it | Otherwise its score is optimistic | Recalibrating or dropping age afterwards (reported as next steps instead) |
+| One `.joblib` + timestamp-free `.json` with SHA-256 and exact versions | Reproducible rebuilds; loading refuses corrupted or mismatched files | ONNX (awkward with custom transformers); unversioned pickles |
+| API inside the existing Django app | Reuses the Week 2 admin session, CSRF, throttling, audit and error format | A separate FastAPI service (a second auth system) |
+| `/api/v1/` plus `model_version` in every response | Separates the API contract from the model behind it | Model version only in the URL |
+| Plain wording, neutral colours, disclaimer beside the result | No clinical claims | "High risk" labels |
+| Per-age-group thresholds | (rejected) | They would deliberately treat people differently by age |
+
+Design notes per step: [docs/WEEK3.md](docs/WEEK3.md).
+
+## Run and test
+
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+python scripts/init_env.py
+python manage.py migrate
+python manage.py seed_demo
+python manage.py runserver 8000
+```
+
+In a second terminal:
+
+```bash
+cd frontend
+npm ci
+npm run dev
+```
+
+Open http://localhost:3000/admin/login and sign in as `admin@example.test`. The password is printed by
+`init_env.py` and stored in `backend/.env`. Then click **No-show estimate**.
+
+The ML pipeline, step by step. Each command is deterministic and writes the committed file shown; the
+model file is already committed, so this is only needed to rebuild:
+
+```bash
+cd backend
+python -m ml.data
+python -m ml.eda
+python -m ml.split
+python -m ml.train
+python -m ml.errors
 python -m ml.artifact
 ```
 
-**What "reproducible" means here**, checked by `tests/test_ml_artifact.py`:
+| Command | Writes |
+|---|---|
+| `python -m ml.data` | `ml/data/appointments.csv` (git-ignored, rebuilt identically) |
+| `python -m ml.eda` | `ml/reports/eda.md` |
+| `python -m ml.split` | prints the split summary |
+| `python -m ml.train` | `ml/reports/metrics.md` |
+| `python -m ml.errors` | `ml/reports/errors.md` |
+| `python -m ml.artifact` | `ml/artifacts/no-show-1.0.0.joblib` + `.json` |
 
-| Level | What matches | Where |
-|---|---|---|
-| 1 | Dataset SHA-256 | everywhere |
-| 2 | Metrics and threshold in the metadata | everywhere (CI checks on Linux) |
-| 3 | Predicted probabilities, within 1e-9 | everywhere |
-| 4 | The `.joblib` file, byte for byte | same platform and library versions as the committed build (macOS arm64). Floating-point results can differ in the last bits across CPUs. |
+Tests:
 
-**Safe loading** (`ml/inference.py`). The file is opened only after all of these checks pass, and any
-failure becomes `ModelUnavailable`, which the API turns into a 503:
-- both files exist;
-- the metadata names this version and our exact feature schema;
-- the installed scikit-learn is the exact version the model was saved with;
-- the file's SHA-256 matches the metadata.
+```bash
+cd backend
+python -m pytest
+cd ../frontend
+npm test
+npm run typecheck
+npm run build
+```
 
-The SHA-256 check catches accidental corruption or mismatched files. It is not protection against a
-deliberate attacker, because the fingerprint is stored in the `.json` next to the file. Real protection
-comes from only loading our own committed file, never an uploaded one. That matters because joblib,
-like pickle, can run code while loading.
-
-**Output wording.** The estimate supports one low-cost action, so the API says
-"Extra reminder suggested" or "Standard reminder". It never says "high risk", and the disclaimer is
-always shown next to the suggestion.
-
-**Prediction API**: `POST /api/v1/predictions/no-show/` (admin only). Sample request and response,
-every input, and every error: [docs/API.md](docs/API.md#week-3-no-show-estimate-api-admin-only).
-**The caller supplies the appointment history counts; the API does not look them up.**
-
-**Dashboard.** Sign in as admin, then open **No-show estimate** in the top bar (`/admin/predictions`).
-- "Fill example" buttons fill the form in one click. A backend test checks that each example really
-  gives the result its label promises.
-- The result shows the suggestion, the estimated chance, the average for comparison and the model
-  version, with the disclaimer right beside it.
-- Any edit clears the old result.
-
-![No-show estimate page](docs/screenshots/w3-01-estimate-extra-reminder.png)
-
-Real-browser check (17 checks, with backend and frontend running and `seed_demo` done; needs
-`pip install playwright` and `python -m playwright install chromium`):
+**Who ran what.** CI (`.github/workflows/ci.yml`) runs the backend suite on PostgreSQL 16 and SQLite,
+and the frontend typecheck, tests and build, on every push. The real-browser check
+(`e2e/run_week3_e2e.py`, 17 checks) needs both servers running, so it is not in CI. It was run locally
+on 2026-10-27: 17/17. To run it you need `pip install playwright` and
+`python -m playwright install chromium`, then:
 
 ```bash
 python e2e/run_week3_e2e.py "<admin password>" "<member password>" docs/screenshots
 ```
 
-The browser check is not part of CI, because it needs both servers running. It was run locally on
-2026-10-27: 17/17.
+## Model release and safe loading
+
+`backend/ml/artifacts/no-show-1.0.0.joblib` holds the whole Pipeline: the input guard, the engineered
+features, preprocessing and the logistic regression. `no-show-1.0.0.json` next to it records:
+- the seed and the dataset SHA-256
+- the feature schema
+- the decision cut-off
+- the metrics
+- the exact library versions
+- the file's SHA-256
+
+It has no timestamp, so rebuilds are identical. Both files are committed.
+
+| Reproducibility level | What matches | Where |
+|---|---|---|
+| 1 | Dataset SHA-256 | everywhere |
+| 2 | Metrics and cut-off in the metadata | everywhere (CI checks on Linux) |
+| 3 | Predicted probabilities, within 1e-9 | everywhere |
+| 4 | The `.joblib` file, byte for byte | same platform and library versions as the committed build (macOS arm64). Floating-point results can differ in the last bits across CPUs. |
+
+**Safe loading** (`ml/inference.py`). The file is opened only after all of these checks pass:
+- both files exist;
+- the metadata names this version and our exact feature schema;
+- the installed scikit-learn is the exact version the model was saved with;
+- the file's SHA-256 matches.
+
+Any failure becomes `ModelUnavailable`, which the API returns as `503`. The SHA-256 check catches
+accidental corruption or mismatched files. It is not protection against a deliberate attacker, because
+the fingerprint is stored in the `.json` next to the file. Real protection comes from only loading our
+own committed file, never an uploaded one. That matters because joblib, like pickle, can run code while
+loading.
 
 **Versions.** major = the inputs change (breaks callers) · minor = retrained on the same inputs ·
 patch = metadata only.
+
+## Limitations and next steps
+
+- **Synthetic only.** Nothing here transfers to real clinics.
+- **Age bias is measured, not removed.** Supportive use only. *Next:* a v2 model without age, with its
+  own validation and test set.
+- **One model version, no monitoring.** *Next:* log estimates (without inputs) and compare predicted
+  with actual rates over time, to catch drift.
+- **Calibration was checked once,** on validation. *Next:* re-check on new data before any change.
+- **The SHA-256 check is not attacker-proof** (see above).
+- **Byte-identical rebuilds** are only promised on the building platform.
+- **The real-browser check is not in CI.**
+- **One appointment per request;** there is no batch endpoint.
 
 ---
 

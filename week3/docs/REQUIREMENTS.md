@@ -58,14 +58,14 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 |---|---|---|---|---|---|---|
 | A1 | Training script can reproduce model artifact | ☑ | `python -m ml.artifact`; reproducibility levels 1–4 in README | `test_rebuild_reproduces_data_metrics_and_predictions` (fresh process), `test_rebuild_is_byte_identical_on_the_same_platform` | | |
 | A2 | Inference API returns validated output and model version | ☑ | Response: `model_version`, `prediction`, `disclaimer` | `test_returns_model_version_prediction_and_disclaimer`, `test_matches_the_released_model_exactly` | | |
-| A3 | README includes metrics, dataset limitations and sample request/response | ◐ | Sample request/response and errors: README + docs/API.md (metrics and limitations summary: Step 10) | manual | | |
+| A3 | README includes metrics, dataset limitations and sample request/response | ☑ | README: "Metrics", "Dataset limitations", "Sample request and response" (real output) | `tests/test_docs.py`: every README number equals metrics.md / errors.md / the model metadata; the sample response equals what the model returns | | |
 
 ## Required submission
 
 | # | Item | Status |
 |---|---|---|
 | S1 | GitHub repository with meaningful commit history and clear setup instructions | ☐ |
-| S2 | README: feature checklist, architecture decisions, run/test commands, limitations, screenshots or API examples | ☐ |
+| S2 | README: feature checklist, architecture decisions, run/test commands, limitations, screenshots or API examples | ☑ README Week 3 section + [WEEK3.md](WEEK3.md) + [ARCHITECTURE.md](ARCHITECTURE.md); links checked by `test_every_local_link_points_at_an_existing_file` |
 | S3 | Loom 5–10 min: working demo; key files and architecture; actual prompts and refinements; context management; blast-radius boundaries; debugging and verification of generated changes | ☐ |
 | S4 | Repository and Loom links posted in the team channel by Tuesday 11:59 PM PKT; daily progress and blockers shared | ☐ |
 

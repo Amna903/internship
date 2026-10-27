@@ -97,6 +97,29 @@ Each row has a test in `tests/test_user_auth.py::TestLogoutAndRevocationLifecycl
 or `test_audit.py`. None of this depends on the frontend: the tests replay copied cookies from a
 separate client, which is what a direct API request does.
 
+## Week 3: ML pipeline and prediction API
+
+```
+offline (python -m ml.*)                                 online (Django + Next.js)
+ml/data → eda → split → preprocess/features → train      Next.js /admin/predictions
+        → errors → artifact                                  │ same-origin proxy
+                │                                            ▼
+                ▼                                        /api/v1/predictions/no-show/  (predictions app)
+ml/artifacts/no-show-1.0.0.joblib + .json  ◀── verify ── ml/inference.get_model()  (loaded once per process)
+```
+
+| Concern | How |
+|---|---|
+| Who may call it | `AdminSessionAuthentication` + `IsAdminRole`, the same as every admin route. A member's JWT gets 401 |
+| CSRF | Enforced by the session authenticator on POST |
+| Abuse | `predictions` throttle scope (60/min per admin); request body capped at 4 KB (413) |
+| Input | Strict serializer generated from `ml.config.FEATURE_SCHEMA`, the same schema stored in the model metadata and in `frontend/lib/noShowSchema.json`. Tests compare all three |
+| Audit | `admin.prediction_made` with the model version in the nullable `detail` column, never the input values. The column was added without a table rebuild, so the append-only triggers survive |
+| Failure | `ModelUnavailable` → `503 model_unavailable`; the reason is logged server-side only |
+| Versioning | `/api/v1/` is the input/output contract; `model_version` in each response names the model |
+
+Design notes per step: [WEEK3.md](WEEK3.md).
+
 ## Database
 
 ```mermaid
