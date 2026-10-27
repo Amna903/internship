@@ -16,6 +16,7 @@ urlpatterns = [
     path("api/", include("accounts.urls")),
     path("api/", include("profiles.urls")),
     path("api/admin/", include("adminpanel.urls")),
+    path("api/v1/", include("predictions.urls")),
 ]
 
 if settings.ENABLE_API_DOCS:

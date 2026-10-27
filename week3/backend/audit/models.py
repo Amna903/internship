@@ -20,6 +20,7 @@ class AuditEvent(models.Model):
         ADMIN_PROFILE_VIEWED = "admin.profile_viewed", "Admin viewed profile"
         ADMIN_PROFILE_DEACTIVATED = "admin.profile_deactivated", "Admin deactivated profile"
         ADMIN_PROFILE_ACTIVATED = "admin.profile_activated", "Admin reactivated profile"
+        ADMIN_PREDICTION_MADE = "admin.prediction_made", "Admin requested a no-show estimate"
 
     created_at = models.DateTimeField(auto_now_add=True)
     # Stable identifiers, not live links: DO_NOTHING + db_constraint=False means deleting the user or
@@ -38,6 +39,10 @@ class AuditEvent(models.Model):
         related_name="+", db_index=False,
     )
     changed_fields = models.JSONField(default=list, blank=True)  # field *names* only
+    # A short non-sensitive label, e.g. the model version behind a prediction. Never input values.
+    # Nullable with no default on purpose: SQLite can then add it with ALTER TABLE ADD COLUMN instead
+    # of rebuilding the table, which would drop the append-only triggers (tests check they survive).
+    detail = models.CharField(max_length=64, null=True, blank=True)
     request_id = models.CharField(max_length=64, blank=True)
 
     class Meta:

@@ -3,7 +3,8 @@ from collections.abc import Iterable
 from .models import AuditEvent
 
 
-def record_event(request, action: str, *, actor=None, profile=None, changed_fields: Iterable[str] = ()) -> AuditEvent:
+def record_event(request, action: str, *, actor=None, profile=None, changed_fields: Iterable[str] = (),
+                 detail: str | None = None) -> AuditEvent:
     """Write one audit row. ``actor`` defaults to the authenticated user on the request."""
     actor = actor or request.user
     return AuditEvent.objects.create(
@@ -12,6 +13,7 @@ def record_event(request, action: str, *, actor=None, profile=None, changed_fiel
         action=action,
         profile=profile,
         changed_fields=sorted(set(changed_fields)),
+        detail=detail,
         request_id=getattr(request, "request_id", ""),
     )
 

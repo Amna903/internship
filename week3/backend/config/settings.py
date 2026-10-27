@@ -110,6 +110,7 @@ INSTALLED_APPS = [
     "profiles",
     "adminpanel",
     "audit",
+    "predictions",
 ]
 
 MIDDLEWARE = [
@@ -218,6 +219,7 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {
         "login": os.environ.get("THROTTLE_LOGIN", "10/min"),
         "signup": os.environ.get("THROTTLE_SIGNUP", "20/hour"),
+        "predictions": os.environ.get("THROTTLE_PREDICTIONS", "60/min"),
     },
 }
 

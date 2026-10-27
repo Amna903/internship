@@ -36,17 +36,17 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 | F8 | Compare models with appropriate metrics | ☑ | [metrics.md](../backend/ml/reports/metrics.md): PR-AUC, ROC-AUC, Brier, threshold metrics, oracle ceiling, bootstrap CI; calibration in [errors.md](../backend/ml/reports/errors.md) §2 | `tests/test_ml_train.py`, `test_report_states_the_calibration_verdict_that_the_numbers_give` | | |
 | F9 | Error analysis | ☑ | `ml/errors.py` → [errors.md](../backend/ml/reports/errors.md): confusion matrix with costs, noise-aware calibration, errors per group, unavoidable vs model errors, learned directions, confident mistakes | `tests/test_ml_errors.py` (15 tests, incl. hand-checked numbers and no dependence on test labels) | | |
 | F10 | Prevent data leakage | ☑ | Column roles + `ColumnGuard`; patient-grouped split; train-only fitting; choices on validation only; test scored once (`evaluate_on_test`) | `tests/test_ml_preprocess.py`; `test_choice_and_threshold_do_not_depend_on_test_labels`, `test_test_set_is_scored_in_exactly_one_place`, `test_no_model_beats_the_oracle_ceiling` | | |
-| F11 | Expose a versioned inference endpoint | ☐ | | | | |
+| F11 | Expose a versioned inference endpoint | ☑ | `predictions/`: `POST /api/v1/predictions/no-show/`, `GET /api/v1/models/no-show/` (API `v1` + `model_version` in every response) | `tests/test_predictions_api.py::TestValidRequest`, `test_model_card_matches_the_released_metadata`, `test_openapi_schema_documents_both_endpoints` | | |
 | F12 | Show model output in the HealthTech dashboard | ☐ | | | | |
 
 ## Engineering constraints
 
 | # | Requirement | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|
-| E1 | Do not claim clinical validity or provide medical diagnosis | ☐ | | | | |
+| E1 | Do not claim clinical validity or provide medical diagnosis | ◐ | Disclaimer in every API response and the model card; plain wording ("Extra reminder suggested", never "high risk"); DATA_CARD (dashboard: Step 8) | `test_output_uses_plain_non_clinical_wording`, `test_no_clinical_wording_in_the_response` | | |
 | E2 | Save preprocessing and model together in a reproducible pipeline | ☑ | `ml/artifact.py` → `ml/artifacts/no-show-1.0.0.joblib` (guard + features + preprocessing + model in one Pipeline) + `.json` metadata | `test_committed_model_equals_a_freshly_trained_one`, `test_committed_file_loads_in_a_fresh_process` | | |
-| E3 | Validate inference schema | ☐ | | | | |
-| E4 | Handle malformed and out-of-range inputs | ☐ | | | | |
+| E3 | Validate inference schema | ☑ | `predictions/serializers.py`, generated from `ml.config.FEATURE_SCHEMA` (same schema as the model metadata); unknown fields rejected | `TestValidation` (missing, unknown, wrong types incl. `true`/`"14"`, unknown categories) | | |
+| E4 | Handle malformed and out-of-range inputs | ☑ | Range checks, `prior_no_shows ≤ prior_appointments`, broken/empty/non-object JSON → 400, >4 KB → 413, model failure → 503 | `test_out_of_range_values_are_rejected`, `test_malformed_or_non_object_bodies_are_rejected`, `test_oversized_body_is_rejected`, `TestModelUnavailable` | | |
 | E5 | Pin dependencies | ☑ | `backend/requirements.txt` exact `==` pins; versions recorded in the metadata; loader refuses a different scikit-learn | `test_pinned_requirements_match_the_versions_the_model_was_built_with`, `test_wrong_scikit_learn_version_is_refused` | | |
 | E6 | Record random seeds | ☑ | `SEED = 42` (`ml/config.py`) drives data, split and every model (`random_state`); recorded in DATA_CARD and metrics.md | `test_same_seed_gives_identical_data`, `test_split_is_reproducible`, `test_training_is_deterministic` | | |
 | E7 | Document class imbalance | ☑ | DATA_CARD "Class imbalance" (16.4%) | `test_class_imbalance_is_in_the_documented_band` | | |
@@ -57,8 +57,8 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 | # | Check | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|
 | A1 | Training script can reproduce model artifact | ☑ | `python -m ml.artifact`; reproducibility levels 1–4 in README | `test_rebuild_reproduces_data_metrics_and_predictions` (fresh process), `test_rebuild_is_byte_identical_on_the_same_platform` | | |
-| A2 | Inference API returns validated output and model version | ☐ | | | | |
-| A3 | README includes metrics, dataset limitations and sample request/response | ☐ | | | | |
+| A2 | Inference API returns validated output and model version | ☑ | Response: `model_version`, `prediction`, `disclaimer` | `test_returns_model_version_prediction_and_disclaimer`, `test_matches_the_released_model_exactly` | | |
+| A3 | README includes metrics, dataset limitations and sample request/response | ◐ | Sample request/response and errors: README + docs/API.md (metrics and limitations summary: Step 10) | manual | | |
 
 ## Required submission
 
@@ -75,4 +75,4 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 |---|---|---|---|
 | K1 | Week 1 and Week 2 features still work after copying Week 2 into `week3/` | ☑ | 2026-10-21, run by Claude Code: `pytest` 192 passed + 1 PostgreSQL-only skip (SQLite), 193 passed (PostgreSQL 14.21); `npm test` 37 passed; typecheck and `next build` clean. CI covers `week3/` on every push. |
 | K2 | Week 2 checklist still valid | ☑ | [REQUIREMENTS-week2.md](REQUIREMENTS-week2.md) |
-| K3 | New ML endpoints follow the same rules: admin session only, CSRF, rate limit, audit event without input values | ☐ | |
+| K3 | New ML endpoints follow the same rules: admin session only, CSRF, rate limit, audit event without input values | ☑ | `TestAccessRules` (anonymous 401, member JWT 401/403, no CSRF 403, 429 after 60/min), `TestAudit` (model version stored, no input value in the audit row or logs; triggers survive migration 0005) |

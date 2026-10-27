@@ -51,6 +51,10 @@ like pickle, can run code while loading.
 "Extra reminder suggested" or "Standard reminder". It never says "high risk", and the disclaimer is
 always shown next to the suggestion.
 
+**Prediction API**: `POST /api/v1/predictions/no-show/` (admin only). Sample request and response,
+every input, and every error: [docs/API.md](docs/API.md#week-3-no-show-estimate-api-admin-only).
+**The caller supplies the appointment history counts; the API does not look them up.**
+
 **Versions.** major = the inputs change (breaks callers) · minor = retrained on the same inputs ·
 patch = metadata only.
 

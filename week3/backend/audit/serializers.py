@@ -16,7 +16,7 @@ class AuditEventSerializer(serializers.ModelSerializer):
         model = AuditEvent
         fields = [
             "id", "created_at", "action", "action_label", "actor_email", "actor_role", "target_email",
-            "actor_id", "actor_deleted", "profile_id", "profile_deleted", "changed_fields", "request_id",
+            "actor_id", "actor_deleted", "profile_id", "profile_deleted", "changed_fields", "detail", "request_id",
         ]
         read_only_fields = fields
 
