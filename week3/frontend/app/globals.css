@@ -406,3 +406,21 @@ table.availability td { white-space: normal; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
+
+/* ---- Week 3: no-show estimate page. Neutral styling on purpose: no red, no warning icons. ---- */
+.estimate-layout { display: grid; gap: var(--space-4, 20px); grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); align-items: start; }
+.estimate-layout > .card { margin: 0; }
+.preset-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 4px 0 8px; }
+.form-section { font-size: 1rem; margin: 18px 0 4px; }
+.form-actions { display: flex; gap: 10px; margin-top: 18px; }
+.choice-row { display: flex; gap: 18px; padding-top: 6px; }
+.choice { display: inline-flex; gap: 6px; align-items: center; font-weight: 500; }
+.estimate-result .suggestion { font-size: 1.35rem; font-weight: 700; color: var(--ink); margin: 6px 0 2px; }
+.estimate-result .chance { font-size: 1.05rem; margin: 0 0 8px; }
+.estimate-result .disclaimer { background: var(--neutral-soft); color: var(--neutral-ink); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.model-card { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+.model-card dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 10px 0 0; }
+.model-card dt { color: var(--muted); }
+.model-card dd { margin: 0; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+@media (max-width: 860px) { .estimate-layout { grid-template-columns: 1fr; } }

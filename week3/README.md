@@ -55,6 +55,25 @@ always shown next to the suggestion.
 every input, and every error: [docs/API.md](docs/API.md#week-3-no-show-estimate-api-admin-only).
 **The caller supplies the appointment history counts; the API does not look them up.**
 
+**Dashboard.** Sign in as admin, then open **No-show estimate** in the top bar (`/admin/predictions`).
+- "Fill example" buttons fill the form in one click. A backend test checks that each example really
+  gives the result its label promises.
+- The result shows the suggestion, the estimated chance, the average for comparison and the model
+  version, with the disclaimer right beside it.
+- Any edit clears the old result.
+
+![No-show estimate page](docs/screenshots/w3-01-estimate-extra-reminder.png)
+
+Real-browser check (17 checks, with backend and frontend running and `seed_demo` done; needs
+`pip install playwright` and `python -m playwright install chromium`):
+
+```bash
+python e2e/run_week3_e2e.py "<admin password>" "<member password>" docs/screenshots
+```
+
+The browser check is not part of CI, because it needs both servers running. It was run locally on
+2026-10-27: 17/17.
+
 **Versions.** major = the inputs change (breaks callers) · minor = retrained on the same inputs ·
 patch = metadata only.
 

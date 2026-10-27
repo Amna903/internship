@@ -4,6 +4,8 @@
 // in-flight refresh, because refresh tokens rotate: a second parallel refresh would present an
 // already-blacklisted token and log the user out.
 
+import type { Payload, PredictionResponse } from "./prediction";
+
 export type Role = "user" | "admin";
 export interface UserSummary { id: number; email: string; role: Role }
 
@@ -142,4 +144,23 @@ export const SECTION_LABELS: Record<string, string> = {
   demographics: "Demographics (name and date of birth or age range)",
   emergency_contact: "Emergency contact (name, relationship and phone)",
   wellness_preferences: "Wellness preferences (contact preference and at least one goal)",
+};
+
+// ---- Week 3: no-show estimate (admin session; same CSRF and error handling as above) ----
+
+export interface ModelCard {
+  model_version: string;
+  task: string;
+  estimator: string;
+  disclaimer: string;
+  inputs_note: string;
+  decision: { threshold: number; rule: string };
+  metrics: { validation: Record<string, number>; test: Record<string, number> };
+  training_data: { sha256: string; average_no_show_rate: number; split_rows: Record<string, number> };
+  artifact_sha256: string;
+}
+
+export const predictionApi = {
+  predict: (input: Payload) => api<PredictionResponse>("POST", "/api/v1/predictions/no-show/", input),
+  model: () => api<ModelCard>("GET", "/api/v1/models/no-show/"),
 };
