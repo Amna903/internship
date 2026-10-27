@@ -56,7 +56,7 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 
 | # | Check | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|
-| A1 | Training script can reproduce model artifact | ☑ | `python -m ml.artifact`; reproducibility levels 1–4 in README | `test_rebuild_reproduces_data_metrics_and_predictions` (fresh process), `test_rebuild_is_byte_identical_on_the_same_platform` | | |
+| A1 | Training script can reproduce model artifact | ☑ | `python -m ml.artifact`; `python -m ml.verify_release` rebuilds everything and compares (levels 1–4 in README); CI job "ML reproducibility (week3)" | `test_rebuild_reproduces_data_metrics_and_predictions` (fresh process), `test_rebuild_is_byte_identical_on_the_same_platform` | | |
 | A2 | Inference API returns validated output and model version | ☑ | Response: `model_version`, `prediction`, `disclaimer` | `test_returns_model_version_prediction_and_disclaimer`, `test_matches_the_released_model_exactly` | | |
 | A3 | README includes metrics, dataset limitations and sample request/response | ☑ | README: "Metrics", "Dataset limitations", "Sample request and response" (real output) | `tests/test_docs.py`: every README number equals metrics.md / errors.md / the model metadata; the sample response equals what the model returns | | |
 

@@ -76,11 +76,35 @@ jobs:
       - run: npm test
       - run: npm run build
 
+  # Week 3 acceptance check A1, visible as its own job: rebuild the dataset, reports and model from
+  # scratch, exactly as the README documents, and compare with the committed files.
+  ml-reproducibility:
+    name: ML reproducibility (week3)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: week3/backend
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: week3/backend/requirements*.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Generate the dataset (prints its SHA-256)
+        run: python -m ml.data
+      - name: Rebuild reports and model, compare with the committed release
+        run: python -m ml.verify_release
+
   # Single required check for branch protection: fails if any job above failed or was cancelled.
   ci-passed:
     if: always()
-    needs: [backend, frontend]
+    needs: [backend, frontend, ml-reproducibility]
     runs-on: ubuntu-latest
     steps:
       - run: |
-          [ "${{ needs.backend.result }}" = "success" ] && [ "${{ needs.frontend.result }}" = "success" ]
+          [ "${{ needs.backend.result }}" = "success" ] && [ "${{ needs.frontend.result }}" = "success" ] \
+            && [ "${{ needs.ml-reproducibility.result }}" = "success" ]

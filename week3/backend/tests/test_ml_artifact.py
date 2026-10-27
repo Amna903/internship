@@ -168,3 +168,13 @@ def test_predictions_are_valid_probabilities_with_the_version(committed):
     out = committed.predict(sample_rows(200).to_dict("records"))
     assert all(0 <= o["no_show_probability"] <= 1 for o in out)
     assert committed.version == f"{config.MODEL_NAME}-{config.MODEL_VERSION}"
+
+
+def test_verify_release_reports_exactly_which_metadata_sections_differ(committed):
+    from ml.verify_release import compare_metadata
+    same = json.loads(json.dumps(committed.metadata))
+    assert compare_metadata(committed.metadata, same) == []
+    changed = {**same, "decision": {**same["decision"], "threshold": 0.5}, "seed": 7}
+    assert compare_metadata(committed.metadata, changed) == ["seed", "decision"]
+    # platform and file hash may legitimately differ between machines, so they are not compared here
+    assert compare_metadata(committed.metadata, {**same, "built_on": {"platform": "linux"}, "artifact_sha256": "x"}) == []

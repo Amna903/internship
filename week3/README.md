@@ -206,8 +206,20 @@ npm run typecheck
 npm run build
 ```
 
+**Check that everything reproduces** (acceptance check A1, about 25 seconds):
+
+```bash
+cd backend
+python -m ml.verify_release
+```
+
+It rebuilds the dataset, the three reports and the model from scratch and compares them with the
+committed files, level by level. It prints `PASS` / `SKIP` / `FAIL` for each and exits non-zero on any
+mismatch.
+
 **Who ran what.** CI (`.github/workflows/ci.yml`) runs the backend suite on PostgreSQL 16 and SQLite,
-and the frontend typecheck, tests and build, on every push. The real-browser check
+the frontend typecheck, tests and build, and a separate **"ML reproducibility (week3)"** job that runs
+`python -m ml.verify_release` on Linux, all on every push. The real-browser check
 (`e2e/run_week3_e2e.py`, 17 checks) needs both servers running, so it is not in CI. It was run locally
 on 2026-10-27: 17/17. To run it you need `pip install playwright` and
 `python -m playwright install chromium`, then:
