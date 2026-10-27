@@ -77,8 +77,19 @@ The curve and the interaction are deliberate. A linear model on raw inputs can't
 
 **Age is a planted driver.** Younger patients miss more often, both in this data and by design. Any model trained on it will flag younger patients more often, including some who would have attended (false positives).
 
+**Measured on the chosen model** (validation, threshold 0.169; full detail in
+[errors.md](../backend/ml/reports/errors.md) §4):
+
+| | 18-24 | 55-64 |
+|---|---|---|
+| attenders wrongly flagged (false-positive rate) | 71.8% | 24.0% |
+| no-shows caught (recall) | 85.4% | 41.9% |
+| appointments flagged | 75.3% | 26.0% |
+
+Removing age (analysis only, not shipped) costs PR-AUC 0.276 → 0.260 and removes most of that gap.
+
 Consequences:
-- Report error rates **per age band** in the error analysis.
+- Error rates **per age band** are reported in the error analysis.
 - The prediction may only support **low-cost, supportive actions**, such as an extra reminder. It must never support penalties, refusals or prioritisation.
 - In a real system, using age as a feature would need a fairness review. Here it's kept on purpose, to demonstrate measuring bias.
 

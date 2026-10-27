@@ -33,8 +33,8 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 | F5 | Train/validation/test split | ☑ | `ml/split.py`: 60/20/20 `GroupShuffleSplit` by `patient_id`, seed 42 (`python -m ml.split`) | `test_no_patient_appears_in_two_parts`, `test_every_row_lands_in_exactly_one_part`, `test_split_is_reproducible`, `test_parts_are_roughly_60_20_20_and_representative` | | |
 | F6 | Train a baseline scikit-learn model for a non-diagnostic task | ☑ | `ml/models.py`: floor `DummyClassifier`; baseline `LogisticRegression` on raw features (no-show likelihood, not diagnostic) | `test_every_real_model_beats_the_floor_on_validation` | | |
 | F7 | At least one improved scikit-learn model | ☑ | `ml/models.py`: logistic regression + engineered features (chosen) and `HistGradientBoostingClassifier` | `test_report_states_whatever_the_improvement_numbers_show` (bootstrap 95% CI, verdict computed, not forced), `test_the_grid_covers_floor_baseline_and_two_improved_families`, `test_full_model_survives_joblib_save_and_reload_in_a_fresh_process` | | |
-| F8 | Compare models with appropriate metrics | ◐ | `ml/train.py` → [ml/reports/metrics.md](../backend/ml/reports/metrics.md): PR-AUC, ROC-AUC, Brier, threshold precision/recall/F1, oracle ceiling | `test_no_model_beats_the_oracle_ceiling`, `test_committed_report_is_up_to_date` (calibration table: Step 5) | | |
-| F9 | Error analysis | ☐ | | | | |
+| F8 | Compare models with appropriate metrics | ☑ | [metrics.md](../backend/ml/reports/metrics.md): PR-AUC, ROC-AUC, Brier, threshold metrics, oracle ceiling, bootstrap CI; calibration in [errors.md](../backend/ml/reports/errors.md) §2 | `tests/test_ml_train.py`, `test_report_states_the_calibration_verdict_that_the_numbers_give` | | |
+| F9 | Error analysis | ☑ | `ml/errors.py` → [errors.md](../backend/ml/reports/errors.md): confusion matrix with costs, noise-aware calibration, errors per group, unavoidable vs model errors, learned directions, confident mistakes | `tests/test_ml_errors.py` (15 tests, incl. hand-checked numbers and no dependence on test labels) | | |
 | F10 | Prevent data leakage | ☑ | Column roles + `ColumnGuard`; patient-grouped split; train-only fitting; choices on validation only; test scored once (`evaluate_on_test`) | `tests/test_ml_preprocess.py`; `test_choice_and_threshold_do_not_depend_on_test_labels`, `test_test_set_is_scored_in_exactly_one_place`, `test_no_model_beats_the_oracle_ceiling` | | |
 | F11 | Expose a versioned inference endpoint | ☐ | | | | |
 | F12 | Show model output in the HealthTech dashboard | ☐ | | | | |
@@ -50,7 +50,7 @@ Rejected alternatives: anything predicting a condition, symptom or risk of illne
 | E5 | Pin dependencies | ◐ | `backend/requirements.txt` (exact `==` for the ML stack) | version check comes with model loading (Step 6) | | |
 | E6 | Record random seeds | ☑ | `SEED = 42` (`ml/config.py`) drives data, split and every model (`random_state`); recorded in DATA_CARD and metrics.md | `test_same_seed_gives_identical_data`, `test_split_is_reproducible`, `test_training_is_deterministic` | | |
 | E7 | Document class imbalance | ☑ | DATA_CARD "Class imbalance" (16.4%) | `test_class_imbalance_is_in_the_documented_band` | | |
-| E8 | Document dataset bias | ◐ | DATA_CARD "Bias" (age) | `test_age_bias_is_present` (per-group model errors: Step 5) | | |
+| E8 | Document dataset bias | ☑ | DATA_CARD "Bias" with measured model numbers; errors.md §4 (gaps, mitigation options: drop age analysed, per-group thresholds rejected, supportive use adopted) | `test_age_bias_is_present`, `test_fairness_gaps_by_hand`, `test_analysis_does_not_depend_on_test_labels` | | |
 
 ## Acceptance checks
 

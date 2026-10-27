@@ -315,7 +315,8 @@ until it passes.
 - The gap to the oracle ceiling is what is left: mostly the hidden per-patient reliability, which no
   feature can fully reveal, plus the coin-flip noise built into every outcome.
 - Gradient boosting with depth 6 scored below depth 3: the extra depth fits noise in the training rows.
-- Error analysis by age band and calibration: see Step 5.
+- Errors per group, calibration, age bias and whether the planted formula was learned:
+  [errors.md](errors.md).
 """
 
 
