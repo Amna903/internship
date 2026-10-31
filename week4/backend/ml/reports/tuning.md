@@ -46,7 +46,7 @@ One validation score is one draw. The fold spread shows how far a score moves by
 | gradient_boosting (learning_rate=0.1, max_depth=6) | 0.240 ± 0.012 | 0.247 |
 
 Is the forest's lead over logistic regression real? Comparing the best of each on the same folds
-(`random_forest (max_depth=None, min_samples_leaf=50)` vs `logreg_engineered (C=0.1)`): the forest is ahead in 0 of 5 folds, by -0.014 on average (fold-to-fold spread of that difference: 0.007). Logistic regression's lead is larger than the fold-to-fold noise: it is consistently better, so the forest's Step 2 validation lead came from the luck of that one validation draw.
+(`random_forest (max_depth=6, min_samples_leaf=20)` vs `logreg_engineered (C=1.0)`): the forest is ahead in 0 of 5 folds, by -0.013 on average (fold-to-fold spread of that difference: 0.007). Logistic regression's lead is larger than the fold-to-fold noise: it is consistently better, so the forest's Step 2 validation lead came from the luck of that one validation draw.
 
 ## 3. Tuning experiment: random forest, `RandomizedSearchCV`
 
@@ -83,8 +83,8 @@ Top 10 of 30 by mean CV PR-AUC (10 settings reached the bar):
 **Chosen: max_depth=4, min_samples_leaf=50, max_features=0.33, n_estimators=300**, CV PR-AUC 0.268 ± 0.017
 (the top-scoring setting had 0.272 ± 0.012).
 
-For comparison, the Step 2 grid's best forest (`random_forest (max_depth=None, min_samples_leaf=50)`) scored
-0.269 ± 0.013 on the same folds.
+For comparison, the Step 2 grid's best forest by CV (`random_forest (max_depth=6, min_samples_leaf=20)`) scored
+0.270 ± 0.013 on the same folds.
 
 ## 4. What this shows
 

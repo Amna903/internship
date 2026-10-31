@@ -146,8 +146,10 @@ def build_report(result: dict, validation: dict[str, float]) -> str:
     grid_rows = "\n".join(f"| {g['label']} | {_ms(g['mean'], g['std'])} | {validation[g['label']]:.3f} |"
                           for g in grid)
     by_label = {g["label"]: g for g in result["grid_cv"]}
-    best_forest = max((g for g in grid if g["name"] == "random_forest"), key=lambda g: validation[g["label"]])
-    best_logreg = max((g for g in grid if g["name"] == "logreg_engineered"), key=lambda g: validation[g["label"]])
+    # Picked by CV mean (committed fold scores), not by validation: near-tied validation scores swap
+    # between machines, which would change which model this paragraph names.
+    best_forest = max((g for g in grid if g["name"] == "random_forest"), key=lambda g: g["mean"])
+    best_logreg = max((g for g in grid if g["name"] == "logreg_engineered"), key=lambda g: g["mean"])
     paired = np.subtract(best_forest["fold_scores"], best_logreg["fold_scores"])
     lead_mean, lead_sd = float(paired.mean()), float(paired.std(ddof=1))
     folds_ahead = int((paired > 0).sum())
@@ -227,7 +229,7 @@ Top 10 of {result['n_iter']} by mean CV PR-AUC ({eligible} settings reached the 
 **Chosen: {_settings(chosen)}**, CV PR-AUC {_ms(chosen_row['mean'], chosen_row['std'])}
 (the top-scoring setting had {_ms(best['mean'], best['std'])}).
 
-For comparison, the Step 2 grid's best forest (`{best_forest['label']}`) scored
+For comparison, the Step 2 grid's best forest by CV (`{best_forest['label']}`) scored
 {_ms(by_label[best_forest['label']]['mean'], by_label[best_forest['label']]['std'])} on the same folds.
 
 ## 4. What this shows

@@ -80,6 +80,26 @@ def reports_match(committed: str, rebuilt: str) -> tuple[bool, str]:
                   f"cut-off figures within {CUTOFF_TOLERANCE} (largest {worst['cut-off figures']:.3f})")
 
 
+def tuning_diagnostics(committed: dict, rebuilt: dict) -> str:
+    """Facts about a rebuilt search, printed whether or not the checks pass: same choice? how far did the
+    means (what the rule uses) and single fold scores move? did any setting cross the one-SE bar?"""
+    def means(r):
+        return {json.dumps(x["params"]): x["mean"] for x in r["search"]} | {g["label"]: g["mean"] for g in r["grid_cv"]}
+
+    def folds(r):
+        return {json.dumps(x["params"]): x["fold_scores"] for x in r["search"]} | {g["label"]: g["fold_scores"]
+                                                                                    for g in r["grid_cv"]}
+
+    m_a, m_b, f_a, f_b = means(committed), means(rebuilt), folds(committed), folds(rebuilt)
+    mean_diff = max(abs(m_a[k] - m_b[k]) for k in m_a)
+    fold_diff = max(abs(x - y) for k in f_a for x, y in zip(f_a[k], f_b[k]))
+    eligible = [{json.dumps(x["params"]) for x in r["search"] if x["mean"] >= r["bar"]} for r in (committed, rebuilt)]
+    return (f"INFO  tuning: same choice: {committed['chosen'] == rebuilt['chosen']} "
+            f"(committed {committed['chosen']}, rebuilt {rebuilt['chosen']}); largest move of a mean "
+            f"{mean_diff:.4f}, of a single fold score {fold_diff:.4f}; bar {committed['bar']:.4f} -> "
+            f"{rebuilt['bar']:.4f}; settings crossing the bar: {len(eligible[0] ^ eligible[1])}")
+
+
 COMPARED_METADATA_KEYS = ["model", "version", "estimator", "seed", "features", "decision", "metrics", "training_data",
                           "task", "disclaimer"]
 
@@ -103,11 +123,15 @@ def main() -> int:
                                 ("errors.md", errors, lambda: errors.build_report(errors.analyse(df)))]:
         checks.append(("2", f"{name} regenerated identically", module.REPORT.read_text() == build()))
     tuning = tune.run(df)
+    committed_tuning = json.loads(tune.RESULT.read_text())
     ok, reason = reports_match(tune.RESULT.read_text(), json.dumps(tuning, indent=2) + "\n")
     checks.append(("2", f"tuning.json (30-draw search) regenerated: {reason}", ok))
+    print(tuning_diagnostics(committed_tuning, tuning))
     step2 = train.run(df, candidates=GRID_CANDIDATES, score_test=False)
-    ok, reason = reports_match(tune.REPORT.read_text(),
-                               tune.build_report(tuning, {c.label: s.pr_auc for c, s in step2.validation.items()}))
+    # The report is rebuilt from the COMMITTED result (checked against the rebuilt one just above, within
+    # tolerance), so near-tied forests can't change which settings the report names on another machine.
+    ok, reason = reports_match(tune.REPORT.read_text(), tune.build_report(
+        committed_tuning, {c.label: s.pr_auc for c, s in step2.validation.items()}))
     checks.append(("2", f"tuning.md regenerated: {reason}", ok))
     ok, reason = reports_match(train.REPORT.read_text(), train.comparison_report(df))
     checks.append(("2", f"metrics.md regenerated: {reason}", ok))
