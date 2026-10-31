@@ -17,6 +17,12 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 - **Supervised task:** the same synthetic appointment no-show task as Week 3, extended rather than replaced. The brief says "expand the Week 3 ML system".
 - **LLM:** local only, through **Ollama**. No data leaves the machine, so the rule against sending patient data to external LLMs holds by design. Tests and CI use a **fake LLM** behind the same interface.
 - **Git:** all Week 4 work goes on the `week4` branch → a PR to `main` → reviewer **@ahmedhashir10**.
+- **Served model stays v1.0.0 until Step 4.** The release and its report (`release-1.0.0.md`) are rebuilt from Week 3's candidates, so it stays exactly reproducible; `metrics.md` compares every model on validation and scores no test rows until Step 4.
+
+## Lessons recorded along the way
+
+- **Step 2: the simplicity order ranks model families, not settings within a family.** The depth-6 forest (validation PR-AUC 0.281) was within the 0.005 tie margin of the unlimited-depth winner (0.284), but the rule doesn't count "shallower" as "simpler". The rule was not changed after seeing results; Step 3's tuning will define within-family simplicity before it runs.
+- **Step 2: a multi-threaded random forest is not exactly reproducible.** Threads add the trees' outputs in varying order, changing the last digits, enough to flip a near-tie. Forests now run single-threaded; a test trains one twice and requires identical output.
 
 ## Supervised learning
 
@@ -24,12 +30,12 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 |---|---|---|---|---|---|---|---|
 | S1 | Prepare a synthetic appointment-attendance dataset | 1 | ☑ | `backend/ml/data.py` (from Week 3); [SUPERVISED.md § Dataset](SUPERVISED.md#dataset-s1) | `tests/test_supervised_doc.py::test_dataset_section_states_the_real_size_and_seed` | | |
 | S2 | Clearly define features, labels, split strategy and leakage checks | 1 | ☑ | [SUPERVISED.md](SUPERVISED.md) | `tests/test_supervised_doc.py` (every table checked against config and the data; history counts proven past-only) | | |
-| S3 | Train Logistic Regression | 2 | ☐ | | | | |
-| S4 | Train Random Forest | 2 | ☐ | | | | |
-| S5 | Train Gradient Boosting/XGBoost or SVM | 2 | ☐ | | | | |
+| S3 | Train Logistic Regression | 2 | ☑ | `ml/models.py` (raw + engineered, C grid) | `tests/test_ml_compare.py::test_logistic_regression_random_forest_and_gradient_boosting_are_all_trained` | | |
+| S4 | Train Random Forest | 2 | ☑ | `ml/models.py` (`FOREST_GRID`, seeded, out-of-bag, single-threaded for exact reruns) | `tests/test_ml_compare.py::test_random_forest_*` | | |
+| S5 | Train Gradient Boosting/XGBoost or SVM | 2 | ☑ | `ml/models.py` (HistGradientBoosting) | `tests/test_ml_compare.py::test_logistic_regression_random_forest_and_gradient_boosting_are_all_trained` | | |
 | S6 | Evaluate with confusion matrix | 4 | ☐ | | | | |
 | S7 | Evaluate with precision, recall, F1, ROC-AUC and PR-AUC | 4 | ☐ | | | | |
-| S8 | Compare train versus validation performance | 2 | ☐ | | | | |
+| S8 | Compare train versus validation performance | 2 | ☑ | [metrics.md § Train versus validation](../backend/ml/reports/metrics.md) (gap warning + out-of-bag) | `tests/test_ml_compare.py` (table, warning rule, memorising tree, out-of-bag) | | |
 | S9 | Perform stratified cross-validation | 3 | ☐ | | | | |
 | S10 | Tune one model with GridSearchCV or RandomizedSearchCV | 3 | ☐ | | | | |
 | S11 | Explain feature importance or permutation importance | 5 | ☐ | | | | |

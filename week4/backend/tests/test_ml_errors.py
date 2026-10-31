@@ -6,6 +6,7 @@ import pytest
 
 from ml import config, errors, train
 from ml.data import generate
+from ml.models import RELEASE_CANDIDATES
 from ml.split import split
 
 
@@ -73,7 +74,7 @@ def test_a_large_gap_is_flagged_and_reported_as_a_finding_not_applied():
 
 
 def test_shipped_model_and_threshold_are_the_step_4_ones(df, analysis):
-    result = train.run(df)
+    result = train.run(df, candidates=RELEASE_CANDIDATES)
     assert analysis.model_label == result.chosen.label
     assert analysis.threshold == result.threshold.value
 

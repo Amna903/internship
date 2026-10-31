@@ -22,7 +22,13 @@ How to read the columns:
 
 | model | PR-AUC ↑ | ROC-AUC ↑ | Brier ↓ | mean prediction | gap closed (floor → oracle) |
 |---|---|---|---|---|---|
-| **logreg_engineered (C=0.1)** | 0.276 | 0.655 | 0.1292 | 0.162 | 64% |
+| **random_forest (max_depth=None, min_samples_leaf=50)** | 0.284 | 0.651 | 0.1298 | 0.164 | 69% |
+| random_forest (max_depth=10, min_samples_leaf=50) | 0.284 | 0.651 | 0.1298 | 0.164 | 69% |
+| random_forest (max_depth=10, min_samples_leaf=20) | 0.284 | 0.649 | 0.1296 | 0.164 | 68% |
+| random_forest (max_depth=6, min_samples_leaf=50) | 0.281 | 0.649 | 0.1301 | 0.164 | 67% |
+| random_forest (max_depth=None, min_samples_leaf=20) | 0.279 | 0.648 | 0.1298 | 0.164 | 66% |
+| random_forest (max_depth=6, min_samples_leaf=20) | 0.278 | 0.649 | 0.1302 | 0.164 | 65% |
+| logreg_engineered (C=0.1) | 0.276 | 0.655 | 0.1292 | 0.162 | 64% |
 | logreg_engineered (C=1.0) | 0.275 | 0.655 | 0.1292 | 0.162 | 64% |
 | logreg_engineered (C=10.0) | 0.275 | 0.655 | 0.1293 | 0.162 | 64% |
 | gradient_boosting (learning_rate=0.05, max_depth=3) | 0.269 | 0.647 | 0.1299 | 0.163 | 60% |
@@ -35,13 +41,47 @@ How to read the columns:
 | floor_dummy | 0.162 | 0.500 | 0.1355 | 0.165 | 0% |
 | *oracle ceiling (true probability)* | 0.340 | 0.719 | 0.1230 | 0.164 | 100% |
 
+### Train versus validation (overfitting check)
+
+The same metrics on the training rows each model was fitted on. A large drop from train to validation
+means the model learned details of its own training rows that don't carry over.
+
+Rule, fixed before training: a train − validation PR-AUC gap above 0.05 raises a **warning**.
+It is a warning, not a verdict; every model is still judged on its validation score alone. Random
+forests always fit their own training rows closely, because each tree memorises the rows it was grown
+on, so their plain training score overstates them by nature. The **out-of-bag** column is fairer: each
+training row is scored only by the trees that never saw it (number in brackets: out-of-bag − validation).
+
+| model | train PR-AUC | validation PR-AUC | gap | out-of-bag PR-AUC | train ROC-AUC | validation ROC-AUC | train Brier | validation Brier | |
+|---|---|---|---|---|---|---|---|---|---|
+| logreg_raw (C=0.1) | 0.277 | 0.261 | +0.016 | – | 0.666 | 0.645 | 0.1309 | 0.1304 |  |
+| logreg_raw (C=1.0) | 0.277 | 0.261 | +0.016 | – | 0.666 | 0.645 | 0.1309 | 0.1304 |  |
+| logreg_raw (C=10.0) | 0.277 | 0.261 | +0.016 | – | 0.666 | 0.645 | 0.1309 | 0.1304 |  |
+| logreg_engineered (C=0.1) | 0.287 | 0.276 | +0.011 | – | 0.683 | 0.655 | 0.1295 | 0.1292 |  |
+| logreg_engineered (C=1.0) | 0.286 | 0.275 | +0.011 | – | 0.683 | 0.655 | 0.1295 | 0.1292 |  |
+| logreg_engineered (C=10.0) | 0.286 | 0.275 | +0.011 | – | 0.683 | 0.655 | 0.1295 | 0.1293 |  |
+| random_forest (max_depth=10, min_samples_leaf=20) | 0.431 | 0.284 | +0.147 | 0.267 (-0.017) | 0.774 | 0.649 | 0.1215 | 0.1296 | ⚠ warning |
+| random_forest (max_depth=10, min_samples_leaf=50) | 0.357 | 0.284 | +0.073 | 0.271 (-0.013) | 0.733 | 0.651 | 0.1259 | 0.1298 | ⚠ warning |
+| random_forest (max_depth=6, min_samples_leaf=20) | 0.343 | 0.278 | +0.066 | 0.268 (-0.009) | 0.715 | 0.649 | 0.1277 | 0.1302 | ⚠ warning |
+| random_forest (max_depth=6, min_samples_leaf=50) | 0.323 | 0.281 | +0.042 | 0.269 (-0.011) | 0.706 | 0.649 | 0.1285 | 0.1301 |  |
+| random_forest (max_depth=None, min_samples_leaf=20) | 0.482 | 0.279 | +0.203 | 0.268 (-0.011) | 0.813 | 0.648 | 0.1177 | 0.1298 | ⚠ warning |
+| random_forest (max_depth=None, min_samples_leaf=50) | 0.364 | 0.284 | +0.080 | 0.270 (-0.014) | 0.742 | 0.651 | 0.1252 | 0.1298 | ⚠ warning |
+| gradient_boosting (learning_rate=0.05, max_depth=3) | 0.358 | 0.269 | +0.089 | – | 0.726 | 0.647 | 0.1245 | 0.1299 | ⚠ warning |
+| gradient_boosting (learning_rate=0.05, max_depth=6) | 0.601 | 0.255 | +0.346 | – | 0.845 | 0.636 | 0.1061 | 0.1317 | ⚠ warning |
+| gradient_boosting (learning_rate=0.1, max_depth=3) | 0.408 | 0.268 | +0.140 | – | 0.752 | 0.644 | 0.1206 | 0.1303 | ⚠ warning |
+| gradient_boosting (learning_rate=0.1, max_depth=6) | 0.727 | 0.247 | +0.480 | – | 0.904 | 0.626 | 0.0928 | 0.1340 | ⚠ warning |
+
+9 of 16 models raised the warning (5 of them random forests). For the forests, the out-of-bag score stays close to the validation score, so their training score overstates them, as expected; validation decides.
+
 ## 2. Choice
 
-**Chosen: logreg_engineered (C=0.1)** (validation PR-AUC 0.276).
+**Chosen: random_forest (max_depth=None, min_samples_leaf=50)** (validation PR-AUC 0.284).
 
 Rule, fixed before training: highest validation PR-AUC; any model within 0.005 of the best
-(here 0.276) counts as tied, and among tied models the simplest wins (logistic regression
-before gradient boosting) because its weights can be read and explained.
+(here 0.284) counts as tied, and among tied models the simplest wins. Simplicity order,
+also fixed before training: `logreg_raw` < `logreg_engineered` < `random_forest` < `gradient_boosting`. Logistic regression comes first because its weights can be
+read and explained; a forest's trees are independent and averaged, while boosting builds trees in
+sequence with interacting settings.
 
 Not used, on purpose: `class_weight="balanced"`. It would push every probability up, hurt the Brier
 score and break the meaning of "16% means 16%". The imbalance is handled by the metric (PR-AUC) and
@@ -54,36 +94,17 @@ chosen to maximise F1 on validation. With 16% positives it is far below 0.5.
 
 | | threshold | precision | recall | F1 | appointments flagged |
 |---|---|---|---|---|---|
-| validation (where it was chosen) | 0.1688 | 0.241 | 0.593 | 0.343 | 39.7% |
-| test (same threshold, applied once) | 0.1688 | 0.246 | 0.597 | 0.349 | 39.9% |
+| validation (where it was chosen) | 0.1958 | 0.257 | 0.515 | 0.343 | 32.4% |
+| test | not scored yet | | | | |
 
-In words: of the appointments the model flags, about 25% are real no-shows
-(precision), and it catches about 60% of all no-shows (recall).
+## 4. Test set: not scored yet
 
-## 4. Test set: scored once, after every decision above
-
-| model | PR-AUC ↑ | ROC-AUC ↑ | Brier ↓ | mean prediction | gap closed (floor → oracle) |
-|---|---|---|---|---|---|
-| floor: floor_dummy | 0.164 | 0.500 | 0.1374 | 0.165 | 0% |
-| baseline: logreg_raw (C=1.0) | 0.267 | 0.649 | 0.1320 | 0.163 | 66% |
-| best logistic + engineered: logreg_engineered (C=0.1) | 0.280 | 0.663 | 0.1307 | 0.162 | 74% |
-| best gradient boosting: gradient_boosting (learning_rate=0.05, max_depth=3) | 0.268 | 0.662 | 0.1315 | 0.164 | 66% |
-| **chosen: logreg_engineered (C=0.1)** | 0.280 | 0.663 | 0.1307 | 0.162 | 74% |
-| oracle ceiling (true probability) | 0.321 | 0.714 | 0.1264 | 0.161 | 100% |
-
-PR-AUC on test: chosen 0.280 vs baseline 0.267 vs oracle
-0.321. Test rows were not used for tuning, model choice or the threshold.
+The test set is scored once, in the final evaluation step, after cross-validation and tuning are done.
+Until then no test number exists in this report, so none can influence a choice.
 
 ## 5. Did the improved model really beat the baseline?
 
-Test PR-AUC, chosen minus baseline: **+0.013**, 95% interval
-**[+0.001, +0.025]** (bootstrap over whole patients, 1000 resamples, seed 42).
-
-Verdict: **a real improvement: the whole 95% interval is above zero.**
-
-This verdict is computed from the numbers every time the report is generated. If a change to the data
-or the models ever makes the improvement disappear, the report says so; the code is not adjusted
-until it passes.
+Answered on the test set in the final evaluation step.
 
 ## 6. What this shows
 

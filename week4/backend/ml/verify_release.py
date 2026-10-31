@@ -4,7 +4,7 @@ Run:  python -m ml.verify_release      (exit code 0 = reproduced, 1 = something 
 
 It regenerates the dataset, the three reports and the model release in a temporary folder, then checks:
   level 1  dataset SHA-256 equals the one recorded in the committed metadata
-  level 2  eda.md, metrics.md and errors.md are identical; metadata metrics, threshold, schema, seed
+  level 2  eda.md, metrics.md, release-<version>.md and errors.md are identical; metadata metrics, threshold, schema, seed
            and estimator are identical
   level 3  the rebuilt and the committed model give the same probabilities (within 1e-9)
   level 4  the .joblib file is byte-identical, checked only on the platform and library versions that
@@ -43,8 +43,10 @@ def main() -> int:
     checks.append(("1", "dataset SHA-256 equals the committed metadata",
                    dataset_hash(df) == committed_meta["training_data"]["sha256"]))
 
+    checks.append(("2", f"{train.RELEASE_REPORT.name} regenerated identically",
+                   train.RELEASE_REPORT.read_text() == train.release_report(df)))
     for name, module, build in [("eda.md", eda, lambda: eda.build_report(df)),
-                                ("metrics.md", train, lambda: train.build_report(train.run(df))),
+                                ("metrics.md", train, lambda: train.comparison_report(df)),
                                 ("errors.md", errors, lambda: errors.build_report(errors.analyse(df)))]:
         checks.append(("2", f"{name} regenerated identically", module.REPORT.read_text() == build()))
 

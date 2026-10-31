@@ -1,5 +1,6 @@
-"""Step 4 evidence: models beat the floor, stay below the oracle, choices use validation only,
-the test set is touched once, and training is deterministic."""
+"""Week 3 Step 4 evidence, run on the served release's candidates: models beat the floor, stay below
+the oracle, choices use validation only, the test set is touched once, and training is deterministic.
+The Week 4 comparison (with the random forest) is tested in test_ml_compare.py."""
 
 import inspect
 
@@ -8,7 +9,7 @@ import pytest
 
 from ml import config, train
 from ml.data import generate
-from ml.models import CANDIDATES, build
+from ml.models import CANDIDATES, RELEASE_CANDIDATES, build
 from ml.preprocess import model_input
 from ml.split import split
 
@@ -20,7 +21,7 @@ def df():
 
 @pytest.fixture(scope="module")
 def result(df):
-    return train.run(df)
+    return train.run(df, candidates=RELEASE_CANDIDATES)
 
 
 def real(result):
@@ -62,9 +63,11 @@ def test_verdict_wording_for_every_outcome(difference, low, high, expected):
     assert train.Improvement(difference, low, high, 1000).verdict.startswith(expected)
 
 
-def test_the_grid_covers_floor_baseline_and_two_improved_families():
+def test_the_grid_covers_floor_baseline_and_three_improved_families():
     assert {c.family for c in CANDIDATES} == {"floor", "baseline", "improved"}
-    assert {c.name for c in CANDIDATES if c.family == "improved"} == {"logreg_engineered", "gradient_boosting"}
+    assert {c.name for c in CANDIDATES if c.family == "improved"} == {"logreg_engineered", "random_forest",
+                                                                       "gradient_boosting"}
+    assert "random_forest" not in {c.name for c in RELEASE_CANDIDATES}
 
 
 # ---- Selection and threshold use validation only ----
@@ -73,7 +76,7 @@ def test_choice_and_threshold_do_not_depend_on_test_labels(df, result):
     _, _, test = split(df)
     scrambled = df.copy()
     scrambled.loc[test.index, config.LABEL] = ~scrambled.loc[test.index, config.LABEL]  # flip every test label
-    again = train.run(scrambled)
+    again = train.run(scrambled, candidates=RELEASE_CANDIDATES)
     assert again.chosen == result.chosen
     assert again.threshold.value == result.threshold.value
     assert again.test != result.test  # the test scores do react, so the test really used test rows
@@ -82,7 +85,7 @@ def test_choice_and_threshold_do_not_depend_on_test_labels(df, result):
 def test_selection_rule_prefers_the_simpler_model_on_a_tie():
     from ml.models import Candidate
     simple = Candidate("improved", "logreg_engineered", True, (("C", 1.0),), complexity=1)
-    complex_ = Candidate("improved", "gradient_boosting", True, (), complexity=2)
+    complex_ = Candidate("improved", "gradient_boosting", True, (), complexity=3)
     scores = {simple: train.Scores(0.300, 0.7, 0.12, 0.16), complex_: train.Scores(0.303, 0.7, 0.12, 0.16)}
     assert train.select(scores) == simple  # within TIE_MARGIN -> simpler wins
     scores[complex_] = train.Scores(0.320, 0.7, 0.12, 0.16)
@@ -117,9 +120,9 @@ def test_training_is_deterministic(df, result):
                                   result.chosen_pipeline.predict_proba(model_input(validation)))
 
 
-def test_committed_report_is_up_to_date(result):
+def test_committed_release_report_is_up_to_date(result):
     # Fails if data, split, models or report changed without re-running `python -m ml.train`.
-    assert train.REPORT.read_text() == train.build_report(result)
+    assert train.RELEASE_REPORT.read_text() == train.build_report(result, train.RELEASE_TITLE)
 
 
 def test_full_model_survives_joblib_save_and_reload_in_a_fresh_process(df, result, tmp_path):

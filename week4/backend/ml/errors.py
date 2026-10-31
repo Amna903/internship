@@ -22,7 +22,7 @@ from sklearn.metrics import average_precision_score
 from . import config, train
 from .data import generate
 from .eda import lead_time_bucket
-from .models import build
+from .models import RELEASE_CANDIDATES, build
 from .preprocess import model_input
 from .split import split
 
@@ -159,7 +159,7 @@ class Analysis:
 
 def analyse(df: pd.DataFrame | None = None) -> Analysis:
     df = generate() if df is None else df
-    result = train.run(df)
+    result = train.run(df, candidates=RELEASE_CANDIDATES)
     pipeline, threshold = result.chosen_pipeline, result.threshold.value
     train_rows, validation, test = split(df)
     X_val, y_val = model_input(validation), validation[config.LABEL]

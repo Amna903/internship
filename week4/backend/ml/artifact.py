@@ -19,6 +19,7 @@ import scipy
 import sklearn
 
 from . import config, train
+from .models import RELEASE_CANDIDATES
 
 
 def file_sha256(path: Path) -> str:
@@ -40,7 +41,7 @@ def _scores(s: train.Scores) -> dict:
 
 
 def build(directory: Path = config.ARTIFACT_DIR) -> dict:
-    result = train.run()
+    result = train.run(candidates=RELEASE_CANDIDATES)
     model_path, meta_path = artifact_paths(directory)
     directory.mkdir(parents=True, exist_ok=True)
     joblib.dump(result.chosen_pipeline, model_path)

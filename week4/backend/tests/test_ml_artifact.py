@@ -14,6 +14,7 @@ import sklearn
 
 from ml import artifact, config, inference, train
 from ml.data import generate
+from ml.models import RELEASE_CANDIDATES
 from ml.preprocess import model_input
 from ml.split import split
 
@@ -71,13 +72,13 @@ def test_rebuild_is_byte_identical_on_the_same_platform(rebuilt, committed):
 
 def test_committed_model_equals_a_freshly_trained_one(committed):
     rows = sample_rows()
-    fresh = train.run().chosen_pipeline
+    fresh = train.run(candidates=RELEASE_CANDIDATES).chosen_pipeline
     np.testing.assert_allclose(committed.pipeline.predict_proba(rows), fresh.predict_proba(rows), rtol=0, atol=1e-9)
 
 
 def test_metadata_matches_the_file_and_the_training_run(committed):
     assert committed.metadata["artifact_sha256"] == artifact.file_sha256(MODEL)
-    result = train.run()
+    result = train.run(candidates=RELEASE_CANDIDATES)
     assert committed.metadata["metrics"]["validation"]["pr_auc"] == round(result.validation[result.chosen].pr_auc, 6)
     assert committed.metadata["decision"]["threshold"] == round(result.threshold.value, 6)
     assert committed.metadata["estimator"] == result.chosen.label

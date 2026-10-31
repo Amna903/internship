@@ -12,7 +12,8 @@ from ml.inference import get_model
 
 WEEK3 = Path(__file__).resolve().parents[2]
 README = (WEEK3 / "README.md").read_text()
-METRICS = (WEEK3 / "backend/ml/reports/metrics.md").read_text()
+# Week 3 numbers describe the served release, so they are checked against its report.
+METRICS = (WEEK3 / f"backend/ml/reports/release-{config.MODEL_VERSION}.md").read_text()
 ERRORS = (WEEK3 / "backend/ml/reports/errors.md").read_text()
 META = json.loads((WEEK3 / "backend/ml/artifacts/no-show-1.0.0.json").read_text())
 WEEK3_SECTION = README.split("# Week 2: Role-Based")[0]
