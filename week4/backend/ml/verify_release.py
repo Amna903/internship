@@ -4,7 +4,8 @@ Run:  python -m ml.verify_release      (exit code 0 = reproduced, 1 = something 
 
 It regenerates the dataset, the three reports and the model release in a temporary folder, then checks:
   level 1  dataset SHA-256 equals the one recorded in the committed metadata
-  level 2  eda.md, release-<version>.md and errors.md are identical; tuning.json, tuning.md and metrics.md
+  level 2  eda.md, release-<version>.md and errors.md are identical; tuning.json has the same choice exactly,
+           CV means and bar within 0.002, single fold scores within 0.01; tuning.md and metrics.md
            have the same text and choice, with scores within 0.002 and cut-off figures within 0.005
            (forests differ slightly between CPUs); metadata metrics, threshold, schema, seed and
            estimator are identical
@@ -80,6 +81,41 @@ def reports_match(committed: str, rebuilt: str) -> tuple[bool, str]:
                   f"cut-off figures within {CUTOFF_TOLERANCE} (largest {worst['cut-off figures']:.3f})")
 
 
+# Tolerances for a rebuilt search, by what each number is used for. CI measured on Linux vs Mac: means moved
+# at most 0.0009, single fold scores up to 0.0033, the bar 0.0002.
+# The chosen setting decides the model: it must be EXACTLY the same.
+# CV means and the one-standard-error bar are what the rule compares: averages over the whole train part,
+# so a forest's platform noise moves them about 0.001. Same strict bar as other scores.
+TUNING_MEAN_TOLERANCE = SCORE_TOLERANCE
+# A single fold score is computed on a fifth of the rows (~2,400), so its noise is about sqrt(5) = 2.2 times
+# larger than a mean's, and no decision reads it on its own. Loose sanity bar: a large drift still fails.
+TUNING_FOLD_TOLERANCE = 0.01
+
+
+def tuning_matches(committed: dict, rebuilt: dict) -> tuple[bool, str]:
+    """Same design and choice exactly; means and bar strictly; single fold scores only loosely."""
+    for key in ["seed", "n_splits", "n_iter", "train_rows", "search_space", "chosen"]:
+        if committed[key] != rebuilt[key]:
+            return False, f"{key} differs: {committed[key]} became {rebuilt[key]}"
+    a_rows = [(json.dumps(x["params"]), x) for x in committed["search"]] + [(g["label"], g) for g in committed["grid_cv"]]
+    b_rows = [(json.dumps(x["params"]), x) for x in rebuilt["search"]] + [(g["label"], g) for g in rebuilt["grid_cv"]]
+    if [k for k, _ in a_rows] != [k for k, _ in b_rows]:
+        return False, "different settings were drawn or cross-validated"
+    if abs(committed["bar"] - rebuilt["bar"]) > TUNING_MEAN_TOLERANCE:
+        return False, f"one-SE bar {committed['bar']:.4f} became {rebuilt['bar']:.4f}"
+    worst_mean = worst_fold = 0.0
+    for (key, a), (_, b) in zip(a_rows, b_rows):
+        mean_move = abs(a["mean"] - b["mean"])
+        if mean_move > TUNING_MEAN_TOLERANCE:
+            return False, f"CV mean of {key} {a['mean']:.4f} became {b['mean']:.4f}"
+        fold_move = max(abs(x - y) for x, y in zip(a["fold_scores"], b["fold_scores"]))
+        if fold_move > TUNING_FOLD_TOLERANCE:
+            return False, f"a fold score of {key} moved {fold_move:.4f}"
+        worst_mean, worst_fold = max(worst_mean, mean_move), max(worst_fold, fold_move)
+    return True, (f"same choice; means and bar within {TUNING_MEAN_TOLERANCE} (largest {worst_mean:.4f}), "
+                  f"fold scores within {TUNING_FOLD_TOLERANCE} (largest {worst_fold:.4f})")
+
+
 def tuning_diagnostics(committed: dict, rebuilt: dict) -> str:
     """Facts about a rebuilt search, printed whether or not the checks pass: same choice? how far did the
     means (what the rule uses) and single fold scores move? did any setting cross the one-SE bar?"""
@@ -124,7 +160,7 @@ def main() -> int:
         checks.append(("2", f"{name} regenerated identically", module.REPORT.read_text() == build()))
     tuning = tune.run(df)
     committed_tuning = json.loads(tune.RESULT.read_text())
-    ok, reason = reports_match(tune.RESULT.read_text(), json.dumps(tuning, indent=2) + "\n")
+    ok, reason = tuning_matches(committed_tuning, tuning)
     checks.append(("2", f"tuning.json (30-draw search) regenerated: {reason}", ok))
     print(tuning_diagnostics(committed_tuning, tuning))
     step2 = train.run(df, candidates=GRID_CANDIDATES, score_test=False)

@@ -13,7 +13,9 @@ from ml import config, train, tune
 from ml.data import generate
 from ml.models import CANDIDATES, GRID_CANDIDATES
 from ml.split import split
-from ml.verify_release import reports_match
+import copy
+
+from ml.verify_release import reports_match, tuning_matches
 
 
 @pytest.fixture(scope="module")
@@ -145,3 +147,40 @@ def test_committed_report_matches_the_committed_result(committed):
     validation = {c.label: s.pr_auc for c, s in step2.validation.items()}
     ok, reason = reports_match(tune.REPORT.read_text(), tune.build_report(committed, validation))
     assert ok, reason
+
+
+# ---- Reproducibility check for a rebuilt search (tolerances by what each number is used for) ----
+
+def test_identical_search_matches(committed):
+    assert tuning_matches(committed, copy.deepcopy(committed))[0]
+
+
+def test_platform_sized_noise_passes(committed):
+    """CI on Linux: means moved 0.0009, one fold score 0.0033, the bar 0.0002; same choice."""
+    rebuilt = copy.deepcopy(committed)
+    rebuilt["search"][0]["fold_scores"][0] -= 0.0033
+    rebuilt["search"][0]["mean"] -= 0.0009
+    rebuilt["bar"] += 0.0002
+    assert tuning_matches(committed, rebuilt)[0]
+
+
+def test_a_different_choice_fails_however_small_the_numbers(committed):
+    rebuilt = copy.deepcopy(committed)
+    rebuilt["chosen"] = {**rebuilt["chosen"], "n_estimators": 100}
+    assert not tuning_matches(committed, rebuilt)[0]
+
+
+def test_a_mean_or_the_bar_beyond_0_002_fails(committed):
+    moved_mean = copy.deepcopy(committed)
+    moved_mean["grid_cv"][3]["mean"] += 0.003
+    moved_bar = copy.deepcopy(committed)
+    moved_bar["bar"] += 0.003
+    assert not tuning_matches(committed, moved_mean)[0]
+    assert not tuning_matches(committed, moved_bar)[0]
+
+
+def test_a_large_fold_drift_still_fails(committed):
+    rebuilt = copy.deepcopy(committed)
+    rebuilt["grid_cv"][0]["fold_scores"][2] += 0.02
+    assert not tuning_matches(committed, rebuilt)[0]
+
