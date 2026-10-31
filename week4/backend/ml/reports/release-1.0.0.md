@@ -70,7 +70,7 @@ training row is scored only by the trees that never saw it (number in brackets: 
 
 Rule, fixed before training: highest validation PR-AUC; any model within 0.005 of the best
 (here 0.276) counts as tied, and among tied models the simplest wins. Simplicity order,
-also fixed before training: `logreg_raw` < `logreg_engineered` < `random_forest` < `gradient_boosting`. Logistic regression comes first because its weights can be
+fixed before training: `logreg_raw` < `logreg_engineered` < `random_forest` < `gradient_boosting`. Logistic regression comes first because its weights can be
 read and explained; a forest's trees are independent and averaged, while boosting builds trees in
 sequence with interacting settings. Within the random forests: shallower trees first, then larger
 leaves (both limit memorising); the number of trees doesn't cause overfitting, only a steadier vote, so

@@ -4,9 +4,10 @@ Run:  python -m ml.verify_release      (exit code 0 = reproduced, 1 = something 
 
 It regenerates the dataset, the three reports and the model release in a temporary folder, then checks:
   level 1  dataset SHA-256 equals the one recorded in the committed metadata
-  level 2  eda.md, release-<version>.md and errors.md are identical; metrics.md has the same text and
-           choice; scores within 0.002, cut-off figures within 0.005 (forests differ slightly between CPUs); metadata metrics, threshold, schema, seed
-           and estimator are identical
+  level 2  eda.md, release-<version>.md and errors.md are identical; tuning.json, tuning.md and metrics.md
+           have the same text and choice, with scores within 0.002 and cut-off figures within 0.005
+           (forests differ slightly between CPUs); metadata metrics, threshold, schema, seed and
+           estimator are identical
   level 3  the rebuilt and the committed model give the same probabilities (within 1e-9)
   level 4  the .joblib file is byte-identical, checked only on the platform and library versions that
            built the committed file (floating-point bits can differ across CPUs); reported as skipped
@@ -22,7 +23,8 @@ from pathlib import Path
 
 import numpy as np
 
-from . import artifact, config, eda, errors, train
+from . import artifact, config, eda, errors, train, tune
+from .models import GRID_CANDIDATES
 from .data import dataset_hash, generate
 from .inference import load
 from .preprocess import model_input
@@ -100,6 +102,13 @@ def main() -> int:
     for name, module, build in [("eda.md", eda, lambda: eda.build_report(df)),
                                 ("errors.md", errors, lambda: errors.build_report(errors.analyse(df)))]:
         checks.append(("2", f"{name} regenerated identically", module.REPORT.read_text() == build()))
+    tuning = tune.run(df)
+    ok, reason = reports_match(tune.RESULT.read_text(), json.dumps(tuning, indent=2) + "\n")
+    checks.append(("2", f"tuning.json (30-draw search) regenerated: {reason}", ok))
+    step2 = train.run(df, candidates=GRID_CANDIDATES, score_test=False)
+    ok, reason = reports_match(tune.REPORT.read_text(),
+                               tune.build_report(tuning, {c.label: s.pr_auc for c, s in step2.validation.items()}))
+    checks.append(("2", f"tuning.md regenerated: {reason}", ok))
     ok, reason = reports_match(train.REPORT.read_text(), train.comparison_report(df))
     checks.append(("2", f"metrics.md regenerated: {reason}", ok))
 

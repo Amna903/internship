@@ -4,6 +4,7 @@ The grid is small and fixed in advance on purpose: quick to run, easy to explain
 overfit the validation set by trying hundreds of settings.
 """
 
+import json
 from dataclasses import dataclass
 
 from sklearn.dummy import DummyClassifier
@@ -30,15 +31,17 @@ class Candidate:
         """Tie-break between settings of the SAME family (lower = simpler), applied after `complexity`.
 
         Random forest: shallower trees first, then larger leaves; both limit how much a tree can memorise.
-        The number of trees does not cause overfitting (more trees only make the vote steadier), so on a
-        remaining tie MORE trees win. Other families have no within-family order: highest score wins.
+        Then fewer columns tried per split (max_features): more random trees, less memorising. The number
+        of trees does not cause overfitting (more trees only make the vote steadier), so on a remaining
+        tie MORE trees win. Other families have no within-family order: highest score wins.
         """
         if self.name != "random_forest":
             return ()
         p = dict(self.params)
         depth = p.get("max_depth")
+        features = p.get("max_features", "sqrt")
         return (float("inf") if depth is None else depth, -p.get("min_samples_leaf", 1),
-                -p.get("n_estimators", RF_TREES))
+                SQRT_FEATURE_SHARE if features == "sqrt" else features, -p.get("n_estimators", RF_TREES))
 
     @property
     def label(self) -> str:
@@ -61,8 +64,8 @@ def _classifier(candidate: Candidate):
         # No class_weight, for the same reason as logistic regression.
         # n_jobs=1: with several threads, predict_proba adds the trees' outputs in whatever order the threads
         # finish, so repeated runs differ in the last digits, enough to flip a near-tie between two forests.
-        return RandomForestClassifier(n_estimators=RF_TREES, oob_score=True, n_jobs=1, random_state=config.SEED,
-                                      **dict(candidate.params))
+        return RandomForestClassifier(**{"n_estimators": RF_TREES, "oob_score": True, "n_jobs": 1,
+                                         "random_state": config.SEED, **dict(candidate.params)})
     if candidate.name == "gradient_boosting":
         # early_stopping=False: the automatic early stopping would carve its own random validation
         # set out of the training rows (ignoring patient groups) and add a second source of randomness.
@@ -86,11 +89,13 @@ def build(candidate: Candidate) -> Pipeline:
 SIMPLICITY_ORDER = ["logreg_raw", "logreg_engineered", "random_forest", "gradient_boosting"]
 
 RF_TREES = 300
+# "sqrt" tries about 5 of the 28 model columns per split; as a share, for ordering against 0.33, 0.5, 1.0.
+SQRT_FEATURE_SHARE = 0.18
 C_GRID = [0.1, 1.0, 10.0]
 FOREST_GRID = [(("max_depth", depth), ("min_samples_leaf", leaf)) for depth in (6, 10, None) for leaf in (20, 50)]
 BOOSTING_GRID = [(("learning_rate", lr), ("max_depth", depth)) for lr in (0.05, 0.1) for depth in (3, 6)]
 
-CANDIDATES: list[Candidate] = (
+GRID_CANDIDATES: list[Candidate] = (
     [Candidate("floor", "floor_dummy", engineered=False)]
     + [Candidate("baseline", "logreg_raw", engineered=False, params=(("C", c),)) for c in C_GRID]
     + [Candidate("improved", "logreg_engineered", engineered=True, params=(("C", c),), complexity=1) for c in C_GRID]
@@ -101,4 +106,18 @@ CANDIDATES: list[Candidate] = (
 # The served release (v1.0.0) was chosen from Week 3's candidates. Until Step 4 releases a new version,
 # the release and its error report are rebuilt from this list, so v1.0.0 stays exactly reproducible
 # while metrics.md compares every model.
-RELEASE_CANDIDATES: list[Candidate] = [c for c in CANDIDATES if c.name != "random_forest"]
+RELEASE_CANDIDATES: list[Candidate] = [c for c in GRID_CANDIDATES if c.name != "random_forest"]
+
+# Step 3: the forest setting chosen by `python -m ml.tune` on training folds joins the comparison. It is
+# read from the committed tuning result, so training doesn't rerun the search.
+TUNING_RESULT = config.ML_DIR / "reports" / "tuning.json"
+
+
+def tuned_candidates() -> list[Candidate]:
+    if not TUNING_RESULT.exists():
+        return []
+    chosen = json.loads(TUNING_RESULT.read_text())["chosen"]
+    return [Candidate("improved", "random_forest", engineered=True, params=tuple(chosen.items()), complexity=2)]
+
+
+CANDIDATES: list[Candidate] = GRID_CANDIDATES + tuned_candidates()

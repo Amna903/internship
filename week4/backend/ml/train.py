@@ -20,6 +20,9 @@ The oracle row (the generator's true probabilities) is the best score any model 
 
 from dataclasses import dataclass
 
+import json
+import math
+
 import numpy as np
 import pandas as pd
 from sklearn.metrics import average_precision_score, brier_score_loss, precision_recall_curve, roc_auc_score
@@ -27,7 +30,7 @@ from sklearn.pipeline import Pipeline
 
 from . import config
 from .data import dataset_hash, generate
-from .models import CANDIDATES, RELEASE_CANDIDATES, SIMPLICITY_ORDER, Candidate, build
+from .models import CANDIDATES, RELEASE_CANDIDATES, SIMPLICITY_ORDER, TUNING_RESULT, Candidate, build
 from .preprocess import model_input
 from .split import split
 
@@ -92,6 +95,8 @@ class TrainingResult:
     test_threshold: Threshold | None
     improvement: "Improvement | None"  # chosen vs baseline on test, with a bootstrap interval; None if not scored
     fitted: dict  # Candidate -> fitted Pipeline
+    cv: dict | None = None  # Candidate -> fold PR-AUCs; when given, the choice is made by cross-validation
+    cv_bar: float | None = None  # one-standard-error bar used for the CV choice
 
 
 def score(y_true, probability) -> Scores:
@@ -143,6 +148,43 @@ def select(validation: dict) -> Candidate:
     return min(contenders, key=lambda c: (c.complexity, c.within_family_simplicity, -real[c].pr_auc))
 
 
+# ---- Week 4 Step 3: choose by cross-validation ----
+# Changed after Step 3's results (recorded in docs/REQUIREMENTS.md): one validation draw of ~4,000 rows
+# was too noisy to separate close models; five patient-grouped folds of the 12,126 training rows are
+# better evidence. Validation is kept as a confirmation check and for the decision threshold.
+CONFIRMATION_SDS = 2  # the chosen model's validation PR-AUC should lie within CV mean +/- 2 fold SDs
+
+
+def load_cv_scores(candidates: list[Candidate] = CANDIDATES) -> dict:
+    """Candidate -> fold PR-AUCs, from the committed `python -m ml.tune` result (train folds only)."""
+    result = json.loads(TUNING_RESULT.read_text())
+    by_label = {g["label"]: g["fold_scores"] for g in result["grid_cv"]}
+    tuned = next(r["fold_scores"] for r in result["search"] if r["params"] == result["chosen"])
+    out = {}
+    for c in candidates:
+        if c.label in by_label:
+            out[c] = by_label[c.label]
+        elif dict(c.params) == result["chosen"]:
+            out[c] = tuned
+    return out
+
+
+def select_by_cv(cv: dict) -> tuple[Candidate, float]:
+    """One-standard-error rule across every family: the bar is the best mean CV PR-AUC minus one standard
+    error of that mean; among real models at or above it, the simplest wins (family, then settings)."""
+    real = {c: s for c, s in cv.items() if c.family != "floor"}
+    means = {c: float(np.mean(s)) for c, s in real.items()}
+    best = max(means, key=means.get)
+    bar = means[best] - float(np.std(real[best], ddof=1)) / math.sqrt(len(real[best]))
+    eligible = [c for c in real if means[c] >= bar]
+    return min(eligible, key=lambda c: (c.complexity, c.within_family_simplicity, -means[c])), bar
+
+
+def confirmed_by_validation(fold_scores, validation_pr_auc: float) -> bool:
+    mean, sd = float(np.mean(fold_scores)), float(np.std(fold_scores, ddof=1))
+    return bool(abs(validation_pr_auc - mean) <= CONFIRMATION_SDS * sd)
+
+
 def best_of(validation: dict, family: str = None, name: str = None) -> Candidate:
     pool = {c: s for c, s in validation.items() if (family is None or c.family == family)
             and (name is None or c.name == name)}
@@ -184,7 +226,9 @@ def evaluate_on_test(fitted: dict, picks: dict, test: pd.DataFrame, threshold: f
 
 
 def run(df: pd.DataFrame | None = None, candidates: list[Candidate] = CANDIDATES,
-        score_test: bool = True) -> TrainingResult:
+        score_test: bool = True, cv: dict | None = None) -> TrainingResult:
+    """With `cv` (fold scores per candidate), the choice is made by cross-validation (Week 4); without
+    it, by validation (Week 3's rule, still used to rebuild the served release exactly)."""
     df = generate() if df is None else df
     train, validation, test = split(df)
     X_train, y_train = model_input(train), train[config.LABEL]
@@ -200,7 +244,7 @@ def run(df: pd.DataFrame | None = None, candidates: list[Candidate] = CANDIDATES
         if oob is not None:
             oob_scores[candidate] = score(y_train, oob)
 
-    chosen = select(val_scores)
+    chosen, cv_bar = select_by_cv(cv) if cv is not None else (select(val_scores), None)
     chosen_val_probability = fitted[chosen].predict_proba(X_val)[:, 1]
     threshold_value = choose_threshold(y_val, chosen_val_probability)
 
@@ -232,6 +276,8 @@ def run(df: pd.DataFrame | None = None, candidates: list[Candidate] = CANDIDATES
         test_threshold=test_threshold,
         improvement=improvement,
         fitted=fitted,
+        cv=cv,
+        cv_bar=cv_bar,
     )
 
 
@@ -307,6 +353,37 @@ COMPARISON_TITLE = "Model comparison: synthetic appointment no-shows"
 RELEASE_TITLE = (f"Served release {config.MODEL_NAME}-{config.MODEL_VERSION}: how it was chosen and its test score\n\n"
                  "> Rebuilt from the candidates this release was chosen from (Week 3), so the served model stays\n"
                  "> exactly reproducible. The Week 4 comparison of every model is in [metrics.md](metrics.md).")
+
+
+def _choice_text(result: TrainingResult, chosen_val: Scores, best_real: float) -> str:
+    if result.cv is None:
+        return (f"**Chosen: {result.chosen.label}** (validation PR-AUC {chosen_val.pr_auc:.3f}).\n\n"
+                f"Rule, fixed before training: highest validation PR-AUC; any model within {TIE_MARGIN} of the best\n"
+                f"(here {best_real:.3f}) counts as tied, and among tied models the simplest wins.")
+    real = [c for c in result.validation if c.family != "floor" and c in result.cv]
+    rows = "\n".join(
+        f"| {'**' + c.label + '**' if c == result.chosen else c.label} | {np.mean(result.cv[c]):.3f} ± "
+        f"{np.std(result.cv[c], ddof=1):.3f} | {'yes' if np.mean(result.cv[c]) >= result.cv_bar else ''} "
+        f"| {result.validation[c].pr_auc:.3f} |"
+        for c in sorted(real, key=lambda c: (c.complexity, c.label)))
+    folds = result.cv[result.chosen]
+    mean, sd = float(np.mean(folds)), float(np.std(folds, ddof=1))
+    confirmed = confirmed_by_validation(folds, chosen_val.pr_auc)
+    return f"""**Chosen: {result.chosen.label}** (CV PR-AUC {mean:.3f} ± {sd:.3f}; validation PR-AUC {chosen_val.pr_auc:.3f}).
+
+Rule (Week 4, Step 3): choose by **cross-validation** on the training rows, five patient-grouped,
+stratified folds ([tuning.md](tuning.md)). The bar is the best mean CV PR-AUC minus one standard error
+of that mean, here **{result.cv_bar:.3f}**; every model at or above it counts as tied, and the simplest
+wins. This replaced choosing by the single validation score after Step 3 showed one validation draw was
+too noisy to separate close models (see docs/REQUIREMENTS.md, "Lessons").
+
+| model | CV PR-AUC (mean ± sd) | at or above bar | validation PR-AUC |
+|---|---|---|---|
+{rows}
+
+Confirmation check on validation, fixed with the rule: the chosen model's validation PR-AUC should lie
+within its CV mean ± {CONFIRMATION_SDS} fold SDs ({mean - CONFIRMATION_SDS * sd:.3f} to {mean + CONFIRMATION_SDS * sd:.3f}).
+Result: {chosen_val.pr_auc:.3f}, **{'confirmed' if confirmed else 'NOT confirmed: investigate before the final evaluation'}**."""
 
 
 def build_report(result: TrainingResult, title: str = COMPARISON_TITLE) -> str:
@@ -385,11 +462,8 @@ else "See the table for which models and by how much; validation decides." if wa
 
 ## 2. Choice
 
-**Chosen: {result.chosen.label}** (validation PR-AUC {chosen_val.pr_auc:.3f}).
-
-Rule, fixed before training: highest validation PR-AUC; any model within {TIE_MARGIN} of the best
-(here {best_real:.3f}) counts as tied, and among tied models the simplest wins. Simplicity order,
-also fixed before training: {simplicity}. Logistic regression comes first because its weights can be
+{_choice_text(result, chosen_val, best_real)} Simplicity order,
+fixed before training: {simplicity}. Logistic regression comes first because its weights can be
 read and explained; a forest's trees are independent and averaged, while boosting builds trees in
 sequence with interacting settings. Within the random forests: shallower trees first, then larger
 leaves (both limit memorising); the number of trees doesn't cause overfitting, only a steadier vote, so
@@ -424,8 +498,13 @@ chosen to maximise F1 on validation. With 16% positives it is far below 0.5.
 """
 
 
+def comparison_run(df: pd.DataFrame | None = None) -> TrainingResult:
+    """Every candidate, chosen by cross-validation, with no test scoring (until the final evaluation)."""
+    return run(df, score_test=False, cv=load_cv_scores())
+
+
 def comparison_report(df: pd.DataFrame | None = None) -> str:
-    return build_report(run(df, score_test=False))
+    return build_report(comparison_run(df))
 
 
 def release_report(df: pd.DataFrame | None = None) -> str:

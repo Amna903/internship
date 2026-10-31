@@ -20,7 +20,7 @@ def df():
 
 @pytest.fixture(scope="module")
 def comparison(df):
-    return train.run(df, score_test=False)
+    return train.comparison_run(df)
 
 
 def forests(result):
@@ -187,3 +187,49 @@ def test_only_cut_off_figures_get_the_looser_tolerance():
     # The same 0.004 move outside section 3 is a score, and fails.
     outside = section.replace("## 3. Decision threshold", "## 1. Validation")
     assert not reports_match(outside, outside.replace("0.526", "0.522"))[0]
+
+
+# ---- Step 3 rule: choose by cross-validation, confirm on validation ----
+
+def test_comparison_is_chosen_by_cross_validation_with_the_one_standard_error_rule(comparison):
+    assert comparison.cv is not None
+    chosen, bar = train.select_by_cv(comparison.cv)
+    assert comparison.chosen == chosen and comparison.cv_bar == bar
+
+
+def test_cv_scores_come_from_the_committed_tuning_result_for_every_real_candidate(comparison):
+    real = {c for c in comparison.validation if c.family != "floor"}
+    assert real <= set(comparison.cv)
+    assert all(len(s) == 5 for s in comparison.cv.values())
+
+
+def _lr(name, complexity, c=1.0):
+    return Candidate("improved" if complexity else "baseline", name, complexity > 0, (("C", c),), complexity=complexity)
+
+
+def test_cv_rule_picks_the_simplest_family_within_one_standard_error():
+    raw, engineered = _lr("logreg_raw", 0), _lr("logreg_engineered", 1)
+    # The bar uses the BEST model's standard error: engineered mean 0.287, SE 0.0054 -> bar 0.2816.
+    cv = {raw: [0.28, 0.29, 0.27, 0.30, 0.285], engineered: [0.30, 0.27, 0.29, 0.28, 0.295]}
+    assert train.select_by_cv(cv)[0] == raw  # raw (0.285) is above the bar, and simpler
+    cv[engineered] = [0.33, 0.30, 0.32, 0.31, 0.325]
+    assert train.select_by_cv(cv)[0] == engineered  # bar 0.3116: raw falls below it
+
+
+def test_cv_rule_ignores_the_floor():
+    floor = Candidate("floor", "floor_dummy", False)
+    raw = _lr("logreg_raw", 0)
+    assert train.select_by_cv({floor: [0.9] * 5, raw: [0.27] * 4 + [0.28]})[0] == raw
+
+
+@pytest.mark.parametrize("validation, confirmed", [(0.275, True), (0.255, True), (0.250, False), (0.300, False)])
+def test_validation_confirmation_check(validation, confirmed):
+    folds = [0.27, 0.28, 0.26, 0.29, 0.275]  # mean 0.275, sd 0.0112: confirmed from 0.2526 to 0.2974
+    assert train.confirmed_by_validation(folds, validation) is confirmed
+
+
+def test_report_states_the_cv_rule_the_bar_and_the_confirmation(comparison):
+    report = train.build_report(comparison)
+    assert "choose by **cross-validation**" in report
+    assert f"**{comparison.cv_bar:.3f}**" in report
+    assert "**confirmed**" in report or "NOT confirmed" in report

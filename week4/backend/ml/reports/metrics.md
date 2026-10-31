@@ -25,14 +25,15 @@ How to read the columns:
 | floor_dummy | 0.162 | 0.500 | 0.1355 | 0.165 | 0% |
 | logreg_raw (C=0.1) | 0.261 | 0.645 | 0.1304 | 0.161 | 55% |
 | logreg_raw (C=1.0) | 0.261 | 0.645 | 0.1304 | 0.161 | 55% |
-| logreg_raw (C=10.0) | 0.261 | 0.645 | 0.1304 | 0.161 | 55% |
+| **logreg_raw (C=10.0)** | 0.261 | 0.645 | 0.1304 | 0.161 | 55% |
 | logreg_engineered (C=0.1) | 0.276 | 0.655 | 0.1292 | 0.162 | 64% |
 | logreg_engineered (C=1.0) | 0.275 | 0.655 | 0.1292 | 0.162 | 64% |
 | logreg_engineered (C=10.0) | 0.275 | 0.655 | 0.1293 | 0.162 | 64% |
 | random_forest (max_depth=10, min_samples_leaf=20) | 0.284 | 0.649 | 0.1296 | 0.164 | 68% |
 | random_forest (max_depth=10, min_samples_leaf=50) | 0.284 | 0.651 | 0.1298 | 0.164 | 69% |
+| random_forest (max_depth=4, min_samples_leaf=50, max_features=0.33, n_estimators=300) | 0.273 | 0.644 | 0.1306 | 0.164 | 62% |
 | random_forest (max_depth=6, min_samples_leaf=20) | 0.278 | 0.649 | 0.1302 | 0.164 | 65% |
-| **random_forest (max_depth=6, min_samples_leaf=50)** | 0.281 | 0.649 | 0.1301 | 0.164 | 67% |
+| random_forest (max_depth=6, min_samples_leaf=50) | 0.281 | 0.649 | 0.1301 | 0.164 | 67% |
 | random_forest (max_depth=None, min_samples_leaf=20) | 0.279 | 0.648 | 0.1298 | 0.164 | 66% |
 | random_forest (max_depth=None, min_samples_leaf=50) | 0.284 | 0.651 | 0.1298 | 0.164 | 69% |
 | gradient_boosting (learning_rate=0.05, max_depth=3) | 0.269 | 0.647 | 0.1299 | 0.163 | 60% |
@@ -62,6 +63,7 @@ training row is scored only by the trees that never saw it (number in brackets: 
 | logreg_engineered (C=10.0) | 0.286 | 0.275 | +0.011 | – | 0.683 | 0.655 | 0.1295 | 0.1293 |  |
 | random_forest (max_depth=10, min_samples_leaf=20) | 0.431 | 0.284 | +0.147 | 0.267 (-0.017) | 0.774 | 0.649 | 0.1215 | 0.1296 | ⚠ warning |
 | random_forest (max_depth=10, min_samples_leaf=50) | 0.357 | 0.284 | +0.073 | 0.271 (-0.013) | 0.733 | 0.651 | 0.1259 | 0.1298 | ⚠ warning |
+| random_forest (max_depth=4, min_samples_leaf=50, max_features=0.33, n_estimators=300) | 0.298 | 0.273 | +0.025 | 0.264 (-0.009) | 0.685 | 0.644 | 0.1301 | 0.1306 |  |
 | random_forest (max_depth=6, min_samples_leaf=20) | 0.343 | 0.278 | +0.066 | 0.268 (-0.009) | 0.715 | 0.649 | 0.1277 | 0.1302 | ⚠ warning |
 | random_forest (max_depth=6, min_samples_leaf=50) | 0.323 | 0.281 | +0.042 | 0.269 (-0.011) | 0.706 | 0.649 | 0.1285 | 0.1301 |  |
 | random_forest (max_depth=None, min_samples_leaf=20) | 0.482 | 0.279 | +0.203 | 0.268 (-0.011) | 0.813 | 0.648 | 0.1177 | 0.1298 | ⚠ warning |
@@ -71,15 +73,42 @@ training row is scored only by the trees that never saw it (number in brackets: 
 | gradient_boosting (learning_rate=0.1, max_depth=3) | 0.408 | 0.268 | +0.140 | – | 0.752 | 0.644 | 0.1206 | 0.1303 | ⚠ warning |
 | gradient_boosting (learning_rate=0.1, max_depth=6) | 0.727 | 0.247 | +0.480 | – | 0.904 | 0.626 | 0.0928 | 0.1340 | ⚠ warning |
 
-9 of 16 models raised the warning (5 of them random forests). For the forests, the out-of-bag score stays close to the validation score, so their training score overstates them, as expected; validation decides.
+9 of 17 models raised the warning (5 of them random forests). For the forests, the out-of-bag score stays close to the validation score, so their training score overstates them, as expected; validation decides.
 
 ## 2. Choice
 
-**Chosen: random_forest (max_depth=6, min_samples_leaf=50)** (validation PR-AUC 0.281).
+**Chosen: logreg_raw (C=10.0)** (CV PR-AUC 0.275 ± 0.019; validation PR-AUC 0.261).
 
-Rule, fixed before training: highest validation PR-AUC; any model within 0.005 of the best
-(here 0.284) counts as tied, and among tied models the simplest wins. Simplicity order,
-also fixed before training: `logreg_raw` < `logreg_engineered` < `random_forest` < `gradient_boosting`. Logistic regression comes first because its weights can be
+Rule (Week 4, Step 3): choose by **cross-validation** on the training rows, five patient-grouped,
+stratified folds ([tuning.md](tuning.md)). The bar is the best mean CV PR-AUC minus one standard error
+of that mean, here **0.275**; every model at or above it counts as tied, and the simplest
+wins. This replaced choosing by the single validation score after Step 3 showed one validation draw was
+too noisy to separate close models (see docs/REQUIREMENTS.md, "Lessons").
+
+| model | CV PR-AUC (mean ± sd) | at or above bar | validation PR-AUC |
+|---|---|---|---|
+| logreg_raw (C=0.1) | 0.275 ± 0.019 | yes | 0.261 |
+| logreg_raw (C=1.0) | 0.275 ± 0.019 | yes | 0.261 |
+| **logreg_raw (C=10.0)** | 0.275 ± 0.019 | yes | 0.261 |
+| logreg_engineered (C=0.1) | 0.283 ± 0.018 | yes | 0.276 |
+| logreg_engineered (C=1.0) | 0.283 ± 0.019 | yes | 0.275 |
+| logreg_engineered (C=10.0) | 0.283 ± 0.019 | yes | 0.275 |
+| random_forest (max_depth=10, min_samples_leaf=20) | 0.268 ± 0.011 |  | 0.284 |
+| random_forest (max_depth=10, min_samples_leaf=50) | 0.269 ± 0.012 |  | 0.284 |
+| random_forest (max_depth=4, min_samples_leaf=50, max_features=0.33, n_estimators=300) | 0.268 ± 0.017 |  | 0.273 |
+| random_forest (max_depth=6, min_samples_leaf=20) | 0.270 ± 0.013 |  | 0.278 |
+| random_forest (max_depth=6, min_samples_leaf=50) | 0.270 ± 0.013 |  | 0.281 |
+| random_forest (max_depth=None, min_samples_leaf=20) | 0.268 ± 0.010 |  | 0.279 |
+| random_forest (max_depth=None, min_samples_leaf=50) | 0.269 ± 0.013 |  | 0.284 |
+| gradient_boosting (learning_rate=0.05, max_depth=3) | 0.267 ± 0.013 |  | 0.269 |
+| gradient_boosting (learning_rate=0.05, max_depth=6) | 0.245 ± 0.013 |  | 0.255 |
+| gradient_boosting (learning_rate=0.1, max_depth=3) | 0.257 ± 0.013 |  | 0.268 |
+| gradient_boosting (learning_rate=0.1, max_depth=6) | 0.240 ± 0.012 |  | 0.247 |
+
+Confirmation check on validation, fixed with the rule: the chosen model's validation PR-AUC should lie
+within its CV mean ± 2 fold SDs (0.238 to 0.313).
+Result: 0.261, **confirmed**. Simplicity order,
+fixed before training: `logreg_raw` < `logreg_engineered` < `random_forest` < `gradient_boosting`. Logistic regression comes first because its weights can be
 read and explained; a forest's trees are independent and averaged, while boosting builds trees in
 sequence with interacting settings. Within the random forests: shallower trees first, then larger
 leaves (both limit memorising); the number of trees doesn't cause overfitting, only a steadier vote, so
@@ -97,7 +126,7 @@ chosen to maximise F1 on validation. With 16% positives it is far below 0.5.
 
 | | threshold | precision | recall | F1 | appointments flagged |
 |---|---|---|---|---|---|
-| validation (where it was chosen) | 0.1879 | 0.254 | 0.526 | 0.342 | 33.5% |
+| validation (where it was chosen) | 0.1616 | 0.240 | 0.579 | 0.339 | 39.0% |
 | test | not scored yet | | | | |
 
 ## 4. Test set: not scored yet
