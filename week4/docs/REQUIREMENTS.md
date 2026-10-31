@@ -1,0 +1,137 @@
+# Week 4 requirement → evidence checklist
+
+Source: **"WEEK 4 | Supervised + Unsupervised ML and LLM Foundations"** in *Elevate Engine Weeks 4–6*. Each row is one line of that brief, worded as in the brief. Lines with several parts are split into one row per part, so none can be ticked half-done.
+
+Fill in each row as the work is done:
+- **Code:** where it's implemented.
+- **Test:** the automated test that proves it, or "manual" plus what you checked.
+- **Demo:** the Loom timestamp.
+- **Me:** the date you re-ran the check yourself. Leave it blank until you have.
+
+Status: ☐ not started · ◐ in progress · ☑ done and evidenced.
+
+The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-week3.md).
+
+## Decisions so far (Step 0)
+
+- **Supervised task:** the same synthetic appointment no-show task as Week 3, extended rather than replaced. The brief says "expand the Week 3 ML system".
+- **LLM:** local only, through **Ollama**. No data leaves the machine, so the rule against sending patient data to external LLMs holds by design. Tests and CI use a **fake LLM** behind the same interface.
+- **Git:** all Week 4 work goes on the `week4` branch → a PR to `main` → reviewer **@ahmedhashir10**.
+
+## Supervised learning
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| S1 | Prepare a synthetic appointment-attendance dataset | 1 | ◐ | `backend/ml/data.py` (from Week 3) | | | |
+| S2 | Clearly define features, labels, split strategy and leakage checks | 1 | ☐ | | | | |
+| S3 | Train Logistic Regression | 2 | ☐ | | | | |
+| S4 | Train Random Forest | 2 | ☐ | | | | |
+| S5 | Train Gradient Boosting/XGBoost or SVM | 2 | ☐ | | | | |
+| S6 | Evaluate with confusion matrix | 4 | ☐ | | | | |
+| S7 | Evaluate with precision, recall, F1, ROC-AUC and PR-AUC | 4 | ☐ | | | | |
+| S8 | Compare train versus validation performance | 2 | ☐ | | | | |
+| S9 | Perform stratified cross-validation | 3 | ☐ | | | | |
+| S10 | Tune one model with GridSearchCV or RandomizedSearchCV | 3 | ☐ | | | | |
+| S11 | Explain feature importance or permutation importance | 5 | ☐ | | | | |
+| S12 | Inspect false positives/negatives | 5 | ☐ | | | | |
+| S13 | Reproducible preprocessing pipeline for imputation, encoding and scaling | 4 | ◐ | `backend/ml/preprocess.py` (from Week 3) | | | |
+
+## Unsupervised learning
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| U1 | Use non-sensitive profile/engagement features | 6 | ☐ | | | | |
+| U2 | Run K-Means | 7 | ☐ | | | | |
+| U3 | Run one alternative (DBSCAN or Agglomerative Clustering) | 7 | ☐ | | | | |
+| U4 | Choose scaling | 6 | ☐ | | | | |
+| U5 | Choose cluster count using silhouette score and/or elbow method | 7 | ☐ | | | | |
+| U6 | PCA for 2D visualization | 8 | ☐ | | | | |
+| U7 | Describe each cluster in neutral, non-clinical terms | 8 | ☐ | | | | |
+| U8 | Compare methods | 7 | ☐ | | | | |
+| U9 | Explain why clusters are exploratory rather than ground-truth categories | 8 | ☐ | | | | |
+
+## LLM foundations and FAQ assistant
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| L1 | Integrate one hosted or local LLM with a backend endpoint | 9 | ☐ | | | | |
+| L2 | Define a system prompt | 9 | ☐ | | | | |
+| L3 | Define a task-specific user prompt | 9 | ☐ | | | | |
+| L4 | Define a context window strategy | 9 | ☐ | | | | |
+| L5 | Define an output token limit | 9 | ☐ | | | | |
+| L6 | Define a temperature | 9 | ☐ | | | | |
+| L7 | Define a structured JSON response schema | 9 | ☐ | | | | |
+| L8 | Educational FAQ assistant over approved fictional clinic policies | 10 | ☐ | | | | |
+| L9 | Document upload | 10 | ☐ | | | | |
+| L10 | Text extraction | 10 | ☐ | | | | |
+| L11 | Chunking | 10 | ☐ | | | | |
+| L12 | Embeddings | 10 | ☐ | | | | |
+| L13 | Vector search | 10 | ☐ | | | | |
+| L14 | Cited source passages | 11 | ☐ | | | | |
+| L15 | Explicit "insufficient information" behavior | 11 | ☐ | | | | |
+
+## Dashboard
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| D1 | Separate tab for supervised predictions | 13 | ◐ | `frontend/app/admin/predictions/` (from Week 3) | | | |
+| D2 | Separate tab for unsupervised cluster visualizations | 13 | ☐ | | | | |
+| D3 | Separate tab for LLM Q&A | 13 | ☐ | | | | |
+| D4 | Display model versions, metrics and educational-use disclaimers | 13 | ☐ | | | | |
+
+## LLM evaluation
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| E1 | At least 12 LLM evaluation prompts | 12 | ☐ | | | | |
+| E2 | Covering answerable, ambiguous, out-of-scope and prompt-injection attempts | 12 | ☐ | | | | |
+| E3 | Compare two prompts or retrieval settings | 12 | ☐ | | | | |
+| E4 | Record citation quality and failures | 12 | ☐ | | | | |
+
+## Engineering constraints
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| C1 | Train-only fitting for preprocessing and tuning | 3 | ◐ | Week 3 Pipeline | | | |
+| C2 | Keep test data untouched until final evaluation | 4 | ◐ | Week 3 `evaluate_on_test` | | | |
+| C3 | Pin dependencies and random seeds | 0 | ◐ | `requirements.txt`, `ml/config.py` SEED | | | |
+| C4 | Document provenance, bias, imbalance and limitations | 14 | ◐ | [DATA_CARD.md](DATA_CARD.md) | | | |
+| C5 | Do not submit patient-identifiable data to external LLMs | 9 | ☐ | | | | |
+| C6 | Validate file types/sizes | 10 | ☐ | | | | |
+| C7 | Enforce upload permissions | 10 | ☐ | | | | |
+| C8 | Treat retrieved documents as untrusted | 11 | ☐ | | | | |
+| C9 | Rate limits | 9 | ☐ | | | | |
+| C10 | Timeouts | 9 | ☐ | | | | |
+| C11 | Safe error responses | 9 | ☐ | | | | |
+| C12 | Approximate token/cost reporting | 9 | ☐ | | | | |
+| C13 | Never present predictions or clusters as medical diagnoses | 8, 13 | ◐ | Week 3 wording + disclaimer | | | |
+
+## Acceptance checks
+
+| # | Requirement (brief wording) | Step | Status | Evidence | Me |
+|---|---|---|---|---|---|
+| A1 | Metrics comparison table for three supervised models | 4 | ☐ | | |
+| A2 | Confusion matrix | 4 | ☐ | | |
+| A3 | One tuning experiment | 3 | ☐ | | |
+| A4 | Reproducible saved pipeline | 4 | ☐ | | |
+| A5 | Two clustering algorithms | 7 | ☐ | | |
+| A6 | PCA plot | 8 | ☐ | | |
+| A7 | Cluster quality analysis | 7 | ☐ | | |
+| A8 | Explanation of meaningful versus misleading clusters | 8 | ☐ | | |
+| A9 | LLM answers cite relevant approved documents | 11 | ☐ | | |
+| A10 | Reject unsupported claims | 11 | ☐ | | |
+| A11 | Survive at least two adversarial prompt tests | 12 | ☐ | | |
+| A12 | API requests/responses for prediction, clustering and LLM endpoints | 14 | ☐ | | |
+| A13 | Document the 12-case evaluation results | 12 | ☐ | | |
+
+## Required submission
+
+| # | Requirement (brief wording) | Step | Status | Evidence | Me |
+|---|---|---|---|---|---|
+| R1 | GitHub repository with meaningful commits | all | ◐ | `week4` branch | |
+| R2 | Setup and run/test commands | 14 | ☐ | | |
+| R3 | README architecture decisions, limitations, screenshots and API examples | 14 | ☐ | | |
+| R4 | Loom: working demo, code architecture, actual AI prompts and refinements, context management, blast-radius controls, debugging and verification | 14 | ☐ | | |
+| R5 | Post repository and Loom links in the team channel | 14 | ☐ | | |
+| R6 | Keep all previous features working and provide regression-test evidence | 0, 14 | ◐ | Week 1–3 suites green in CI | |
+| R7 | Git workflow: branch, PR, reviewer @ahmedhashir10 (mentor instruction) | 0, 14 | ◐ | `week4` branch | |
