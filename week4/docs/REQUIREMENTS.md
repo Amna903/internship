@@ -18,7 +18,12 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 - **LLM:** local only, through **Ollama**. No data leaves the machine, so the rule against sending patient data to external LLMs holds by design. Tests and CI use a **fake LLM** behind the same interface.
 - **Git:** all Week 4 work goes on the `week4` branch → a PR to `main` → reviewer **@ahmedhashir10**.
 - **Model choice is by cross-validation (from Step 3 on).** See the lesson below. The rule is now fixed: no further rule changes.
-- **Served model stays v1.0.0 until Step 4.** The release and its report (`release-1.0.0.md`) are rebuilt from Week 3's candidates, so it stays exactly reproducible; `metrics.md` compares every model on validation and scores no test rows until Step 4.
+- **Served model: still v1.0.0 (engineered logistic regression, C=0.1). Week 4 made no new release** (Step 4 decision, see Lessons). Its report (`release-1.0.0.md`) and files are rebuilt from Week 3's candidates and checked byte-for-byte; the dashboard's "About this model" panel names it, and a test pins that.
+- **Champion/challenger rule for future releases, written before any evaluation of a challenger:**
+  1. The served model is the champion. A challenger replaces it only if, on the same training folds, its mean CV PR-AUC beats the champion's by **more than one standard error** of the champion's mean.
+  2. The simplicity preference applies **between model families with different explainability** (logistic regression before trees). Between equally explainable models (two logistic regressions), it doesn't apply: the higher CV mean wins.
+  3. The challenger is decided on CV before the test set is scored. The test score is reported, not used to choose; if it ever argues against a CV decision, that is recorded as a finding, as in Step 4.
+  4. Release numbering stays Week 3's: same inputs, retrained → minor version; inputs change → major version.
 
 ## Lessons recorded along the way
 
@@ -34,14 +39,14 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 | S3 | Train Logistic Regression | 2 | ☑ | `ml/models.py` (raw + engineered, C grid) | `tests/test_ml_compare.py::test_logistic_regression_random_forest_and_gradient_boosting_are_all_trained` | | |
 | S4 | Train Random Forest | 2 | ☑ | `ml/models.py` (`FOREST_GRID`, seeded, out-of-bag, single-threaded for exact reruns) | `tests/test_ml_compare.py::test_random_forest_*` | | |
 | S5 | Train Gradient Boosting/XGBoost or SVM | 2 | ☑ | `ml/models.py` (HistGradientBoosting) | `tests/test_ml_compare.py::test_logistic_regression_random_forest_and_gradient_boosting_are_all_trained` | | |
-| S6 | Evaluate with confusion matrix | 4 | ☐ | | | | |
-| S7 | Evaluate with precision, recall, F1, ROC-AUC and PR-AUC | 4 | ☐ | | | | |
+| S6 | Evaluate with confusion matrix | 4 | ☑ | [metrics.md](../backend/ml/reports/metrics.md) §4: one per algorithm, each at its own validation cut-off | `tests/test_ml_compare.py::test_each_algorithm_has_a_confusion_matrix_over_all_test_rows`, `::test_each_cut_off_is_the_models_own_validation_f1_best` | | |
+| S7 | Evaluate with precision, recall, F1, ROC-AUC and PR-AUC | 4 | ☑ | [metrics.md](../backend/ml/reports/metrics.md) §4 (same table) | `tests/test_ml_compare.py::test_each_algorithm_has_a_confusion_matrix_over_all_test_rows` | | |
 | S8 | Compare train versus validation performance | 2 | ☑ | [metrics.md § Train versus validation](../backend/ml/reports/metrics.md) (gap warning + out-of-bag) | `tests/test_ml_compare.py` (table, warning rule, memorising tree, out-of-bag) | | |
 | S9 | Perform stratified cross-validation | 3 | ☑ | `ml/tune.py` (`StratifiedGroupKFold`, 5 folds, train rows only); [tuning.md §1–2](../backend/ml/reports/tuning.md) | `tests/test_ml_tune.py` (folds cover train once, no shared patients, stratified, train rows only) | | |
 | S10 | Tune one model with GridSearchCV or RandomizedSearchCV | 3 | ☑ | `ml/tune.py` (`RandomizedSearchCV`, random forest, 30 seeded draws, one-standard-error rule); [tuning.md §3](../backend/ml/reports/tuning.md) | `tests/test_ml_tune.py` (seeded, matches manual CV, rule cases, committed choice follows the rule) | | |
 | S11 | Explain feature importance or permutation importance | 5 | ☐ | | | | |
 | S12 | Inspect false positives/negatives | 5 | ☐ | | | | |
-| S13 | Reproducible preprocessing pipeline for imputation, encoding and scaling | 4 | ◐ | `backend/ml/preprocess.py` (from Week 3) | | | |
+| S13 | Reproducible preprocessing pipeline for imputation, encoding and scaling | 4 | ☑ | `backend/ml/preprocess.py` inside every Pipeline; served `no-show-1.0.0.joblib` | `python -m ml.verify_release` (CI job), `tests/test_ml_artifact.py` | | |
 
 ## Unsupervised learning
 
@@ -100,7 +105,7 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
 | C1 | Train-only fitting for preprocessing and tuning | 3 | ☑ | Pipeline fitted inside each fold; folds and search see the train part only | `tests/test_ml_tune.py::test_tuning_only_ever_sees_training_rows` | | |
-| C2 | Keep test data untouched until final evaluation | 4 | ◐ | Week 3 `evaluate_on_test` | | | |
+| C2 | Keep test data untouched until final evaluation | 4 | ☑ | No Week 4 choice read a test number (`evaluate_on_test` is the only scoring); caveats: the test set was scored in Week 3, and it informed the Week 4 release decision (see Lessons) | `tests/test_ml_compare.py::test_choice_cut_offs_and_rival_do_not_depend_on_test_labels` | | |
 | C3 | Pin dependencies and random seeds | 0 | ◐ | `requirements.txt`, `ml/config.py` SEED | | | |
 | C4 | Document provenance, bias, imbalance and limitations | 14 | ◐ | [DATA_CARD.md](DATA_CARD.md) | | | |
 | C5 | Do not submit patient-identifiable data to external LLMs | 9 | ☐ | | | | |
@@ -117,10 +122,10 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 
 | # | Requirement (brief wording) | Step | Status | Evidence | Me |
 |---|---|---|---|---|---|
-| A1 | Metrics comparison table for three supervised models | 4 | ☐ | | |
-| A2 | Confusion matrix | 4 | ☐ | | |
+| A1 | Metrics comparison table for three supervised models | 4 | ☑ | [metrics.md](../backend/ml/reports/metrics.md) §1 (validation), §2 (CV), §4 (test) | |
+| A2 | Confusion matrix | 4 | ☑ | [metrics.md](../backend/ml/reports/metrics.md) §4 | |
 | A3 | One tuning experiment | 3 | ☑ | [tuning.md](../backend/ml/reports/tuning.md); regenerated by `python -m ml.verify_release` in CI | |
-| A4 | Reproducible saved pipeline | 4 | ☐ | | |
+| A4 | Reproducible saved pipeline | 4 | ☑ | served `no-show-1.0.0` (kept; see Lessons), rebuilt byte-identically by `python -m ml.verify_release` in CI | |
 | A5 | Two clustering algorithms | 7 | ☐ | | |
 | A6 | PCA plot | 8 | ☐ | | |
 | A7 | Cluster quality analysis | 7 | ☐ | | |
@@ -146,4 +151,9 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
   - What the new rule picked: **raw logistic regression (C=10)**. Its CV mean (0.2751) is 0.0003 above the one-standard-error bar (0.2748). Engineered features lead by 0.008 on average across folds, but with a fold-to-fold spread of 0.009 (ahead in 4 of 5 folds), so the gain is within the noise and the simpler model wins the tie. This is recorded as a finding, not adjusted. Week 3's test set showed engineered ahead (+0.013), but test results may not be used for choosing.
   - The tuned forest (depth 4, leaf 50, 33% of columns per split, 300 trees) reached CV 0.268 ± 0.017: tuning did not lift forests to logistic regression's level.
   - The release version is decided in Step 4, from what the brief requires.
+- **Step 3 (CI): one search setting sat on the one-standard-error bar.** On Linux, one of the 30 settings fell on the other side of the bar (bar 0.2664 vs 0.2666) without changing the choice. A known fragility: the check requires the choice to be identical, so a crossing that changed it would fail CI.
+- **Step 4: the rule's choice was not shipped. Three things recorded honestly:**
+  1. **The decision not to ship raw logistic regression was informed by the test result, so it is not test-independent.** On test, raw LR (the rule's choice) scored PR-AUC 0.267 against engineered LR's 0.280: −0.013, 95% interval [−0.026, −0.001]. The test set had also been scored once in Week 3 for v1.0.0, so it was never brand new for Week 4 (stated in `metrics.md` §4).
+  2. **The CV-only argument also supports keeping v1.0.0 (champion/challenger).** The challenger (raw LR, CV mean 0.275) did not beat the champion (the served engineered LR, CV 0.283, one standard error 0.008), so there was no evidence to replace the served model.
+  3. **Lesson: the simplicity preference made sense between logistic regression and trees, but between two logistic regressions both are equally explainable, so it only cost accuracy.** The champion/challenger rule above is now written down before any future evaluation.
 

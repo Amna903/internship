@@ -1,4 +1,4 @@
-# Served release no-show-1.0.0: how it was chosen and its test score
+# First release no-show-1.0.0: how it was chosen and its test score
 
 > Rebuilt from the candidates this release was chosen from (Week 3), so the served model stays
 > exactly reproducible. The Week 4 comparison of every model is in [metrics.md](metrics.md).

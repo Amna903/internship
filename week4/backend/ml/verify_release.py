@@ -17,6 +17,7 @@ CI runs this as its own job, so the check is visible on every push.
 """
 
 import json
+import math
 import re
 import sys
 import tempfile
@@ -45,7 +46,32 @@ SCORE_TOLERANCE = 0.002
 # differently; CI measured recall 0.526 -> 0.522. Only these are allowed the looser bar, equal to the
 # tie margin that model selection already treats as noise.
 CUTOFF_TOLERANCE = train.TIE_MARGIN
-CUTOFF_SECTION = ("## 3. Decision threshold", "## 4.")
+# Where cut-off figures live: the decision-threshold section, and the per-algorithm confusion matrices.
+CUTOFF_SECTIONS = [("## 3. Decision threshold", "## 4."),
+                   ("### Confusion matrix for each algorithm", "**About this test set.**")]
+# Confusion-matrix counts (TP, FP, FN, TN) move with the cut-off. Their tolerance is DERIVED from the same
+# CUTOFF_TOLERANCE, applied to the rate each count belongs to, using the committed row's own totals:
+#   TP, FN count no-shows: recall = TP / no-shows, so TP and FN may move floor(0.005 x no-shows) rows
+#     (650 no-shows -> 3 rows).
+#   FP, TN count attenders: false-positive rate = FP / attenders, so FP and TN may move
+#     floor(0.005 x attenders) rows (3,302 attenders -> 16 rows).
+# The two agree: a cut-off step flags appointments of both kinds, ~84% of them attenders, so FP moves about
+# five times as much as TP, the same ratio as 16 : 3. Measured Mac vs Linux so far: recall 0.004 on
+# validation, about 3 of 646 no-shows. Rounded down, so the derived bar is never looser than 0.005.
+CONFUSION_COLUMNS = ("tp", "fp", "fn", "tn")
+
+
+def confusion_count_tolerances(cells: list[str]) -> dict[str, int]:
+    """For one confusion-matrix row (cells: model, cut-off, TP, FP, FN, TN, ...), rows each count may move."""
+    tp, fp, fn, tn = (int(c.replace(",", "")) for c in cells[2:6])
+    no_shows, attenders = tp + fn, fp + tn
+    return {"tp": math.floor(CUTOFF_TOLERANCE * no_shows), "fn": math.floor(CUTOFF_TOLERANCE * no_shows),
+            "fp": math.floor(CUTOFF_TOLERANCE * attenders), "tn": math.floor(CUTOFF_TOLERANCE * attenders)}
+
+
+def _is_confusion_row(line: str) -> bool:
+    cells = [c.strip() for c in line.strip().strip("|").split("|")]
+    return line.startswith("|") and len(cells) == 11 and all(re.fullmatch(r"[\d,]+", c) for c in cells[2:6])
 # Whole-percent "gap closed" column: rounded from PR-AUC, so a 0.001 move can flip the last digit.
 PERCENT_TOLERANCE = 1
 
@@ -54,7 +80,7 @@ def _allowed(token: str, in_cutoff_section: bool) -> float:
     decimal_tolerance = CUTOFF_TOLERANCE if in_cutoff_section else SCORE_TOLERANCE
     if token.endswith("%"):
         return 100 * decimal_tolerance if "." in token else PERCENT_TOLERANCE  # "33.5%": percentage points
-    return decimal_tolerance if "." in token else 0  # whole numbers (row counts, seeds) must be exact
+    return decimal_tolerance if "." in token else 0  # whole numbers are exact (confusion counts handled apart)
 
 
 def reports_match(committed: str, rebuilt: str) -> tuple[bool, str]:
@@ -66,11 +92,25 @@ def reports_match(committed: str, rebuilt: str) -> tuple[bool, str]:
     worst = {"scores": 0.0, "cut-off figures": 0.0}
     in_cutoff = False
     for line_a, line_b in zip(committed.splitlines(), rebuilt.splitlines()):
-        if line_a.startswith(CUTOFF_SECTION[0]):
+        if any(line_a.startswith(start) for start, _ in CUTOFF_SECTIONS):
             in_cutoff = True
-        elif line_a.startswith(CUTOFF_SECTION[1]):
+        elif any(line_a.startswith(end) for _, end in CUTOFF_SECTIONS):
             in_cutoff = False
-        for a, b in zip(NUMBER.findall(line_a), NUMBER.findall(line_b)):
+        counts = {}
+        if in_cutoff and _is_confusion_row(line_a):
+            cells_a = [c.strip() for c in line_a.strip().strip("|").split("|")]
+            cells_b = [c.strip() for c in line_b.strip().strip("|").split("|")]
+            allowed_rows = confusion_count_tolerances(cells_a)
+            for name, a, b in zip(CONFUSION_COLUMNS, cells_a[2:6], cells_b[2:6]):
+                moved = abs(int(a.replace(",", "")) - int(b.replace(",", "")))
+                if moved > allowed_rows[name]:
+                    return False, f"{name.upper()} {a} became {b} (allowed {allowed_rows[name]} rows)"
+            # positions of the four counts among the line's numbers (the model name may contain numbers too)
+            first = sum(len(NUMBER.findall(c)) for c in cells_a[:2])
+            counts = set(range(first, first + 4))
+        for i, (a, b) in enumerate(zip(NUMBER.findall(line_a), NUMBER.findall(line_b))):
+            if i in counts:
+                continue  # checked above with its derived tolerance
             x, y = float(a.rstrip("%").replace(",", "")), float(b.rstrip("%").replace(",", ""))
             if abs(x - y) > _allowed(a, in_cutoff):
                 return False, f"{a} became {b}" + (" (cut-off figure)" if in_cutoff else " (score)")

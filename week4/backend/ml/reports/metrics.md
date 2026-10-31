@@ -127,23 +127,87 @@ chosen to maximise F1 on validation. With 16% positives it is far below 0.5.
 | | threshold | precision | recall | F1 | appointments flagged |
 |---|---|---|---|---|---|
 | validation (where it was chosen) | 0.1616 | 0.240 | 0.579 | 0.339 | 39.0% |
-| test | not scored yet | | | | |
+| test (same threshold, applied once) | 0.1616 | 0.242 | 0.577 | 0.341 | 39.2% |
 
-## 4. Test set: not scored yet
+In words: of the appointments the model flags, about 24% are real no-shows
+(precision), and it catches about 58% of all no-shows (recall).
 
-The test set is scored once, in the final evaluation step, after cross-validation and tuning are done.
-Until then no test number exists in this report, so none can influence a choice.
+## 4. Test set: scored once, after every decision above
 
-## 5. Did the improved model really beat the baseline?
+| model | PR-AUC ↑ | ROC-AUC ↑ | Brier ↓ | mean prediction | gap closed (floor → oracle) |
+|---|---|---|---|---|---|
+| floor: floor_dummy | 0.164 | 0.500 | 0.1374 | 0.165 | 0% |
+| baseline: logreg_raw (C=10.0) | 0.267 | 0.649 | 0.1320 | 0.163 | 66% |
+| best logistic + engineered: logreg_engineered (C=1.0) | 0.280 | 0.662 | 0.1307 | 0.162 | 74% |
+| best random forest: random_forest (max_depth=6, min_samples_leaf=20) | 0.278 | 0.665 | 0.1312 | 0.164 | 72% |
+| best gradient boosting: gradient_boosting (learning_rate=0.05, max_depth=3) | 0.268 | 0.662 | 0.1315 | 0.164 | 66% |
+| **chosen: logreg_raw (C=10.0)** | 0.267 | 0.649 | 0.1320 | 0.163 | 66% |
+| oracle ceiling (true probability) | 0.321 | 0.714 | 0.1264 | 0.161 | 100% |
 
-Answered on the test set in the final evaluation step.
+PR-AUC on test: chosen 0.267 vs baseline 0.267 vs oracle
+0.321. Test rows were not used for tuning, model choice or the threshold.
+
+### Confusion matrix for each algorithm (test, each at its own validation cut-off)
+
+Every algorithm gets its own F1-best cut-off, chosen on validation before the test set was scored, so the
+comparison is fair (one shared cut-off would favour whichever model it was tuned for). TP: no-shows
+flagged · FP: attenders flagged (an unneeded reminder) · FN: no-shows missed · TN: attenders not flagged.
+
+| model | cut-off | TP | FP | FN | TN | precision | recall | F1 | ROC-AUC | PR-AUC |
+|---|---|---|---|---|---|---|---|---|---|---|
+| baseline: logreg_raw (C=10.0) | 0.1616 | 375 | 1,176 | 275 | 2,126 | 0.242 | 0.577 | 0.341 | 0.649 | 0.267 |
+| best logistic + engineered: logreg_engineered (C=1.0) | 0.1689 | 385 | 1,185 | 265 | 2,117 | 0.245 | 0.592 | 0.347 | 0.662 | 0.280 |
+| best random forest: random_forest (max_depth=6, min_samples_leaf=20) | 0.1943 | 328 | 886 | 322 | 2,416 | 0.270 | 0.505 | 0.352 | 0.665 | 0.278 |
+| best gradient boosting: gradient_boosting (learning_rate=0.05, max_depth=3) | 0.1713 | 385 | 1,187 | 265 | 2,115 | 0.245 | 0.592 | 0.347 | 0.662 | 0.268 |
+| **chosen: logreg_raw (C=10.0)** | 0.1616 | 375 | 1,176 | 275 | 2,126 | 0.242 | 0.577 | 0.341 | 0.649 | 0.267 |
+
+**About this test set.** It is not brand new. The same 3,952 test rows were already scored once in
+Week 3, for release 1.0.0 ([release-1.0.0.md](release-1.0.0.md)). Week 4's choice was made by
+cross-validation on training rows and confirmed on validation; no Week 4 decision read a test number, and
+this section is the single Week 4 scoring. But anyone who saw the Week 3 test results (for example, that
+engineered features scored higher there) could in principle have been influenced, so treat these numbers
+as a well-guarded estimate rather than a first look at untouched data. A truly fresh check would need new
+rows from the generator with a different seed.
+
+## 5. What did choosing the simplest model cost?
+
+The cross-validation rule picked the simplest model within one standard error of the best. The question
+fixed before the test was scored: how does it compare with the best other model by CV mean
+(`best logistic + engineered: logreg_engineered (C=1.0)`)?
+
+Test PR-AUC, chosen minus that model: **-0.013**, 95% interval
+**[-0.026, -0.001]** (bootstrap over whole patients, 1000 resamples, seed 42).
+
+Verdict: **the simpler choice cost accuracy on test: the whole 95% interval is below zero.** Reported as-is; the choice is not revisited after seeing it.
+
+This verdict is computed from the numbers every time the report is generated. If a change to the data
+or the models ever makes the improvement disappear, the report says so; the code is not adjusted
+until it passes.
 
 ## 6. What this shows
 
 - Every real model beats the floor, so there is genuine signal in the features.
-- The engineered features (log lead time, no-show rate, has-history, reminder × lead time) helped the logistic regression capture the curve, habit and interaction found in the EDA.
+- The engineered features did not produce a clear gain over the raw baseline on test; see section 5.
 - The gap to the oracle ceiling is what is left: mostly the hidden per-patient reliability, which no
   feature can fully reveal, plus the coin-flip noise built into every outcome.
 - Gradient boosting with depth 6 scored below depth 3: the extra depth fits noise in the training rows.
 - Errors per group, calibration, age bias and whether the planted formula was learned:
   [errors.md](errors.md).
+
+## 7. Release decision: keep serving no-show-1.0.0
+
+**Decision: no new release.** The served model stays `logreg_engineered (C=0.1)` (no-show-1.0.0),
+still exactly reproducible and checked in CI. The Week 4 rule's choice, `logreg_raw (C=10.0)`, is recorded
+above and was not shipped.
+
+1. **This decision is not test-independent.** It was made after section 5 showed the rule's choice scoring
+   below the best other model on test. The test set therefore informed a release decision, and is no longer
+   a clean estimate for the served model either.
+2. **Cross-validation alone also supports it (champion/challenger).** The served model is the champion and
+   the rule's choice the challenger. On the same training folds the challenger's mean was 0.275
+   against the champion's 0.283 (one standard error 0.008): the challenger did not beat the
+   champion by more than one standard error, so there was no evidence to replace the served model.
+3. **Lesson.** The simplicity preference made sense between logistic regression and trees (readable
+   weights versus hundreds of trees). Between two logistic regressions both are equally explainable, so
+   preferring the one with fewer inputs bought nothing and cost accuracy. For future releases, the
+   champion/challenger rule is written down before evaluation (docs/REQUIREMENTS.md).

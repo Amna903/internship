@@ -259,6 +259,15 @@ def test_model_card_matches_the_released_metadata(admin_browser):
 
 
 @pytest.mark.django_db
+def test_about_this_model_panel_shows_the_served_model_type(admin_browser):
+    """The dashboard's "About this model" panel prints card["estimator"]. Week 4 kept release 1.0.0, so it
+    must name the served engineered logistic regression, not the model Week 4's rule picked."""
+    from ml import train
+
+    assert admin_browser.get(MODEL).json()["estimator"] == train.SERVED_ESTIMATOR == get_model().metadata["estimator"]
+
+
+@pytest.mark.django_db
 def test_openapi_schema_documents_both_endpoints(browser):
     schema = browser.client.get("/api/schema/", HTTP_ACCEPT="application/vnd.oai.openapi+json").content.decode()
     assert "/api/v1/predictions/no-show/" in schema and "/api/v1/models/no-show/" in schema

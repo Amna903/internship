@@ -10,7 +10,7 @@ from ml.data import generate
 from ml.models import CANDIDATES, SIMPLICITY_ORDER, Candidate, build
 from ml.preprocess import model_input
 from ml.split import split
-from ml.verify_release import reports_match
+from ml.verify_release import confusion_count_tolerances, reports_match
 
 
 @pytest.fixture(scope="module")
@@ -126,13 +126,116 @@ def test_report_says_the_warning_is_not_a_verdict(comparison):
     assert "out-of-bag" in report
 
 
-# ---- No test numbers until the final evaluation step ----
+# ---- Step 4: the test set, scored once ----
 
-def test_comparison_never_scores_the_test_set(comparison):
-    assert comparison.test == {} and comparison.test_threshold is None and comparison.improvement is None
+def test_final_evaluation_scores_the_test_set_once_with_every_algorithm(comparison):
+    names = {label.split(": ")[1].split(" (")[0] for label in comparison.test if ": " in label}
+    assert {"logreg_raw", "logreg_engineered", "random_forest", "gradient_boosting"} <= names
+    assert comparison.improvement is not None
+
+
+def test_each_algorithm_has_a_confusion_matrix_over_all_test_rows(df, comparison):
+    test_rows = len(split(df)[2])
+    no_shows = int(split(df)[2][config.LABEL].sum())
+    for label, (cut, t, c) in comparison.per_model_test.items():
+        assert c["tp"] + c["fp"] + c["fn"] + c["tn"] == test_rows, label
+        assert c["tp"] + c["fn"] == no_shows, label
+        assert t.recall == pytest.approx(c["tp"] / no_shows), label
+
+
+def test_each_cut_off_is_the_models_own_validation_f1_best(df, comparison):
+    _, validation, _ = split(df)
+    X_val, y_val = model_input(validation), validation[config.LABEL]
+    by_label = {c.label: c for c in comparison.fitted}
+    for label, (cut, _, _) in comparison.per_model_test.items():
+        candidate = by_label[label.split(": ", 1)[1]]
+        assert cut == train.choose_threshold(y_val, comparison.fitted[candidate].predict_proba(X_val)[:, 1])
+
+
+def test_choice_cut_offs_and_rival_do_not_depend_on_test_labels(df, comparison):
+    _, _, test = split(df)
+    flipped = df.copy()
+    flipped.loc[test.index, config.LABEL] = ~flipped.loc[test.index, config.LABEL]
+    again = train.run(flipped, cv=train.load_cv_scores())
+    assert again.chosen == comparison.chosen and again.rival == comparison.rival
+    assert {k: v[0] for k, v in again.per_model_test.items()} == {k: v[0] for k, v in comparison.per_model_test.items()}
+    assert again.test != comparison.test  # the test scores do react, so test rows really were scored
+
+
+def test_rival_is_the_best_other_model_by_cv_mean(comparison):
+    others = [c for c in comparison.cv if c.family != "floor" and c.name != comparison.chosen.name]
+    best_other = max(others, key=lambda c: np.mean(comparison.cv[c]))
+    assert comparison.rival.endswith(best_other.label)
+
+
+def test_report_states_the_test_set_history_and_the_cost_question(comparison):
     report = train.build_report(comparison)
-    assert "## 4. Test set: not scored yet" in report
-    assert "applied once" not in report
+    assert "It is not brand new" in report and "already scored once in\nWeek 3" in report
+    assert "## 5. What did choosing the simplest model cost?" in report
+    assert train.simplicity_cost_verdict(comparison.improvement) in report
+
+
+# ---- Release decision: keep serving the first release ----
+
+def test_served_model_is_still_the_first_release():
+    import json
+    meta = json.loads((config.ARTIFACT_DIR / f"{config.MODEL_NAME}-{train.FIRST_RELEASE}.json").read_text())
+    assert config.MODEL_VERSION == train.FIRST_RELEASE
+    assert meta["estimator"] == train.SERVED_ESTIMATOR
+
+
+def test_report_records_the_release_decision_and_its_three_points(comparison):
+    report = train.build_report(comparison)
+    assert "## 7. Release decision: keep serving" in report
+    assert "not test-independent" in report and "champion/challenger" in report and "**Lesson.**" in report
+
+
+def test_champion_challenger_numbers_are_the_cv_numbers(comparison):
+    served = next(c for c in comparison.cv if c.label == train.SERVED_ESTIMATOR)
+    report = train.build_report(comparison)
+    assert f"challenger's mean was {np.mean(comparison.cv[comparison.chosen]):.3f}" in report
+    assert f"against the champion's {np.mean(comparison.cv[served]):.3f}" in report
+    # the challenger did not beat the champion by more than one standard error
+    se = np.std(comparison.cv[served], ddof=1) / np.sqrt(5)
+    assert np.mean(comparison.cv[comparison.chosen]) - np.mean(comparison.cv[served]) <= se
+
+
+def test_confusion_count_tolerances_are_derived_from_the_0_005_rate_tolerance():
+    # 650 no-shows, 3,302 attenders (the real test set): 0.005 x 650 -> 3 rows, 0.005 x 3,302 -> 16 rows
+    cells = ["rf", "0.1943", "328", "886", "322", "2,416", "0.270", "0.505", "0.352", "0.665", "0.278"]
+    assert confusion_count_tolerances(cells) == {"tp": 3, "fn": 3, "fp": 16, "tn": 16}
+
+
+_SECTION = ("### Confusion matrix for each algorithm (test)\n"
+            "| rf | 0.1943 | 328 | 886 | 322 | 2,416 | 0.270 | 0.505 | 0.352 | 0.665 | 0.278 |\n"
+            "**About this test set.**")
+
+
+def _moved(tp=328, fp=886, fn=322, tn="2,416"):
+    return _SECTION.replace("| 328 | 886 | 322 | 2,416 |", f"| {tp} | {fp} | {fn} | {tn} |")
+
+
+def test_a_one_step_cut_off_move_passes():
+    # a step flags ~19 appointments: about 3 no-shows and 16 attenders
+    assert reports_match(_SECTION, _moved(tp=331, fp=902, fn=319, tn="2,400"))[0]
+
+
+def test_no_show_counts_beyond_3_rows_fail():
+    assert not reports_match(_SECTION, _moved(tp=332, fn=318))[0]
+
+
+def test_attender_counts_beyond_16_rows_fail():
+    assert not reports_match(_SECTION, _moved(fp=903, tn="2,399"))[0]
+
+
+def test_numbers_in_the_model_name_stay_exact_even_when_equal_to_a_count():
+    named = _SECTION.replace("| rf |", "| random_forest (min_samples_leaf=328) |")
+    assert not reports_match(named, named.replace("min_samples_leaf=328", "min_samples_leaf=329"))[0]
+
+
+def test_counts_outside_cut_off_sections_must_be_exact():
+    outside = _SECTION.replace("### Confusion matrix for each algorithm", "## 1. Validation")
+    assert not reports_match(outside, outside.replace("| 328 |", "| 329 |"))[0]
 
 
 def test_committed_comparison_report_is_up_to_date(comparison):

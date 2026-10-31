@@ -35,7 +35,10 @@ from .preprocess import model_input
 from .split import split
 
 REPORT = config.ML_DIR / "reports" / "metrics.md"
-RELEASE_REPORT = config.ML_DIR / "reports" / f"release-{config.MODEL_VERSION}.md"
+# The first release, chosen in Week 3 by validation. Kept exactly reproducible next to the current one.
+FIRST_RELEASE = "1.0.0"
+SERVED_ESTIMATOR = "logreg_engineered (C=0.1)"  # what the first (and still served) release contains
+RELEASE_REPORT = config.ML_DIR / "reports" / f"release-{FIRST_RELEASE}.md"
 TIE_MARGIN = 0.005  # PR-AUC differences smaller than this are treated as a tie -> the simpler model wins
 # Train PR-AUC minus validation PR-AUC above this raises an overfitting WARNING, written before training.
 # A warning, not a verdict: models are still judged on validation alone. Forests always fit their own
@@ -93,10 +96,13 @@ class TrainingResult:
     threshold: Threshold
     test: dict  # label -> Scores (floor, best baseline, chosen, best of each family, oracle); {} if not scored
     test_threshold: Threshold | None
+    # Week 4: each algorithm at its OWN validation cut-off, scored on test: label -> (cut-off, Threshold, confusion)
+    per_model_test: dict | None
     improvement: "Improvement | None"  # chosen vs baseline on test, with a bootstrap interval; None if not scored
     fitted: dict  # Candidate -> fitted Pipeline
     cv: dict | None = None  # Candidate -> fold PR-AUCs; when given, the choice is made by cross-validation
     cv_bar: float | None = None  # one-standard-error bar used for the CV choice
+    rival: str | None = None  # Week 4: the model the chosen one is compared with on test (best other by CV)
 
 
 def score(y_true, probability) -> Scores:
@@ -185,10 +191,20 @@ def confirmed_by_validation(fold_scores, validation_pr_auc: float) -> bool:
     return bool(abs(validation_pr_auc - mean) <= CONFIRMATION_SDS * sd)
 
 
-def best_of(validation: dict, family: str = None, name: str = None) -> Candidate:
-    pool = {c: s for c, s in validation.items() if (family is None or c.family == family)
-            and (name is None or c.name == name)}
-    return max(pool, key=lambda c: pool[c].pr_auc)
+def best_of(validation: dict, family: str = None, name: str = None, cv: dict | None = None) -> Candidate:
+    """Best of a family: by mean CV PR-AUC when CV scores are given (Week 4; near-tied validation scores swap
+    between machines), otherwise by validation PR-AUC (Week 3)."""
+    pool = [c for c in validation if (family is None or c.family == family) and (name is None or c.name == name)]
+    if cv is not None:
+        return max(pool, key=lambda c: float(np.mean(cv[c])))
+    return max(pool, key=lambda c: validation[c].pr_auc)
+
+
+def confusion_counts(y_true, probability, threshold: float) -> dict:
+    y_true = np.asarray(y_true, dtype=bool)
+    flagged = np.asarray(probability) >= threshold
+    return {"tp": int((flagged & y_true).sum()), "fp": int((flagged & ~y_true).sum()),
+            "fn": int((~flagged & y_true).sum()), "tn": int((~flagged & ~y_true).sum())}
 
 
 BOOTSTRAP_RESAMPLES = 1000
@@ -214,15 +230,23 @@ def bootstrap_difference(y, chosen_probability, baseline_probability, groups) ->
     return Improvement(float(point), float(low), float(high), len(differences))
 
 
-def evaluate_on_test(fitted: dict, picks: dict, test: pd.DataFrame, threshold: float):
-    """The ONLY place test rows are scored. Called once, after every decision is final."""
+def evaluate_on_test(fitted: dict, picks: dict, test: pd.DataFrame, threshold: float, cutoffs: dict | None = None,
+                     rival: str = "baseline"):
+    """The ONLY place test rows are scored. Called once, after every decision is final.
+    `cutoffs` (label -> validation cut-off) adds each algorithm's confusion matrix at its own cut-off."""
     X, y = model_input(test), test[config.LABEL]
     results = {label: score(y, fitted[c].predict_proba(X)[:, 1]) for label, c in picks.items()}
+    per_model = None
+    if cutoffs is not None:
+        per_model = {}
+        for label, cut in cutoffs.items():
+            probability = fitted[picks[label]].predict_proba(X)[:, 1]
+            per_model[label] = (cut, apply_threshold(y, probability, cut), confusion_counts(y, probability, cut))
     results["oracle ceiling (true probability)"] = score(y, test[config.ORACLE])
     chosen_probability = fitted[picks["chosen"]].predict_proba(X)[:, 1]
-    baseline_probability = fitted[picks["baseline"]].predict_proba(X)[:, 1]
+    baseline_probability = fitted[picks[rival]].predict_proba(X)[:, 1]
     improvement = bootstrap_difference(y, chosen_probability, baseline_probability, test["patient_id"])
-    return results, apply_threshold(y, chosen_probability, threshold), improvement
+    return results, apply_threshold(y, chosen_probability, threshold), improvement, per_model
 
 
 def run(df: pd.DataFrame | None = None, candidates: list[Candidate] = CANDIDATES,
@@ -250,15 +274,25 @@ def run(df: pd.DataFrame | None = None, candidates: list[Candidate] = CANDIDATES
 
     picks = {
         "floor": best_of(val_scores, family="floor"),
-        "baseline": best_of(val_scores, family="baseline"),
-        "best logistic + engineered": best_of(val_scores, name="logreg_engineered"),
-        **({"best random forest": best_of(val_scores, name="random_forest")}
+        "baseline": best_of(val_scores, family="baseline", cv=cv),
+        "best logistic + engineered": best_of(val_scores, name="logreg_engineered", cv=cv),
+        **({"best random forest": best_of(val_scores, name="random_forest", cv=cv)}
            if any(c.name == "random_forest" for c in candidates) else {}),
-        "best gradient boosting": best_of(val_scores, name="gradient_boosting"),
+        "best gradient boosting": best_of(val_scores, name="gradient_boosting", cv=cv),
         "chosen": chosen,
     }
-    test_scores, test_threshold, improvement = (evaluate_on_test(fitted, picks, test, threshold_value)
-                                                if score_test else ({}, None, None))
+    # Week 4: every algorithm gets its own F1-best cut-off on VALIDATION, fixed before the test is scored.
+    cutoffs = None if cv is None else {
+        label: choose_threshold(y_val, fitted[c].predict_proba(X_val)[:, 1])
+        for label, c in picks.items() if label != "floor"}
+    # Week 3 asked "did the improved model beat the baseline?". In Week 4 the chosen model may BE the
+    # baseline, so the question becomes "what did choosing the simplest model cost?": chosen versus the
+    # best other model by CV mean, fixed here before the test set is scored.
+    rival = "baseline" if cv is None else max(
+        (k for k in picks if k not in ("floor", "chosen") and picks[k] != chosen),
+        key=lambda k: float(np.mean(cv[picks[k]])))
+    test_scores, test_threshold, improvement, per_model = (
+        evaluate_on_test(fitted, picks, test, threshold_value, cutoffs, rival) if score_test else ({}, None, None, None))
 
     return TrainingResult(
         data_sha256=dataset_hash(df),
@@ -274,10 +308,13 @@ def run(df: pd.DataFrame | None = None, candidates: list[Candidate] = CANDIDATES
         test={("chosen: " + chosen.label if k == "chosen" else f"{k}: {picks[k].label}" if k in picks else k): v
               for k, v in test_scores.items()},
         test_threshold=test_threshold,
+        per_model_test=None if per_model is None else {
+            ("chosen: " + chosen.label if k == "chosen" else f"{k}: {picks[k].label}"): v for k, v in per_model.items()},
         improvement=improvement,
         fitted=fitted,
         cv=cv,
         cv_bar=cv_bar,
+        rival=None if cv is None else f"{rival}: {picks[rival].label}",
     )
 
 
@@ -316,6 +353,88 @@ Until then no test number exists in this report, so none can influence a choice.
 Answered on the test set in the final evaluation step."""
 
 
+# Week 4 addition (user-requested): the test set's history, stated plainly.
+TEST_HISTORY_NOTE = f"""**About this test set.** It is not brand new. The same 3,952 test rows were already scored once in
+Week 3, for release {FIRST_RELEASE} ([release-{FIRST_RELEASE}.md](release-{FIRST_RELEASE}.md)). Week 4's choice was made by
+cross-validation on training rows and confirmed on validation; no Week 4 decision read a test number, and
+this section is the single Week 4 scoring. But anyone who saw the Week 3 test results (for example, that
+engineered features scored higher there) could in principle have been influenced, so treat these numbers
+as a well-guarded estimate rather than a first look at untouched data. A truly fresh check would need new
+rows from the generator with a different seed."""
+
+
+def _per_model_section(result: TrainingResult) -> str:
+    rows = []
+    for label, (cut, t, c) in result.per_model_test.items():
+        s = result.test[label]
+        name = f"**{label}**" if label.startswith("chosen") else label
+        rows.append(f"| {name} | {cut:.4f} | {c['tp']:,} | {c['fp']:,} | {c['fn']:,} | {c['tn']:,} | {t.precision:.3f} "
+                    f"| {t.recall:.3f} | {t.f1:.3f} | {s.roc_auc:.3f} | {s.pr_auc:.3f} |")
+    return """### Confusion matrix for each algorithm (test, each at its own validation cut-off)
+
+Every algorithm gets its own F1-best cut-off, chosen on validation before the test set was scored, so the
+comparison is fair (one shared cut-off would favour whichever model it was tuned for). TP: no-shows
+flagged · FP: attenders flagged (an unneeded reminder) · FN: no-shows missed · TN: attenders not flagged.
+
+| model | cut-off | TP | FP | FN | TN | precision | recall | F1 | ROC-AUC | PR-AUC |
+|---|---|---|---|---|---|---|---|---|---|---|
+""" + "\n".join(rows)
+
+
+def _release_decision(result: TrainingResult) -> str:
+    """Week 4 release decision (user-decided): keep serving the first release; no new release."""
+    served = next(c for c in result.cv if c.label == SERVED_ESTIMATOR)
+    chosen_mean = float(np.mean(result.cv[result.chosen]))
+    served_mean, served_sd = float(np.mean(result.cv[served])), float(np.std(result.cv[served], ddof=1))
+    se = served_sd / math.sqrt(len(result.cv[served]))
+    return f"""## 7. Release decision: keep serving {config.MODEL_NAME}-{FIRST_RELEASE}
+
+**Decision: no new release.** The served model stays `{SERVED_ESTIMATOR}` ({config.MODEL_NAME}-{FIRST_RELEASE}),
+still exactly reproducible and checked in CI. The Week 4 rule's choice, `{result.chosen.label}`, is recorded
+above and was not shipped.
+
+1. **This decision is not test-independent.** It was made after section 5 showed the rule's choice scoring
+   below the best other model on test. The test set therefore informed a release decision, and is no longer
+   a clean estimate for the served model either.
+2. **Cross-validation alone also supports it (champion/challenger).** The served model is the champion and
+   the rule's choice the challenger. On the same training folds the challenger's mean was {chosen_mean:.3f}
+   against the champion's {served_mean:.3f} (one standard error {se:.3f}): the challenger did not beat the
+   champion by more than one standard error, so there was no evidence to replace the served model.
+3. **Lesson.** The simplicity preference made sense between logistic regression and trees (readable
+   weights versus hundreds of trees). Between two logistic regressions both are equally explainable, so
+   preferring the one with fewer inputs bought nothing and cost accuracy. For future releases, the
+   champion/challenger rule is written down before evaluation (docs/REQUIREMENTS.md)."""
+
+
+def simplicity_cost_verdict(imp: Improvement) -> str:
+    if imp.high < 0:
+        return "the simpler choice cost accuracy on test: the whole 95% interval is below zero"
+    if imp.low > 0:
+        return "the simpler choice did better on test: the whole 95% interval is above zero"
+    return "no clear difference on test: the 95% interval includes zero"
+
+
+def _comparison_section(result: TrainingResult) -> str:
+    imp = result.improvement
+    interval = (f"**{imp.difference:+.3f}**, 95% interval\n**[{imp.low:+.3f}, {imp.high:+.3f}]** (bootstrap over whole "
+                f"patients, {imp.resamples} resamples, seed {config.SEED}).")
+    if result.rival is None:
+        return f"""## 5. Did the improved model really beat the baseline?
+
+Test PR-AUC, chosen minus baseline: {interval}
+
+Verdict: **{imp.verdict}.**"""
+    return f"""## 5. What did choosing the simplest model cost?
+
+The cross-validation rule picked the simplest model within one standard error of the best. The question
+fixed before the test was scored: how does it compare with the best other model by CV mean
+(`{result.rival}`)?
+
+Test PR-AUC, chosen minus that model: {interval}
+
+Verdict: **{simplicity_cost_verdict(imp)}.** Reported as-is; the choice is not revisited after seeing it."""
+
+
 def _test_sections(result: TrainingResult) -> tuple[str, str]:
     floor_test = next(s for k, s in result.test.items() if k.startswith("floor"))
     oracle_test = result.test["oracle ceiling (true probability)"]
@@ -324,6 +443,7 @@ def _test_sections(result: TrainingResult) -> tuple[str, str]:
     baseline_test = next(s for k, s in result.test.items() if k.startswith("baseline"))
     chosen_test = next(s for k, s in result.test.items() if k.startswith("chosen"))
     tt, imp = result.test_threshold, result.improvement
+    extra = "" if result.per_model_test is None else "\n\n" + _per_model_section(result) + "\n\n" + TEST_HISTORY_NOTE
     threshold_row = (f"| test (same threshold, applied once) | {tt.value:.4f} | {tt.precision:.3f} | {tt.recall:.3f} "
                      f"| {tt.f1:.3f} | {100 * tt.flagged_share:.1f}% |\n\n"
                      f"In words: of the appointments the model flags, about {100 * tt.precision:.0f}% are real no-shows\n"
@@ -334,14 +454,9 @@ def _test_sections(result: TrainingResult) -> tuple[str, str]:
 {test_rows}
 
 PR-AUC on test: chosen {chosen_test.pr_auc:.3f} vs baseline {baseline_test.pr_auc:.3f} vs oracle
-{oracle_test.pr_auc:.3f}. Test rows were not used for tuning, model choice or the threshold.
+{oracle_test.pr_auc:.3f}. Test rows were not used for tuning, model choice or the threshold.{extra}
 
-## 5. Did the improved model really beat the baseline?
-
-Test PR-AUC, chosen minus baseline: **{imp.difference:+.3f}**, 95% interval
-**[{imp.low:+.3f}, {imp.high:+.3f}]** (bootstrap over whole patients, {imp.resamples} resamples, seed {config.SEED}).
-
-Verdict: **{imp.verdict}.**
+{_comparison_section(result)}
 
 This verdict is computed from the numbers every time the report is generated. If a change to the data
 or the models ever makes the improvement disappear, the report says so; the code is not adjusted
@@ -350,7 +465,7 @@ until it passes."""
 
 
 COMPARISON_TITLE = "Model comparison: synthetic appointment no-shows"
-RELEASE_TITLE = (f"Served release {config.MODEL_NAME}-{config.MODEL_VERSION}: how it was chosen and its test score\n\n"
+RELEASE_TITLE = (f"First release {config.MODEL_NAME}-{FIRST_RELEASE}: how it was chosen and its test score\n\n"
                  "> Rebuilt from the candidates this release was chosen from (Week 3), so the served model stays\n"
                  "> exactly reproducible. The Week 4 comparison of every model is in [metrics.md](metrics.md).")
 
@@ -495,12 +610,12 @@ chosen to maximise F1 on validation. With 16% positives it is far below 0.5.
 - Gradient boosting with depth 6 scored below depth 3: the extra depth fits noise in the training rows.
 - Errors per group, calibration, age bias and whether the planted formula was learned:
   [errors.md](errors.md).
-"""
+""" + ("" if result.rival is None else "\n" + _release_decision(result) + "\n")
 
 
 def comparison_run(df: pd.DataFrame | None = None) -> TrainingResult:
-    """Every candidate, chosen by cross-validation, with no test scoring (until the final evaluation)."""
-    return run(df, score_test=False, cv=load_cv_scores())
+    """Week 4 final evaluation: every candidate, chosen by cross-validation, then the test set scored once."""
+    return run(df, cv=load_cv_scores())
 
 
 def comparison_report(df: pd.DataFrame | None = None) -> str:
