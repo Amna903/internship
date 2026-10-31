@@ -10,6 +10,7 @@ from ml.data import generate
 from ml.models import CANDIDATES, SIMPLICITY_ORDER, Candidate, build
 from ml.preprocess import model_input
 from ml.split import split
+from ml.verify_release import reports_match
 
 
 @pytest.fixture(scope="module")
@@ -135,4 +136,35 @@ def test_comparison_never_scores_the_test_set(comparison):
 
 
 def test_committed_comparison_report_is_up_to_date(comparison):
-    assert train.REPORT.read_text() == train.build_report(comparison)
+    ok, reason = reports_match(train.REPORT.read_text(), train.build_report(comparison))
+    assert ok, reason
+
+
+# ---- Same choice on every machine ----
+
+def test_within_family_order_is_depth_then_leaf_then_more_trees():
+    def forest(depth, leaf, trees=300):
+        return Candidate("improved", "random_forest", True,
+                         (("max_depth", depth), ("min_samples_leaf", leaf), ("n_estimators", trees)), complexity=2)
+    ordered = [forest(6, 50), forest(6, 20), forest(10, 50), forest(None, 50)]
+    assert sorted(reversed(ordered), key=lambda c: c.within_family_simplicity) == ordered
+    # More trees only steady the vote, they don't memorise: on a remaining tie, more trees win.
+    assert forest(6, 50, 500).within_family_simplicity < forest(6, 50, 100).within_family_simplicity
+
+
+def test_near_tied_forests_resolve_to_the_simpler_one_whatever_their_order():
+    """The CI finding: two forests 0.0002 apart swapped places between Mac and Linux. With the
+    within-family rule, a swap of near-tied scores can't change the choice."""
+    deep = Candidate("improved", "random_forest", True, (("max_depth", None), ("min_samples_leaf", 50)), complexity=2)
+    shallow = Candidate("improved", "random_forest", True, (("max_depth", 6), ("min_samples_leaf", 50)), complexity=2)
+    for deep_score, shallow_score in [(0.2845, 0.281), (0.281, 0.2845)]:
+        scores = {deep: train.Scores(deep_score, 0.65, 0.13, 0.16), shallow: train.Scores(shallow_score, 0.65, 0.13, 0.16)}
+        assert train.select(scores) == shallow
+
+
+def test_report_check_tolerates_platform_noise_but_not_a_different_choice():
+    committed = "**Chosen: random_forest (max_depth=6)** | 0.281 | 69% |"
+    assert reports_match(committed, committed.replace("0.281", "0.282").replace("69%", "68%"))[0]
+    assert not reports_match(committed, committed.replace("0.281", "0.290"))[0]
+    assert not reports_match(committed, committed.replace("max_depth=6", "max_depth=10"))[0]
+    assert not reports_match("12,126 rows", "12,127 rows")[0]

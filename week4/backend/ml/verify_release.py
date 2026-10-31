@@ -4,7 +4,8 @@ Run:  python -m ml.verify_release      (exit code 0 = reproduced, 1 = something 
 
 It regenerates the dataset, the three reports and the model release in a temporary folder, then checks:
   level 1  dataset SHA-256 equals the one recorded in the committed metadata
-  level 2  eda.md, metrics.md, release-<version>.md and errors.md are identical; metadata metrics, threshold, schema, seed
+  level 2  eda.md, release-<version>.md and errors.md are identical; metrics.md has the same text and
+           choice with numbers within 0.002 (random forests differ slightly between CPUs); metadata metrics, threshold, schema, seed
            and estimator are identical
   level 3  the rebuilt and the committed model give the same probabilities (within 1e-9)
   level 4  the .joblib file is byte-identical, checked only on the platform and library versions that
@@ -14,6 +15,7 @@ CI runs this as its own job, so the check is visible on every push.
 """
 
 import json
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -25,6 +27,32 @@ from .data import dataset_hash, generate
 from .inference import load
 from .preprocess import model_input
 from .split import split
+
+# Random forests are built from thousands of threshold comparisons; the last floating-point digits differ
+# between CPUs (arm64 vs x86), which can move a forest's score by about 0.001. The comparison report is
+# therefore checked in two ways: the text (every word, model name and the choice) must be identical, and
+# every number must agree within these tolerances. Reports holding the served release must match exactly.
+NUMBER = re.compile(r"[-+]?\d[\d,]*(?:\.\d+)?%?")
+DECIMAL_TOLERANCE = 0.002
+PERCENT_TOLERANCE = 1  # whole-percent columns ("69%") follow the decimals they are computed from
+
+
+def reports_match(committed: str, rebuilt: str) -> tuple[bool, str]:
+    """Same text with numbers masked, and every number within tolerance. Returns (ok, reason)."""
+    if committed == rebuilt:
+        return True, "identical"
+    if NUMBER.sub("#", committed) != NUMBER.sub("#", rebuilt):
+        return False, "text differs (a word, a model name or the choice changed)"
+    worst = 0.0
+    for a, b in zip(NUMBER.findall(committed), NUMBER.findall(rebuilt)):
+        x, y = float(a.rstrip("%").replace(",", "")), float(b.rstrip("%").replace(",", ""))
+        allowed = PERCENT_TOLERANCE if a.endswith("%") and "." not in a else DECIMAL_TOLERANCE if "." in a else 0
+        if abs(x - y) > allowed:
+            return False, f"{a} became {b}"
+        if "." in a:
+            worst = max(worst, abs(x - y))
+    return True, f"same text and choice; numbers within {DECIMAL_TOLERANCE} (largest difference {worst:.3f})"
+
 
 COMPARED_METADATA_KEYS = ["model", "version", "estimator", "seed", "features", "decision", "metrics", "training_data",
                           "task", "disclaimer"]
@@ -46,9 +74,10 @@ def main() -> int:
     checks.append(("2", f"{train.RELEASE_REPORT.name} regenerated identically",
                    train.RELEASE_REPORT.read_text() == train.release_report(df)))
     for name, module, build in [("eda.md", eda, lambda: eda.build_report(df)),
-                                ("metrics.md", train, lambda: train.comparison_report(df)),
                                 ("errors.md", errors, lambda: errors.build_report(errors.analyse(df)))]:
         checks.append(("2", f"{name} regenerated identically", module.REPORT.read_text() == build()))
+    ok, reason = reports_match(train.REPORT.read_text(), train.comparison_report(df))
+    checks.append(("2", f"metrics.md regenerated: {reason}", ok))
 
     with tempfile.TemporaryDirectory() as tmp:
         rebuilt_dir = Path(tmp)

@@ -25,17 +25,17 @@ How to read the columns:
 
 | model | PR-AUC ↑ | ROC-AUC ↑ | Brier ↓ | mean prediction | gap closed (floor → oracle) |
 |---|---|---|---|---|---|
+| floor_dummy | 0.162 | 0.500 | 0.1355 | 0.165 | 0% |
+| logreg_raw (C=0.1) | 0.261 | 0.645 | 0.1304 | 0.161 | 55% |
+| logreg_raw (C=1.0) | 0.261 | 0.645 | 0.1304 | 0.161 | 55% |
+| logreg_raw (C=10.0) | 0.261 | 0.645 | 0.1304 | 0.161 | 55% |
 | **logreg_engineered (C=0.1)** | 0.276 | 0.655 | 0.1292 | 0.162 | 64% |
 | logreg_engineered (C=1.0) | 0.275 | 0.655 | 0.1292 | 0.162 | 64% |
 | logreg_engineered (C=10.0) | 0.275 | 0.655 | 0.1293 | 0.162 | 64% |
 | gradient_boosting (learning_rate=0.05, max_depth=3) | 0.269 | 0.647 | 0.1299 | 0.163 | 60% |
-| gradient_boosting (learning_rate=0.1, max_depth=3) | 0.268 | 0.644 | 0.1303 | 0.162 | 60% |
-| logreg_raw (C=1.0) | 0.261 | 0.645 | 0.1304 | 0.161 | 55% |
-| logreg_raw (C=10.0) | 0.261 | 0.645 | 0.1304 | 0.161 | 55% |
-| logreg_raw (C=0.1) | 0.261 | 0.645 | 0.1304 | 0.161 | 55% |
 | gradient_boosting (learning_rate=0.05, max_depth=6) | 0.255 | 0.636 | 0.1317 | 0.162 | 52% |
+| gradient_boosting (learning_rate=0.1, max_depth=3) | 0.268 | 0.644 | 0.1303 | 0.162 | 60% |
 | gradient_boosting (learning_rate=0.1, max_depth=6) | 0.247 | 0.626 | 0.1340 | 0.160 | 48% |
-| floor_dummy | 0.162 | 0.500 | 0.1355 | 0.165 | 0% |
 | *oracle ceiling (true probability)* | 0.340 | 0.719 | 0.1230 | 0.164 | 100% |
 
 ### Train versus validation (overfitting check)
@@ -72,7 +72,10 @@ Rule, fixed before training: highest validation PR-AUC; any model within 0.005 o
 (here 0.276) counts as tied, and among tied models the simplest wins. Simplicity order,
 also fixed before training: `logreg_raw` < `logreg_engineered` < `random_forest` < `gradient_boosting`. Logistic regression comes first because its weights can be
 read and explained; a forest's trees are independent and averaged, while boosting builds trees in
-sequence with interacting settings.
+sequence with interacting settings. Within the random forests: shallower trees first, then larger
+leaves (both limit memorising); the number of trees doesn't cause overfitting, only a steadier vote, so
+on a remaining tie more trees win. Rows above are in this order, not by score, so near-ties can't
+reorder them between machines.
 
 Not used, on purpose: `class_weight="balanced"`. It would push every probability up, hurt the Brier
 score and break the meaning of "16% means 16%". The imbalance is handled by the metric (PR-AUC) and

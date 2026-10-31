@@ -133,12 +133,14 @@ def out_of_bag_probability(pipeline: Pipeline):
 
 
 def select(validation: dict) -> Candidate:
-    """Highest validation PR-AUC among real models; within TIE_MARGIN of the best, the simplest wins.
+    """Highest validation PR-AUC among real models; within TIE_MARGIN of the best, the simplest wins:
+    first by family (`complexity`), then by settings within the family (`within_family_simplicity`).
+    The second key matters because near-tied settings can swap places between machines (see below).
     This function only ever receives validation scores."""
     real = {c: s for c, s in validation.items() if c.family != "floor"}
     best = max(s.pr_auc for s in real.values())
     contenders = [c for c, s in real.items() if s.pr_auc >= best - TIE_MARGIN]
-    return min(contenders, key=lambda c: (c.complexity, -real[c].pr_auc))
+    return min(contenders, key=lambda c: (c.complexity, c.within_family_simplicity, -real[c].pr_auc))
 
 
 def best_of(validation: dict, family: str = None, name: str = None) -> Candidate:
@@ -312,7 +314,7 @@ def build_report(result: TrainingResult, title: str = COMPARISON_TITLE) -> str:
     oracle_val = result.oracle_validation
     val_rows = "\n".join(
         _row(c.label, s, floor_val, oracle_val, "**" if c == result.chosen else "")
-        for c, s in sorted(result.validation.items(), key=lambda kv: -kv[1].pr_auc)
+        for c, s in sorted(result.validation.items(), key=lambda kv: (kv[0].complexity, kv[0].label))
     )
     t = result.threshold
     best_real = max((s.pr_auc for c, s in result.validation.items() if c.family != "floor"))
@@ -389,7 +391,10 @@ Rule, fixed before training: highest validation PR-AUC; any model within {TIE_MA
 (here {best_real:.3f}) counts as tied, and among tied models the simplest wins. Simplicity order,
 also fixed before training: {simplicity}. Logistic regression comes first because its weights can be
 read and explained; a forest's trees are independent and averaged, while boosting builds trees in
-sequence with interacting settings.
+sequence with interacting settings. Within the random forests: shallower trees first, then larger
+leaves (both limit memorising); the number of trees doesn't cause overfitting, only a steadier vote, so
+on a remaining tie more trees win. Rows above are in this order, not by score, so near-ties can't
+reorder them between machines.
 
 Not used, on purpose: `class_weight="balanced"`. It would push every probability up, hurt the Brier
 score and break the meaning of "16% means 16%". The imbalance is handled by the metric (PR-AUC) and

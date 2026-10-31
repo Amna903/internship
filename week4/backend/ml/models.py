@@ -26,6 +26,21 @@ class Candidate:
     complexity: int = 0
 
     @property
+    def within_family_simplicity(self) -> tuple:
+        """Tie-break between settings of the SAME family (lower = simpler), applied after `complexity`.
+
+        Random forest: shallower trees first, then larger leaves; both limit how much a tree can memorise.
+        The number of trees does not cause overfitting (more trees only make the vote steadier), so on a
+        remaining tie MORE trees win. Other families have no within-family order: highest score wins.
+        """
+        if self.name != "random_forest":
+            return ()
+        p = dict(self.params)
+        depth = p.get("max_depth")
+        return (float("inf") if depth is None else depth, -p.get("min_samples_leaf", 1),
+                -p.get("n_estimators", RF_TREES))
+
+    @property
     def label(self) -> str:
         settings = ", ".join(f"{k}={v}" for k, v in self.params)
         return f"{self.name} ({settings})" if settings else self.name

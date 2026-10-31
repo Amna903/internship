@@ -21,7 +21,7 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 
 ## Lessons recorded along the way
 
-- **Step 2: the simplicity order ranks model families, not settings within a family.** The depth-6 forest (validation PR-AUC 0.281) was within the 0.005 tie margin of the unlimited-depth winner (0.284), but the rule doesn't count "shallower" as "simpler". The rule was not changed after seeing results; Step 3's tuning will define within-family simplicity before it runs.
+- **Step 2: the simplicity order ranked model families only, and CI exposed why that matters.** Two forests 0.0002 apart in validation PR-AUC swapped places between Mac (arm64) and Linux CI (x86): trees amplify last-digit floating-point differences into different splits, moving forest scores by about 0.001. So the chosen model depended on the machine. Fix: a within-family order (shallower trees, then larger leaves; on a remaining tie **more** trees, since tree count only steadies the vote and doesn't cause overfitting). The depth-6, leaf-50 forest now wins on both machines. This rule was written after seeing results, for the stability reason, and it changed the winner from the unlimited-depth forest (0.284) to depth 6 (0.281), within the tie margin. `metrics.md` is now checked for identical text and choice with numbers within 0.002; the release reports stay byte-exact.
 - **Step 2: a multi-threaded random forest is not exactly reproducible.** Threads add the trees' outputs in varying order, changing the last digits, enough to flip a near-tie. Forests now run single-threaded; a test trains one twice and requires identical output.
 
 ## Supervised learning
