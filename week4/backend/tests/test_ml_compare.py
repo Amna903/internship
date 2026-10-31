@@ -168,3 +168,7 @@ def test_report_check_tolerates_platform_noise_but_not_a_different_choice():
     assert not reports_match(committed, committed.replace("0.281", "0.290"))[0]
     assert not reports_match(committed, committed.replace("max_depth=6", "max_depth=10"))[0]
     assert not reports_match("12,126 rows", "12,127 rows")[0]
+    # The real CI case: recall at the decision threshold moved by 0.004 between Mac and Linux.
+    row = "| validation (where it was chosen) | 0.1879 | 0.254 | 0.526 | 0.342 | 33.5% |"
+    assert reports_match(row, row.replace("0.526", "0.522").replace("33.5%", "33.3%"))[0]
+    assert not reports_match(row, row.replace("33.5%", "34.5%"))[0]

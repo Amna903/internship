@@ -5,7 +5,7 @@ Run:  python -m ml.verify_release      (exit code 0 = reproduced, 1 = something 
 It regenerates the dataset, the three reports and the model release in a temporary folder, then checks:
   level 1  dataset SHA-256 equals the one recorded in the committed metadata
   level 2  eda.md, release-<version>.md and errors.md are identical; metrics.md has the same text and
-           choice with numbers within 0.002 (random forests differ slightly between CPUs); metadata metrics, threshold, schema, seed
+           choice with numbers within 0.005 (random forests differ slightly between CPUs); metadata metrics, threshold, schema, seed
            and estimator are identical
   level 3  the rebuilt and the committed model give the same probabilities (within 1e-9)
   level 4  the .joblib file is byte-identical, checked only on the platform and library versions that
@@ -29,11 +29,14 @@ from .preprocess import model_input
 from .split import split
 
 # Random forests are built from thousands of threshold comparisons; the last floating-point digits differ
-# between CPUs (arm64 vs x86), which can move a forest's score by about 0.001. The comparison report is
+# between CPUs (arm64 vs x86), which can move a forest's score by about 0.001. Figures read at the decision
+# threshold move more (CI measured 0.004 in recall): the F1-best cut-off is a staircase, so a tiny shift in
+# probabilities can move it one step and flag 2-3 appointments differently. The comparison report is
 # therefore checked in two ways: the text (every word, model name and the choice) must be identical, and
-# every number must agree within these tolerances. Reports holding the served release must match exactly.
+# every number must agree within TIE_MARGIN, the size of difference model selection already treats as
+# noise. Reports holding the served release must match exactly.
 NUMBER = re.compile(r"[-+]?\d[\d,]*(?:\.\d+)?%?")
-DECIMAL_TOLERANCE = 0.002
+DECIMAL_TOLERANCE = train.TIE_MARGIN
 PERCENT_TOLERANCE = 1  # whole-percent columns ("69%") follow the decimals they are computed from
 
 
@@ -46,10 +49,13 @@ def reports_match(committed: str, rebuilt: str) -> tuple[bool, str]:
     worst = 0.0
     for a, b in zip(NUMBER.findall(committed), NUMBER.findall(rebuilt)):
         x, y = float(a.rstrip("%").replace(",", "")), float(b.rstrip("%").replace(",", ""))
-        allowed = PERCENT_TOLERANCE if a.endswith("%") and "." not in a else DECIMAL_TOLERANCE if "." in a else 0
+        if a.endswith("%"):
+            allowed = 100 * DECIMAL_TOLERANCE if "." in a else PERCENT_TOLERANCE  # "33.5%": 0.5 points
+        else:
+            allowed = DECIMAL_TOLERANCE if "." in a else 0
         if abs(x - y) > allowed:
             return False, f"{a} became {b}"
-        if "." in a:
+        if "." in a and not a.endswith("%"):
             worst = max(worst, abs(x - y))
     return True, f"same text and choice; numbers within {DECIMAL_TOLERANCE} (largest difference {worst:.3f})"
 
