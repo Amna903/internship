@@ -5,7 +5,7 @@ Run:  python -m ml.verify_release      (exit code 0 = reproduced, 1 = something 
 It regenerates the dataset, the three reports and the model release in a temporary folder, then checks:
   level 1  dataset SHA-256 equals the one recorded in the committed metadata
   level 2  eda.md, release-<version>.md and errors.md are identical; metrics.md has the same text and
-           choice with numbers within 0.005 (random forests differ slightly between CPUs); metadata metrics, threshold, schema, seed
+           choice; scores within 0.002, cut-off figures within 0.005 (forests differ slightly between CPUs); metadata metrics, threshold, schema, seed
            and estimator are identical
   level 3  the rebuilt and the committed model give the same probabilities (within 1e-9)
   level 4  the .joblib file is byte-identical, checked only on the platform and library versions that
@@ -29,35 +29,53 @@ from .preprocess import model_input
 from .split import split
 
 # Random forests are built from thousands of threshold comparisons; the last floating-point digits differ
-# between CPUs (arm64 vs x86), which can move a forest's score by about 0.001. Figures read at the decision
-# threshold move more (CI measured 0.004 in recall): the F1-best cut-off is a staircase, so a tiny shift in
-# probabilities can move it one step and flag 2-3 appointments differently. The comparison report is
-# therefore checked in two ways: the text (every word, model name and the choice) must be identical, and
-# every number must agree within TIE_MARGIN, the size of difference model selection already treats as
-# noise. Reports holding the served release must match exactly.
+# between CPUs (arm64 vs x86). The comparison report is therefore checked in two ways: the text (every
+# word, model name and the choice) must be identical, and every number must agree within a tolerance that
+# depends on the KIND of number. Reports holding the served release must match exactly.
 NUMBER = re.compile(r"[-+]?\d[\d,]*(?:\.\d+)?%?")
-DECIMAL_TOLERANCE = train.TIE_MARGIN
-PERCENT_TOLERANCE = 1  # whole-percent columns ("69%") follow the decimals they are computed from
+
+# PR-AUC, ROC-AUC, Brier (and train/out-of-bag/gap figures built from them): averages over thousands of
+# rows, so a forest's platform noise moves them by about 0.001. Kept strict.
+SCORE_TOLERANCE = 0.002
+# Threshold, precision, recall, F1 and share flagged (section 3): read at the F1-best cut-off, which is a
+# staircase. A 0.001 shift in probabilities can move the cut-off one step and flag 2-3 appointments
+# differently; CI measured recall 0.526 -> 0.522. Only these are allowed the looser bar, equal to the
+# tie margin that model selection already treats as noise.
+CUTOFF_TOLERANCE = train.TIE_MARGIN
+CUTOFF_SECTION = ("## 3. Decision threshold", "## 4.")
+# Whole-percent "gap closed" column: rounded from PR-AUC, so a 0.001 move can flip the last digit.
+PERCENT_TOLERANCE = 1
+
+
+def _allowed(token: str, in_cutoff_section: bool) -> float:
+    decimal_tolerance = CUTOFF_TOLERANCE if in_cutoff_section else SCORE_TOLERANCE
+    if token.endswith("%"):
+        return 100 * decimal_tolerance if "." in token else PERCENT_TOLERANCE  # "33.5%": percentage points
+    return decimal_tolerance if "." in token else 0  # whole numbers (row counts, seeds) must be exact
 
 
 def reports_match(committed: str, rebuilt: str) -> tuple[bool, str]:
-    """Same text with numbers masked, and every number within tolerance. Returns (ok, reason)."""
+    """Same text with numbers masked, and every number within its tolerance. Returns (ok, reason)."""
     if committed == rebuilt:
         return True, "identical"
     if NUMBER.sub("#", committed) != NUMBER.sub("#", rebuilt):
         return False, "text differs (a word, a model name or the choice changed)"
-    worst = 0.0
-    for a, b in zip(NUMBER.findall(committed), NUMBER.findall(rebuilt)):
-        x, y = float(a.rstrip("%").replace(",", "")), float(b.rstrip("%").replace(",", ""))
-        if a.endswith("%"):
-            allowed = 100 * DECIMAL_TOLERANCE if "." in a else PERCENT_TOLERANCE  # "33.5%": 0.5 points
-        else:
-            allowed = DECIMAL_TOLERANCE if "." in a else 0
-        if abs(x - y) > allowed:
-            return False, f"{a} became {b}"
-        if "." in a and not a.endswith("%"):
-            worst = max(worst, abs(x - y))
-    return True, f"same text and choice; numbers within {DECIMAL_TOLERANCE} (largest difference {worst:.3f})"
+    worst = {"scores": 0.0, "cut-off figures": 0.0}
+    in_cutoff = False
+    for line_a, line_b in zip(committed.splitlines(), rebuilt.splitlines()):
+        if line_a.startswith(CUTOFF_SECTION[0]):
+            in_cutoff = True
+        elif line_a.startswith(CUTOFF_SECTION[1]):
+            in_cutoff = False
+        for a, b in zip(NUMBER.findall(line_a), NUMBER.findall(line_b)):
+            x, y = float(a.rstrip("%").replace(",", "")), float(b.rstrip("%").replace(",", ""))
+            if abs(x - y) > _allowed(a, in_cutoff):
+                return False, f"{a} became {b}" + (" (cut-off figure)" if in_cutoff else " (score)")
+            if "." in a and not a.endswith("%"):
+                kind = "cut-off figures" if in_cutoff else "scores"
+                worst[kind] = max(worst[kind], abs(x - y))
+    return True, (f"same text and choice; scores within {SCORE_TOLERANCE} (largest {worst['scores']:.3f}), "
+                  f"cut-off figures within {CUTOFF_TOLERANCE} (largest {worst['cut-off figures']:.3f})")
 
 
 COMPARED_METADATA_KEYS = ["model", "version", "estimator", "seed", "features", "decision", "metrics", "training_data",

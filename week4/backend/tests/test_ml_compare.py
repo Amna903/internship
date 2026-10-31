@@ -165,10 +165,25 @@ def test_near_tied_forests_resolve_to_the_simpler_one_whatever_their_order():
 def test_report_check_tolerates_platform_noise_but_not_a_different_choice():
     committed = "**Chosen: random_forest (max_depth=6)** | 0.281 | 69% |"
     assert reports_match(committed, committed.replace("0.281", "0.282").replace("69%", "68%"))[0]
-    assert not reports_match(committed, committed.replace("0.281", "0.290"))[0]
     assert not reports_match(committed, committed.replace("max_depth=6", "max_depth=10"))[0]
     assert not reports_match("12,126 rows", "12,127 rows")[0]
-    # The real CI case: recall at the decision threshold moved by 0.004 between Mac and Linux.
-    row = "| validation (where it was chosen) | 0.1879 | 0.254 | 0.526 | 0.342 | 33.5% |"
-    assert reports_match(row, row.replace("0.526", "0.522").replace("33.5%", "33.3%"))[0]
-    assert not reports_match(row, row.replace("33.5%", "34.5%"))[0]
+
+
+def test_scores_keep_the_strict_tolerance():
+    """PR-AUC, ROC-AUC and Brier move about 0.001 between machines: 0.002 allowed, no more."""
+    row = "## 1. Validation\n| random_forest | 0.281 | 0.649 | 0.1301 |"
+    assert reports_match(row, row.replace("0.281", "0.283"))[0]
+    assert not reports_match(row, row.replace("0.281", "0.285"))[0]  # would pass the cut-off bar, not this one
+
+
+def test_only_cut_off_figures_get_the_looser_tolerance():
+    """The real CI case: recall at the decision threshold moved by 0.004 between Mac and Linux."""
+    section = ("## 3. Decision threshold (chosen on validation)\n"
+               "| validation (where it was chosen) | 0.1879 | 0.254 | 0.526 | 0.342 | 33.5% |\n"
+               "## 4. Test set")
+    assert reports_match(section, section.replace("0.526", "0.522").replace("33.5%", "33.3%"))[0]
+    assert not reports_match(section, section.replace("0.526", "0.516"))[0]
+    assert not reports_match(section, section.replace("33.5%", "34.5%"))[0]
+    # The same 0.004 move outside section 3 is a score, and fails.
+    outside = section.replace("## 3. Decision threshold", "## 1. Validation")
+    assert not reports_match(outside, outside.replace("0.526", "0.522"))[0]
