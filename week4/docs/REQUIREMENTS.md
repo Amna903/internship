@@ -22,8 +22,8 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| S1 | Prepare a synthetic appointment-attendance dataset | 1 | ◐ | `backend/ml/data.py` (from Week 3) | | | |
-| S2 | Clearly define features, labels, split strategy and leakage checks | 1 | ☐ | | | | |
+| S1 | Prepare a synthetic appointment-attendance dataset | 1 | ☑ | `backend/ml/data.py` (from Week 3); [SUPERVISED.md § Dataset](SUPERVISED.md#dataset-s1) | `tests/test_supervised_doc.py::test_dataset_section_states_the_real_size_and_seed` | | |
+| S2 | Clearly define features, labels, split strategy and leakage checks | 1 | ☑ | [SUPERVISED.md](SUPERVISED.md) | `tests/test_supervised_doc.py` (every table checked against config and the data; history counts proven past-only) | | |
 | S3 | Train Logistic Regression | 2 | ☐ | | | | |
 | S4 | Train Random Forest | 2 | ☐ | | | | |
 | S5 | Train Gradient Boosting/XGBoost or SVM | 2 | ☐ | | | | |
