@@ -4,7 +4,7 @@ Run:  python -m ml.verify_release      (exit code 0 = reproduced, 1 = something 
 
 It regenerates the dataset, the three reports and the model release in a temporary folder, then checks:
   level 1  dataset SHA-256 equals the one recorded in the committed metadata
-  level 2  eda.md, release-<version>.md and errors.md are identical; tuning.json has the same choice exactly,
+  level 2  eda.md, cluster_features.md, release-<version>.md and errors.md are identical; tuning.json has the same choice exactly,
            CV means and bar within 0.002, single fold scores within 0.01; tuning.md, metrics.md and
            explain.md have the same text and choice, with scores within 0.002 and cut-off figures within 0.005
            (forests differ slightly between CPUs); metadata metrics, threshold, schema, seed and
@@ -25,7 +25,7 @@ from pathlib import Path
 
 import numpy as np
 
-from . import artifact, config, eda, errors, explain, train, tune
+from . import artifact, cluster_features, config, eda, errors, explain, train, tune
 from .models import GRID_CANDIDATES
 from .data import dataset_hash, generate
 from .inference import load
@@ -196,6 +196,7 @@ def main() -> int:
     checks.append(("2", f"{train.RELEASE_REPORT.name} regenerated identically",
                    train.RELEASE_REPORT.read_text() == train.release_report(df)))
     for name, module, build in [("eda.md", eda, lambda: eda.build_report(df)),
+                                ("cluster_features.md", cluster_features, lambda: cluster_features.build_report(df)),
                                 ("errors.md", errors, lambda: errors.build_report(errors.analyse(df)))]:
         checks.append(("2", f"{name} regenerated identically", module.REPORT.read_text() == build()))
     tuning = tune.run(df)

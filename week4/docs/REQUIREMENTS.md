@@ -19,6 +19,7 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 - **Git:** all Week 4 work goes on the `week4` branch → a PR to `main` → reviewer **@ahmedhashir10**.
 - **Model choice is by cross-validation (from Step 3 on).** See the lesson below. The rule is now fixed: no further rule changes.
 - **Served model: still v1.0.0 (engineered logistic regression, C=0.1). Week 4 made no new release** (Step 4 decision, see Lessons). Its report (`release-1.0.0.md`) and files are rebuilt from Week 3's candidates and checked byte-for-byte; the dashboard's "About this model" panel names it, and a test pins that.
+- **Clustering: real data plus a positive control** (user decision, Step 6). The main synthetic data has no patient habits (every engagement column is drawn independently per appointment), so Step 7 reports "no structure found" on it, compared with a shuffled baseline. A separate small control generator with 3–4 planted engagement habits (own module and seed, never touching `data.py`) tests whether the methods recover planted groups (adjusted Rand index). The dashboard's PCA plot and cluster descriptions use the control data, clearly labelled as such.
 - **Test results so far are exploratory evidence** (mentor review on PR #1). Week 4's experimental selection never read the test set, but the release decision did, and the set had already been scored in Week 3. `metrics.md` §4 states both.
 - **Fresh holdout reserved for the next final evaluation:** `backend/ml/holdout.py`, seed 20261101 (not 42), 2,000 patients, IDs offset by 10,000,000 so they cannot collide, fingerprint pinned. Never used for exploration, tuning, model choice or release selection; only that module may load it. Guarded by `tests/test_holdout.py`.
 - **Champion/challenger rule: FROZEN on 2026-11-01** in `backend/ml/release_rule.py` (behaviour pinned by `tests/test_release_rule.py`). Changing it needs a new, dated decision recorded here before the evaluation it applies to. The rule:
@@ -54,10 +55,10 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| U1 | Use non-sensitive profile/engagement features | 6 | ☐ | | | | |
+| U1 | Use non-sensitive profile/engagement features | 6 | ☑ | `backend/ml/cluster_features.py`, [cluster_features.md](../backend/ml/reports/cluster_features.md) §1–3: six per-patient engagement features; age, distance, history, outcome, reminder (clinic behaviour) and web share (redundant) excluded with reasons | `tests/test_cluster_features.py` (exclusions enforced, hand-made patient, one row per patient) | | |
 | U2 | Run K-Means | 7 | ☐ | | | | |
 | U3 | Run one alternative (DBSCAN or Agglomerative Clustering) | 7 | ☐ | | | | |
-| U4 | Choose scaling | 6 | ☐ | | | | |
+| U4 | Choose scaling | 6 | ☑ | [cluster_features.md](../backend/ml/reports/cluster_features.md) §4: rule fixed before clustering; RobustScaler chosen (lead-time outliers, max \|z\| 7.2; every IQR > 0) | `tests/test_cluster_features.py::test_scaling_rule_cases`, `::test_rule_picks_robust_scaling_for_these_patients` | | |
 | U5 | Choose cluster count using silhouette score and/or elbow method | 7 | ☐ | | | | |
 | U6 | PCA for 2D visualization | 8 | ☐ | | | | |
 | U7 | Describe each cluster in neutral, non-clinical terms | 8 | ☐ | | | | |
