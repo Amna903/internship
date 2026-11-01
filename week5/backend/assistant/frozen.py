@@ -86,3 +86,10 @@ WEEK5_FROZEN_SHA256["dev/retrieval_dev_round2.json"] = "ebade698ea5215491cf0205d
 # Step 4 (2026-11-02): the generation answer key, frozen before any Step 4 run (the user reviewed U01-U08).
 GENERATION_KEYS = ROOT / "eval" / "generation_keys.json"
 WEEK5_FROZEN_SHA256["eval/generation_keys.json"] = "e8c3d6c063c706edfbea78c42c2d9d8ed2ac33b5aee3dc271ae747540f3e55b4"
+
+# Step 5 (2026-11-02): follow-up conversations (C1-C5 by the user) and the history red-team (H1-H3 by the
+# user), frozen before any Step 5 code.
+CONVERSATIONS = ROOT / "eval" / "conversations.json"
+HISTORY_REDTEAM = ROOT / "eval" / "history_redteam.json"
+WEEK5_FROZEN_SHA256["eval/conversations.json"] = "0120953bae3f303b89c7bd33a910f11daf43e55939cbd951fd20caa3ae21f21e"
+WEEK5_FROZEN_SHA256["eval/history_redteam.json"] = "d6b8ec594421e8370df86fecacb1d103e92bc7bdac4635108fa18622dc5b0d6a"
