@@ -11,33 +11,41 @@ Chunk size 80 tokens. "As shipped" uses the shipped floor 0.70 and top-k 2.
 
 ## Overall (18 answerable + 5 unanswerable)
 
+**Headline measure (chosen by the user on 2026-11-01, after seeing the baseline and before any Step 3 work):**
+the as-shipped hit rate on answerable questions, with false retrieval on unanswerable questions as a
+guardrail that must not rise. Secondary: Recall@1 and MRR. The guardrail rests on only 5
+unanswerable questions, so one miss moves it by 20 percentage points; counts are shown, not only percentages.
+
 | metric | value |
 |---|---|
-| Recall@1 / @3 / @5 (every evidence quote in the top K) | 83% / 100% / 100% |
+| Recall@1 / @3 / @5 (every evidence quote in the top K) | 83% / 100% / 100% (Recall@3 was already at the ceiling in the baseline) |
 | Hit rate@1 / @3 / @5 (at least one quote in the top K) | 94% / 100% / 100% |
 | Document recall@3 | 100% |
 | MRR | 0.97 |
-| **As shipped:** answerable questions whose evidence is returned | 61% |
-| **As shipped:** unanswerable questions where something is returned (false retrieval) | 0% |
+| **Primary: as shipped, answerable questions whose evidence is returned** | **11 of 18 (61%)** |
+| **Guardrail: as shipped, unanswerable questions where something is returned** (must not rise) | **0 of 5 (0%)** |
 
 ## By category
 
 | category | answerable + unanswerable | R@1 | R@3 | R@5 | MRR | as shipped: hit | false retrieval |
 |---|---|---|---|---|---|---|---|
-| area_hint | 3 + 0 | 100% | 100% | 100% | 1.00 | 0% | – |
-| current_version | 2 + 0 | 100% | 100% | 100% | 1.00 | 100% | – |
-| direct | 2 + 0 | 100% | 100% | 100% | 1.00 | 100% | – |
-| keyword | 3 + 0 | 100% | 100% | 100% | 1.00 | 100% | – |
-| multi_doc | 2 + 0 | 0% | 100% | 100% | 1.00 | 50% | – |
-| paraphrase | 6 + 0 | 83% | 100% | 100% | 0.92 | 50% | – |
-| unanswerable | 0 + 5 | – | – | – | – | – | 0% |
+| area_hint | 3 + 0 | 100% | 100% | 100% | 1.00 | 0 of 3 (0%) | – |
+| current_version | 2 + 0 | 100% | 100% | 100% | 1.00 | 2 of 2 (100%) | – |
+| direct | 2 + 0 | 100% | 100% | 100% | 1.00 | 2 of 2 (100%) | – |
+| keyword | 3 + 0 | 100% | 100% | 100% | 1.00 | 3 of 3 (100%) | – |
+| multi_doc | 2 + 0 | 0% | 100% | 100% | 1.00 | 1 of 2 (50%) | – |
+| paraphrase | 6 + 0 | 83% | 100% | 100% | 0.92 | 3 of 6 (50%) | – |
+| unanswerable | 0 + 5 | – | – | – | – | – | 0 of 5 (0%) |
 
 ## By author
 
+The user's questions (paraphrase, area hint and unanswerable) and the assistant's are reported separately: the
+assistant also builds the retrieval, so its questions are less independent.
+
 | author | answerable + unanswerable | R@1 | R@3 | R@5 | MRR | as shipped: hit | false retrieval |
 |---|---|---|---|---|---|---|---|
-| assistant | 10 + 2 | 80% | 100% | 100% | 1.00 | 80% | 0% |
-| user | 8 + 3 | 88% | 100% | 100% | 0.94 | 38% | 0% |
+| assistant | 10 + 2 | 80% | 100% | 100% | 1.00 | 8 of 10 (80%) | 0 of 2 (0%) |
+| user | 8 + 3 | 88% | 100% | 100% | 0.94 | 3 of 8 (38%) | 0 of 3 (0%) |
 
 ## Every question
 

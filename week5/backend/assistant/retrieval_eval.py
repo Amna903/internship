@@ -115,7 +115,9 @@ def score_case(case: dict, ranked: Ranked, floor: float, top_k: int) -> dict:
 def aggregate(rows: list[dict]) -> dict:
     answerable = [r for r in rows if r["answerable"]]
     unanswerable = [r for r in rows if not r["answerable"]]
-    agg = {"questions": len(rows), "answerable": len(answerable), "unanswerable": len(unanswerable)}
+    agg = {"questions": len(rows), "answerable": len(answerable), "unanswerable": len(unanswerable),
+           "shipped_hits": sum(r["shipped_hit"] for r in answerable),
+           "false_retrievals": sum(r["false_retrieval"] for r in unanswerable)}
     for k in KS:
         for m in ("recall", "hit", "doc_recall"):
             agg[f"{m}@{k}"] = sum(r[f"{m}@{k}"] for r in answerable) / len(answerable) if answerable else None
@@ -166,6 +168,11 @@ def pct(v) -> str:
     return "–" if v is None else f"{100 * v:.0f}%"
 
 
+def count(k: int, n: int) -> str:
+    """Counts first: with 5 unanswerable questions, one miss is 20 percentage points."""
+    return "–" if not n else f"{k} of {n} ({100 * k / n:.0f}%)"
+
+
 def build_report(result: dict, cases: list[dict]) -> str:
     o, s = result["overall"], result["settings"]
     by_id = {c["id"]: c for c in cases}
@@ -177,7 +184,7 @@ def build_report(result: dict, cases: list[dict]) -> str:
         for r in result["cases"])
     table = lambda groups: "\n".join(
         f"| {name} | {g['answerable']} + {g['unanswerable']} | {pct(g['recall@1'])} | {pct(g['recall@3'])} | {pct(g['recall@5'])} | "
-        f"{'–' if g['mrr'] is None else f'{g['mrr']:.2f}'} | {pct(g['shipped_hit_rate'])} | {pct(g['false_retrieval_rate'])} |"
+        f"{'–' if g['mrr'] is None else f'{g['mrr']:.2f}'} | {count(g['shipped_hits'], g['answerable'])} | {count(g['false_retrievals'], g['unanswerable'])} |"
         for name, g in groups.items())
     return f"""# Retrieval evaluation ({result['label']}): {result['method']}
 
@@ -192,14 +199,19 @@ Chunk size {s['chunk_tokens']} tokens. "As shipped" uses the shipped floor {s['f
 
 ## Overall ({o['answerable']} answerable + {o['unanswerable']} unanswerable)
 
+**Headline measure (chosen by the user on 2026-11-01, after seeing the baseline and before any Step 3 work):**
+the as-shipped hit rate on answerable questions, with false retrieval on unanswerable questions as a
+guardrail that must not rise. Secondary: Recall@1 and MRR. The guardrail rests on only {o['unanswerable']}
+unanswerable questions, so one miss moves it by {100 // max(o['unanswerable'], 1)} percentage points; counts are shown, not only percentages.
+
 | metric | value |
 |---|---|
-| Recall@1 / @3 / @5 (every evidence quote in the top K) | {pct(o['recall@1'])} / {pct(o['recall@3'])} / {pct(o['recall@5'])} |
+| Recall@1 / @3 / @5 (every evidence quote in the top K) | {pct(o['recall@1'])} / {pct(o['recall@3'])} / {pct(o['recall@5'])} (Recall@3 was already at the ceiling in the baseline) |
 | Hit rate@1 / @3 / @5 (at least one quote in the top K) | {pct(o['hit@1'])} / {pct(o['hit@3'])} / {pct(o['hit@5'])} |
 | Document recall@3 | {pct(o['doc_recall@3'])} |
 | MRR | {'–' if o['mrr'] is None else f"{o['mrr']:.2f}"} |
-| **As shipped:** answerable questions whose evidence is returned | {pct(o['shipped_hit_rate'])} |
-| **As shipped:** unanswerable questions where something is returned (false retrieval) | {pct(o['false_retrieval_rate'])} |
+| **Primary: as shipped, answerable questions whose evidence is returned** | **{count(o['shipped_hits'], o['answerable'])}** |
+| **Guardrail: as shipped, unanswerable questions where something is returned** (must not rise) | **{count(o['false_retrievals'], o['unanswerable'])}** |
 
 ## By category
 
@@ -208,6 +220,9 @@ Chunk size {s['chunk_tokens']} tokens. "As shipped" uses the shipped floor {s['f
 {table(result['by_category'])}
 
 ## By author
+
+The user's questions (paraphrase, area hint and unanswerable) and the assistant's are reported separately: the
+assistant also builds the retrieval, so its questions are less independent.
 
 | author | answerable + unanswerable | R@1 | R@3 | R@5 | MRR | as shipped: hit | false retrieval |
 |---|---|---|---|---|---|---|---|

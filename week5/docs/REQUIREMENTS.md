@@ -66,6 +66,13 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
   - **Frozen on 2026-11-01** (`frozen.WEEK5_FROZEN_SHA256`): the 7 new corpus files, the 23-question evaluation set (11 by the user) and the 15-question dev set. Before freezing, the v2 date was moved to the past (1 October 2026) so v2 is clearly in force (user). A second v2 change ("by email to the front desk") was added so the dev set can have a v2 question that shares no evidence sentence with the evaluation set (user decision). A test enforces that no dev question shares an evidence sentence with an evaluation question.
   - **Authors:** the user writes about 10 evaluation questions (paraphrase, unanswerable, area_hint) after reading the drafted corpus; the assistant writes the rest. The dev set is separate and written by the assistant.
 
+- **Step 3 headline measure (user decision, 2026-11-01). Chosen after seeing the Step 2 baseline and before any Step 3 work:**
+  - **Primary:** the as-shipped hit rate on answerable questions (baseline **11 of 18**).
+  - **Guardrail:** false retrieval on unanswerable questions must not rise (baseline **0 of 5**). It rests on only 5 questions (one miss = 20 points), so reports show counts, not only percentages.
+  - **Secondary:** Recall@1 (83%) and MRR (0.97). Recall@3 is still reported, noting it was already at the ceiling (100%).
+  - **Floor and top-k for each method are chosen on the dev set only,** with the rules written before Step 3 runs.
+  - **By-author results stay in the report:** the user's questions scored 3 of 8 as shipped, against 8 of 10 for the assistant's, with the same 100% Recall@3.
+
 ## Retrieval (RAG improvements)
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
