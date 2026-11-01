@@ -562,3 +562,26 @@ A running record, added to as each step lands. The full decision history is in
   - +5 s median latency.
 
   A6 stays ◐ with that explanation, and Week 5 moves on to Step 4.
+
+## Step 4: generation evaluation, separately from retrieval
+
+- **Order of commits:** the rules and the frozen answer key came first (`dce5cf6`), then the harness (`d9703e3`, 515 targeted tests passed on SQLite and PostgreSQL), and only then the real run. Nothing was tuned.
+- **Answer key review by the user:** the user's negation rule (a match doesn't count if not / no / never / cannot / *n't* comes up to 2 words before it), with tests for "Guide dogs are not allowed" and "an interpreter is not free". U02 accepts "interpreter" or "translator"; U03 accepts instalments as well as installments, and drops "3 months".
+- **Result** (23 questions × 3 seeds × 2 modes, 9 min 48 s; counts in [generation_eval.md](../backend/assistant/eval/generation_eval.md)):
+
+  | | key fact correct | false abstention | answered but wrong | correct abstention |
+  |---|---|---|---|---|
+  | A: oracle context | 9 of 18 | 8 of 18 | 1 of 18 | 5 of 5 |
+  | B: end to end | 7 of 18 | 10 of 18 | 1 of 18 | 5 of 5 |
+
+- **The main finding: even when the right text is in front of it, the stack abstains on 8 of 18 answerable questions.** A breakdown of the reason behind each of the 40 abstaining runs in mode A:
+  - in 12, the model itself said it didn't know;
+  - in 28, the server's checks turned the answer down: 15 for groundedness below 0.61 (most scored 0.50), 7 for the number check, 6 for no citation or an unverified one.
+
+  So the Week 4 safety checks cost answers as well as stopping bad ones. A06 is a clear case. End to end, it answered correctly ("From 1 October 2026"). With the oracle context, all 3 runs were turned down by the number check, at a groundedness of 0.0. In mode B, 33 of 45 abstaining runs were below the retrieval floor, which is the Step 3 problem.
+- **Wrong answers:** both modes had 1 answered-but-wrong question each.
+  - Mode A, A07: it said an interpreter can join the video call, but left out the patient app. It also cited the distractor, which accounts for all 3 citation-precision misses (54 of 57).
+  - Mode B, A05: "The late cancellation fee is 20 euros." That's true but incomplete, because the fee applies from the second late cancellation. The key fact rule caught it.
+- **Safety held:** every unanswerable question was abstained on in both modes.
+- **By author:** the user's questions got 4 of 8 in A and 2 of 8 in B (retrieval lost U06 and U07, both area hints). The assistant's got 5 of 10 in both modes.
+- **Not applied, by rule 4:** the groundedness threshold, the number check on dates, and the model's own "don't know" are candidates for a future dev round. No check was changed on these results.
