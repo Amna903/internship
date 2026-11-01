@@ -98,10 +98,10 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| E1 | At least 12 LLM evaluation prompts | 12 | ☐ | | | | |
-| E2 | Covering answerable, ambiguous, out-of-scope and prompt-injection attempts | 12 | ☐ | | | | |
-| E3 | Compare two prompts or retrieval settings | 12 | ☐ | | | | |
-| E4 | Record citation quality and failures | 12 | ☐ | | | | |
+| E1 | At least 12 LLM evaluation prompts | 12 | ☑ | 18 frozen cases (12 written by the user), SHA-256 pinned in `assistant/frozen.py`; [eval_report.md](../backend/assistant/eval/eval_report.md) | `tests/test_eval_freeze.py` | | |
+| E2 | Covering answerable, ambiguous, out-of-scope and prompt-injection attempts | 12 | ☑ | categories table in [eval_report.md](../backend/assistant/eval/eval_report.md) (6 answerable, 1 ambiguous, 2 out of scope, 6 injection, plus false premise, medical and personal data); red-team R1–R6 kept separate, diagnostic only | `tests/test_assistant_evaluate.py` | | |
+| E3 | Compare two prompts or retrieval settings | 12 | ☑ | A (shipped, top-k 2) vs B (top-k 4), named before the run, reporting only: 17/18 each, no disagreements; little signal because the floor acts first, as noted in [eval_report.md](../backend/assistant/eval/eval_report.md) | `tests/test_assistant_evaluate.py` | | |
+| E4 | Record citation quality and failures | 12 | ☑ | citations 17 verified / 0 rejected, failure analysis, which defence decided each run, no-floor diagnostic; gaps in [known_gaps.md](../backend/assistant/eval/known_gaps.md) | `tests/test_assistant_evaluate.py` | | |
 
 ## Engineering constraints
 
@@ -133,11 +133,11 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 | A6 | PCA plot | 8 | ◐ | data and report in [cluster_view.md](../backend/ml/reports/cluster_view.md) §1; the plot itself is drawn in the dashboard (Step 13) | |
 | A7 | Cluster quality analysis | 7 | ☑ | [clusters.md](../backend/ml/reports/clusters.md): silhouette vs appointment-reshuffle baseline (no structure found on real data), false-pattern checks, ARI recovery on the positive control, stability | |
 | A8 | Explanation of meaningful versus misleading clusters | 8 | ☑ | [cluster_view.md](../backend/ml/reports/cluster_view.md) §3–4 (real-data clusters as the concrete misleading example) | |
-| A9 | LLM answers cite relevant approved documents | 11 | ☐ | | |
-| A10 | Reject unsupported claims | 11 | ☐ | | |
-| A11 | Survive at least two adversarial prompt tests | 12 | ☐ | | |
+| A9 | LLM answers cite relevant approved documents | 11 | ☑ | 15 of 15 answered runs cite the expected policy ([eval_report.md](../backend/assistant/eval/eval_report.md)). **Caveat:** the server checks support, not relevance; relevance relies on the floor ([known_gaps.md](../backend/assistant/eval/known_gaps.md) §1) | `tests/test_assistant_ask.py` |
+| A10 | Reject unsupported claims | 11 | ☑ | citation, number, polarity and groundedness checks; R3 was stopped by the polarity check. Checks are lexical; known gaps in [known_gaps.md](../backend/assistant/eval/known_gaps.md) | `tests/test_assistant_ask.py`, `tests/test_assistant_polarity.py` |
+| A11 | Survive at least two adversarial prompt tests | 12 | ☑ | R1, R2, R3, R4 and R6 cleared the floor and none leaked ([eval_report.md](../backend/assistant/eval/eval_report.md) Diagnostic 2, [known_gaps.md](../backend/assistant/eval/known_gaps.md)); in the frozen set most attacks were stopped by the floor | `tests/test_assistant_evaluate.py` |
 | A12 | API requests/responses for prediction, clustering and LLM endpoints | 14 | ☐ | | |
-| A13 | Document the 12-case evaluation results | 12 | ☐ | | |
+| A13 | Document the 12-case evaluation results | 12 | ☑ | [eval_report.md](../backend/assistant/eval/eval_report.md), [known_gaps.md](../backend/assistant/eval/known_gaps.md) | `tests/test_assistant_evaluate.py` |
 
 ## Required submission
 

@@ -434,3 +434,18 @@ A running record, added to as each step lands. The full decision history is in
   model call / refused before retrieval); automated tests for every status path, injection defences, safe
   errors, rate limit and audit, with known lexical gaps kept as explicit tests.
 
+
+## Step 12: evaluation on the frozen cases
+
+- **Settings named before the run.** A (shipped) and B (top-k 4) were committed in the runner before any
+  case ran; the comparison is for reporting only, and A ships whatever B scores.
+- **The first run looked better than it was.** Both settings passed 17/18, but most adversarial cases
+  never reached the model: the similarity floor stopped them. With the user's approval I added a "which
+  defence decided it" table, a no-floor diagnostic, and the user's red-team set R1–R6 (written after the
+  evaluation, diagnostic only, kept out of the frozen 18). The runner was committed before the re-run, and
+  the A/B results matched the first run exactly.
+- **What the diagnostics showed.** R1, R2, R3, R4 and R6 cleared the floor and none leaked. With the floor
+  off, U1, U2 and U9b got true but off-topic answers, U8 got a terse answer, and A6 was falsely blocked by
+  the polarity check. R5 stayed below the floor.
+- **No checks changed on eval results.** The gaps are recorded in
+  `backend/assistant/eval/known_gaps.md` as candidates for a future dev round.
