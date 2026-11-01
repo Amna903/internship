@@ -42,8 +42,10 @@ class Answered:
     settings: dict = field(default_factory=dict)
 
 
-def answer_question(question, llm: LLMClient, embedder: Embedder) -> Answered:
-    tuned = load_tuned()
+def answer_question(question, llm: LLMClient, embedder: Embedder, tuned: dict | None = None,
+                    seed: int | None = None) -> Answered:
+    """`tuned` and `seed` default to the shipped values; only the evaluation runner passes others."""
+    tuned = load_tuned() if tuned is None else tuned
     cleaned, redactions = redact(clean_question(question))
     if is_medical_advice_request(cleaned):
         result = AssistantResult(status="refused", answer=REFUSAL_MESSAGE, redactions=redactions,
@@ -59,7 +61,7 @@ def answer_question(question, llm: LLMClient, embedder: Embedder) -> Answered:
         reason = "index out of date" if found.stale_skipped and not found.searched else "below floor"
         result = AssistantResult(status="insufficient_information", reason=reason, redactions=redactions, model=llm.model)
         return Answered(result, stale_skipped=found.stale_skipped, public_reason=public_reason(reason), settings=tuned)
-    result = ask(cleaned, found.passages, llm, groundedness_threshold=tuned["groundedness_threshold"])
+    result = ask(cleaned, found.passages, llm, groundedness_threshold=tuned["groundedness_threshold"], seed=seed)
     result.redactions = redactions
     sources = [{"passage_id": p.id, "source": p.source, "similarity": round(s, 3)}
                for p, s in zip(found.passages, found.scores) if p.id in result.passages_used]

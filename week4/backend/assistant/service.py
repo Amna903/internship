@@ -55,7 +55,7 @@ def clean_question(question) -> str:
 
 
 def ask(question: str, ranked: list[Passage], llm: LLMClient,
-        groundedness_threshold: float = GROUNDEDNESS_THRESHOLD) -> AssistantResult:
+        groundedness_threshold: float = GROUNDEDNESS_THRESHOLD, seed: int | None = None) -> AssistantResult:
     cfg = settings.ASSISTANT
     question, redactions = redact(clean_question(question))
     if is_medical_advice_request(question):
@@ -66,7 +66,7 @@ def ask(question: str, ranked: list[Passage], llm: LLMClient,
     base = {"passages_used": prompt.included, "passages_dropped": prompt.dropped, "redactions": redactions,
             "model": llm.model, "model_called": True}
     try:
-        reply = llm.chat(prompt.messages, ANSWER_SCHEMA)
+        reply = llm.chat(prompt.messages, ANSWER_SCHEMA, seed=seed)
     except LLMTimeout as exc:
         logger.warning("assistant: model timeout (%s)", exc.reason)
         return AssistantResult(status="timeout", reason="timeout", **base)
