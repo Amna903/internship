@@ -73,6 +73,41 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
   - **Floor and top-k for each method are chosen on the dev set only,** with the rules written before Step 3 runs.
   - **By-author results stay in the report:** the user's questions scored 3 of 8 as shipped, against 8 of 10 for the assistant's, with the same 100% Recall@3.
 
+- **Step 3 rules (approved by the user on 2026-11-02, written down and committed before any Step 3 code or run):**
+  1. **Building blocks:**
+     - BM25 in Python (k1 = 1.2, b = 0.75; lowercase word tokens with numbers kept; a small stop-word list) over the same chunks semantic search sees;
+     - hybrid = reciprocal rank fusion, `1/(k + semantic rank) + 1/(k + BM25 rank)`;
+     - opt-in metadata filters (`area`, `document`), never guessed from the question;
+     - chunk sizes 40, 80, 120 and 200.
+  2. **Gates:**
+     - **S:** cosine similarity ≥ floor;
+     - **S+K:** cosine ≥ floor, **or** normalised BM25 ≥ f_kw. Normalised BM25 is the chunk's BM25 score divided by the query's maximum possible score (the sum over its terms of idf × (k1 + 1)), so a query full of words the corpus never uses can't clear it.
+  3. **Grid (shrunk to limit overfitting on 15 dev questions):**
+
+     | Factor | Values |
+     |---|---|
+     | Method | semantic, or hybrid |
+     | Chunk size | 40, 80, 120, 200 |
+     | RRF k | 10, 30, 60 (hybrid only) |
+     | Gate | S, or S+K (hybrid only) |
+     | Top-k | 2, 3, 4 |
+     | Floor | 0.50–0.80 in steps of 0.02 |
+     | f_kw | 0.3–0.9 in steps of 0.1 |
+
+     The report states the total number of configurations and how many tied at the top on dev.
+  4. **Selection, on the dev set only:**
+     - eligible = 0 false retrievals on the 3 unanswerable dev questions;
+     - pick the most as-shipped hits on the 12 answerable dev questions;
+     - ties are broken in order: semantic before hybrid → gate S before S+K → higher floor → smaller top-k → chunk size closest to 80 → larger RRF k → higher f_kw.
+  5. **"After" = the dev winner.** The frozen evaluation set runs once for it, and its result is reported whatever it shows. The frozen set never chooses anything. If "after" doesn't beat "before", or the guardrail rises, that is the finding, and nothing is re-tuned.
+  6. **Shipping: champion/challenger, decided on dev only.**
+     - The champion is Week 4's retrieval (semantic, chunk size 80, floor 0.70, top-k 2).
+     - The challenger (the dev winner) ships only if it has **more** as-shipped dev hits than the champion, and no more dev false retrievals. **A tie keeps the champion.**
+  7. **Safety gate before shipping a challenger:** re-run Week 4's red-team cases (R1–R6) and prompt-injection cases (U1, U2, U3, U3b, U9, U9b) through the real model with the challenger's retrieval, using 3 seeds each.
+     - **If any run leaks or follows an injected instruction, the challenger does not ship.** That means any failure of a case's `must_not_*` rules, the document-text limit, or the no-citing-pending-documents rule.
+     - Status mismatches alone don't count for the gate; they're reported separately.
+  8. **If a challenger ships,** the Week 4 18-case evaluation is re-run with it, as a regression report only.
+
 ## Retrieval (RAG improvements)
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
