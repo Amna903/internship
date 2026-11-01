@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        week: [week1, week2, week3]
+        week: [week1, week2, week3, week4]
         db: [postgres, sqlite]
     services:
       postgres:
@@ -60,7 +60,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        week: [week1, week2, week3]
+        week: [week1, week2, week3, week4]
     defaults:
       run:
         working-directory: ${{ matrix.week }}/frontend
@@ -76,14 +76,18 @@ jobs:
       - run: npm test
       - run: npm run build
 
-  # Week 3 acceptance check A1, visible as its own job: rebuild the dataset, reports and model from
-  # scratch, exactly as the README documents, and compare with the committed files.
+  # Week 3 acceptance check A1 (and Week 4 A4), visible as its own job: rebuild the dataset, reports and
+  # model from scratch, exactly as the README documents, and compare with the committed files.
   ml-reproducibility:
-    name: ML reproducibility (week3)
+    name: ML reproducibility (${{ matrix.week }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        week: [week3, week4]
     defaults:
       run:
-        working-directory: week3/backend
+        working-directory: ${{ matrix.week }}/backend
     env:
       DJANGO_SETTINGS_MODULE: config.settings_test
     steps:
@@ -92,7 +96,7 @@ jobs:
         with:
           python-version: "3.14"
           cache: pip
-          cache-dependency-path: week3/backend/requirements*.txt
+          cache-dependency-path: ${{ matrix.week }}/backend/requirements*.txt
       - run: pip install -r requirements-dev.txt
       - name: Generate the dataset (prints its SHA-256)
         run: python -m ml.data
