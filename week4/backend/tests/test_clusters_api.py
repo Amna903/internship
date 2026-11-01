@@ -54,6 +54,14 @@ class TestResponse:
         assert body["real"]["structure_found"] == {"k-means": False, "agglomerative (Ward)": False}
         assert "misleading_clusters" in body["real"]
 
+    def test_method_comparison_matches_the_committed_step7_results(self, admin_browser):
+        methods = {m["method"]: m for m in admin_browser.get(CLUSTERS).json()["methods"]}
+        results = json.loads(views.CLUSTER_RESULTS.read_text())
+        assert set(methods) == {"k-means", "agglomerative (Ward)"}
+        for name, m in methods.items():
+            assert m["real_structure_found"] is False and m["real_chosen_k"] == results["real"]["chosen_k"][name]
+            assert m["control_ari"] == results["control"]["methods"][name]["ari_at_chosen_k"]
+
     def test_no_identifier_leaks(self, admin_browser):
         text = admin_browser.get(CLUSTERS).text
         assert "patient_id" not in text and "appointment_id" not in text and "100000" not in text

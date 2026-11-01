@@ -66,7 +66,7 @@ export default function AdminDashboard() {
   }
 
   const pages = data ? Math.max(1, Math.ceil(data.count / 10)) : 1;
-  const nav = (<><Link className="btn ghost small" href="/admin/predictions">No-show estimate</Link><span className="muted small">{adminEmail}</span><button className="btn ghost small" onClick={logout}>Sign out</button></>);
+  const nav = (<><Link className="btn ghost small" href="/admin/predictions">ML tools</Link><span className="muted small">{adminEmail}</span><button className="btn ghost small" onClick={logout}>Sign out</button></>);
   const tile = (label: string, value: number | null, icon: IconName, tone: string, note: string) => (
     <div className={`stat ${tone}`}>
       <div className="stat-label"><span className="icon-chip"><Icon name={icon} /></span>{label}</div>

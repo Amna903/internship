@@ -1,12 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { AdminTabs, useAdminNav } from "@/components/AdminTabs";
 import { Shell } from "@/components/Shell";
 import { FormField } from "@/components/ui/FormField";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { adminApi, ModelCard, predictionApi } from "@/lib/api";
+import { ModelCard, predictionApi } from "@/lib/api";
 import {
   buildRequest, DEFAULT_FORM, describe, ErrorView, errorView, FieldName, FormState, LABELS, optionText,
   percent, PredictionResponse, PRESETS, presetToForm, SCHEMA,
@@ -20,7 +20,7 @@ const HINTS: Partial<Record<FieldName, string>> = {
 
 export default function NoShowEstimatePage() {
   const router = useRouter();
-  const [adminEmail, setAdminEmail] = useState("");
+  const nav = useAdminNav();
   const [form, setForm] = useState<FormState>(DEFAULT_FORM);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<string, string>>>({});
   const [result, setResult] = useState<PredictionResponse | null>(null);
@@ -30,9 +30,7 @@ export default function NoShowEstimatePage() {
   // Each submit gets a number; only the newest one may show its answer (no stale results).
   const latest = useRef(0);
 
-  // The server decides who is an admin; this redirect is convenience, the API enforces it.
   useEffect(() => {
-    adminApi.me().then((r) => setAdminEmail(r.user.email)).catch(() => router.replace("/admin/login"));
     predictionApi.model().then(setCard).catch(() => setCard("unavailable"));
   }, [router]);
 
@@ -67,18 +65,6 @@ export default function NoShowEstimatePage() {
       if (ticket === latest.current) setBusy(false);
     }
   }
-
-  async function logout() {
-    try { await adminApi.logout(); } finally { router.push("/admin/login"); }
-  }
-
-  const nav = (
-    <>
-      <Link className="btn ghost small" href="/admin">Member profiles</Link>
-      <span className="muted small">{adminEmail}</span>
-      <button className="btn ghost small" onClick={logout}>Sign out</button>
-    </>
-  );
 
   const control = (name: FieldName) => {
     const spec = SCHEMA[name];
@@ -121,6 +107,7 @@ export default function NoShowEstimatePage() {
     <Shell nav={nav}>
       <PageHeader eyebrow="Admin console · educational prototype" title="Appointment no-show estimate"
                   lead="Estimate whether a fictional appointment may be missed, to decide on an extra reminder. Synthetic data only." />
+      <AdminTabs />
 
       <div className="estimate-layout">
         <form className="card" onSubmit={submit} noValidate aria-describedby="estimate-intro">
@@ -179,6 +166,9 @@ export default function NoShowEstimatePage() {
                 <dt>Extra reminder from</dt><dd>{percent(card.decision.threshold)}</dd>
                 <dt>Inputs</dt><dd>{card.inputs_note}</dd>
               </dl>
+            )}
+            {card && card !== "unavailable" && (
+              <p className="disclaimer small">{card.disclaimer}</p>
             )}
           </details>
         </section>

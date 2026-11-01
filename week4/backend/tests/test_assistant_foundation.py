@@ -279,6 +279,7 @@ class TestStatusEndpoint:
         body = admin_browser.get(STATUS).json()
         assert body["temperature"] == 0.1 and body["max_output_tokens"] == 512 and body["context_tokens"] == 4096
         assert body["output_schema"] == schema.ANSWER_SCHEMA and "approximate" in body["context_strategy"]
+        assert body["model"] and body["embedder"]
         assert "11434" not in json.dumps(body) and "localhost" not in json.dumps(body)
 
     def test_rate_limited(self, admin_browser):

@@ -66,6 +66,7 @@ class ClustersUnavailableError(APIException):
 
 CLUSTER_VIEW = config.ML_DIR / "reports" / "cluster_view.json"
 CLUSTER_VIEW_KEYS = {"disclaimer", "control", "real"}
+CLUSTER_RESULTS = config.ML_DIR / "reports" / "clusters.json"
 
 
 @lru_cache(maxsize=1)
@@ -78,10 +79,24 @@ def load_cluster_view() -> tuple[dict, str]:
     return view, hashlib.sha256(raw).hexdigest()
 
 
+def method_comparison(results: dict) -> list[dict]:
+    """K-Means vs Ward side by side, read from the committed Step 7 results (clusters.json)."""
+    real, control = results["real"], results["control"]
+    return [{"method": name,
+             "real_structure_found": real["methods"][name]["structure_found"],
+             "real_silhouette": real["methods"][name]["silhouette"],
+             "real_baseline_bar": real["methods"][name]["baseline_bar"],
+             "real_chosen_k": real["chosen_k"][name],
+             "control_chosen_k": control["chosen_k"][name],
+             "control_ari": control["methods"][name]["ari_at_chosen_k"]}
+            for name in real["methods"]]
+
+
 def _cluster_view() -> tuple[dict, str]:
     try:
-        return load_cluster_view()
-    except (OSError, ValueError) as exc:
+        view, digest = load_cluster_view()
+        return {**view, "methods": method_comparison(json.loads(CLUSTER_RESULTS.read_bytes()))}, digest
+    except (OSError, ValueError, KeyError) as exc:
         # The reason goes to the server log only; clients get a generic 503.
         logger.error("cluster view unavailable: %s", exc.__class__.__name__)
         raise ClustersUnavailableError() from None

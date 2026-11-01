@@ -449,3 +449,18 @@ A running record, added to as each step lands. The full decision history is in
   the polarity check. R5 stayed below the floor.
 - **No checks changed on eval results.** The gaps are recorded in
   `backend/assistant/eval/known_gaps.md` as candidates for a future dev round.
+
+## Step 13: dashboard tabs
+
+- **Plan approved with four additions:** example-question buttons (including red-team R1), a K-Means vs
+  Ward table, tokens and cost under each answer, and a text summary plus aria labels for the PCA plot.
+- **Two small backend additions, no changed checks or settings.** `/clusters/` now includes a method
+  comparison read from the committed Step 7 results, and `/assistant/status/` names the embedder. Both
+  are pinned by tests.
+- **Verified in a real browser.** `e2e/run_week4_e2e.py` passed 23/23 against the local model, and the
+  Week 3 e2e still passes 17/17 after the header link changed. One run hit the assistant's rate limit
+  (two runs back to back within a minute), which is that limit working as designed.
+- **Local setup note.** Another project held port 3000, so the e2e ran on port 3100 (`E2E_BASE`), with
+  the backend trusting that origin through `CSRF_TRUSTED_ORIGINS` for the run only. No setting changed.
+- **Found by looking at screenshots:** a doubled bracket in the model line, fixed. Found by a test: the
+  model-card check read the card before it loaded, so the check now waits for it.

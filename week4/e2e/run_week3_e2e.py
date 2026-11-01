@@ -12,12 +12,13 @@ the API itself refuses a member.
 """
 
 import json
+import os
 import sys
 
 from playwright.sync_api import expect, sync_playwright
 
 ADMIN_PW, MEMBER_PW, SHOTS = sys.argv[1], sys.argv[2], sys.argv[3]
-BASE = "http://127.0.0.1:3000"
+BASE = os.environ.get("E2E_BASE", "http://127.0.0.1:3000")
 PAGE = f"{BASE}/admin/predictions"
 results = []
 
@@ -40,7 +41,7 @@ with sync_playwright() as p:
     page.goto(f"{BASE}/admin/login")
     page.fill("#email", "admin@example.test"); page.fill("#password", ADMIN_PW)
     page.click("button:has-text('Sign in')"); page.wait_for_url(f"{BASE}/admin")
-    page.click("text=No-show estimate"); page.wait_for_url(PAGE)
+    page.click("text=ML tools"); page.wait_for_url(PAGE)
     check("admin reaches the page from the dashboard link", page.url == PAGE)
     expect(page.locator(".model-card")).to_be_visible()
 

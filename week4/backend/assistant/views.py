@@ -48,6 +48,7 @@ class AssistantStatusView(AdminOnlyAPIView):
         return Response({
             "provider": "local (Ollama)" if cfg["PROVIDER"] == "ollama" else cfg["PROVIDER"],
             "model": cfg["MODEL"],
+            "embedder": cfg["EMBED_MODEL"] if cfg["EMBEDDER"] == "ollama" else cfg["EMBEDDER"],
             "temperature": cfg["TEMPERATURE"],
             "max_output_tokens": cfg["MAX_OUTPUT_TOKENS"],
             "context_tokens": cfg["CONTEXT_TOKENS"],

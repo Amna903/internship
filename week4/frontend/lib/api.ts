@@ -164,3 +164,58 @@ export const predictionApi = {
   predict: (input: Payload) => api<PredictionResponse>("POST", "/api/v1/predictions/no-show/", input),
   model: () => api<ModelCard>("GET", "/api/v1/models/no-show/"),
 };
+
+// ---- Week 4: clusters and the policy assistant (admin session) ----
+
+export interface ClusterSummary {
+  cluster: number; size: number; share: number; description: string;
+  most_common_planted_habit?: { habit: string; share: number };
+}
+
+export interface MethodRow {
+  method: string; real_structure_found: boolean; real_silhouette: number; real_baseline_bar: number;
+  real_chosen_k: number; control_chosen_k: number; control_ari: number;
+}
+
+export interface ClusterView {
+  results_version: string;
+  disclaimer: string;
+  control: {
+    label: string; patients: number; k: number; pca_variance: number[]; ari: number; recovery: string;
+    clusters: ClusterSummary[]; points: { x: number; y: number; cluster: number; planted_habit: string }[];
+  };
+  real: {
+    patients: number; k: number; silhouette: number; baseline_bar: number; appointments_share_of_split: number;
+    structure_found: Record<string, boolean>; misleading_clusters: ClusterSummary[];
+  };
+  methods: MethodRow[];
+}
+
+export interface AssistantStatus {
+  provider: string; model: string; embedder: string; temperature: number; data_policy: string;
+  limits: { question_chars: number };
+}
+
+export interface Citation { passage_id: string; quote: string; source: string }
+
+export interface AskResponse {
+  status: "answered" | "insufficient_information" | "refused";
+  answer: string;
+  citations: Citation[];
+  reason: string | null;
+  usage: { prompt_tokens: number; output_tokens: number; total_tokens: number; cost_usd: number;
+           hosted_equivalent_usd: number; note: string } | null;
+  model: string;
+  model_called: boolean;
+  settings: { floor: number; top_k: number; groundedness_threshold: number };
+  disclaimer: string;
+}
+
+export const clustersApi = {
+  view: () => api<ClusterView>("GET", "/api/v1/clusters/"),
+};
+
+export const assistantApi = {
+  status: () => api<AssistantStatus>("GET", "/api/v1/assistant/status/"),
+  ask: (question: string) => api<AskResponse>("POST", "/api/v1/assistant/ask/", { question }),
+};
