@@ -116,10 +116,10 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
 | G1 | Support document versioning | 1 | ☑ | `assistant/models.py` (`DocumentVersion`), `assistant/documents.py`; migrations `assistant/0002`–`0004` (existing documents become v1, chunks kept, Week 4 passage IDs unchanged); citations and `AnswerRecord` name the edition (`billing.md@v2#0` from v2 on) | `tests/test_assistant_versions.py` (`TestVersions`, `TestEditionsInAnswers`, migration forward and back) | | |
 | G2 | Update re-indexing | 1 | ☑ | `documents.approve_version`: embed first, then one locked transaction writes the new chunks, marks v(n) current and v(n−1) superseded, deletes the old chunks; a failed embedding changes nothing | `tests/test_assistant_versions.py`: old edition never retrieved after approval; failure keeps the old edition live; a version decided while embedding isn't approved twice; row lock taken | | |
 | G3 | Delete re-indexing | 1 | ☑ | `documents.retire` (soft delete): chunks removed, every version kept for audit; restoring means a new version plus approval | `tests/test_assistant_versions.py` (`TestRetire`) | | |
-| G4 | Metadata filters | 3 | ☐ | | | | |
-| G5 | Hybrid keyword + semantic retrieval | 3 | ☐ | | | | |
-| G6 | Reranking or a documented alternative | 3 | ☐ | | | | |
-| G7 | Chunk-size comparison | 3 | ☐ | | | | |
+| G4 | Metadata filters | 3 | ☑ | Opt-in `area` and `document` filters in `indexing.retrieve`, and an optional validated `area` on the ask API. Reported in [retrieval_before_after.md](../backend/assistant/eval/retrieval_before_after.md): no change as shipped, because a filter can't lift a correct chunk over the floor | `tests/test_retrieval_select.py` (`TestFilters`, `TestAskArea`) | | |
+| G5 | Hybrid keyword + semantic retrieval | 3 | ☑ | `assistant/bm25.py` and `indexing.retrieve` (RRF), with gates S and S+K. Compared on dev in [retrieval_selection.md](../backend/assistant/dev/retrieval_selection.md): hybrid search did not beat semantic (best 4 of 12 for each) | `tests/test_retrieval_select.py` (BM25 and RRF checked by hand) | | |
+| G6 | Reranking or a documented alternative | 3 | ☑ | Reciprocal rank fusion, the approved documented alternative (`bm25.rrf`) | `tests/test_retrieval_select.py` | | |
+| G7 | Chunk-size comparison | 3 | ☑ | 40, 80, 120 and 200 tokens, on dev ([retrieval_selection.md](../backend/assistant/dev/retrieval_selection.md): best 1, 3, 4 and 4 of 12) and on the frozen set, reporting only ([retrieval_before_after.md](../backend/assistant/eval/retrieval_before_after.md)) | `tests/test_retrieval_select.py`, `tests/test_retrieval_sets.py` (the hit rule is fair at every size) | | |
 
 ## Evaluation (retrieval separately from generation)
 
@@ -131,7 +131,7 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
 | V4 | Report citation correctness | 4 | ☐ | | | | |
 | V5 | Report groundedness | 4 | ☐ | | | | |
 | V6 | Report abstention behavior | 4 | ☐ | | | | |
-| V7 | Show before/after results for one retrieval improvement | 3 | ☐ | | | | |
+| V7 | Show before/after results for one retrieval improvement | 3 | ☑ | [retrieval_before_after.md](../backend/assistant/eval/retrieval_before_after.md): before = Week 4's retrieval; after = the dev winner, picked by rules written before any run. **On the primary measure, after was worse (5 of 18 against 11 of 18, guardrail 0 of 5 for both); the secondary measures rose slightly (Recall@1 +1 question, MRR 0.97 → 1.00).** Reported as it came out, with nothing re-tuned | `tests/test_retrieval_select.py`, `tests/test_retrieval_eval.py` | | |
 
 ## LLM structured outputs and conversation
 
@@ -227,7 +227,7 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
 | A3 | Demonstrate a rejected write | 13 | ☐ | | | | |
 | A4 | Demonstrate an explicitly approved write | 13 | ☐ | | | | |
 | A5 | Demonstrate document re-indexing | 1, 13 | ◐ | Update, approve, retire and restore are built and tested offline (G1–G3). The real-model demo is in Step 13 | `tests/test_assistant_versions.py` | | |
-| A6 | Measurable retrieval improvement with the 20-question test set | 3 | ☐ | | | | |
+| A6 | Measurable retrieval improvement with the 20-question test set | 3 | ◐ | **Not achieved on the primary measure.** The dev-chosen setting lowered the as-shipped hit rate on the frozen set. Only Recall@1 and MRR rose slightly. The champion (Week 4's retrieval) stays. See [retrieval_before_after.md](../backend/assistant/eval/retrieval_before_after.md) | | | |
 | A7 | Show a background job failure/retry | 13 | ☐ | | | | |
 | A8 | Show the audit trail | 13 | ☐ | | | | |
 | A9 | Show a bounded agent loop | 13 | ☐ | | | | |

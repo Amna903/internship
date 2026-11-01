@@ -3,9 +3,14 @@
  "method": "semantic only (Week 4 retrieval)",
  "embedder": "ollama/nomic-embed-text:latest",
  "settings": {
+  "method": "semantic",
   "floor": 0.7,
   "top_k": 2,
-  "chunk_tokens": 80
+  "rrf_k": 60,
+  "gate": "S",
+  "f_kw": 1.0,
+  "chunk_tokens": 80,
+  "filters": false
  },
  "frozen_sha256": {
   "eval/retrieval_cases.json": "7a40e307ca00ba0db640bf2f3100dc3dc460a9b887b2cbb505d74801f9e57a82"

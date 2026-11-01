@@ -529,3 +529,18 @@ A running record, added to as each step lands. The full decision history is in
 - **The guard caught a false positive:** Week 4's "no code reads the evaluation cases" pattern matched `retrieval_cases` as a substring. It was tightened to whole names, with a test that it still catches real readers.
 - **The harness caught a gap in its own check:** a manifest pointing at the wrong file passed the per-file hash check. It now also checks each document's current edition against its expected hash.
 - **Baseline finding:** ranking is near the ceiling even on the harder corpus (Recall@3 100%, MRR 0.97). The losses come from the shipped floor and top-k: as shipped, only 61% of answerable questions get their evidence (0% false retrieval). Correct top-1 chunks score as low as 0.608, while unanswerable questions score as high as 0.679. Reported to the user before choosing Step 3's headline measure.
+
+## Step 3: retrieval improvements chosen on dev, before/after on the frozen set
+
+- **Rules first, committed before any code (`91ab685`):** the grid (shrunk by the user to limit overfitting), the selection and tie order, champion/challenger decided on dev only, and a safety gate.
+- **A test found a gap in the rules before any run:** "closest to 80" doesn't decide 40 against 120. The user chose the larger. A test now checks that the tie order separates all 4,800 configurations.
+- **The headline measure was chosen by the user after the baseline and before Step 3.** The reports show counts beside percentages (the guardrail rests on 5 questions).
+- **Result, reported as it came out:**
+  - on dev, Week 4's retrieval had 6 of 12 hits but 1 false retrieval (D13), so it was ineligible under the rules;
+  - every eligible configuration reached at most 4 of 12, and hybrid gave no gain;
+  - the dev winner (semantic, chunk size 120, floor 0.74) scored **5 of 18 against 11 of 18** on the frozen set (worse), with the guardrail unchanged.
+
+  Champion/challenger kept the champion, so the safety gate did not run. **A6 (measurable improvement) is not achieved on the primary measure,** and it is marked ◐, not ticked.
+- **What it showed:** the bottleneck is the abstention gate, not the ranking. Correct paraphrased chunks and near-misses fall in the same cosine range. This is recorded as the finding for a next round.
+- **Honesty fixes in the report generator:** the "why" paragraph first hard-coded values read off this run (D13, 0.74, "4 of 12"). It now computes them, so a regenerated report can't state something stale.
+- **Verified on local PostgreSQL before pushing** (lesson from Step 1): 204 tests across the Step 1–3 files.

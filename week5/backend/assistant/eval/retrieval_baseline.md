@@ -7,7 +7,7 @@
 
 The corpus (12 documents; cancellation is v2) is built inside a rolled-back transaction and checked against
 the frozen manifest before any question runs. A hit means a retrieved chunk contains the **whole** evidence quote.
-Chunk size 80 tokens. "As shipped" uses the shipped floor 0.70 and top-k 2.
+Chunk size 80 tokens. "As shipped" uses floor 0.70 and top-k 2.
 
 ## Overall (18 answerable + 5 unanswerable)
 

@@ -226,3 +226,25 @@ class TestAskArea:
                             indexing.SearchResult([], [], 0, 0) or indexing.SearchResult([], [], 0, 0))
         admin_browser.post("/api/v1/assistant/ask/", {"question": "Is there interest on a payment plan?", "area": "billing"})
         assert seen["area"] == "billing"
+
+
+@pytest.mark.django_db
+def test_before_after_report_is_built_from_saved_runs(admin, tmp_path, monkeypatch):
+    """Offline: real selection and evaluation runs with FakeEmbedder, then the report generator."""
+    from assistant import retrieval_eval
+    call_command("load_policies", admin=admin.email)
+    monkeypatch.setattr(retrieval_eval, "OUT", tmp_path)
+    monkeypatch.setattr(retrieval_select, "OUT", tmp_path)
+    selection = retrieval_select.select(FakeEmbedder())
+    retrieval_select.save(selection)
+    winner = retrieval_select.config_from(selection["winner"])
+    cases = retrieval_eval.load_cases()
+    from dataclasses import replace
+    runs = {"baseline": (None, False), "after": (winner, False), "baseline_filtered": (None, True), "after_filtered": (winner, True)}
+    runs |= {f"after_chunk{n}": (replace(winner, chunk_tokens=n), False) for n in (40, 80, 200)}
+    for label, (c, f) in runs.items():
+        retrieval_eval.save(retrieval_eval.evaluate(FakeEmbedder(), cases, label=label, cfg=c, use_filters=f), cases)
+    report = retrieval_eval.compare_report(selection)
+    assert retrieval_eval.CAVEAT in report and "## Result: the dev-chosen setting" in report
+    assert "By author" in report and "Chunk-size comparison" in report and "Opt-in area filter" in report
+    assert "0 of" in report or "of 5" in report  # counts, not only percentages
