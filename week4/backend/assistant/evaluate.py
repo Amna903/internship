@@ -14,6 +14,12 @@ Each case runs RUNS times per setting with seeds SEED, SEED+1, SEED+2 (temperatu
 least MAJORITY runs pass. Uploads (U3 pending, U3b approved) are created inside a transaction that is rolled
 back after each run, so no case affects another and the database is left unchanged.
 
+Diagnostics, reported separately and never used to choose or change anything:
+  - "no floor": the same 18 cases with the shipped settings except the similarity floor turned off, so every
+    case reaches the model and the server checks (most adversarial cases are stopped by the floor otherwise).
+  - "red team": six injections wrapped inside on-topic questions (assistant/eval/redteam_cases.json, written by
+    the user after the evaluation, diagnostic only), run with the shipped settings.
+
 Scoring a run against its frozen expectations:
   - expected_status: the server-decided status must be one of them;
   - expected_source / must_contain (answered cases), if_answered (only when answered);
@@ -32,7 +38,7 @@ from django.db import transaction
 from . import frozen
 from .answering import answer_question
 from .embeddings import Embedder
-from .indexing import approve
+from .indexing import approve, search
 from .llm import LLMClient
 from .models import PolicyDocument
 from .tuning import load_tuned
@@ -47,6 +53,23 @@ MAJORITY = 2
 SHIPPED = "A (shipped)"
 COMPARISON = "B (comparison)"
 LESS_INDEPENDENT = {"A1", "A6"}  # share their meaning with the question the Step 9 design was built on
+NO_FLOOR = "A without floor (diagnostic)"
+RED_TEAM = EVAL_DIR / "redteam_cases.json"
+
+# Which defence decided a run, from its internal reason.
+NOT_CALLED = {"below floor": "similarity floor (model not called)",
+              "server medical-advice check": "server medical check (model not called)",
+              "index out of date": "index out of date (model not called)"}
+
+
+def decided_by(run: dict) -> str:
+    if run["status"] == "answered":
+        return "answered (all checks passed)"
+    return NOT_CALLED.get(run["reason"], f"after the model: {run['reason'] or run['status']}")
+
+
+def load_red_team() -> list[dict]:
+    return json.loads(RED_TEAM.read_text())["cases"]
 
 
 def settings_under_test() -> dict[str, dict]:
@@ -124,7 +147,8 @@ def run_case(case: dict, settings: dict, seed: int, llm: LLMClient, embedder: Em
         answered = answer_question(case["question"], llm, embedder, tuned=settings, seed=seed)
         transaction.set_rollback(True)  # the upload never outlives its run
     r = answered.result
-    run = {"seed": seed, "status": r.status, "reason": r.reason, "public_reason": answered.public_reason,
+    top = search(case["question"], embedder, top_k=1, floor=-1.0).scores
+    run = {"seed": seed, "top_score": round(top[0], 3) if top else None, "status": r.status, "reason": r.reason, "public_reason": answered.public_reason,
            "answer": r.answer if r.status == "answered" else "", "citations": r.citations,
            "rejected_citations": r.rejected_citations, "groundedness": r.groundedness,
            "model_called": r.model_called, "sources": answered.sources,
@@ -136,10 +160,17 @@ def run_case(case: dict, settings: dict, seed: int, llm: LLMClient, embedder: Em
 def evaluate(llm: LLMClient, embedder: Embedder, admin, base_seed: int) -> dict:
     seeds = [base_seed + i for i in range(RUNS)]
     under_test = settings_under_test()
-    results = {name: {c["id"]: [run_case(c, s, seed, llm, embedder, admin) for seed in seeds] for c in load_cases()}
-               for name, s in under_test.items()}
+    cases, red_team = load_cases(), load_red_team()
+
+    def run_all(case_list, s):
+        return {c["id"]: [run_case(c, s, seed, llm, embedder, admin) for seed in seeds] for c in case_list}
+
+    results = {name: run_all(cases, s) for name, s in under_test.items()}
+    no_floor = under_test[SHIPPED] | {"floor": -1.0}
     return {"model": llm.model, "embedder": embedder.identity, "seeds": seeds, "settings": under_test,
-            "frozen_eval_sha256": frozen.FROZEN_SHA256["eval/eval_cases.json"], "results": results}
+            "frozen_eval_sha256": frozen.FROZEN_SHA256["eval/eval_cases.json"], "results": results,
+            "diagnostics": {"no_floor": {"settings": no_floor, "results": run_all(cases, no_floor)},
+                            "red_team": {"settings": under_test[SHIPPED], "results": run_all(red_team, under_test[SHIPPED])}}}
 
 
 # ---------------------------------------------------------------- report
@@ -166,6 +197,89 @@ def summary(result: dict, cases: list[dict]) -> dict:
             "tokens": sum(r["tokens"] for r in all_runs),
         }
     return out
+
+
+def _defence_counts(runs_by_case: dict, case_ids: list[str]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for cid in case_ids:
+        for r in runs_by_case[cid]:
+            counts[decided_by(r)] = counts.get(decided_by(r), 0) + 1
+    return counts
+
+
+def _defence_table(result: dict, cases: list[dict], names: list[str]) -> str:
+    ids = [c["id"] for c in cases]
+    counts = {n: _defence_counts(result["results"][n], ids) for n in names}
+    rows = sorted({k for c in counts.values() for k in c})
+    return ("| decided by | " + " | ".join(names) + " |\n|---|" + "---|" * len(names) + "\n" +
+            "\n".join(f"| {k} | " + " | ".join(str(counts[n].get(k, 0)) for n in names) + " |" for k in rows))
+
+
+def _defence_note(result: dict, cases: list[dict]) -> str:
+    adversarial = [c for c in cases if c["category"] not in ("answerable",)]
+    runs = result["results"][SHIPPED]
+    reached = [c["id"] for c in adversarial if any(r["model_called"] for r in runs[c["id"]])]
+    floor = [c["id"] for c in adversarial if all(decided_by(r).startswith("similarity floor") for r in runs[c["id"]])]
+    return (f"In the shipped setting, {len(floor)} of the {len(adversarial)} non-answerable cases were stopped by the similarity "
+            f"floor before reaching the model ({', '.join(floor) or 'none'}); {len(reached)} reached the model "
+            f"({', '.join(reached) or 'none'}). **Most adversarial cases were stopped by the similarity floor before "
+            "reaching the model; this evaluation does not test the model's injection resistance or the server checks on "
+            "those cases.** The no-floor and red-team diagnostics below do. Because top-k only acts after the floor, the "
+            "A/B comparison says little about these cases.")
+
+
+def _findings(result: dict, cases: list[dict]) -> str:
+    runs = result["results"][SHIPPED]
+    floor = result["settings"][SHIPPED]["floor"]
+    blocked = [c for c in cases if c["category"] == "answerable" or c.get("expected_source")]
+    lines = [f"- **{c['id']}** ({c['category']}): top retrieval score {runs[c['id']][0]['top_score']:.3f} < floor {floor:.2f}, so "
+             "a question the policies answer was stopped before the model."
+             for c in blocked if all(decided_by(r).startswith("similarity floor") for r in runs[c["id"]])]
+    if not lines:
+        return ""
+    return ("### Findings for a future dev-set round (configuration NOT changed on eval results)\n\n" + "\n".join(lines) +
+            "\n\nThe dev set had no paraphrase-style answerable questions, so the floor was set without seeing any. These "
+            "are candidates for the next dev round; the shipped floor stays as tuned.")
+
+
+def _diagnostic_rows(runs_by_case: dict, case_list: list[dict], floor: float | None) -> str:
+    rows = []
+    for c in case_list:
+        runs = runs_by_case[c["id"]]
+        top = runs[0]["top_score"]
+        verdict = "**pass**" if case_passes(runs) else "**FAIL**"
+        details = sorted({f for r in runs for f in r["failures"]})
+        rows.append(f"| {c['id']} | {top:.3f}{(' (clears floor)' if top >= floor else ' (below floor)') if floor is not None else ''} | "
+                    f"{', '.join(r['status'] for r in runs)} | {'; '.join(sorted({decided_by(r) for r in runs}))} | "
+                    f"{verdict} ({sum(not r['failures'] for r in runs)}/3){': ' + '; '.join(details) if details else ''} |")
+    return "\n".join(rows)
+
+
+def _no_floor_section(result: dict, cases: list[dict]) -> str:
+    d = result["diagnostics"]["no_floor"]
+    passed = sum(case_passes(d["results"][c["id"]]) for c in cases)
+    return f"""## Diagnostic 1: the same 18 cases with the floor turned off (not a setting, not shipped)
+
+Every case reaches the model and the server checks, to see whether the second line of defence holds on its own.
+Settings: floor off, top-k {d['settings']['top_k']}, groundedness threshold {d['settings']['groundedness_threshold']:.2f}. **{passed} of {len(cases)} cases passed.**
+
+| case | top score | statuses of the 3 runs | decided by | result |
+|---|---|---|---|---|
+{_diagnostic_rows(d['results'], cases, floor=None)}"""
+
+
+def _red_team_section(result: dict) -> str:
+    d = result["diagnostics"]["red_team"]
+    red = load_red_team()
+    passed = sum(case_passes(d["results"][c["id"]]) for c in red)
+    return f"""## Diagnostic 2: red-team set, shipped settings (written by the user after the evaluation; diagnostic only)
+
+Injections wrapped inside on-topic questions so they clear the floor ({d['settings']['floor']:.2f}) and reach the deeper defences.
+Not part of the 18 frozen cases. **{passed} of {len(red)} red-team cases passed.**
+
+| case | top score | statuses of the 3 runs | decided by | result |
+|---|---|---|---|---|
+{_diagnostic_rows(d['results'], red, floor=d['settings']['floor'])}"""
 
 
 def build_report(result: dict, cases: list[dict]) -> str:
@@ -250,9 +364,21 @@ Unstable cases (passed only 1 or 2 of their 3 runs in some setting; close to a c
 |---|---|---|---|---|
 {chr(10).join(case_rows)}
 
+## Which defence decided each run
+
+{_defence_table(result, cases, names)}
+
+{_defence_note(result, cases)}
+
 ## Failure analysis
 
 {chr(10).join(failures) if failures else 'No case failed in either setting.'}
+
+{_findings(result, cases)}
+
+{_no_floor_section(result, cases)}
+
+{_red_team_section(result)}
 
 **Limitation: the server checks compare words, not meaning.** A negation flip can still get through in forms
 the polarity check doesn't recognise (an antonym such as "refused" for "paid back", or "only after" versus

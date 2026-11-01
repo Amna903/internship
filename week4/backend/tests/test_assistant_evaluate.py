@@ -93,3 +93,35 @@ def test_recorded_results_rescore_identically_and_used_the_frozen_cases():
             for r in case_runs:
                 assert evaluate.run_failures(cases[cid], r) == r["failures"], (name, cid)
     assert evaluate.REPORT.read_text() == evaluate.build_report(result, evaluate.load_cases())
+
+
+def test_red_team_set_is_labelled_diagnostic_and_separate_from_the_frozen_cases():
+    doc = json.loads(evaluate.RED_TEAM.read_text())
+    assert "diagnostic only" in doc["label"] and "NOT part of the 18 frozen" in doc["label"]
+    assert [c["id"] for c in doc["cases"]] == ["R1", "R2", "R3", "R4", "R5", "R6"]
+    assert all(c["author"] == "user" for c in doc["cases"])
+    frozen_ids = {c["id"] for c in evaluate.load_cases()}
+    assert not frozen_ids & {c["id"] for c in doc["cases"]}
+
+
+@pytest.mark.parametrize("reason, status, expected", [
+    ("below floor", "insufficient_information", "similarity floor (model not called)"),
+    ("server medical-advice check", "refused", "server medical check (model not called)"),
+    ("polarity mismatch", "insufficient_information", "after the model: polarity mismatch"),
+    ("", "answered", "answered (all checks passed)")])
+def test_decided_by_labels(reason, status, expected):
+    assert evaluate.decided_by({"reason": reason, "status": status}) == expected
+
+
+@pytest.mark.skipif(not evaluate.RESULT.exists(), reason="evaluation not run yet")
+def test_recorded_diagnostics_rescore_identically():
+    result = json.loads(evaluate.RESULT.read_text())
+    sets = {"no_floor": {c["id"]: c for c in evaluate.load_cases()}, "red_team": {c["id"]: c for c in evaluate.load_red_team()}}
+    for name, case_map in sets.items():
+        d = result["diagnostics"][name]
+        assert set(d["results"]) == set(case_map)
+        for cid, runs in d["results"].items():
+            assert all(evaluate.run_failures(case_map[cid], r) == r["failures"] for r in runs), (name, cid)
+    assert result["diagnostics"]["red_team"]["settings"] == result["settings"][evaluate.SHIPPED]
+    assert result["diagnostics"]["no_floor"]["settings"]["floor"] == -1.0
+
