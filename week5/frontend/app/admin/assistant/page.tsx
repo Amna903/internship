@@ -6,6 +6,7 @@ import { AdminTabs, useAdminNav } from "@/components/AdminTabs";
 import { Shell } from "@/components/Shell";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ApiError, AskResponse, AssistantStatus, assistantApi } from "@/lib/api";
+import { Conversation, NEW_CONVERSATION, afterAnswer, conversationEnded } from "@/lib/conversation";
 
 const EXAMPLES = [
   { label: "Answerable", question: "How many times can I reschedule?" },
@@ -36,9 +37,10 @@ export default function AssistantPage() {
   const router = useRouter();
   const nav = useAdminNav();
   const [status, setStatus] = useState<AssistantStatus | null>(null);
-  // The question lives in component state only: never stored in the browser.
+  // The question and the conversation live in component state only: never stored in the browser.
   const [question, setQuestion] = useState("");
   const [result, setResult] = useState<AskResponse | null>(null);
+  const [conversation, setConversation] = useState<Conversation>(NEW_CONVERSATION);
   const [failure, setFailure] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const latest = useRef(0);
@@ -46,14 +48,16 @@ export default function AssistantPage() {
 
   useEffect(() => { assistantApi.status().then(setStatus).catch(() => setStatus(null)); }, []);
 
-  async function ask(text: string) {
+  async function ask(text: string, from: Conversation = conversation) {
     const ticket = ++latest.current;
     setBusy(true); setFailure(null); setResult(null);
     try {
-      const response = await assistantApi.ask(text);
-      if (ticket === latest.current) setResult(response);
+      const response = await assistantApi.ask(text, from.history);
+      if (ticket === latest.current) { setResult(response); setConversation(afterAnswer(from, text, response)); }
     } catch (err) {
       if (ticket !== latest.current) return;
+      const ended = conversationEnded(err);
+      if (ended) { setConversation(NEW_CONVERSATION); setFailure(ended); return; }
       const message = failureText(err);
       if (message === "signed_out") { router.replace("/admin/login"); return; }
       setFailure(message);
@@ -67,10 +71,20 @@ export default function AssistantPage() {
     if (question.trim()) ask(question.trim());
   }
 
+  // An example starts a new conversation, so it shows exactly what it says.
   function example(text: string) {
     setQuestion(text);
-    ask(text);
+    setConversation(NEW_CONVERSATION);
+    ask(text, NEW_CONVERSATION);
   }
+
+  function startOver() {
+    latest.current++; // ignore any answer still on its way
+    setConversation(NEW_CONVERSATION); setResult(null); setFailure(null); setBusy(false); setQuestion("");
+  }
+
+  const earlier = conversation.turns.slice(0, result ? -1 : undefined);
+  const meta = conversation.turns.at(-1)?.result.conversation;
 
   return (
     <Shell nav={nav}>
@@ -88,8 +102,29 @@ export default function AssistantPage() {
               </button>
             ))}
           </div>
+          <div className="preset-row" data-testid="conversation-bar">
+            <span className="muted small" data-testid="conversation-meta">
+              {meta
+                ? `Question ${meta.turn} of ${meta.max_turns} in this conversation · ${meta.tokens_used.toLocaleString()} of ${meta.token_cap.toLocaleString()} tokens used`
+                : "New conversation: a follow-up question can refer to the previous answer."}
+            </span>
+            <button type="button" className="btn ghost small" data-testid="new-conversation"
+                    disabled={!conversation.turns.length && !failure} onClick={startOver}>New conversation</button>
+          </div>
+          {earlier.length > 0 && (
+            <ol className="small" data-testid="earlier-turns" aria-label="Earlier in this conversation">
+              {earlier.map((t, i) => (
+                <li key={i}>
+                  <strong>{t.question}</strong>
+                  <br />
+                  <span className="muted">{t.result.status === "answered" ? t.result.answer
+                    : t.result.status === "refused" ? "Not answered: medical question" : "Insufficient information"}</span>
+                </li>
+              ))}
+            </ol>
+          )}
           <form onSubmit={submit}>
-            <label htmlFor="question" className="small">Question</label>
+            <label htmlFor="question" className="small">{conversation.turns.length ? "Follow-up question" : "Question"}</label>
             <div className="ask-row">
               <textarea id="question" value={question} maxLength={limit} onChange={(e) => setQuestion(e.target.value)}
                         aria-describedby="question-count" />
@@ -127,7 +162,13 @@ export default function AssistantPage() {
                   {result.usage
                     ? `About ${result.usage.total_tokens.toLocaleString()} tokens (${result.usage.prompt_tokens} in, ${result.usage.output_tokens} out) · cost $${result.usage.cost_usd.toFixed(2)} (local model) · hosted equivalent about $${result.usage.hosted_equivalent_usd.toFixed(4)}, illustrative`
                     : "Model not called · 0 tokens · cost $0.00"}
+                  {result.retries ? " · the model's first reply was invalid and was asked for once more" : ""}
                 </p>
+                {result.budget && (
+                  <p className="muted small" data-testid="budget">
+                    {`Prompt budget (approximate tokens): system ${result.budget.system}, question ${result.budget.question}, earlier turns ${result.budget.history}, passages ${result.budget.passages}; ${result.budget.output_reserved} kept for the reply, of ${result.budget.context}`}
+                  </p>
+                )}
                 <p className="disclaimer small" data-testid="disclaimer">{result.disclaimer}</p>
               </>
             )}

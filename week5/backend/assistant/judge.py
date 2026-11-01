@@ -21,6 +21,7 @@ from .embeddings import Embedder
 from .indexing import Candidates, SearchResult, candidates
 from .llm import LLMClient, LLMError
 from .prompts import PASSAGE_TEMPLATE, Passage
+from .validation import SchemaError, validate
 
 JUDGE_SCHEMA = {"type": "object", "properties": {"relevant": {"type": "boolean"}}, "required": ["relevant"],
                 "additionalProperties": False}
@@ -79,7 +80,9 @@ def one_vote(question: str, passage: Passage, llm: LLMClient, seed: int) -> bool
         data = json.loads(reply.text)
     except (ValueError, TypeError):  # unparseable model output: fail safe (programming errors are not caught)
         return None
-    if not isinstance(data, dict) or set(data) != {"relevant"} or not isinstance(data["relevant"], bool):
+    try:
+        validate(JUDGE_SCHEMA, data)
+    except SchemaError:
         return None
     return data["relevant"]
 

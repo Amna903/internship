@@ -23,6 +23,10 @@ from .answering import answer_question
 from .embeddings import get_embedder
 from .documents import (DocumentError, add_version, approve_version, create_document, pending_version, reject_version,
                         retire)
+from .history import ConversationLimit, HistoryInvalid
+from .history import dump as dump_history
+from .history import load as load_history
+from .history import CONVERSATION_TOKENS, MAX_TURNS
 from .llm import LLMError, get_llm
 from .service import QuestionInvalid
 from .models import POLICY_AREAS, AnswerRecord, DocumentVersion, PolicyDocument
@@ -310,35 +314,55 @@ ERRORS = {
 }
 
 
+class AskJSONParser(SmallJSONParser):
+    """Room for the question plus the signed conversation history (Week 5 Step 5)."""
+
+    max_bytes = 32 * 1024
+
+
 class AskView(AdminOnlyAPIView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "assistant"
-    parser_classes = [SmallJSONParser]
+    parser_classes = [AskJSONParser]
 
     @extend_schema(
         summary="Ask the clinic-policy assistant a question",
         description=("Answers only from approved fictional policies, with citations the server has checked. "
-                     "Status is decided by the server: answered, insufficient_information or refused."),
+                     "Status is decided by the server: answered, insufficient_information or refused. "
+                     "For a follow-up, send back the `history` from the previous answer (signed, tied to you, "
+                     "valid for 30 minutes); omit it to start a new conversation."),
         responses={200: OpenApiResponse(description="answered, insufficient_information or refused"),
-                   400: OpenApiResponse(description="Invalid question"), 401: OpenApiResponse(description="Not signed in"),
+                   400: OpenApiResponse(description="Invalid question, invalid or expired history, or the "
+                                                    "conversation limit reached (start a new conversation)"),
+                   401: OpenApiResponse(description="Not signed in"),
                    403: OpenApiResponse(description="Not an admin, or CSRF token missing"),
+                   413: OpenApiResponse(description="Request body too large"),
                    429: OpenApiResponse(description="Rate limit exceeded"),
                    502: OpenApiResponse(description="Model produced invalid output"),
                    503: OpenApiResponse(description="Model unavailable"), 504: OpenApiResponse(description="Model timeout")},
     )
     def post(self, request):
         data = request.data if isinstance(request.data, dict) else {}
-        if set(data) - {"question", "area"}:
-            return rejection("Only 'question' and an optional 'area' are accepted.", "invalid_request")
+        if set(data) - {"question", "area", "history"}:
+            return rejection("Only 'question', an optional 'area' and an optional 'history' are accepted.",
+                             "invalid_request")
         area = data.get("area")
         if area is not None and area not in POLICY_AREAS:
             return rejection("area must be one of: " + ", ".join(POLICY_AREAS) + ".", "invalid_request")
         try:
-            answered = answer_question(data.get("question"), get_llm(), get_embedder(), area=area)
+            history = load_history(data.get("history"), request.user.id)
+        except HistoryInvalid:
+            return rejection("This conversation can't be continued. Start a new conversation.", "invalid_history")
+        try:
+            answered = answer_question(data.get("question"), get_llm(), get_embedder(), area=area, history=history)
         except QuestionInvalid as exc:
             return rejection(str(exc), "invalid_question")
+        except ConversationLimit:
+            return rejection(f"This conversation has reached its limit ({MAX_TURNS} questions or "
+                             f"{CONVERSATION_TOKENS:,} tokens). Start a new conversation.", "conversation_limit")
         result = answered.result
-        # Audit: who asked, the outcome and the question's length. Never the question text.
+        turn = history.turn_count + 1
+        # Audit: who asked, the outcome and the question's length. Never the question text or the history.
         question_length = len(data.get("question") or "")
         event = record_event(request, AuditEvent.Action.ADMIN_ASSISTANT_ASKED, detail=f"{result.status}:{question_length}")
         by_id = {s["passage_id"]: s for s in answered.sources}
@@ -349,9 +373,11 @@ class AskView(AdminOnlyAPIView):
         AnswerRecord.objects.create(
             audit_event=event, status=result.status, public_reason=answered.public_reason or "", model=result.model,
             citations=[{k: by_id[c["passage_id"]][k] for k in edition} for c in result.citations],
-            sources=[{k: s[k] for k in edition} for s in answered.sources])
+            sources=[{k: s[k] for k in edition} for s in answered.sources],
+            turn=turn, retries=result.retries, budget=result.budget or {})
         if result.status in ERRORS:
             raise AssistantError(*ERRORS[result.status])
+        nxt = answered.history
         return Response({
             "status": result.status,
             "answer": result.answer,
@@ -363,6 +389,11 @@ class AskView(AdminOnlyAPIView):
             "model": result.model,
             "model_called": result.model_called,
             "settings": answered.settings,
+            "budget": result.budget,
+            "retries": result.retries,
+            "history": dump_history(nxt),
+            "conversation": {"turn": turn, "max_turns": MAX_TURNS, "tokens_used": nxt.tokens_used,
+                             "token_cap": CONVERSATION_TOKENS},
             "disclaimer": DISCLAIMER,
         })
 

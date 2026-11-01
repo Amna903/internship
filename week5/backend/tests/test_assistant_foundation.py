@@ -115,12 +115,13 @@ class TestValidation:
                                       json.dumps({"answer": "x" * 2000, "citations": [], "refused": False}),
                                       '{"answer": "Up to 24 hours'])  # cut off at the output-token limit
     def test_contract_breaches_become_invalid_output_and_are_never_shown(self, text):
-        result, _ = ask(text)
+        result, fake = ask(text, text)  # Week 5 Step 5: retried once, so both attempts are invalid here
         assert result.status == "invalid_output" and result.answer == "" and result.citations == []
+        assert result.retries == 1 and len(fake.seen) == 2
 
     def test_too_many_citations_are_invalid(self):
         many = [{"passage_id": "cancel-1", "quote": QUOTE}] * (schema.MAX_CITATIONS + 1)
-        assert ask(reply(citations=many))[0].status == "invalid_output"
+        assert ask(reply(citations=many), reply(citations=many))[0].status == "invalid_output"
 
 
 # ---------------- Prompt and context window ----------------

@@ -40,44 +40,70 @@ class Answered:
     stale_skipped: int = 0
     public_reason: str | None = None
     settings: dict = field(default_factory=dict)
+    cleaned: str = ""  # the redacted question (kept in the signed history; never logged or audited)
+    history: object = None  # the conversation after this turn (assistant/history.History), when one was given
+
+
+def shipped_retrieve(query: str, llm: LLMClient, embedder: Embedder, tuned: dict, seed: int | None = None,
+                     area: str | None = None):
+    """The retrieval the answer path uses for these settings (the evaluations call this too, so they measure
+    exactly what ships)."""
+    if tuned.get("judge"):  # Step 3 round 2: semantic candidates filtered by the LLM relevance judge
+        from django.conf import settings as django_settings
+        from .judge import JudgeConfig, judged_retrieve
+        j = tuned["judge"]
+        return judged_retrieve(query, embedder, llm, JudgeConfig(j["n"], j["f_low"], j["top_k"]),
+                               seed if seed is not None else django_settings.ASSISTANT["SEED"], area=area)
+    if tuned.get("retrieval"):
+        return retrieve(query, embedder, RetrievalConfig(**tuned["retrieval"]), area=area)
+    if area:
+        return retrieve(query, embedder, RetrievalConfig(floor=tuned["floor"], top_k=tuned["top_k"]), area=area)
+    return search(query, embedder, top_k=tuned["top_k"], floor=tuned["floor"])
 
 
 def answer_question(question, llm: LLMClient, embedder: Embedder, tuned: dict | None = None,
-                    seed: int | None = None, area: str | None = None) -> Answered:
+                    seed: int | None = None, area: str | None = None, history=None) -> Answered:
     """`tuned` and `seed` default to the shipped values; only the evaluation runner passes others.
     If `tuned` carries a "retrieval" setting (Week 5 Step 3), that method, gate and top-k are used; otherwise
     Week 4's semantic search with the tuned floor and top-k. `area` is the opt-in metadata filter."""
     tuned = load_tuned() if tuned is None else tuned
+    if history is not None:
+        history.check_limits()  # raises ConversationLimit before anything else
+    answered = _answer(question, llm, embedder, tuned, seed, area, history)
+    if history is not None:
+        r = answered.result
+        answered.history = history.after(answered.cleaned, r.answer if r.status == "answered" else "",
+                                         (r.usage or {}).get("total_tokens", 0),
+                                         medical=r.status == "refused")
+    return answered
+
+
+def _answer(question, llm, embedder, tuned, seed, area, history) -> Answered:
     cleaned, redactions = redact(clean_question(question))
-    if is_medical_advice_request(cleaned):
+    medical = is_medical_advice_request(cleaned) or (
+        history is not None and (history.medical or is_medical_advice_request(history.conversation_text(cleaned))))
+    if medical:
         result = AssistantResult(status="refused", answer=REFUSAL_MESSAGE, redactions=redactions,
                                  reason="server medical-advice check", model=llm.model)
-        return Answered(result, public_reason=public_reason(result.reason), settings=tuned)
+        return Answered(result, public_reason=public_reason(result.reason), settings=tuned, cleaned=cleaned)
+    query = history.retrieval_query(cleaned) if history is not None else cleaned
     try:
-        if tuned.get("judge"):  # Step 3 round 2: semantic candidates filtered by the LLM relevance judge
-            from django.conf import settings as django_settings
-            from .judge import JudgeConfig, judged_retrieve
-            j = tuned["judge"]
-            found = judged_retrieve(cleaned, embedder, llm, JudgeConfig(j["n"], j["f_low"], j["top_k"]),
-                                    seed if seed is not None else django_settings.ASSISTANT["SEED"], area=area)
-        elif tuned.get("retrieval"):
-            found = retrieve(cleaned, embedder, RetrievalConfig(**tuned["retrieval"]), area=area)
-        elif area:
-            found = retrieve(cleaned, embedder, RetrievalConfig(floor=tuned["floor"], top_k=tuned["top_k"]), area=area)
-        else:
-            found = search(cleaned, embedder, top_k=tuned["top_k"], floor=tuned["floor"])
+        found = shipped_retrieve(query, llm, embedder, tuned, seed, area)
     except LLMError as exc:
         result = AssistantResult(status="unavailable", reason=f"embedding failed: {exc.__class__.__name__}",
                                  redactions=redactions, model=llm.model)
-        return Answered(result, settings=tuned)
+        return Answered(result, settings=tuned, cleaned=cleaned)
     if not found.passages:
         reason = "index out of date" if found.stale_skipped and not found.searched else "below floor"
         result = AssistantResult(status="insufficient_information", reason=reason, redactions=redactions, model=llm.model)
-        return Answered(result, stale_skipped=found.stale_skipped, public_reason=public_reason(reason), settings=tuned)
-    result = ask(cleaned, found.passages, llm, groundedness_threshold=tuned["groundedness_threshold"], seed=seed)
+        return Answered(result, stale_skipped=found.stale_skipped, public_reason=public_reason(reason), settings=tuned,
+                        cleaned=cleaned)
+    result = ask(cleaned, found.passages, llm, groundedness_threshold=tuned["groundedness_threshold"], seed=seed,
+                 history=history.turns() if history is not None else ())
     result.redactions = redactions
     sources = [{"passage_id": p.id, "source": p.source, "similarity": round(s, 3), "document_id": p.document_id,
                 "version": p.version, "sha256": p.sha256}
                for p, s in zip(found.passages, found.scores) if p.id in result.passages_used]
     return Answered(result, sources=sources, stale_skipped=found.stale_skipped,
-                    public_reason=public_reason(result.reason) if result.status != "answered" else None, settings=tuned)
+                    public_reason=public_reason(result.reason) if result.status != "answered" else None, settings=tuned,
+                    cleaned=cleaned)

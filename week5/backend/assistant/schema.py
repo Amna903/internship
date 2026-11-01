@@ -13,6 +13,8 @@ a constrained reply can still be empty, cut off at the output-token limit, or wr
 import json
 from dataclasses import dataclass
 
+from .validation import SchemaError, strict, validate
+
 STATUSES = ("answered", "insufficient_information", "refused")
 MAX_ANSWER_CHARS = 1200
 MAX_CITATIONS = 4
@@ -57,28 +59,26 @@ class ModelReply:
     refused: bool
 
 
+# The server-side check, derived from the schema sent to the model (assistant/validation.py): no extra keys,
+# every key required, and the size limits. A field must contain more than whitespace where noted.
+NON_BLANK = r"\S"
+SERVER_ANSWER_SCHEMA = strict(ANSWER_SCHEMA, {
+    "$.answer": {"maxLength": MAX_ANSWER_CHARS},
+    "$.citations": {"maxItems": MAX_CITATIONS},
+    "$.citations[].passage_id": {"pattern": NON_BLANK},
+    "$.citations[].quote": {"pattern": NON_BLANK, "maxLength": MAX_QUOTE_CHARS},
+})
+
+
 def parse_reply(text: str) -> ModelReply:
     """Strict: exact keys, exact types and size limits. Says nothing about whether the answer is right."""
     try:
         data = json.loads(text)
     except (TypeError, ValueError):
         raise InvalidAnswer("output is not JSON") from None
-    if not isinstance(data, dict) or set(data) != {"answer", "citations", "refused"}:
-        raise InvalidAnswer("output must have exactly the keys answer, citations and refused")
-    answer, citations, refused = data["answer"], data["citations"], data["refused"]
-    if not isinstance(answer, str) or len(answer) > MAX_ANSWER_CHARS:
-        raise InvalidAnswer("answer must be a string within the size limit")
-    if not isinstance(refused, bool):
-        raise InvalidAnswer("refused must be true or false")
-    if not isinstance(citations, list) or len(citations) > MAX_CITATIONS:
-        raise InvalidAnswer("citations must be a list within the size limit")
-    parsed = []
-    for item in citations:
-        if not isinstance(item, dict) or set(item) != {"passage_id", "quote"}:
-            raise InvalidAnswer("each citation must have exactly passage_id and quote")
-        if not all(isinstance(item[k], str) and item[k].strip() for k in ("passage_id", "quote")):
-            raise InvalidAnswer("citation fields must be non-empty strings")
-        if len(item["quote"]) > MAX_QUOTE_CHARS:
-            raise InvalidAnswer("citation quote too long")
-        parsed.append(Citation(item["passage_id"].strip(), item["quote"].strip()))
-    return ModelReply(answer=answer.strip(), citations=tuple(parsed), refused=refused)
+    try:
+        validate(SERVER_ANSWER_SCHEMA, data)
+    except SchemaError as exc:
+        raise InvalidAnswer(str(exc)) from None
+    citations = tuple(Citation(c["passage_id"].strip(), c["quote"].strip()) for c in data["citations"])
+    return ModelReply(answer=data["answer"].strip(), citations=citations, refused=data["refused"])

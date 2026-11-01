@@ -359,6 +359,42 @@ one of a few public codes; the internal reason stays in the logs.
 Limit: 10 per minute. Each call writes an `admin.assistant_asked` audit event holding the status and the
 question's length, **never the question text**.
 
+**Conversations (Week 5 Step 5).** Every response also carries `history`, `conversation`, `budget` and
+`retries`. To ask a follow-up, send the previous response's `history` back with the next question; leave it
+out to start a new conversation:
+
+```bash
+curl -b jar.txt -H "X-CSRFToken: $CSRF" -H "Content-Type: application/json" \
+  -d '{"question": "Does that work for video visits too?", "history": "<history from the previous answer>"}' \
+  http://127.0.0.1:8000/api/v1/assistant/ask/
+```
+
+- **The server stores no conversation.** `history` is signed by the server, tied to the signed-in admin and
+  valid for 30 minutes. A tampered, expired, malformed or another admin's history gets `400`
+  `invalid_history`, with no detail and no model call. It holds only redacted questions and the last 3 answers;
+  the browser keeps it in memory only.
+- **Follow-ups:** retrieval searches the previous question plus the new one. Earlier turns go into the prompt
+  as data (at most 3 turns and about 600 tokens, oldest dropped first) and can never be cited.
+- **The medical check runs on the whole conversation.** Once a turn is refused as medical, every later question
+  in that conversation is refused too; start a new conversation.
+- **Limits:** 12 questions or 20,000 model tokens per conversation; then `400` `conversation_limit`, with no
+  model call.
+- **Retry:** if the model's reply breaks the schema, it is asked once more (new seed). `retries` is 0 or 1 and
+  both attempts count in `usage`. A model that declines is never retried.
+- `budget` is the prompt's approximate token split; `AnswerRecord` keeps it with the turn number and retries,
+  never the question, answer or history. The request body limit for this endpoint is 32 KB (`413` above).
+
+```json
+{
+ "...": "the Week 4 fields shown below",
+ "budget": {"context": 4096, "output_reserved": 512, "prompt_budget": 2867, "system": 282, "question": 45,
+            "history": 52, "passages": 58},
+ "retries": 0,
+ "history": "<signed, opaque>",
+ "conversation": {"turn": 2, "max_turns": 12, "tokens_used": 912, "token_cap": 20000}
+}
+```
+
 **Answered** `200`
 ```json
 {

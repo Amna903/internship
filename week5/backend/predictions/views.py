@@ -44,12 +44,14 @@ class ModelUnavailableError(APIException):
 
 
 class SmallJSONParser(JSONParser):
-    """Reads at most MAX_BODY_BYTES + 1 bytes, so an oversized body is rejected without being parsed."""
+    """Reads at most max_bytes + 1 bytes, so an oversized body is rejected without being parsed."""
+
+    max_bytes = MAX_BODY_BYTES
 
     def parse(self, stream, media_type=None, parser_context=None):
-        raw = stream.read(MAX_BODY_BYTES + 1) if stream is not None else b""
-        if len(raw) > MAX_BODY_BYTES:
-            raise RequestTooLarge()
+        raw = stream.read(self.max_bytes + 1) if stream is not None else b""
+        if len(raw) > self.max_bytes:
+            raise RequestTooLarge(f"Request body is larger than {self.max_bytes} bytes.")
         if not raw.strip():
             raise ParseError("Request body is empty.")
         try:

@@ -119,6 +119,11 @@ class AnswerRecord(models.Model):
     # [{"passage_id", "document_id", "version", "sha256"}]: cited passages, and all passages given to the model
     citations = models.JSONField(default=list)
     sources = models.JSONField(default=list)
+    # Week 5 Step 5: the turn number in its conversation, retries for invalid output, and the prompt's token
+    # split. Never the question, the answer or the history itself.
+    turn = models.PositiveSmallIntegerField(default=1)
+    retries = models.PositiveSmallIntegerField(default=0)
+    budget = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

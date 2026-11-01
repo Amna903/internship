@@ -208,6 +208,13 @@ export interface AskResponse {
   model: string;
   model_called: boolean;
   settings: { floor: number; top_k: number; groundedness_threshold: number };
+  // Week 5 Step 5: the explicit token split, retries for invalid output, and the signed conversation history
+  // to send back with a follow-up (kept in React state only, never in browser storage).
+  budget: { context: number; output_reserved: number; prompt_budget: number; system: number; question: number;
+            history: number; passages: number } | null;
+  retries: number;
+  history: string;
+  conversation: { turn: number; max_turns: number; tokens_used: number; token_cap: number };
   disclaimer: string;
 }
 
@@ -217,5 +224,7 @@ export const clustersApi = {
 
 export const assistantApi = {
   status: () => api<AssistantStatus>("GET", "/api/v1/assistant/status/"),
-  ask: (question: string) => api<AskResponse>("POST", "/api/v1/assistant/ask/", { question }),
+  // A follow-up sends back the previous answer's signed history; without it, a new conversation starts.
+  ask: (question: string, history: string | null = null) =>
+    api<AskResponse>("POST", "/api/v1/assistant/ask/", history ? { question, history } : { question }),
 };

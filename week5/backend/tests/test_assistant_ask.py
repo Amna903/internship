@@ -120,7 +120,8 @@ class TestSafety:
                                                    (LLMUnavailable("down"), 503, "assistant_unavailable"),
                                                    ("not json", 502, "assistant_invalid_output")])
     def test_model_failures_are_safe_errors(self, admin_browser, setup, error, http, code):
-        setup.replies.append(error)
+        # Week 5 Step 5: invalid output is retried once, so it takes two invalid replies to reach the error
+        setup.replies.extend([error] * (2 if isinstance(error, str) else 1))
         response = ask(admin_browser, "How many days do I have to request a refund?")
         assert response.status_code == http and response.json()["error"]["code"] == code
         assert "slow" not in response.text and "down" not in response.text
