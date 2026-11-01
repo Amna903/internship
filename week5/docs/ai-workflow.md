@@ -555,3 +555,10 @@ A running record, added to as each step lands. The full decision history is in
 - **Two report bugs, found and fixed before committing:**
   - the round-2 section showed the dev decision alone ("the challenger ships") without the safety gate. Shipping now needs both, for that exact winner, and this is tested;
   - the safety gate was first run from the saved winner by hand, because the command would have re-run the selection. The command can now gate the saved winner directly (`--gate-saved-winner`).
+- **Decision (user, 2026-11-02): option 1, keep the champion.** The gate rule was pre-declared and the frozen set shows no net gain, so there is no case for a post-result rule change. Recorded:
+  - dev improvement: 6 → 10 of 15 hits, 3 → 0 of 10 false retrievals;
+  - frozen tie: 5 paraphrases rescued, 5 easy passages wrongly rejected;
+  - the R6 lexical false positive;
+  - +5 s median latency.
+
+  A6 stays ◐ with that explanation, and Week 5 moves on to Step 4.
