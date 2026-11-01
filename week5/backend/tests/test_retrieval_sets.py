@@ -132,7 +132,7 @@ def test_dev_set_covers_the_categories_step3_will_tune_for():
 def test_only_the_evaluation_harness_reads_the_evaluation_file():
     readers = {p.relative_to(ASSISTANT).as_posix() for p in ASSISTANT.rglob("*.py")
                if "retrieval_cases" in p.read_text() or "RETRIEVAL_CASES" in p.read_text()}
-    assert readers <= {"frozen.py", "retrieval_eval.py"}, readers
+    assert readers <= {"frozen.py", "retrieval_eval.py", "generation_eval.py"}, readers
 
 
 # ---------------- round 2 dev set (Step 3 round 2) ----------------
