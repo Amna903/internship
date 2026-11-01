@@ -82,9 +82,9 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| V1 | At least 20 labeled questions | 2 | ◐ | 23 frozen questions (11 by the user) in `assistant/eval/retrieval_cases.json`, plus a separate 15-question dev set; quote labels; corpus and sets hash-pinned in `frozen.py` | `tests/test_retrieval_sets.py` | | |
-| V2 | Evaluate retrieval separately from generation | 2 | ☐ | | | | |
-| V3 | Report Recall@K or hit rate | 2 | ☐ | | | | |
+| V1 | At least 20 labeled questions | 2 | ☑ | 23 frozen questions (11 by the user) in `assistant/eval/retrieval_cases.json`, plus a separate 15-question dev set; quote labels; corpus and sets hash-pinned in `frozen.py` | `tests/test_retrieval_sets.py` | | |
+| V2 | Evaluate retrieval separately from generation | 2 | ☑ | `assistant/retrieval_eval.py`, `manage.py evaluate_retrieval`: no language model is called; the frozen corpus is built in a rolled-back transaction and checked against the manifest | `tests/test_retrieval_eval.py` | | |
+| V3 | Report Recall@K or hit rate | 2 | ☑ | [retrieval_baseline.md](../backend/assistant/eval/retrieval_baseline.md): Recall@1/3/5, hit rate, document recall, MRR, as-shipped hit rate, false retrieval; by category and author | `tests/test_retrieval_eval.py` (metrics checked by hand on toy rankings) | | |
 | V4 | Report citation correctness | 4 | ☐ | | | | |
 | V5 | Report groundedness | 4 | ☐ | | | | |
 | V6 | Report abstention behavior | 4 | ☐ | | | | |

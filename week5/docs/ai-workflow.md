@@ -519,3 +519,13 @@ A running record, added to as each step lands. The full decision history is in
   All other Week 4 tests pass unchanged, helped by keeping v1 passage IDs and v1 audit details in Week 4's form.
 - **Audit migration checked with `sqlmigrate`:** only `choices` change (no-op SQL), so the append-only triggers survive.
 - **CI caught a PostgreSQL-only failure.** The migration test first used a transactional test database, which pytest empties afterwards with `TRUNCATE`. On PostgreSQL the Week 2 append-only trigger blocks `TRUNCATE` on the audit table (correctly), so the test errored only in CI. Limiting the flush with `available_apps` hid the other apps from the migration loader. The fix: on PostgreSQL the test runs inside the normal rolled-back transaction (PostgreSQL can roll back schema changes, with constraints set to immediate); on SQLite it stays transactional. It was verified on local PostgreSQL 14 before pushing (281 tests across the assistant and audit files).
+
+## Step 2: retrieval evaluation set, harness and baseline
+
+- **Corpus B approved:** 6 new fictional admin policies plus cancellation v2. The user moved the v2 date into the past so v2 is clearly in force.
+- **The user wrote 11 of the 23 evaluation questions.** Every quote was checked word for word, and the three unanswerable topics were confirmed absent (with near-misses noted: "charge" in parking, "opening hours" in rescheduling).
+- **A duplicate caught by the user:** dev D06 shared its evidence sentence with evaluation A05/A06 (the Week 4 A1/A6 lesson). Because v2 changed only one sentence, any v2-only dev question would have shared it. With the user's approval, a second v2 change was made before freezing, and a test now forbids shared evidence sentences (shown to catch the old D06).
+- **Order kept and provable:** freeze (`48fe63e`) → harness (`648092b`) → baseline run.
+- **The guard caught a false positive:** Week 4's "no code reads the evaluation cases" pattern matched `retrieval_cases` as a substring. It was tightened to whole names, with a test that it still catches real readers.
+- **The harness caught a gap in its own check:** a manifest pointing at the wrong file passed the per-file hash check. It now also checks each document's current edition against its expected hash.
+- **Baseline finding:** ranking is near the ceiling even on the harder corpus (Recall@3 100%, MRR 0.97). The losses come from the shipped floor and top-k: as shipped, only 61% of answerable questions get their evidence (0% false retrieval). Correct top-1 chunks score as low as 0.608, while unanswerable questions score as high as 0.679. Reported to the user before choosing Step 3's headline measure.
