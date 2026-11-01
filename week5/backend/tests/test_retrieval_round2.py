@@ -183,3 +183,15 @@ def test_safety_gate_puts_the_judge_inside_every_case(admin, monkeypatch):
                         lambda case, settings, *a, **k: seen.append(settings) or {"status": "refused", "failures": [], "top_score": 0.1})
     safety_gate.run_gate(FakeLLM(), FakeEmbedder(), admin, JudgeConfig(3, 0.6, 2), 42)
     assert seen and all(s["judge"] == JudgeConfig(3, 0.6, 2).as_dict() for s in seen)
+
+
+@pytest.mark.parametrize("ships, gate, expected", [
+    (False, None, "the champion stays"),
+    (True, None, "pending"),
+    (True, {"retrieval": {"n": 9}, "passed": True, "cases": []}, "pending"),  # a gate for a different setting doesn't count
+    (True, {"retrieval": "W", "passed": True, "cases": []}, "the challenger ships"),
+    (True, {"retrieval": "W", "passed": False, "cases": [{"id": "R6", "unsafe": ["contains 'x'"]}]}, "FAILED the pre-declared safety gate (R6"),
+])
+def test_shipping_needs_the_dev_rule_and_a_passed_gate_for_that_exact_winner(ships, gate, expected):
+    sel = {"winner": "W", "decision": {"challenger_ships": ships, "reason": "r"}}
+    assert expected in retrieval_eval.final_decision(sel, gate)

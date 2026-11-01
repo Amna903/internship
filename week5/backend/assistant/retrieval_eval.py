@@ -409,6 +409,21 @@ def evaluate_judged(embedder: Embedder, llm, cases: list[dict], jcfg, base_seed:
             "cases": rows}
 
 
+def final_decision(selection: dict, gate: dict | None) -> str:
+    """Shipping needs BOTH: the dev champion/challenger rule, and a passed safety gate for that exact winner."""
+    d = selection["decision"]
+    gated = gate is not None and gate.get("retrieval") == selection["winner"]
+    if not d["challenger_ships"]:
+        return f"the champion stays: {d['reason']}"
+    if not gated:
+        return "pending: the safety gate has not been run for this challenger"
+    if gate["passed"]:
+        return "the challenger ships: it beat the champion on dev and passed the safety gate"
+    unsafe = [f"{x['id']}: {'; '.join(x['unsafe'])}" for x in gate["cases"] if x["unsafe"]]
+    return ("the champion stays: the challenger beat the champion on dev but FAILED the pre-declared safety gate ("
+            + "; ".join(unsafe) + ")")
+
+
 def _round2_section(before: dict) -> str:
     sel_path = Path(__file__).resolve().parent / "dev" / "retrieval_round2.json"
     if not sel_path.exists() or not (OUT / "retrieval_round2.json").exists():
@@ -420,6 +435,9 @@ def _round2_section(before: dict) -> str:
         "did not improve" if a["shipped_hits"] == b["shipped_hits"] else "got worse")
     guard = "held" if a["false_retrievals"] <= b["false_retrievals"] else "**rose**"
     d, inj, cost = sel["decision"], sel["injection_check"], r2["cost"]
+    gate_path = OUT / "safety_gate.json"
+    gate = json.loads(gate_path.read_text()) if gate_path.exists() else None
+    final = final_decision(sel, gate)
     return f"""
 ## Round 2: LLM relevance judge (a second comparison on the frozen set)
 
@@ -435,5 +453,6 @@ the gate too strict, so round 2 allows no more false retrievals than the champio
 On the primary measure, round 2 **{verdict}**; the guardrail {guard}. Judge injection check:
 {'passed' if inj['passed'] else '**failed**'} ({inj['forced_relevant_votes']} of {inj['votes']} votes forced). Extra cost on the frozen set:
 {cost['judge_calls']} judge calls, median {cost['seconds_median']} s and worst {cost['seconds_max']} s per question.
-**Shipping (dev only): {'the challenger ships' if d['challenger_ships'] else 'the champion stays'}**: {d['reason']}.
+**Shipping decision: {final}.** Dev: challenger {sel['winner_score']['hits'] if sel['winner_score'] else '–'} of {sel['dev_answerable']} hits,
+{sel['winner_score']['false'] if sel['winner_score'] else '–'} of {sel['dev_unanswerable']} false; champion {sel['champion_score']['hits']} of {sel['dev_answerable']} hits, {sel['champion_score']['false']} of {sel['dev_unanswerable']} false.
 """

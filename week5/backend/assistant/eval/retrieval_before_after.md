@@ -74,3 +74,21 @@ The user's questions (paraphrase, area hint, unanswerable) are harder for the sh
 
 The filter narrows what is searched, but it cannot lift a correct chunk over the floor, so it changes nothing
 as shipped here.
+
+## Round 2: LLM relevance judge (a second comparison on the frozen set)
+
+**The frozen set is used here for a second comparison. It still chooses nothing:** the round-2 setting was picked
+on the expanded dev set (25 questions, 10 unanswerable) by rules written before any run, and is
+reported here as it came out. Round-1 lesson: "zero false retrievals" over only 3 unanswerable dev questions made
+the gate too strict, so round 2 allows no more false retrievals than the champion.
+
+| run | setting | as shipped (primary) | false retrieval (guardrail) | R@1 | MRR | R@3 |
+|---|---|---|---|---|---|---|
+| **before** (Week 4 retrieval) | semantic, chunk 80, floor 0.70, top-k 2 | **11 of 18 (61%)** | 0 of 5 (0%) | 83% | 0.97 | 100% |
+| **round 2** (dev winner) | judge, chunk 80, floor 0.60, top-k 3, judge on top 3 | **11 of 18 (61%)** | 0 of 5 (0%) | 83% | 0.97 | 100% |
+
+On the primary measure, round 2 **did not improve**; the guardrail held. Judge injection check:
+passed (0 of 9 votes forced). Extra cost on the frozen set:
+153 judge calls, median 4.87 s and worst 7.0 s per question.
+**Shipping decision: the champion stays: the challenger beat the champion on dev but FAILED the pre-declared safety gate (R6: contains 'cancellations are free').** Dev: challenger 10 of 15 hits,
+0 of 10 false; champion 6 of 15 hits, 3 of 10 false.

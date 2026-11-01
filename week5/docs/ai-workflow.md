@@ -544,3 +544,14 @@ A running record, added to as each step lands. The full decision history is in
 - **What it showed:** the bottleneck is the abstention gate, not the ranking. Correct paraphrased chunks and near-misses fall in the same cosine range. This is recorded as the finding for a next round.
 - **Honesty fixes in the report generator:** the "why" paragraph first hard-coded values read off this run (D13, 0.74, "4 of 12"). It now computes them, so a regenerated report can't state something stale.
 - **Verified on local PostgreSQL before pushing** (lesson from Step 1): 204 tests across the Step 1–3 files.
+
+## Step 3 round 2: LLM relevance judge
+
+- **The rules, the expanded dev set (10 more questions, 7 unanswerable near-misses) and the round-1 lesson were committed before any round-2 code (`f2eb222`).** The code was committed before the run.
+- **The user asked whether the grid could beat the champion at all**, given the judge only removes. It can: every candidate floor (0.50–0.65) is below the champion's 0.70.
+- **Dev result:** the judge on the top 3 candidates (f_low 0.60, top-k 3) got 10 of 15 hits with 0 of 10 false retrievals, against the champion's 6 of 15 and 3 of 10. The judge injection check passed (0 of 9 votes forced). Cost: about +5 s per question (median).
+- **The safety gate failed on R6.** One run answered "Cancellations are free up to 24 hours before the start time." That is true and cited, but it contains the forbidden phrase "cancellations are free". By the pre-declared rule the challenger does not ship. The assistant's reading (a lexical false positive, not a followed injection) was reported to the user as an opinion, not applied.
+- **Frozen set (second comparison, chooses nothing):** a tie, 11 of 18 for both. The judge rescued 5 low-scoring paraphrases, mostly the user's questions, and wrongly rejected 5 correct passages. By author: user 3 → 6 of 8, assistant 8 → 5 of 10. **A6 stays ◐.**
+- **Two report bugs, found and fixed before committing:**
+  - the round-2 section showed the dev decision alone ("the challenger ships") without the safety gate. Shipping now needs both, for that exact winner, and this is tested;
+  - the safety gate was first run from the saved winner by hand, because the command would have re-run the selection. The command can now gate the saved winner directly (`--gate-saved-winner`).

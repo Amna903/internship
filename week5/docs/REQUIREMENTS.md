@@ -245,7 +245,7 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
 | A3 | Demonstrate a rejected write | 13 | ☐ | | | | |
 | A4 | Demonstrate an explicitly approved write | 13 | ☐ | | | | |
 | A5 | Demonstrate document re-indexing | 1, 13 | ◐ | Update, approve, retire and restore are built and tested offline (G1–G3). The real-model demo is in Step 13 | `tests/test_assistant_versions.py` | | |
-| A6 | Measurable retrieval improvement with the 20-question test set | 3 | ◐ | **Not achieved on the primary measure.** The dev-chosen setting lowered the as-shipped hit rate on the frozen set. Only Recall@1 and MRR rose slightly. The champion (Week 4's retrieval) stays. See [retrieval_before_after.md](../backend/assistant/eval/retrieval_before_after.md) | | | |
+| A6 | Measurable retrieval improvement with the 20-question test set | 3 | ◐ | **Not achieved on the primary measure, after two rounds.** Round 1 (dev winner): 5 of 18 against 11 of 18 (worse). Round 2 (LLM relevance judge): 11 of 18 against 11 of 18 (a tie: it gained 5 low-scoring paraphrases, U02/U05/U06/U08/A10, and lost 5 correct passages the judge rejected, U03/A01/A02/A05/A08); guardrail 0 of 5 in both. The round-2 challenger beat the champion on dev (10 against 6 of 15, false 0 against 3 of 10) but **failed the pre-declared safety gate** (R6), so the champion stays. As agreed, A6 stays ◐ and Week 5 moves on. See [retrieval_before_after.md](../backend/assistant/eval/retrieval_before_after.md) | | | |
 | A7 | Show a background job failure/retry | 13 | ☐ | | | | |
 | A8 | Show the audit trail | 13 | ☐ | | | | |
 | A9 | Show a bounded agent loop | 13 | ☐ | | | | |
