@@ -1,0 +1,190 @@
+# Week 5 requirement → evidence checklist
+
+Source: **"WEEK 5 | Advanced RAG, LLM Agents and ML Automation"** in *Elevate Engine Weeks 4–6*. Each row is one line of that brief, worded as in the brief. Lines with several parts are split into one row per part, so none can be ticked half-done.
+
+The Week 4 checklist is kept, finished, in [REQUIREMENTS-week4.md](REQUIREMENTS-week4.md).
+
+Fill in each row as the work is done:
+- **Code:** where it's implemented.
+- **Test:** the automated test that proves it, or "manual" plus what you checked.
+- **Demo:** the Loom timestamp.
+- **Me:** the date you re-ran the check yourself. Leave it blank until you have.
+
+Status: ☐ not started · ◐ in progress · ☑ done and evidenced.
+
+## Decisions for Week 5 (Step 0, approved by the user on 2026-11-01)
+
+- **Git:** a `week5/` folder copied from `week4/`, on a `week5` branch made from `week4`. The PR **targets `week4` for now**, so the reviewer sees only Week 5's changes. Its base switches to `main` after Week 4's PR #1 is merged. Mentor changes on PR #1 are made on `week4` first, then carried into `week5`.
+- **Background jobs: Celery + Redis.** Eager mode is used only in unit tests. At least one test or acceptance check uses a real worker process and Redis, so retries and job states are tested for real. Redis runs as a CI service, and local setup is `brew install redis`. Chosen for Week 6's containerised worker.
+- **Agent: our own small state machine** (plan → tool selection → validation → execution → response). The model only proposes a tool and its arguments; the server validates and authorises every call.
+- **Retrieval:** BM25 keyword search in Python, the same on SQLite and PostgreSQL, combined with semantic search. Reranking uses reciprocal rank fusion, documented as the brief's "alternative". Documents get a `DocumentVersion` history, and only the current version is searchable.
+- **MCP:** a real MCP server built with the official Python SDK, calling the same authorised tool layer as the agent.
+- **Drift:** the population stability index (PSI) on the prediction distribution, plus latency and failure rates, compared with a baseline.
+- **Evaluation sets:** the user writes some of the ≥20 retrieval questions and some of the agent red-team cases. The structure is drafted first, the user adds theirs, and then the set is frozen before any tuning. A separate dev set is used for choices.
+- **Week 4 rules carry over:** frozen evaluation sets; tuning on a dev set only; champion/challenger for releases; the fresh holdout stays unopened; no rule changes after seeing results without telling the user.
+- **Week 6 watch points:** a containerised worker; a reusable 20-question RAG benchmark; at least 10 agent safety and workflow tests.
+
+## Decisions carried over from Week 4
+
+Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQUIREMENTS-week4.md](REQUIREMENTS-week4.md):
+
+- **Supervised task:** the same synthetic appointment no-show task as Week 3, extended rather than replaced. The brief says "expand the Week 3 ML system".
+- **LLM:** local only, through **Ollama**. No data leaves the machine, so the rule against sending patient data to external LLMs holds by design. Tests and CI use a **fake LLM** behind the same interface.
+- **Git:** all Week 4 work goes on the `week4` branch → a PR to `main` → reviewer **@ahmedhashir10**.
+- **Model choice is by cross-validation (from Step 3 on).** See the lesson below. The rule is now fixed: no further rule changes.
+- **Served model: still v1.0.0 (engineered logistic regression, C=0.1). Week 4 made no new release** (Step 4 decision, see Lessons). Its report (`release-1.0.0.md`) and files are rebuilt from Week 3's candidates and checked byte-for-byte; the dashboard's "About this model" panel names it, and a test pins that.
+- **Clustering: real data plus a positive control** (user decision, Step 6). The main synthetic data has no patient habits (every engagement column is drawn independently per appointment), so Step 7 reports "no structure found" on it, compared with a shuffled baseline. A separate small control generator with 3–4 planted engagement habits (own module and seed, never touching `data.py`) tests whether the methods recover planted groups (adjusted Rand index). The dashboard's PCA plot and cluster descriptions use the control data, clearly labelled as such.
+- **Test results so far are exploratory evidence** (mentor review on PR #1). Week 4's experimental selection never read the test set, but the release decision did, and the set had already been scored in Week 3. `metrics.md` §4 states both.
+- **Fresh holdout reserved for the next final evaluation:** `backend/ml/holdout.py`, seed 20261101 (not 42), 2,000 patients, IDs offset by 10,000,000 so they cannot collide, fingerprint pinned. Never used for exploration, tuning, model choice or release selection; only that module may load it. Guarded by `tests/test_holdout.py`.
+- **Champion/challenger rule: FROZEN on 2026-11-01** in `backend/ml/release_rule.py` (behaviour pinned by `tests/test_release_rule.py`). Changing it needs a new, dated decision recorded here before the evaluation it applies to. The rule:
+  1. The served model is the champion. A challenger replaces it only if, on the same training folds, its mean CV PR-AUC beats the champion's by **more than one standard error** of the champion's mean.
+  2. The simplicity preference applies **between model families with different explainability** (logistic regression before trees). Between equally explainable models (two logistic regressions), it doesn't apply: the higher CV mean wins.
+  3. The challenger is decided on CV before the test set is scored. The test score is reported, not used to choose; if it ever argues against a CV decision, that is recorded as a finding, as in Step 4.
+  4. Release numbering stays Week 3's: same inputs, retrained → minor version; inputs change → major version.
+
+## Lessons carried over from Week 4
+
+
+- **Step 2: the simplicity order ranked model families only, and CI exposed why that matters.** Two forests 0.0002 apart in validation PR-AUC swapped places between Mac (arm64) and Linux CI (x86): trees amplify last-digit floating-point differences into different splits, moving forest scores by about 0.001. So the chosen model depended on the machine. Fix: a within-family order (shallower trees, then larger leaves; on a remaining tie **more** trees, since tree count only steadies the vote and doesn't cause overfitting). The depth-6, leaf-50 forest now wins on both machines. This rule was written after seeing results, for the stability reason, and it changed the winner from the unlimited-depth forest (0.284) to depth 6 (0.281), within the tie margin. `metrics.md` is now checked for identical text and choice with numbers within 0.002; the release reports stay byte-exact.
+- **Step 2: a multi-threaded random forest is not exactly reproducible.** Threads add the trees' outputs in varying order, changing the last digits, enough to flip a near-tie. Forests now run single-threaded; a test trains one twice and requires identical output.
+
+## Retrieval (RAG improvements)
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| G1 | Support document versioning | 1 | ☐ | | | | |
+| G2 | Update re-indexing | 1 | ☐ | | | | |
+| G3 | Delete re-indexing | 1 | ☐ | | | | |
+| G4 | Metadata filters | 3 | ☐ | | | | |
+| G5 | Hybrid keyword + semantic retrieval | 3 | ☐ | | | | |
+| G6 | Reranking or a documented alternative | 3 | ☐ | | | | |
+| G7 | Chunk-size comparison | 3 | ☐ | | | | |
+
+## Evaluation (retrieval separately from generation)
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| V1 | At least 20 labeled questions | 2 | ☐ | | | | |
+| V2 | Evaluate retrieval separately from generation | 2 | ☐ | | | | |
+| V3 | Report Recall@K or hit rate | 2 | ☐ | | | | |
+| V4 | Report citation correctness | 4 | ☐ | | | | |
+| V5 | Report groundedness | 4 | ☐ | | | | |
+| V6 | Report abstention behavior | 4 | ☐ | | | | |
+| V7 | Show before/after results for one retrieval improvement | 3 | ☐ | | | | |
+
+## LLM structured outputs and conversation
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| L1 | LLM structured outputs with schema validation | 5 | ☐ | | | | |
+| L2 | Retry-on-invalid-output (bounded) | 5 | ☐ | | | | |
+| L3 | Conversation/session history | 5 | ☐ | | | | |
+| L4 | History summarization or truncation | 5 | ☐ | | | | |
+| L5 | Explicit token budgets | 5 | ☐ | | | | |
+
+## Tools and agent
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| T1 | Controlled tool-using agent with at least four typed tools | 6 | ☐ | | | | |
+| T2 | Tool: search approved documents | 6 | ☐ | | | | |
+| T3 | Tool: check fictional appointment availability | 6 | ☐ | | | | |
+| T4 | Tool: request supervised ML prediction | 6 | ☐ | | | | |
+| T5 | Tool: retrieve anonymized cluster summaries | 6 | ☐ | | | | |
+| T6 | Stateful multi-step workflow: plan → tool selection → validation → execution → response | 8 | ☐ | | | | |
+| T7 | Tool-call traces | 8 | ☐ | | | | |
+| T8 | Maximum-step limit | 8 | ☐ | | | | |
+| T9 | Recovery from failed tools | 8 | ☐ | | | | |
+
+## Write tool and approval
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| W1 | Fifth tool: draft a fictional reminder or schedule a mock appointment | 7 | ☐ | | | | |
+| W2 | Any write requires explicit human confirmation | 7 | ☐ | | | | |
+| W3 | Any write requires server-side authorization | 7 | ☐ | | | | |
+
+## MCP
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| P1 | Integrate one MCP server/tool where feasible, or an equivalent typed tool adapter | 9 | ☐ | | | | |
+| P2 | Explain how MCP permissions, inputs and outputs are handled | 9 | ☐ | | | | |
+
+## Background jobs
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| J1 | Background job for document indexing or batch predictions using a task queue | 10 | ☐ | | | | |
+| J2 | Track queued/running/succeeded/failed status | 10 | ☐ | | | | |
+| J3 | Retry transient failures safely | 10 | ☐ | | | | |
+
+## Model monitoring
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| M1 | Log synthetic prediction distributions | 11 | ☐ | | | | |
+| M2 | Log inference latency | 11 | ☐ | | | | |
+| M3 | Log failure rates | 11 | ☐ | | | | |
+| M4 | Compare with baseline to flag possible drift | 11 | ☐ | | | | |
+| M5 | No claims of real-world medical impact | 11 | ☐ | | | | |
+
+## Admin audit page
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| D1 | Admin-facing audit page: agent actions | 12 | ☐ | | | | |
+| D2 | Audit page: approval decisions | 12 | ☐ | | | | |
+| D3 | Audit page: retrieval sources | 12 | ☐ | | | | |
+| D4 | Audit page: job status | 12 | ☐ | | | | |
+| D5 | Audit page: model versions | 12 | ☐ | | | | |
+
+## Engineering constraints
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| C1 | Authorize each tool at execution time; do not trust prompts to enforce security | 6–8 | ☐ | | | | |
+| C2 | Allowlists | 6–8 | ☐ | | | | |
+| C3 | Schema validation | 5–8 | ☐ | | | | |
+| C4 | Idempotency keys for writes | 7 | ☐ | | | | |
+| C5 | Bounded retries | 5, 10 | ☐ | | | | |
+| C6 | Per-request timeouts | 6–10 | ☐ | | | | |
+| C7 | Defend against prompt injection in retrieved content | 3, 8 | ☐ | | | | |
+| C8 | Defend against prompt injection in tool responses | 8 | ☐ | | | | |
+| C9 | Redact secrets and personal data from prompts | 5–8 | ☐ | | | | |
+| C10 | Redact secrets and personal data from traces | 8 | ☐ | | | | |
+| C11 | Redact secrets and personal data from logs | 8–10 | ☐ | | | | |
+| C12 | Agent capabilities limited to synthetic, low-risk administration | 6–8 | ☐ | | | | |
+| C13 | No autonomous clinical recommendations or real-world patient changes | 6–8 | ☐ | | | | |
+
+## Acceptance checks
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| A1 | Demonstrate a successful multi-tool workflow | 13 | ☐ | | | | |
+| A2 | Demonstrate an unauthorized tool denial | 13 | ☐ | | | | |
+| A3 | Demonstrate a rejected write | 13 | ☐ | | | | |
+| A4 | Demonstrate an explicitly approved write | 13 | ☐ | | | | |
+| A5 | Demonstrate document re-indexing | 1, 13 | ☐ | | | | |
+| A6 | Measurable retrieval improvement with the 20-question test set | 3 | ☐ | | | | |
+| A7 | Show a background job failure/retry | 13 | ☐ | | | | |
+| A8 | Show the audit trail | 13 | ☐ | | | | |
+| A9 | Show a bounded agent loop | 13 | ☐ | | | | |
+| A10 | Show structured-output validation | 13 | ☐ | | | | |
+| A11 | Submit an architecture diagram | 14 | ☐ | | | | |
+| A12 | Submit typed tool contracts | 14 | ☐ | | | | |
+| A13 | Submit an evaluation report | 14 | ☐ | | | | |
+| A14 | Submit security threat notes | 14 | ☐ | | | | |
+
+## Required submission
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| R1 | GitHub repository with meaningful commits | all | ☐ | | | | |
+| R2 | Setup and run/test commands | 14 | ☐ | | | | |
+| R3 | README architecture decisions, limitations, screenshots and API examples | 14 | ☐ | | | | |
+| R4 | 5–10 minute Loom: working demo, code architecture, actual AI prompts and refinements, context management, blast-radius controls, debugging and verification | 14 | ☐ | | | | |
+| R5 | Post repository and Loom links in the team channel | 14 | ☐ | | | | |
+| R6 | Keep all previous features working and provide regression-test evidence | 0, 14 | ☐ | | | | |
+| R7 | Git workflow: branch, PR, reviewer @ahmedhashir10 (mentor instruction) | 0, 14 | ☐ | | | | |
+| R8 | Study guide (user's standing request) | 14 | ☐ | | | | |

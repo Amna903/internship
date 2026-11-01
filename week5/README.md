@@ -1,3 +1,14 @@
+# HealthProfile: Week 5 (advanced RAG, LLM agents and ML automation), in progress
+
+> **Educational prototype on synthetic, fictional data.** Nothing here is medical advice, and the agent
+> can only take synthetic, low-risk admin actions, each needing human approval.
+
+Week 5 is being built step by step on the `week5` branch. The plan, the decisions so far and the
+requirement checklist are in [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md). Everything from Weeks 1–4
+below still works ([regression evidence](docs/regression.md)).
+
+---
+
 # HealthProfile: Week 4 (supervised + unsupervised ML and a local LLM assistant)
 
 > **Educational prototype on synthetic, fictional data.** Predictions, clusters and assistant answers

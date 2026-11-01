@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        week: [week1, week2, week3, week4]
+        week: [week1, week2, week3, week4, week5]
         db: [postgres, sqlite]
     services:
       postgres:
@@ -60,7 +60,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        week: [week1, week2, week3, week4]
+        week: [week1, week2, week3, week4, week5]
     defaults:
       run:
         working-directory: ${{ matrix.week }}/frontend
@@ -84,7 +84,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        week: [week3, week4]
+        week: [week3, week4, week5]
     defaults:
       run:
         working-directory: ${{ matrix.week }}/backend
