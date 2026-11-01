@@ -15,7 +15,8 @@ import numpy as np
 from django.conf import settings
 from django.db import models
 
-POLICY_AREAS = ("billing", "cancellation", "privacy", "reminders", "rescheduling", "telehealth", "other")
+POLICY_AREAS = ("billing", "cancellation", "privacy", "reminders", "rescheduling", "telehealth", "access", "results",
+                "other")
 
 
 class PolicyDocument(models.Model):

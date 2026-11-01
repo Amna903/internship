@@ -58,6 +58,14 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
   - Version 1 audit details keep Week 4's form (`document:12`); later versions add `:v2`.
   - Area filtering in Step 3 will join through the document instead of copying the area onto every chunk, so copies can't drift.
 
+- **Step 2 (2026-11-01), approved:**
+  - **Corpus B:** a frozen Week 5 corpus made of the 6 Week 4 policies, 6 new fictional admin policies, and a v2 of the cancellation policy. The evaluation builds it inside a rolled-back transaction, so the live database and the Week 4 corpus check are unaffected.
+  - **Labels are evidence quotes, not passage IDs,** so every chunk size can be scored.
+  - **Hit rule (user addition 1):** each evidence quote is **one sentence or part of one sentence**, and a hit means a retrieved chunk contains the **whole quote** (after normalising case and whitespace). The chunker splits only between sentences, so a one-sentence quote is always whole inside some chunk at any chunk size. A test checks this for every chunk size Step 3 compares. Chosen over an "80% of the words" rule because it is stricter and needs no threshold.
+  - **Corpus frozen before any Step 3 design work (user addition 2).** The reports will state: *"The corpus was deliberately built to be harder by the same author who builds the retrieval, so the size of any improvement may not transfer to other document sets."*
+  - **Frozen on 2026-11-01** (`frozen.WEEK5_FROZEN_SHA256`): the 7 new corpus files, the 23-question evaluation set (11 by the user) and the 15-question dev set. Before freezing, the v2 date was moved to the past (1 October 2026) so v2 is clearly in force (user). A second v2 change ("by email to the front desk") was added so the dev set can have a v2 question that shares no evidence sentence with the evaluation set (user decision). A test enforces that no dev question shares an evidence sentence with an evaluation question.
+  - **Authors:** the user writes about 10 evaluation questions (paraphrase, unanswerable, area_hint) after reading the drafted corpus; the assistant writes the rest. The dev set is separate and written by the assistant.
+
 ## Retrieval (RAG improvements)
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
@@ -74,7 +82,7 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| V1 | At least 20 labeled questions | 2 | ☐ | | | | |
+| V1 | At least 20 labeled questions | 2 | ◐ | 23 frozen questions (11 by the user) in `assistant/eval/retrieval_cases.json`, plus a separate 15-question dev set; quote labels; corpus and sets hash-pinned in `frozen.py` | `tests/test_retrieval_sets.py` | | |
 | V2 | Evaluate retrieval separately from generation | 2 | ☐ | | | | |
 | V3 | Report Recall@K or hit rate | 2 | ☐ | | | | |
 | V4 | Report citation correctness | 4 | ☐ | | | | |
