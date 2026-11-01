@@ -76,12 +76,12 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 | L5 | Define an output token limit | 9 | ☑ | `ASSISTANT_MAX_OUTPUT_TOKENS` = 512 (`config/settings.py`), sent as `num_predict`; cut-off output fails validation | `tests/test_assistant_foundation.py`::test_request_sends_schema_temperature_token_limit_and_context | | |
 | L6 | Define a temperature | 9 | ☑ | 0.1, with the reason, in `config/settings.py` | `tests/test_assistant_foundation.py`::test_request_sends_schema_temperature_token_limit_and_context | | |
 | L7 | Define a structured JSON response schema | 9 | ☑ | `ANSWER_SCHEMA` (`backend/assistant/schema.py`): answer, citations, refused; sent as Ollama's `format` and validated strictly; status decided by the server (`backend/assistant/verify.py`) | `tests/test_assistant_foundation.py`::TestValidation, ::TestStatus | | |
-| L8 | Educational FAQ assistant over approved fictional clinic policies | 10 | ☐ | | | | |
-| L9 | Document upload | 10 | ☐ | | | | |
-| L10 | Text extraction | 10 | ☐ | | | | |
-| L11 | Chunking | 10 | ☐ | | | | |
-| L12 | Embeddings | 10 | ☐ | | | | |
-| L13 | Vector search | 10 | ☐ | | | | |
+| L8 | Educational FAQ assistant over approved fictional clinic policies | 10 | ◐ | six frozen fictional policies (`backend/assistant/policies/`, hashes pinned in `backend/assistant/frozen.py`) loaded as approved by `manage.py load_policies`; question endpoint in Step 11 | `tests/test_assistant_documents.py`::TestRetrieval, `tests/test_eval_freeze.py` | | |
+| L9 | Document upload | 10 | ☑ | `POST /api/v1/assistant/documents/` (multipart, admin, CSRF); lands as pending; `.../approve/` makes it searchable | `tests/test_assistant_documents.py`::TestDocumentsAPI | | |
+| L10 | Text extraction | 10 | ☑ | UTF-8 text from .txt/.md, BOM removed, headings dropped before chunking (`backend/assistant/uploads.py`, `backend/assistant/chunking.py`) | `tests/test_assistant_documents.py`::TestValidation, ::TestChunking | | |
+| L11 | Chunking | 10 | ☑ | whole sentences, ~80 approximate tokens, one-sentence overlap (`backend/assistant/chunking.py`) | `tests/test_assistant_documents.py`::TestChunking | | |
+| L12 | Embeddings | 10 | ☑ | `nomic-embed-text` via Ollama; deterministic `FakeEmbedder` in tests/CI; model identity stored with every vector (`backend/assistant/embeddings.py`) | `tests/test_assistant_documents.py`::test_approval_indexes_with_the_current_embedder_and_is_audited | | |
+| L13 | Vector search | 10 | ☑ | cosine similarity in NumPy over approved chunks of the current embedder; top-k and floor; stale vectors skipped and reported; re-index only via `manage.py reindex_documents` (audited) | `tests/test_assistant_documents.py`::TestRetrieval, ::TestStaleVectors | | |
 | L14 | Cited source passages | 11 | ☐ | | | | |
 | L15 | Explicit "insufficient information" behavior | 11 | ☐ | | | | |
 
@@ -112,8 +112,8 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 | C3 | Pin dependencies and random seeds | 0 | ◐ | `requirements.txt`, `ml/config.py` SEED | | | |
 | C4 | Document provenance, bias, imbalance and limitations | 14 | ◐ | [DATA_CARD.md](DATA_CARD.md) | | | |
 | C5 | Do not submit patient-identifiable data to external LLMs | 9 | ☑ | local model only; obvious identifiers redacted from questions before the prompt (`backend/assistant/privacy.py`); no profile or prediction data in the prompt | `tests/test_assistant_foundation.py`::TestPrivacy | | |
-| C6 | Validate file types/sizes | 10 | ☐ | | | | |
-| C7 | Enforce upload permissions | 10 | ☐ | | | | |
+| C6 | Validate file types/sizes | 10 | ☑ | `backend/assistant/uploads.py`: size, extension, content signature (PDF/ZIP/images/executables rejected whatever the extension), NUL bytes, UTF-8, control characters, safe file names, duplicates by SHA-256 | `tests/test_assistant_documents.py`::TestValidation | | |
+| C7 | Enforce upload permissions | 10 | ☑ | admin session + role + CSRF on upload and approval; pending documents have no chunks and are never retrieved; uploads and approvals audited | `tests/test_assistant_documents.py`::test_anonymous_and_members_cannot_upload_list_or_approve, ::test_a_pending_document_is_never_retrieved_even_for_its_own_words | | |
 | C8 | Treat retrieved documents as untrusted | 11 | ☐ | | | | |
 | C9 | Rate limits | 9 | ◐ | `assistant` scope, 10/min (status endpoint now; question endpoint in Step 11) | `tests/test_assistant_foundation.py`::test_rate_limited | | |
 | C10 | Timeouts | 9 | ☑ | one deadline per answer (60 s, allows the measured ~6 s cold start); `manage.py warm_llm` | `tests/test_assistant_foundation.py`::test_slow_model_raises_timeout | | |

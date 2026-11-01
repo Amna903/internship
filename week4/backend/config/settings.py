@@ -291,5 +291,7 @@ ASSISTANT = {
     "CONTEXT_TOKENS": int(os.environ.get("ASSISTANT_CONTEXT_TOKENS", "4096")),
     # Deadline for one answer, including a cold start (first call after the model loads).
     "TIMEOUT_SECONDS": float(os.environ.get("ASSISTANT_TIMEOUT_SECONDS", "60")),
+    "EMBEDDER": os.environ.get("ASSISTANT_EMBEDDER", "ollama"),  # "ollama" or "fake" (tests, CI)
+    "EMBED_MODEL": os.environ.get("ASSISTANT_EMBED_MODEL", "nomic-embed-text:latest"),
 }
 
