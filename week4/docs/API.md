@@ -179,3 +179,360 @@ Validation is strict:
 The model card: version, estimator, disclaimer, input schema, decision rule, validation and test
 metrics, training-data SHA-256, seed, library versions and file SHA-256. These are the values from
 `ml/artifacts/no-show-1.0.0.json`.
+
+
+## Week 4: clusters and the clinic policy assistant (admin only)
+
+Every example below was **captured from the running server** on 2026-11-01 (local model `llama3.2:3b`,
+embeddings `nomic-embed-text`). The upload and approve examples ran against a **copy** of the local
+database, so the real document index was not changed. Long responses are trimmed where marked `…`.
+
+Same rules as the Week 3 routes: an admin session cookie, the CSRF token in `X-CSRFToken` on writes,
+and the error envelope `{"error": {"code", "message", "details"}}`. A member's JWT gets 401; a missing
+CSRF token gets 403. The prediction endpoints above are unchanged: Week 4 still serves `no-show-1.0.0`.
+
+### `GET /api/v1/clusters/`
+
+Reads the committed Step 7–8 results; no clustering runs during a request. Limit: 60 per minute.
+Each call writes an `admin.clusters_viewed` audit event with the results version.
+
+The PCA points and cluster descriptions come from the **positive-control data** (planted habits,
+fictional) and are labelled as such. For the real synthetic patients the response gives the verdict (no
+structure found) and the clusters K-Means formed anyway, under `misleading_clusters`. `methods` compares
+K-Means with Ward.
+
+`200` (trimmed)
+```json
+{
+ "results_version": "2f0ceb1443dd",
+ "results_sha256": "2f0ceb1443dd3e02…",
+ "disclaimer": "Exploratory clustering of synthetic, fictional engagement data. Clusters describe booking patterns, not categories of people, and are never a medical or personal assessment.",
+ "control": {
+  "label": "Positive-control data with planted habits (fictional), not real patients",
+  "patients": 1500,
+  "k": 3,
+  "pca_variance": [
+   0.35137421309014355,
+   0.2591676404604878
+  ],
+  "ari": 0.51786239486612,
+  "recovery": "partially recovered",
+  "clusters": [
+   {
+    "cluster": 0,
+    "size": 420,
+    "share": 0.28,
+    "profile": {
+     "mean_lead_time": 9.32425344496773,
+     "telehealth_share": 0.7531843421129135,
+     "phone_share": 0.12308346415489271,
+     "app_share": 0.7331666812023955,
+     "mean_hour": 16.320582592011164,
+     "appointments": 3.9571428571428573
+    },
+    "description": "Books in the app more often; more telehealth visits; later appointment times.",
+    "most_common_planted_habit": {
+     "habit": "telehealth app users",
+     "share": 0.85
+    }
+   },
+   "… 2 more"
+  ],
+  "points": [
+   {
+    "x": 0.652,
+    "y": -0.272,
+    "cluster": 1,
+    "planted_habit": "mixed"
+   },
+   {
+    "x": -1.393,
+    "y": -0.516,
+    "cluster": 0,
+    "planted_habit": "telehealth app users"
+   },
+   "… 1,498 more"
+  ]
+ },
+ "real": {
+  "patients": 5000,
+  "k": 3,
+  "structure_found": {
+   "k-means": false,
+   "agglomerative (Ward)": false
+  },
+  "silhouette": 0.16924811339778348,
+  "baseline_bar": 0.17317526382248177,
+  "appointments_share_of_split": 0.627879274329328,
+  "misleading_clusters": [
+   {
+    "cluster": 0,
+    "size": 2377,
+    "share": 0.4754,
+    "description": "Fewer appointments in the data; books closer to the date."
+   },
+   "… 2 more"
+  ]
+ },
+ "methods": [
+  {
+   "method": "k-means",
+   "real_structure_found": false,
+   "real_silhouette": 0.16924811339778348,
+   "real_baseline_bar": 0.17317526382248177,
+   "real_chosen_k": 3,
+   "control_chosen_k": 3,
+   "control_ari": 0.51786239486612
+  },
+  {
+   "method": "agglomerative (Ward)",
+   "real_structure_found": false,
+   "real_silhouette": 0.12959287489016755,
+   "real_baseline_bar": 0.16331546922263412,
+   "real_chosen_k": 3,
+   "control_chosen_k": 2,
+   "control_ari": 0.17927215231236512
+  }
+ ]
+}
+```
+
+| status | when | `error.code` |
+|---|---|---|
+| 401 / 403 | not signed in as admin | `not_authenticated` / `permission_denied` |
+| 429 | over 60/min | `throttled` |
+| 503 | the results file is missing or damaged (reason logged server-side only) | `clusters_unavailable` |
+
+### `GET /api/v1/assistant/status/`
+
+The assistant's configuration. It never calls the model, and it never includes the server address.
+
+`200` (output schema trimmed)
+```json
+{
+ "provider": "local (Ollama)",
+ "model": "llama3.2:3b",
+ "embedder": "nomic-embed-text:latest",
+ "temperature": 0.1,
+ "max_output_tokens": 512,
+ "context_tokens": 4096,
+ "timeout_seconds": 60.0,
+ "context_strategy": "System prompt and question always included; ranked passages fill the rest, lowest ranked dropped first. Token counts are approximate (4 characters per token) with a 20% safety margin.",
+ "limits": {
+  "question_chars": 500,
+  "answer_chars": 1200,
+  "citations": 4
+ },
+ "cost": {
+  "local_usd_per_call": 0.0,
+  "illustrative_hosted_usd_per_1k_tokens": {
+   "input": 0.0005,
+   "output": 0.0015
+  }
+ },
+ "data_policy": "Only approved fictional clinic policies and the question reach the model; obvious identifiers in questions are redacted first. The model runs locally.",
+ "output_schema": "{ … JSON schema: answer, citations, refused … }"
+}
+```
+
+### `POST /api/v1/assistant/ask/`
+
+```bash
+curl -b jar.txt -H "X-CSRFToken: $CSRF" -H "Content-Type: application/json" \
+  -d '{"question": "How many times can I reschedule?"}' \
+  http://127.0.0.1:8000/api/v1/assistant/ask/
+```
+
+The order is fixed:
+1. validate the question (1–500 characters);
+2. redact obvious identifiers;
+3. **refuse medical questions before any retrieval or model call**;
+4. retrieve approved passages above the similarity floor;
+5. if nothing clears the floor, return `insufficient_information` **without calling the model**;
+6. otherwise call the model and verify its reply on the server.
+
+**The server decides the status, not the model.** The model returns only `answer`, `citations` and
+`refused`. An answer is shown only if every citation points to a passage it was given, each quote is in
+that passage, every number is in the quotes, and the polarity and groundedness checks pass. `reason` is
+one of a few public codes; the internal reason stays in the logs.
+
+Limit: 10 per minute. Each call writes an `admin.assistant_asked` audit event holding the status and the
+question's length, **never the question text**.
+
+**Answered** `200`
+```json
+{
+ "status": "answered",
+ "answer": "An appointment can be rescheduled at most twice.",
+ "citations": [
+  {
+   "passage_id": "rescheduling.md#0",
+   "quote": "Each appointment can be rescheduled at most twice;",
+   "source": "rescheduling.md"
+  }
+ ],
+ "sources": [
+  {
+   "passage_id": "rescheduling.md#0",
+   "source": "rescheduling.md",
+   "similarity": 0.704
+  }
+ ],
+ "reason": null,
+ "stale_chunks_skipped": 0,
+ "usage": {
+  "prompt_tokens": 387,
+  "output_tokens": 53,
+  "total_tokens": 440,
+  "cost_usd": 0.0,
+  "hosted_equivalent_usd": 0.000273,
+  "note": "Local model: no per-call cost. Hosted equivalent uses illustrative prices, not a quote."
+ },
+ "model": "llama3.2:3b",
+ "model_called": true,
+ "settings": {
+  "floor": 0.7,
+  "top_k": 2,
+  "groundedness_threshold": 0.61
+ },
+ "disclaimer": "Educational assistant for a fictional clinic's policies. Answers come only from approved policy documents and are checked against them; it gives no medical advice."
+}
+```
+
+**Nothing relevant above the floor** (`"Do you offer appointments on Sundays?"`): the model is not called. `200`
+```json
+{
+ "status": "insufficient_information",
+ "answer": "",
+ "citations": [],
+ "sources": [],
+ "reason": "no_relevant_policy",
+ "stale_chunks_skipped": 0,
+ "usage": null,
+ "model": "llama3.2:3b",
+ "model_called": false,
+ "settings": {
+  "floor": 0.7,
+  "top_k": 2,
+  "groundedness_threshold": 0.61
+ },
+ "disclaimer": "Educational assistant for a fictional clinic's policies. Answers come only from approved policy documents and are checked against them; it gives no medical advice."
+}
+```
+
+**Medical question**, refused before retrieval (`"Which medicine should I take for my fever before the visit?"`). `200`
+```json
+{
+ "status": "refused",
+ "answer": "This assistant only answers questions about the fictional clinic's policies. It can't give medical advice; please contact a qualified professional.",
+ "citations": [],
+ "sources": [],
+ "reason": "medical_advice_not_given",
+ "stale_chunks_skipped": 0,
+ "usage": null,
+ "model": "llama3.2:3b",
+ "model_called": false,
+ "settings": {
+  "floor": 0.7,
+  "top_k": 2,
+  "groundedness_threshold": 0.61
+ },
+ "disclaimer": "Educational assistant for a fictional clinic's policies. Answers come only from approved policy documents and are checked against them; it gives no medical advice."
+}
+```
+
+`reason` values: `no_relevant_policy`, `could_not_verify_answer` (any failed citation, number, polarity,
+groundedness or prompt-leak check), `index_out_of_date` (vectors from another embedder; an admin must
+run `reindex_documents`), and `medical_advice_not_given`.
+
+| status | when | `error.code` |
+|---|---|---|
+| 400 | empty, non-text, over 500 characters, or unknown fields | `invalid_question`, e.g. `{
+ "code": "invalid_question",
+ "message": "Ask a question as non-empty text."
+}` |
+| 401 / 403 | not signed in as admin, or CSRF token missing | `not_authenticated` / `permission_denied` |
+| 429 | over 10/min | `throttled` |
+| 502 | the model's reply was not valid JSON for the schema | `assistant_invalid_output` |
+| 503 | the model server is unreachable | `assistant_unavailable` |
+| 504 | no reply within 60 seconds | `assistant_timeout` |
+
+Error messages never include the model's output or the server's details.
+
+### Policy documents: `GET` / `POST /api/v1/assistant/documents/`, `POST /api/v1/assistant/documents/<id>/approve/`
+
+Uploads arrive as **pending** and are **not searchable until an admin approves them**. Approving embeds
+the chunks and makes them searchable. Only UTF-8 `.txt` and `.md` files up to the size limit are accepted;
+the content is checked, not just the extension.
+
+```bash
+curl -b jar.txt -H "X-CSRFToken: $CSRF" -F "file=@parking.md" http://127.0.0.1:8000/api/v1/assistant/documents/
+```
+
+`201` (pending, 0 chunks: not searchable yet)
+```json
+{
+ "id": 7,
+ "filename": "parking.md",
+ "status": "pending",
+ "source": "upload",
+ "sha256": "99269f96acf8109edfcced31f3c39f2c6e89e9748c81479377706c4d3604c0bb",
+ "created_at": "2026-11-01T12:57:33.710843Z",
+ "approved_at": null,
+ "chunks": 0
+}
+```
+
+The same content again: `409`
+```json
+{
+ "error": {
+  "code": "duplicate_document",
+  "message": "A document with exactly this content already exists."
+ }
+}
+```
+
+`POST /api/v1/assistant/documents/7/approve/`: `200`
+```json
+{
+ "id": 7,
+ "filename": "parking.md",
+ "status": "approved",
+ "source": "upload",
+ "sha256": "99269f96acf8109edfcced31f3c39f2c6e89e9748c81479377706c4d3604c0bb",
+ "created_at": "2026-11-01T12:57:33.710843Z",
+ "approved_at": "2026-11-01T12:57:33.734527Z",
+ "chunks": 1
+}
+```
+
+After approval the new policy is answerable (`"Is there free parking at the clinic?"`), trimmed:
+```json
+{
+ "status": "answered",
+ "answer": "The clinic has free parking for patients in the car park behind the building, for up to 3 hours.",
+ "citations": [
+  {
+   "passage_id": "parking.md#0",
+   "quote": "Parking The clinic has free parking for patients in the car park behind the building, for up to 3 hours.",
+   "source": "parking.md"
+  }
+ ],
+ "sources": [
+  {
+   "passage_id": "parking.md#0",
+   "source": "parking.md",
+   "similarity": 0.857
+  }
+ ]
+}
+```
+
+| status | when | `error.code` |
+|---|---|---|
+| 400 | no file, empty, wrong type, binary, not UTF-8, too many control characters | `upload_rejected` |
+| 404 | approving an unknown id | `not_found` |
+| 409 | same content already uploaded; approving an approved document | `duplicate_document` / `already_approved` |
+| 413 | file over the size limit | `file_too_large` |
+| 503 | embeddings unavailable while approving; the document stays pending | `embedding_unavailable` |

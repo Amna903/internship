@@ -1,3 +1,194 @@
+# HealthProfile: Week 4 (supervised + unsupervised ML and a local LLM assistant)
+
+> **Educational prototype on synthetic, fictional data.** Predictions, clusters and assistant answers
+> are never a medical assessment, diagnosis or advice. The assistant answers only from approved,
+> fictional clinic policies, and runs on a local model: no data leaves the machine.
+
+Week 4 extends the Week 3 system:
+- the supervised comparison now covers three algorithm families, chosen by cross-validation;
+- exploratory clustering, with a positive control;
+- a retrieval-based policy assistant whose answers are verified by the server;
+- three dashboard tabs.
+
+Everything from Weeks 1–3 further down still works, and the tests confirm it ([regression evidence](docs/regression.md)).
+
+![Clusters tab: PCA plot of the labelled control data, real-data verdict and method comparison](docs/screenshots/w4-02-clusters-tab.png)
+
+![Assistant tab: an answer with a server-checked citation, tokens and cost](docs/screenshots/w4-03-assistant-answered.png)
+
+## Week 4 checklist
+
+Each row is one part of the Week 4 brief. The full table, with test names and a column for checks I
+re-ran myself, is in [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md).
+
+| Brief requirement | Where it is built | Proof |
+|---|---|---|
+| Logistic regression, random forest, gradient boosting | `backend/ml/models.py` | `tests/test_ml_compare.py` |
+| Confusion matrix, precision, recall, F1, ROC-AUC, PR-AUC; train vs validation | [metrics.md](backend/ml/reports/metrics.md) §1, §4 | `tests/test_ml_compare.py` |
+| Stratified CV and one tuning experiment | `ml/tune.py`: patient-grouped stratified 5-fold CV, `RandomizedSearchCV` → [tuning.md](backend/ml/reports/tuning.md) | `tests/test_ml_tune.py` |
+| Feature importance and error inspection | permutation importance, false positive/negative profiles → [explain.md](backend/ml/reports/explain.md) | `tests/test_ml_explain.py` |
+| K-Means plus one alternative, on non-sensitive features | K-Means and Ward → [clusters.md](backend/ml/reports/clusters.md); features → [cluster_features.md](backend/ml/reports/cluster_features.md) | `tests/test_ml_cluster.py`, `tests/test_cluster_features.py` |
+| PCA plot, cluster quality, meaningful vs misleading clusters | Clusters tab; [cluster_view.md](backend/ml/reports/cluster_view.md) | `tests/test_clusters_api.py`, `e2e/run_week4_e2e.py` |
+| Local LLM; approved documents only; citations | Ollama `llama3.2:3b`; `backend/assistant/` | `tests/test_assistant_*.py` |
+| Upload validation, approval before search | `assistant/uploads.py`, documents API | `tests/test_assistant_documents.py` |
+| Reject unsupported claims; survive adversarial prompts | server-side checks (`assistant/verify.py`); red-team diagnostic | `tests/test_assistant_ask.py`, [eval_report.md](backend/assistant/eval/eval_report.md) |
+| 12+ evaluation cases; compare two settings; citation quality and failures | 18 frozen cases, settings A and B → [eval_report.md](backend/assistant/eval/eval_report.md), [known_gaps.md](backend/assistant/eval/known_gaps.md) | `tests/test_assistant_evaluate.py`, `tests/test_eval_freeze.py` |
+| Dashboard tabs with versions, metrics, disclaimers | `/admin/predictions`, `/admin/clusters`, `/admin/assistant` | `e2e/run_week4_e2e.py` (23 checks) |
+| API examples | [docs/API.md](docs/API.md), Week 4 section, captured from the running server | |
+
+## Results
+
+**Supervised (synthetic data, so these numbers show how well a model recovers the generating formula).**
+- **Served model: still `no-show-1.0.0`** (engineered logistic regression, C=0.1): test PR-AUC 0.280,
+  ROC-AUC 0.663, against a floor of 0.164 and an oracle ceiling of 0.321.
+- The Week 4 rule chose by cross-validation with the one-standard-error rule, and its choice
+  (`logreg_raw`, CV PR-AUC 0.275) was **not shipped**: on the same folds it did not beat the served
+  model (0.283) by more than one standard error (0.008). See [metrics.md](backend/ml/reports/metrics.md) §2 and §7.
+- **These test results are exploratory evidence.** The same test set was scored in Week 3, and in Week 4
+  it informed the release decision. A fresh holdout is reserved for the next final evaluation (see
+  "Mentor review" below).
+
+**Clustering.**
+- On the real synthetic patients, **no structure was found**. Neither method's separation score beat
+  the score on shuffled data (K-Means 0.169 vs 0.173; Ward 0.130 vs 0.163). The clusters K-Means forms
+  anyway are shown on the dashboard as a misleading example.
+- On a positive control with planted habits, K-Means **partly** recovered them (ARI 0.52; Ward 0.18 at its chosen k).
+
+**Assistant ([eval_report.md](backend/assistant/eval/eval_report.md)).**
+- **17 of 18 frozen cases passed** with the shipped settings and also with the comparison setting. The
+  only failure is A6, a paraphrased answerable question below the similarity floor.
+- 17 verified citations, 0 rejected.
+- **Honest caveat:** 10 of the 12 cases that shouldn't be answered were stopped by the similarity floor,
+  before the model. So the frozen set doesn't test the model's injection resistance.
+- A **red-team set** added after the evaluation, diagnostic only, does test it. Five attacks wrapped in
+  on-topic questions (R1, R2, R3, R4, R6) cleared the floor and reached the model, and **none leaked**.
+- With the floor turned off, 13 of 18 passed. Nothing leaked, but some answers were true and off-topic.
+  The gaps are listed in [known_gaps.md](backend/assistant/eval/known_gaps.md).
+
+## Architecture and decisions
+
+```
+Next.js admin tabs ──► Django REST (admin session, CSRF, rate limits, audit)
+  Predictions  ──► /api/v1/predictions/no-show/ ──► saved scikit-learn Pipeline (SHA-256 checked)
+  Clusters     ──► /api/v1/clusters/            ──► committed results (no clustering per request)
+  Assistant    ──► /api/v1/assistant/ask/       ──► medical check ─► vector search (floor) ─► Ollama ─► server checks
+```
+
+- **Choose by cross-validation, release by champion/challenger.** In Step 3, one validation draw was too
+  noisy to separate close models, so model choice moved to patient-grouped CV with the
+  one-standard-error rule. A challenger replaces the served model only if it wins by more than one
+  standard error on the same folds. That rule is frozen in `ml/release_rule.py`.
+- **The server decides the assistant's status, not the model.** The 3B model labelled correct answers
+  "insufficient information" (Step 9), so the model now returns only `answer`, `citations` and
+  `refused`. The server shows an answer only if all of these hold:
+  - each citation points to a passage the model was given;
+  - each quote is in that passage;
+  - every number in the answer is in the quotes;
+  - the answer has at least two key terms;
+  - the polarity check passes in both directions;
+  - word-overlap groundedness reaches the tuned threshold;
+  - the answer doesn't repeat the system prompt.
+- **Layered defences, in a fixed order:**
+  1. medical questions are refused before retrieval;
+  2. retrieval below the similarity floor returns "insufficient information" without a model call;
+  3. the server checks the model's reply.
+
+  Uploads arrive **pending** and are searchable only after an admin approves them. Each vector stores
+  the embedder that made it: vectors from another embedder are skipped and reported, and re-indexing
+  happens only through an admin command.
+- **Dev set versus frozen evaluation.** The floor, top-k and groundedness threshold were tuned on 11
+  development questions only. The 18 evaluation cases (12 written by me) were frozen, with SHA-256
+  pinned, before tuning. Settings A and B were named before the evaluation ran, and A shipped whatever
+  B scored.
+- **Local model only.** Ollama runs `llama3.2:3b` and `nomic-embed-text`, so no data leaves the
+  machine. Tests and CI use a fake model and fake embedder behind the same interface.
+- **Weekly folders: a trade-off to fix.** Each week lives in its own folder (`week1/` … `week4/`),
+  started as a full copy of the previous week. That kept each review separate, but it duplicates code,
+  and the brief says to *extend the same HealthTech application*, with Week 6 integrating into one
+  application. **Plan:** move to a single codebase, marking each week's state with a git tag (for
+  example `week4-final`) instead of a copied folder.
+
+## Mentor review on PR #1: how each point was addressed
+
+1. **One consistent account of the test set.** *Experimental selection* used CV on training rows,
+   confirmed on validation, and never read the test set. A test flips every test label and checks the
+   choice doesn't change. The *release decision* to keep v1.0.0 was made after reading test results.
+   `metrics.md` states both, and C2 in the checklist is ◐ (in progress) for that reason.
+2. **A fresh holdout that has never been opened.** `backend/ml/holdout.py` has a seed of 20261101 (not
+   42) and 2,000 patients, with IDs offset so they can't collide with the main data, and its fingerprint
+   is pinned. `tests/test_holdout.py` guards it: no other module may import or load it, and no copy of
+   its rows is committed. Nothing has read its labels. The champion/challenger rule was frozen before
+   any future evaluation.
+3. **Draft until the evidence is in.** The PR stayed a draft through Steps 5–14. Each step was ticked
+   in the PR checklist only after CI was green, with links to its code, report and tests.
+
+## Run and test
+
+Prerequisites: Python 3.14 and Node 20 (the versions CI uses), and [Ollama](https://ollama.com) for the assistant.
+
+```bash
+# Local model (once)
+ollama pull llama3.2:3b && ollama pull nomic-embed-text
+
+# Backend
+cd week4/backend
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python scripts/init_env.py            # writes .env with generated secrets
+python manage.py migrate
+python manage.py seed_demo            # synthetic admin and member accounts
+python manage.py load_policies --admin admin@example.test   # the fictional clinic policies, approved and indexed
+python manage.py warm_llm             # loads the model so the first question isn't slow
+python manage.py runserver
+
+# Frontend (second terminal)
+cd week4/frontend && npm ci && npm run dev    # http://localhost:3000/admin/login
+```
+
+| What | Command (from `week4/backend` unless noted) |
+|---|---|
+| Backend tests (fake model, no Ollama needed) | `python -m pytest -q` |
+| Model release check (rebuilds v1.0.0 byte for byte) | `python -m ml.verify_release` |
+| Assistant evaluation (real model, about 15 minutes) | `python manage.py evaluate_assistant --admin admin@example.test` |
+| Re-index after changing the embedder | `python manage.py reindex_documents --admin admin@example.test` |
+| Frontend tests, typecheck, build | `cd week4/frontend && npm test && npx tsc --noEmit && npm run build` |
+| Browser check, Week 4 tabs (needs both servers, Ollama, `pip install playwright`) | `python ../e2e/run_week4_e2e.py <admin_password> <screenshots_dir>` |
+| Browser check, Week 3 page | `python ../e2e/run_week3_e2e.py <admin_password> <member_password> <screenshots_dir>` |
+
+If port 3000 is taken, run the frontend on another port and set `E2E_BASE=http://127.0.0.1:<port>`.
+Add that origin to `CSRF_TRUSTED_ORIGINS` for the backend. The assistant allows 10 questions a minute,
+so wait a minute between browser runs.
+
+CI (`.github/workflows/ci.yml`) runs on every push:
+- the backend suites on PostgreSQL 16 and SQLite;
+- the frontend checks;
+- `python -m ml.verify_release`.
+
+## Limitations
+
+- **Synthetic data throughout.** The scores show how well models recover a known formula, not real
+  clinic behaviour. See the [data card](docs/DATA_CARD.md).
+- **The test set has been reused**, so the supervised test numbers are exploratory. The reserved holdout
+  is for the next final evaluation.
+- **The real data has no clusters to find.** The engagement columns are drawn independently, so the
+  dashboard's PCA picture uses labelled control data.
+- **The assistant's checks compare words, not meaning.** Relevance currently relies on the similarity
+  floor. Known gaps are listed, without fixes applied on eval results, in
+  [known_gaps.md](backend/assistant/eval/known_gaps.md):
+  - true but off-topic answers when the floor is off;
+  - a terse answer to an ambiguous question;
+  - a false polarity block on a paraphrase;
+  - meaning-level negation flips.
+- **The evaluation is small.** With 18 cases, a 1–2 case difference is noise. The red-team set was
+  written after the evaluation and is diagnostic only.
+- **A 3B local model** is slow on a laptop (several seconds per answer) and its answers vary between
+  runs, hence the three seeds and the two-of-three majority.
+- **Not all versions are pinned.** The ML libraries are pinned exactly, but the web-framework
+  dependencies from Week 1 use version ranges, and the Ollama model tags aren't pinned to a digest.
+- **Code is duplicated across weekly folders** (see the decision above).
+
+---
+
 # HealthProfile: Week 3 (machine-learning pipeline and prediction API)
 
 > **Educational prototype on synthetic data.** It estimates whether a *fictional* appointment may be

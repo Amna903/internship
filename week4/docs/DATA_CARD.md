@@ -101,3 +101,33 @@ Consequences:
 - **No interactions beyond the one planted**, and no measurement error in the features.
 - **Effect sizes are invented**, and the population mix (age and channel shares) is made up.
 - **Fixed, closed population**: 5,000 patients, all with prior history.
+
+## Week 4 additions
+
+Everything below is synthetic or written for this project. None of it describes real people, and none
+of it is real clinic policy.
+
+| Data | Provenance | Used for | Never used for |
+|---|---|---|---|
+| **Fresh holdout** (`ml/holdout.py`) | Same generator as the main data. Seed 20261101, 2,000 patients, IDs offset by 10,000,000, fingerprint pinned. | The next final evaluation only | Exploration, tuning, model choice, release selection. Nothing has read its labels; `tests/test_holdout.py` guards it. |
+| **Clustering positive control** (`ml/cluster_control.py`) | Separate generator. Seed 7, 1,500 patients, IDs offset by 20,000,000. Four planted engagement habits, with overlap and a "mixed" group. | Checking whether the clustering methods recover planted structure (ARI); the dashboard's PCA picture, labelled | Anything about the real data; the planted labels are never clustering inputs |
+| **Clinic policies** (`assistant/policies/*.md`, 6 files) | Written for this project, for a **fictional** clinic: billing, cancellation, privacy, reminders, rescheduling, telehealth. SHA-256 pinned in `assistant/frozen.py`. | The assistant's only knowledge | Medical content of any kind |
+| **Development questions** (`assistant/dev/`, 11) | Written for tuning | Tuning the similarity floor, top-k and groundedness threshold | Reporting final quality |
+| **Frozen evaluation cases** (`assistant/eval/eval_cases.json`, 18) | 12 written by the project owner, 6 by the AI assistant, frozen with SHA-256 before tuning | The Step 12 evaluation | Tuning; tuning code never reads them |
+| **Red-team cases** (`assistant/eval/redteam_cases.json`, 6) | Written by the project owner **after** the evaluation | A diagnostic of the deeper defences | Counting toward the 18-case result |
+
+### Limitations and bias (Week 4)
+
+- **The clustering features have no real structure.** In the main data every engagement column is drawn
+  independently for each appointment, so "no structure found" there is expected. It is not evidence about
+  real patients. The control data shows the methods *can* find planted habits, partly (ARI 0.52 for K-Means).
+- **The clusters describe booking patterns, not kinds of people.** Age, distance, history and outcomes
+  are excluded from the clustering features ([cluster_features.md](../backend/ml/reports/cluster_features.md)).
+- **The local model** (`llama3.2:3b`) is small:
+  - it can misread negations and paraphrases, and its answers vary between runs;
+  - it was trained mostly on English, so a question in another language may be handled worse (U9b, in
+    Urdu script, is in the evaluation);
+  - the server checks reduce these risks, but they compare words, not meaning
+    ([known_gaps.md](../backend/assistant/eval/known_gaps.md)).
+- **The evaluation is small and partly self-written.** 6 of the 18 cases were written by the same AI
+  assistant that built the system. Results are reported separately by author.

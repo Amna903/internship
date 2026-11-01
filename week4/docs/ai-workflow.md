@@ -464,3 +464,34 @@ A running record, added to as each step lands. The full decision history is in
   the backend trusting that origin through `CSRF_TRUSTED_ORIGINS` for the run only. No setting changed.
 - **Found by looking at screenshots:** a doubled bracket in the model line, fixed. Found by a test: the
   model-card check read the card before it loaded, so the check now waits for it.
+
+## Step 14: docs, regression evidence and the Loom script
+
+- **Plan approved with four additions:**
+  - the weekly-folder trade-off in the README (plan: one codebase with git tags);
+  - how the mentor's three review points were addressed;
+  - the real debugging moments in the Loom script;
+  - a simple spoken-English script with a one-word cue list.
+
+  A standing request was also added: a plain-English study guide at the end of every week
+  ([study-guide.md](study-guide.md)).
+- **API examples captured, not written by hand.** Every example in the Week 4 section of
+  [API.md](API.md) came from the running server. The upload and approve examples ran against a copy of
+  the local database, so the real document index was not changed.
+- **Drafted outside the repo while tests ran,** because `test_docs.py` reads the README and `docs/`.
+- **Caught before shipping:**
+  - the link test failed because the README linked to `regression.md` before that file existed;
+  - CI uses Python 3.14, so an unverified "Python 3.12+" in the README draft was corrected.
+- **Labelled honestly:** two "rejected alternatives" in the study guide (DBSCAN, a vector database)
+  weren't recorded decisions at the time, so the guide marks them as reasoning written afterwards.
+- **A mistake of mine:** a loop that ran the browser tests echoed their arguments, which printed the
+  local demo seed passwords into the agent's tool output. They are synthetic, in the git-ignored `.env`,
+  and were never committed. Rotation is recommended. `seed_demo` only creates *missing* accounts, so
+  re-running it doesn't change existing passwords. Instead, set the new `.env` values on the existing
+  admin and demo accounts with `set_password` in `manage.py shell`.
+- **Parallel sessions.** After an editor restart, two older Claude sessions were still running and
+  doing the same Step 14 work. They rewrote `regression.md` and REQUIREMENTS rows, and appended
+  duplicate entries here. It was found from unexpected file contents and process listings, and the user
+  stopped both sessions. The files were then reconciled into one version, and the full suite was re-run
+  with a single session.
+- **Regression:** see [regression.md](regression.md).

@@ -109,8 +109,8 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 |---|---|---|---|---|---|---|---|
 | C1 | Train-only fitting for preprocessing and tuning | 3 | ☑ | Pipeline fitted inside each fold; folds and search see the train part only | `tests/test_ml_tune.py::test_tuning_only_ever_sees_training_rows` | | |
 | C2 | Keep test data untouched until final evaluation | 4 | ◐ | Experimental selection did not read the test set (CV choice, validation confirmation, cut-offs). **Not complete:** the same test set was scored in Week 3, and in Week 4 it informed the release decision to keep v1.0.0, so it is no longer untouched. Fix: a fresh holdout is reserved for the next final evaluation (`backend/ml/holdout.py`); current test results are exploratory evidence | `tests/test_ml_compare.py::test_choice_cut_offs_and_rival_do_not_depend_on_test_labels` (selection), `tests/test_holdout.py` (reserved holdout) | | |
-| C3 | Pin dependencies and random seeds | 0 | ◐ | `requirements.txt`, `ml/config.py` SEED | | | |
-| C4 | Document provenance, bias, imbalance and limitations | 14 | ◐ | [DATA_CARD.md](DATA_CARD.md) | | | |
+| C3 | Pin dependencies and random seeds | 0 | ◐ | Seeds recorded (`ml/config.py` SEED 42; holdout 20261101; control 7; evaluation seeds 42–44). ML libraries pinned with `==`; `frontend/package-lock.json` committed. **Not complete:** the Week 1 web-framework dependencies in `requirements.txt` use version ranges, and the Ollama model tags aren't pinned to a digest | pins checked against the model's metadata (`tests/test_ml_artifact.py`) | | |
+| C4 | Document provenance, bias, imbalance and limitations | 14 | ☑ | [DATA_CARD.md](DATA_CARD.md), including "Week 4 additions" (holdout, clustering control, policies, dev and eval sets, red-team set, local-model limits) | | | |
 | C5 | Do not submit patient-identifiable data to external LLMs | 9 | ☑ | local model only; obvious identifiers redacted from questions before the prompt (`backend/assistant/privacy.py`); no profile or prediction data in the prompt | `tests/test_assistant_foundation.py`::TestPrivacy | | |
 | C6 | Validate file types/sizes | 10 | ☑ | `backend/assistant/uploads.py`: size, extension, content signature (PDF/ZIP/images/executables rejected whatever the extension), NUL bytes, UTF-8, control characters, safe file names, duplicates by SHA-256 | `tests/test_assistant_documents.py`::TestValidation | | |
 | C7 | Enforce upload permissions | 10 | ☑ | admin session + role + CSRF on upload and approval; pending documents have no chunks and are never retrieved; uploads and approvals audited | `tests/test_assistant_documents.py`::test_anonymous_and_members_cannot_upload_list_or_approve, ::test_a_pending_document_is_never_retrieved_even_for_its_own_words | | |
@@ -119,7 +119,7 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 | C10 | Timeouts | 9 | ☑ | one deadline per answer (60 s, allows the measured ~6 s cold start); `manage.py warm_llm` | `tests/test_assistant_foundation.py`::test_slow_model_raises_timeout | | |
 | C11 | Safe error responses | 9, 11 | ☑ | 504 timeout / 503 unavailable / 502 invalid output, generic messages; reasons logged without the question | `tests/test_assistant_ask.py`::test_model_failures_are_safe_errors | | |
 | C12 | Approximate token/cost reporting | 9 | ☑ | server token counts per answer; local cost $0 and an illustrative hosted equivalent (`backend/assistant/costs.py`) | `tests/test_assistant_foundation.py`::test_cost_report_uses_server_token_counts_and_states_it_is_illustrative | | |
-| C13 | Never present predictions or clusters as medical diagnoses | 8, 13 | ◐ | Week 3 wording + disclaimer | | | |
+| C13 | Never present predictions or clusters as medical diagnoses | 8, 13 | ☑ | Disclaimers in every prediction, cluster and assistant response and on all three tabs; "booking patterns, not categories of people"; non-clinical wording ("Extra reminder suggested"); medical questions refused before retrieval | `tests/test_predictions_api.py`, `tests/test_clusters_api.py`, `tests/test_assistant_ask.py`, `e2e/run_week4_e2e.py` | | |
 
 ## Acceptance checks
 
@@ -136,7 +136,7 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 | A9 | LLM answers cite relevant approved documents | 11 | ☑ | 15 of 15 answered runs cite the expected policy ([eval_report.md](../backend/assistant/eval/eval_report.md)). **Caveat:** the server checks support, not relevance; relevance relies on the floor ([known_gaps.md](../backend/assistant/eval/known_gaps.md) §1) | `tests/test_assistant_ask.py` |
 | A10 | Reject unsupported claims | 11 | ☑ | citation, number, polarity and groundedness checks; R3 was stopped by the polarity check. Checks are lexical; known gaps in [known_gaps.md](../backend/assistant/eval/known_gaps.md) | `tests/test_assistant_ask.py`, `tests/test_assistant_polarity.py` |
 | A11 | Survive at least two adversarial prompt tests | 12 | ☑ | R1, R2, R3, R4 and R6 cleared the floor and none leaked ([eval_report.md](../backend/assistant/eval/eval_report.md) Diagnostic 2, [known_gaps.md](../backend/assistant/eval/known_gaps.md)); in the frozen set most attacks were stopped by the floor | `tests/test_assistant_evaluate.py` |
-| A12 | API requests/responses for prediction, clustering and LLM endpoints | 14 | ☐ | | |
+| A12 | API requests/responses for prediction, clustering and LLM endpoints | 14 | ☑ | [API.md](API.md), Week 3 and Week 4 sections, captured from the running server (upload and approve on a copy of the local database) | |
 | A13 | Document the 12-case evaluation results | 12 | ☑ | [eval_report.md](../backend/assistant/eval/eval_report.md), [known_gaps.md](../backend/assistant/eval/known_gaps.md) | `tests/test_assistant_evaluate.py` |
 
 ## Required submission
@@ -144,12 +144,12 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 | # | Requirement (brief wording) | Step | Status | Evidence | Me |
 |---|---|---|---|---|---|
 | R1 | GitHub repository with meaningful commits | all | ◐ | `week4` branch | |
-| R2 | Setup and run/test commands | 14 | ☐ | | |
-| R3 | README architecture decisions, limitations, screenshots and API examples | 14 | ☐ | | |
-| R4 | Loom: working demo, code architecture, actual AI prompts and refinements, context management, blast-radius controls, debugging and verification | 14 | ☐ | | |
-| R5 | Post repository and Loom links in the team channel | 14 | ☐ | | |
-| R6 | Keep all previous features working and provide regression-test evidence | 0, 14 | ◐ | Week 1–3 suites green in CI | |
-| R7 | Git workflow: branch, PR, reviewer @ahmedhashir10 (mentor instruction) | 0, 14 | ◐ | `week4` branch | |
+| R2 | Setup and run/test commands | 14 | ☑ | [README](../README.md) "Run and test" | |
+| R3 | README architecture decisions, limitations, screenshots and API examples | 14 | ☑ | [README](../README.md): decisions (including the weekly-folder trade-off), mentor review points, limitations, screenshots; examples in [API.md](API.md) | |
+| R4 | Loom: working demo, code architecture, actual AI prompts and refinements, context management, blast-radius controls, debugging and verification | 14 | ◐ | Script ready: [loom-script.md](loom-script.md). Recording pending (owner) | |
+| R5 | Post repository and Loom links in the team channel | 14 | ☐ | me, after recording | |
+| R6 | Keep all previous features working and provide regression-test evidence | 0, 14 | ☑ | [regression.md](regression.md): backend suite, frontend, and Week 1–4 browser tests; CI on every push | |
+| R7 | Git workflow: branch, PR, reviewer @ahmedhashir10 (mentor instruction) | 0, 14 | ◐ | `week4` branch, PR #1 (draft), reviewer set. Ready for review after my read of the docs | |
 - **Step 3: the model-choice rule changed after seeing results. This was the question Step 3 set out to answer.** Step 3 asked whether Step 2's validation differences were bigger than chance. Five patient-grouped, stratified folds of the training rows answered no: the random forest's validation lead over engineered logistic regression (0.284 vs 0.276) reversed in cross-validation (0.269 vs 0.283; logistic regression ahead in all 5 folds). **One validation draw (~4,000 rows) was too noisy to choose between close models.** So, with the user's approval, the rule changed from "highest validation PR-AUC" to **cross-validation with the one-standard-error rule and the simplicity order**, with validation kept as a confirmation check (within CV mean ± 2 fold SDs) and for the decision cut-off. The test set was still untouched when this was decided. **No more rule changes after this.**
   - What the new rule picked: **raw logistic regression (C=10)**. Its CV mean (0.2751) is 0.0003 above the one-standard-error bar (0.2748). Engineered features lead by 0.008 on average across folds, but with a fold-to-fold spread of 0.009 (ahead in 4 of 5 folds), so the gain is within the noise and the simpler model wins the tie. This is recorded as a finding, not adjusted. Week 3's test set showed engineered ahead (+0.013), but test results may not be used for choosing.
   - The tuned forest (depth 4, leaf 50, 33% of columns per split, 300 trees) reached CV 0.268 ± 0.017: tuning did not lift forests to logistic regression's level.
