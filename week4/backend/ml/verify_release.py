@@ -156,6 +156,76 @@ def tuning_matches(committed: dict, rebuilt: dict) -> tuple[bool, str]:
                   f"fold scores within {TUNING_FOLD_TOLERANCE} (largest {worst_fold:.4f})")
 
 
+# Tolerances for a rebuilt clustering, by what each number is used for. CI measured on Linux vs Mac: the
+# report identical, but one of the 20 Ward baseline runs moved 0.119 -> 0.132. Cause: with ~4 appointments
+# per patient many patients have identical features, and Ward merges exactly tied pairs in an order set by
+# floating-point rounding, so one run's tree (and silhouette) can differ between machines.
+# Verdicts and chosen k decide the result: EXACT.
+# Silhouettes, the 95th-percentile bar, ARIs, stability and false-pattern shares are what the verdicts and
+# report read: within SCORE_TOLERANCE.
+# The MEDIAN of the 20 baseline runs, per method, within SCORE_TOLERANCE: the bar only watches the top runs,
+# the median catches a shift across the whole baseline, and one tied run moving barely affects it (0.0013
+# in the CI case). Individual baseline runs are not compared one by one: no decision reads a single run.
+# K-Means inertia (elbow column, shown rounded to whole numbers): within 0.1% of its value.
+CLUSTER_INERTIA_RELATIVE = 0.001
+
+
+def clusters_match(committed: dict, rebuilt: dict) -> tuple[bool, str]:
+    for key in ["seed", "control_seed", "k_range", "baseline_runs"]:
+        if committed[key] != rebuilt[key]:
+            return False, f"{key} differs"
+    worst = 0.0
+
+    def close(a: float, b: float, what: str, tolerance: float = SCORE_TOLERANCE) -> str | None:
+        nonlocal worst
+        if abs(a - b) > tolerance:
+            return f"{what} {a:.4f} became {b:.4f}"
+        worst = max(worst, abs(a - b)) if tolerance == SCORE_TOLERANCE else worst
+        return None
+
+    problems = []
+    for part in ("real", "control"):
+        a, b = committed[part], rebuilt[part]
+        if a["chosen_k"] != b["chosen_k"]:
+            return False, f"{part} chosen k {a['chosen_k']} became {b['chosen_k']}"
+        for m in a["silhouette"]:
+            for k in a["silhouette"][m]:
+                problems.append(close(a["silhouette"][m][k], b["silhouette"][m][k], f"{part} silhouette {m} k={k}"))
+        for k in a["inertia"]:
+            problems.append(close(a["inertia"][k], b["inertia"][k], f"{part} inertia k={k}",
+                                  CLUSTER_INERTIA_RELATIVE * abs(a["inertia"][k])))
+    real_a, real_b = committed["real"], rebuilt["real"]
+    for m, v in real_a["methods"].items():
+        w = real_b["methods"][m]
+        if v["structure_found"] != w["structure_found"]:
+            return False, f"verdict for {m} changed"
+        if v["false_patterns"]["checks"] != w["false_patterns"]["checks"] or \
+                v["false_patterns"]["main_feature"] != w["false_patterns"]["main_feature"]:
+            return False, f"false-pattern result for {m} changed"
+        problems.append(close(v["silhouette"], w["silhouette"], f"real silhouette {m}"))
+        problems.append(close(v["baseline_bar"], w["baseline_bar"], f"baseline bar {m}"))
+        problems.append(close(float(np.median(real_a["baseline"][m])), float(np.median(real_b["baseline"][m])),
+                              f"baseline median {m}"))
+        problems.append(close(v["false_patterns"]["largest_single_share"], w["false_patterns"]["largest_single_share"],
+                              f"largest one-appointment share {m}"))
+        for f, share in v["false_patterns"]["variance_explained"].items():
+            problems.append(close(share, w["false_patterns"]["variance_explained"][f], f"variance explained {m} {f}"))
+    ctl_a, ctl_b = committed["control"], rebuilt["control"]
+    for m, v in ctl_a["methods"].items():
+        for key, value in v.items():
+            problems.append(close(value, ctl_b["methods"][m][key], f"control {key} {m}"))
+    for setting, v in ctl_a["diagnostics"].items():
+        for m, value in v["ari"].items():
+            problems.append(close(value, ctl_b["diagnostics"][setting]["ari"][m], f"diagnostic {setting} {m}"))
+    for key, value in ctl_a["kmeans_stability"].items():
+        problems.append(close(value, ctl_b["kmeans_stability"][key], f"stability {key}"))
+    problems = [p for p in problems if p]
+    if problems:
+        return False, problems[0]
+    return True, (f"same verdicts and k; silhouettes, bars, baseline medians and ARIs within {SCORE_TOLERANCE} "
+                  f"(largest {worst:.4f}); single baseline runs not compared (Ward ties, see code)")
+
+
 def tuning_diagnostics(committed: dict, rebuilt: dict) -> str:
     """Facts about a rebuilt search, printed whether or not the checks pass: same choice? how far did the
     means (what the rule uses) and single fold scores move? did any setting cross the one-SE bar?"""
@@ -215,7 +285,7 @@ def main() -> int:
     ok, reason = reports_match(explain.REPORT.read_text(), explain.build_report(explain.analyse(df)))
     checks.append(("2", f"explain.md regenerated: {reason}", ok))
     clustering = cluster.run(df)
-    ok, reason = reports_match(cluster.RESULT.read_text(), cluster.to_json(clustering))
+    ok, reason = clusters_match(json.loads(cluster.RESULT.read_text()), json.loads(cluster.to_json(clustering)))
     checks.append(("2", f"clusters.json regenerated: {reason}", ok))
     ok, reason = reports_match(cluster.REPORT.read_text(), cluster.build_report(clustering))
     checks.append(("2", f"clusters.md regenerated: {reason}", ok))

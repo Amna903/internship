@@ -31,6 +31,11 @@ including choosing its own best k.
 
 Verdict rule: structure found only if the real silhouette beats the 95th percentile of the baseline.
 
+Reproducibility note: Ward's tree can differ between machines when patients have identical feature
+values (common with about four appointments each), because exactly tied merges are ordered by
+floating-point rounding. Individual baseline runs may therefore differ slightly between machines; the
+verdict, the chosen k, the 95th-percentile bar and the median of the baseline runs are checked strictly.
+
 | method | chosen k | real silhouette | baseline 95th percentile | verdict |
 |---|---|---|---|---|
 | k-means | 3 | 0.169 | 0.173 | **no structure found** |

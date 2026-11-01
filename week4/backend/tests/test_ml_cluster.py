@@ -11,7 +11,10 @@ from sklearn.metrics import adjusted_rand_score
 
 from ml import cluster, cluster_control, cluster_features, config, holdout
 from ml.data import generate
-from ml.verify_release import reports_match
+import copy
+import json
+
+from ml.verify_release import clusters_match, reports_match
 
 
 @pytest.fixture(scope="module")
@@ -168,3 +171,46 @@ def test_report_says_thresholds_were_set_after_seeing_the_result(committed):
 def test_committed_report_matches_the_committed_result(committed):
     ok, reason = reports_match(cluster.REPORT.read_text(), cluster.build_report(committed))
     assert ok, reason
+
+
+# ---- Reproducibility check for a rebuilt clustering (by what each number is used for) ----
+
+@pytest.fixture(scope="module")
+def raw():
+    return json.loads(cluster.RESULT.read_text())
+
+
+def test_identical_clustering_matches(raw):
+    assert clusters_match(raw, copy.deepcopy(raw))[0]
+
+
+def test_the_ci_case_passes_one_tied_ward_run_moving(raw):
+    """CI on Linux: Ward baseline run 13 moved 0.119 -> 0.132; verdicts, bar and report unchanged."""
+    rebuilt = copy.deepcopy(raw)
+    rebuilt["real"]["baseline"]["agglomerative (Ward)"][13] = 0.13213131205290382
+    assert clusters_match(raw, rebuilt)[0]
+
+
+def test_a_shift_across_the_whole_baseline_fails_through_the_median(raw):
+    rebuilt = copy.deepcopy(raw)
+    rebuilt["real"]["baseline"]["k-means"] = [x + 0.003 for x in rebuilt["real"]["baseline"]["k-means"]]
+    ok, reason = clusters_match(raw, rebuilt)
+    assert not ok and "median" in reason
+
+
+@pytest.mark.parametrize("change, expected", [
+    (lambda r: r["real"]["methods"]["k-means"].update(structure_found=True), "verdict"),
+    (lambda r: r["control"]["chosen_k"].update({"k-means": 4}), "chosen k"),
+    (lambda r: r["real"]["methods"]["k-means"].update(baseline_bar=r["real"]["methods"]["k-means"]["baseline_bar"] + 0.003), "bar"),
+    (lambda r: r["control"]["methods"]["k-means"].update(ari_at_chosen_k=0.49), "control"),
+])
+def test_decisions_and_the_numbers_they_read_are_checked_strictly(raw, change, expected):
+    rebuilt = copy.deepcopy(raw)
+    change(rebuilt)
+    ok, reason = clusters_match(raw, rebuilt)
+    assert not ok and expected in reason
+
+
+def test_report_records_the_ward_tie_fragility(committed):
+    assert "Ward's tree can differ between machines" in cluster.build_report(committed)
+
