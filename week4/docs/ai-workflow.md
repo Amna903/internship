@@ -376,3 +376,41 @@ file.
   - why the calibration limit is 2.81
   - why the SHA-256 isn't attacker-proof
   - why the audit stores the model version but not the inputs
+
+# Week 4: supervised + unsupervised ML and the local LLM assistant
+
+A running record, added to as each step lands. The full decision history is in
+[REQUIREMENTS.md](REQUIREMENTS.md) ("Lessons recorded along the way").
+
+## Step 9: LLM foundation
+
+### Finding: the small model's self-labelled status was unreliable
+
+- **What happened.** The first design asked the model for `status` (answered / insufficient_information /
+  refused) alongside its answer. On a development question whose answer was plainly in the passage
+  ("How late can I cancel without a charge?"), `llama3.2:3b` returned `insufficient_information` with an
+  empty answer three times out of three.
+- **First diagnosis.** With Ollama's structured output, the model writes keys in schema order, so it
+  committed to `status` before writing any answer. Putting `answer` and `citations` first made it write the
+  correct answer and an exact, correct quote, and then still label it `insufficient_information`.
+- **Decision (user-approved).** The model no longer labels its answer. It returns `answer`, `citations` and
+  a `refused` flag; the server derives the status from checks it can verify: the cited passage was actually
+  given, the quote appears in it (case and whitespace normalised), the answer is substantive (not empty,
+  not "I don't know"), the answer's key terms appear in the quotes, and every number in the answer
+  appears in the quotes. Refusal is defence in depth: a server-side medical-advice check (which refuses
+  before any model call) or the model's flag.
+- **Found by a test, fixed.** The word-share groundedness check alone accepted "Up to 48 hours" against a
+  quote saying "24 hours" (3 of 4 terms matched). Numbers are now a hard rule.
+- **Process guard.** All tuning so far used development questions only. The groundedness threshold is
+  provisional and will be set on the development set in Step 11; the 12 evaluation cases are written and
+  frozen before any further tuning.
+
+### Verification
+
+- Live, against the local model: the answerable development question is answered with a verified
+  citation; an out-of-scope question returns insufficient_information; a dosage question is refused by
+  the server check without calling the model.
+- Automated (no real model in tests or CI): `tests/test_assistant_foundation.py` covers server-decided
+  status, refusals, strict output validation, the context budget, redaction, the real client against a
+  local imitation of Ollama (request format, timeout, server error, unreachable server), safe errors, cost
+  reporting and the admin-only status endpoint.

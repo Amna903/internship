@@ -16,6 +16,8 @@ os.environ["THROTTLE_LOGIN"] = "10/min"
 os.environ["THROTTLE_SIGNUP"] = "20/hour"
 os.environ["THROTTLE_PREDICTIONS"] = "60/min"
 os.environ["THROTTLE_CLUSTERS"] = "60/min"
+os.environ["THROTTLE_ASSISTANT"] = "10/min"
+os.environ["ASSISTANT_PROVIDER"] = "fake"  # CI has no Ollama; tests never call a real model
 os.environ["ENABLE_API_DOCS"] = "true"
 
 from .settings import *  # noqa: E402,F401,F403

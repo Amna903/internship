@@ -69,13 +69,13 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| L1 | Integrate one hosted or local LLM with a backend endpoint | 9 | ☐ | | | | |
-| L2 | Define a system prompt | 9 | ☐ | | | | |
-| L3 | Define a task-specific user prompt | 9 | ☐ | | | | |
-| L4 | Define a context window strategy | 9 | ☐ | | | | |
-| L5 | Define an output token limit | 9 | ☐ | | | | |
-| L6 | Define a temperature | 9 | ☐ | | | | |
-| L7 | Define a structured JSON response schema | 9 | ☐ | | | | |
+| L1 | Integrate one hosted or local LLM with a backend endpoint | 9 | ◐ | local Ollama (`llama3.2:3b`) behind `LLMClient` (`backend/assistant/llm.py`); `GET /api/v1/assistant/status/`; the question endpoint lands in Step 11 | `tests/test_assistant_foundation.py`::TestOllamaClient, ::TestStatusEndpoint | | |
+| L2 | Define a system prompt | 9 | ☑ | `SYSTEM_PROMPT` in `backend/assistant/prompts.py` | `tests/test_assistant_foundation.py`::TestPrompt | | |
+| L3 | Define a task-specific user prompt | 9 | ☑ | `USER_TEMPLATE`, passages in marked data blocks (`backend/assistant/prompts.py`) | `tests/test_assistant_foundation.py`::TestPrompt | | |
+| L4 | Define a context window strategy | 9 | ☑ | `build_prompt`: fixed parts always in, ranked passages fill the rest, lowest dropped first; approximate token count with a 20% safety margin | `tests/test_assistant_foundation.py`::test_lowest_ranked_passages_are_dropped_first_when_the_budget_is_full | | |
+| L5 | Define an output token limit | 9 | ☑ | `ASSISTANT_MAX_OUTPUT_TOKENS` = 512 (`config/settings.py`), sent as `num_predict`; cut-off output fails validation | `tests/test_assistant_foundation.py`::test_request_sends_schema_temperature_token_limit_and_context | | |
+| L6 | Define a temperature | 9 | ☑ | 0.1, with the reason, in `config/settings.py` | `tests/test_assistant_foundation.py`::test_request_sends_schema_temperature_token_limit_and_context | | |
+| L7 | Define a structured JSON response schema | 9 | ☑ | `ANSWER_SCHEMA` (`backend/assistant/schema.py`): answer, citations, refused; sent as Ollama's `format` and validated strictly; status decided by the server (`backend/assistant/verify.py`) | `tests/test_assistant_foundation.py`::TestValidation, ::TestStatus | | |
 | L8 | Educational FAQ assistant over approved fictional clinic policies | 10 | ☐ | | | | |
 | L9 | Document upload | 10 | ☐ | | | | |
 | L10 | Text extraction | 10 | ☐ | | | | |
@@ -111,14 +111,14 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 | C2 | Keep test data untouched until final evaluation | 4 | ◐ | Experimental selection did not read the test set (CV choice, validation confirmation, cut-offs). **Not complete:** the same test set was scored in Week 3, and in Week 4 it informed the release decision to keep v1.0.0, so it is no longer untouched. Fix: a fresh holdout is reserved for the next final evaluation (`backend/ml/holdout.py`); current test results are exploratory evidence | `tests/test_ml_compare.py::test_choice_cut_offs_and_rival_do_not_depend_on_test_labels` (selection), `tests/test_holdout.py` (reserved holdout) | | |
 | C3 | Pin dependencies and random seeds | 0 | ◐ | `requirements.txt`, `ml/config.py` SEED | | | |
 | C4 | Document provenance, bias, imbalance and limitations | 14 | ◐ | [DATA_CARD.md](DATA_CARD.md) | | | |
-| C5 | Do not submit patient-identifiable data to external LLMs | 9 | ☐ | | | | |
+| C5 | Do not submit patient-identifiable data to external LLMs | 9 | ☑ | local model only; obvious identifiers redacted from questions before the prompt (`backend/assistant/privacy.py`); no profile or prediction data in the prompt | `tests/test_assistant_foundation.py`::TestPrivacy | | |
 | C6 | Validate file types/sizes | 10 | ☐ | | | | |
 | C7 | Enforce upload permissions | 10 | ☐ | | | | |
 | C8 | Treat retrieved documents as untrusted | 11 | ☐ | | | | |
-| C9 | Rate limits | 9 | ☐ | | | | |
-| C10 | Timeouts | 9 | ☐ | | | | |
-| C11 | Safe error responses | 9 | ☐ | | | | |
-| C12 | Approximate token/cost reporting | 9 | ☐ | | | | |
+| C9 | Rate limits | 9 | ◐ | `assistant` scope, 10/min (status endpoint now; question endpoint in Step 11) | `tests/test_assistant_foundation.py`::test_rate_limited | | |
+| C10 | Timeouts | 9 | ☑ | one deadline per answer (60 s, allows the measured ~6 s cold start); `manage.py warm_llm` | `tests/test_assistant_foundation.py`::test_slow_model_raises_timeout | | |
+| C11 | Safe error responses | 9 | ◐ | timeout / unavailable / invalid_output statuses without details, reasons logged without the question (API mapping in Step 11) | `tests/test_assistant_foundation.py`::TestSafeErrors, ::test_the_question_text_is_never_logged | | |
+| C12 | Approximate token/cost reporting | 9 | ☑ | server token counts per answer; local cost $0 and an illustrative hosted equivalent (`backend/assistant/costs.py`) | `tests/test_assistant_foundation.py`::test_cost_report_uses_server_token_counts_and_states_it_is_illustrative | | |
 | C13 | Never present predictions or clusters as medical diagnoses | 8, 13 | ◐ | Week 3 wording + disclaimer | | | |
 
 ## Acceptance checks

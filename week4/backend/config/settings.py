@@ -111,6 +111,7 @@ INSTALLED_APPS = [
     "adminpanel",
     "audit",
     "predictions",
+    "assistant",
 ]
 
 MIDDLEWARE = [
@@ -221,6 +222,8 @@ REST_FRAMEWORK = {
         "signup": os.environ.get("THROTTLE_SIGNUP", "20/hour"),
         "predictions": os.environ.get("THROTTLE_PREDICTIONS", "60/min"),
         "clusters": os.environ.get("THROTTLE_CLUSTERS", "60/min"),
+        # Each assistant call runs a local model for seconds; a low limit protects the machine.
+        "assistant": os.environ.get("THROTTLE_ASSISTANT", "10/min"),
     },
 }
 
@@ -273,3 +276,20 @@ LOGGING = {
 
 if CONFIG_ERRORS:
     raise ImproperlyConfigured("Invalid configuration:\n  - " + "\n  - ".join(CONFIG_ERRORS))
+
+
+# ---- Week 4: clinic-policy FAQ assistant (local LLM through Ollama; nothing leaves the machine) ----
+ASSISTANT = {
+    "PROVIDER": os.environ.get("ASSISTANT_PROVIDER", "ollama"),  # "ollama" or "fake" (tests, CI)
+    "OLLAMA_URL": os.environ.get("OLLAMA_URL", "http://localhost:11434"),
+    "MODEL": os.environ.get("ASSISTANT_MODEL", "llama3.2:3b"),
+    # Low but not zero: answers should stick to the passages and be repeatable; 0.1 keeps wording natural.
+    "TEMPERATURE": float(os.environ.get("ASSISTANT_TEMPERATURE", "0.1")),
+    # Room for a short answer plus up to 4 citations in JSON; longer output is cut off and fails validation.
+    "MAX_OUTPUT_TOKENS": int(os.environ.get("ASSISTANT_MAX_OUTPUT_TOKENS", "512")),
+    # The context window the model is asked to use; prompts are budgeted to fit (assistant/prompts.py).
+    "CONTEXT_TOKENS": int(os.environ.get("ASSISTANT_CONTEXT_TOKENS", "4096")),
+    # Deadline for one answer, including a cold start (first call after the model loads).
+    "TIMEOUT_SECONDS": float(os.environ.get("ASSISTANT_TIMEOUT_SECONDS", "60")),
+}
+
