@@ -48,13 +48,23 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
 - **Step 2: the simplicity order ranked model families only, and CI exposed why that matters.** Two forests 0.0002 apart in validation PR-AUC swapped places between Mac (arm64) and Linux CI (x86): trees amplify last-digit floating-point differences into different splits, moving forest scores by about 0.001. So the chosen model depended on the machine. Fix: a within-family order (shallower trees, then larger leaves; on a remaining tie **more** trees, since tree count only steadies the vote and doesn't cause overfitting). The depth-6, leaf-50 forest now wins on both machines. This rule was written after seeing results, for the stability reason, and it changed the winner from the unlimited-depth forest (0.284) to depth 6 (0.281), within the tie margin. `metrics.md` is now checked for identical text and choice with numbers within 0.002; the release reports stay byte-exact.
 - **Step 2: a multi-threaded random forest is not exactly reproducible.** Threads add the trees' outputs in varying order, changing the last digits, enough to flip a near-tie. Forests now run single-threaded; a test trains one twice and requires identical output.
 
+## Decisions added during Week 5
+
+- **Step 1 (2026-11-01), user additions:**
+  - **Citations name their edition.** Version 1 keeps Week 4's passage IDs (`billing.md#0`), so the frozen Week 4 set still matches. Later versions use `billing.md@v2#0`. Every citation in the API carries `document_id` and `version`, and each answer gets an `AnswerRecord` (linked to its audit event) listing the editions it cited and was given. It never stores the question or answer text.
+  - **Evaluation runs record a corpus snapshot and fail loudly.** `evaluate_assistant` and `tune_assistant` check that the searchable documents are exactly the corpus their set was frozen against (`frozen.WEEK4_CORPUS`: the six policies as v1). They stop with an error before any case runs if not, and the results record the snapshot. The Week 5 sets will declare their own corpus the same way.
+- **Step 1 implementation choices:**
+  - `policy_area` is optional on upload (default `other`), so Week 4's `/v1` upload contract still works. Adding a required field would break existing callers.
+  - Version 1 audit details keep Week 4's form (`document:12`); later versions add `:v2`.
+  - Area filtering in Step 3 will join through the document instead of copying the area onto every chunk, so copies can't drift.
+
 ## Retrieval (RAG improvements)
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| G1 | Support document versioning | 1 | ☐ | | | | |
-| G2 | Update re-indexing | 1 | ☐ | | | | |
-| G3 | Delete re-indexing | 1 | ☐ | | | | |
+| G1 | Support document versioning | 1 | ☑ | `assistant/models.py` (`DocumentVersion`), `assistant/documents.py`; migrations `assistant/0002`–`0004` (existing documents become v1, chunks kept, Week 4 passage IDs unchanged); citations and `AnswerRecord` name the edition (`billing.md@v2#0` from v2 on) | `tests/test_assistant_versions.py` (`TestVersions`, `TestEditionsInAnswers`, migration forward and back) | | |
+| G2 | Update re-indexing | 1 | ☑ | `documents.approve_version`: embed first, then one locked transaction writes the new chunks, marks v(n) current and v(n−1) superseded, deletes the old chunks; a failed embedding changes nothing | `tests/test_assistant_versions.py`: old edition never retrieved after approval; failure keeps the old edition live; a version decided while embedding isn't approved twice; row lock taken | | |
+| G3 | Delete re-indexing | 1 | ☑ | `documents.retire` (soft delete): chunks removed, every version kept for audit; restoring means a new version plus approval | `tests/test_assistant_versions.py` (`TestRetire`) | | |
 | G4 | Metadata filters | 3 | ☐ | | | | |
 | G5 | Hybrid keyword + semantic retrieval | 3 | ☐ | | | | |
 | G6 | Reranking or a documented alternative | 3 | ☐ | | | | |
@@ -165,7 +175,7 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
 | A2 | Demonstrate an unauthorized tool denial | 13 | ☐ | | | | |
 | A3 | Demonstrate a rejected write | 13 | ☐ | | | | |
 | A4 | Demonstrate an explicitly approved write | 13 | ☐ | | | | |
-| A5 | Demonstrate document re-indexing | 1, 13 | ☐ | | | | |
+| A5 | Demonstrate document re-indexing | 1, 13 | ◐ | Update, approve, retire and restore are built and tested offline (G1–G3). The real-model demo is in Step 13 | `tests/test_assistant_versions.py` | | |
 | A6 | Measurable retrieval improvement with the 20-question test set | 3 | ☐ | | | | |
 | A7 | Show a background job failure/retry | 13 | ☐ | | | | |
 | A8 | Show the audit trail | 13 | ☐ | | | | |

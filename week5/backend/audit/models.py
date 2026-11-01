@@ -26,6 +26,9 @@ class AuditEvent(models.Model):
         ADMIN_DOCUMENT_APPROVED = "admin.document_approved", "Admin approved a policy document"
         ADMIN_DOCUMENTS_REINDEXED = "admin.documents_reindexed", "Admin re-indexed the policy documents"
         ADMIN_ASSISTANT_ASKED = "admin.assistant_asked", "Admin asked the policy assistant"
+        ADMIN_DOCUMENT_VERSION_UPLOADED = "admin.document_version_uploaded", "Admin uploaded a new document version (pending)"
+        ADMIN_DOCUMENT_VERSION_REJECTED = "admin.document_version_rejected", "Admin rejected a pending document version"
+        ADMIN_DOCUMENT_RETIRED = "admin.document_retired", "Admin retired a policy document"
 
     created_at = models.DateTimeField(auto_now_add=True)
     # Stable identifiers, not live links: DO_NOTHING + db_constraint=False means deleting the user or

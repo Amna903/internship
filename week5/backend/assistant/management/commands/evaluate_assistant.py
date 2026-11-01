@@ -3,6 +3,8 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
+from assistant.documents import CorpusMismatch
+
 from accounts.models import User
 from assistant import evaluate
 from assistant.embeddings import get_embedder
@@ -19,7 +21,10 @@ class Command(BaseCommand):
         actor = User.objects.filter(email=admin.strip().lower(), role="admin").first()
         if actor is None:
             raise CommandError("No admin account with that email.")
-        result = evaluate.evaluate(get_llm(), get_embedder(), actor, settings.ASSISTANT["SEED"])
+        try:
+            result = evaluate.evaluate(get_llm(), get_embedder(), actor, settings.ASSISTANT["SEED"])
+        except CorpusMismatch as exc:
+            raise CommandError(str(exc)) from None
         evaluate.save(result)
         for name, s in evaluate.summary(result, evaluate.load_cases()).items():
             self.stdout.write(f"{name}: {s['passed']} of 18 cases passed")

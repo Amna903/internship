@@ -40,6 +40,7 @@ from .answering import answer_question
 from .embeddings import Embedder
 from .indexing import approve, search
 from .llm import LLMClient
+from .documents import check_corpus, create_document
 from .models import PolicyDocument
 from .tuning import load_tuned
 from .uploads import validate_upload
@@ -135,8 +136,7 @@ def _prepare_upload(case: dict, admin, embedder: Embedder) -> None:
     if not upload:
         return
     valid = validate_upload(upload["filename"], upload["content"].encode())
-    document = PolicyDocument.objects.create(filename=valid.filename, sha256=valid.sha256, content=valid.content,
-                                             source=PolicyDocument.Source.UPLOAD, uploaded_by=admin)
+    document = create_document(valid.filename, valid.content, valid.sha256, PolicyDocument.Source.UPLOAD, admin)
     if upload["approval"] == "approved":
         approve(document, admin, embedder)
 
@@ -158,6 +158,7 @@ def run_case(case: dict, settings: dict, seed: int, llm: LLMClient, embedder: Em
 
 
 def evaluate(llm: LLMClient, embedder: Embedder, admin, base_seed: int) -> dict:
+    corpus = check_corpus(frozen.WEEK4_CORPUS)  # raises CorpusMismatch before any case runs
     seeds = [base_seed + i for i in range(RUNS)]
     under_test = settings_under_test()
     cases, red_team = load_cases(), load_red_team()
@@ -168,7 +169,7 @@ def evaluate(llm: LLMClient, embedder: Embedder, admin, base_seed: int) -> dict:
     results = {name: run_all(cases, s) for name, s in under_test.items()}
     no_floor = under_test[SHIPPED] | {"floor": -1.0}
     return {"model": llm.model, "embedder": embedder.identity, "seeds": seeds, "settings": under_test,
-            "frozen_eval_sha256": frozen.FROZEN_SHA256["eval/eval_cases.json"], "results": results,
+            "frozen_eval_sha256": frozen.FROZEN_SHA256["eval/eval_cases.json"], "corpus": corpus, "results": results,
             "diagnostics": {"no_floor": {"settings": no_floor, "results": run_all(cases, no_floor)},
                             "red_team": {"settings": under_test[SHIPPED], "results": run_all(red_team, under_test[SHIPPED])}}}
 
@@ -193,7 +194,7 @@ def summary(result: dict, cases: list[dict]) -> dict:
             "answered_runs_citing_expected": sum(
                 1 for c in cases for r in runs[c["id"]] if r["status"] == "answered"
                 and (c.get("expected_source") or c.get("if_answered", {}).get("expected_source"))
-                in {x["passage_id"].split("#")[0] for x in r["citations"]}),
+                in {x["passage_id"].split("#")[0].split("@")[0] for x in r["citations"]}),
             "tokens": sum(r["tokens"] for r in all_runs),
         }
     return out

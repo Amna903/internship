@@ -45,7 +45,9 @@ class TestAnswers:
         setup.replies.append(reply("A refund can be requested within 14 days of a payment."))
         body = ask(admin_browser, "How many days do I have to request a refund?").json()
         assert body["status"] == "answered" and body["reason"] is None and body["model_called"]
-        assert body["citations"] == [{"passage_id": "billing.md#0", "quote": REFUND_QUOTE, "source": "billing.md"}]
+        # Week 5: every citation also names the document and edition it came from (v1 keeps Week 4's passage ID).
+        assert body["citations"] == [{"passage_id": "billing.md#0", "quote": REFUND_QUOTE, "source": "billing.md",
+                                      "document_id": body["citations"][0]["document_id"], "version": 1}]
         assert body["sources"][0]["source"] == "billing.md" and body["usage"]["total_tokens"] > 0
         assert "medical advice" in body["disclaimer"]
 

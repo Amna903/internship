@@ -6,7 +6,7 @@ import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import CommandError, call_command
 
-from assistant import chunking, indexing
+from assistant import chunking, documents, indexing
 from assistant.embeddings import FakeEmbedder
 from assistant.llm import LLMUnavailable
 from assistant.models import Chunk, PolicyDocument
@@ -175,12 +175,13 @@ class TestStaleVectors:
         assert result.stale_skipped == Chunk.objects.count() > 0
 
     def test_search_never_re_embeds_documents(self, policies, monkeypatch):
-        monkeypatch.setattr(indexing, "index_document", lambda *a, **k: pytest.fail("search must not re-index"))
-        monkeypatch.setattr(indexing, "reindex_all", lambda *a, **k: pytest.fail("search must not re-index"))
+        # Week 5: indexing lives in assistant/documents.py, so the guards patch the functions that really embed.
+        for name in ["_embed", "_write_chunks", "reindex_all"]:
+            monkeypatch.setattr(documents, name, lambda *a, **k: pytest.fail("search must not re-index"))
         indexing.search("refund", FakeEmbedder(version="v2"), top_k=3, floor=0.0)
 
     def test_no_endpoint_runs_a_reindex(self, admin_browser, policies, monkeypatch):
-        monkeypatch.setattr(indexing, "reindex_all", lambda *a, **k: pytest.fail("requests must not re-index"))
+        monkeypatch.setattr(documents, "reindex_all", lambda *a, **k: pytest.fail("requests must not re-index"))
         for url in ["/api/v1/assistant/status/", DOCS]:
             assert admin_browser.get(url).status_code == 200
 

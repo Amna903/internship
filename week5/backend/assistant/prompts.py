@@ -55,6 +55,9 @@ class Passage:
     id: str
     source: str
     text: str
+    version: int = 1  # the document edition this passage came from (Week 5)
+    document_id: int | None = None
+    sha256: str = ""
 
 
 @dataclass

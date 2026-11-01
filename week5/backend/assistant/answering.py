@@ -63,7 +63,8 @@ def answer_question(question, llm: LLMClient, embedder: Embedder, tuned: dict | 
         return Answered(result, stale_skipped=found.stale_skipped, public_reason=public_reason(reason), settings=tuned)
     result = ask(cleaned, found.passages, llm, groundedness_threshold=tuned["groundedness_threshold"], seed=seed)
     result.redactions = redactions
-    sources = [{"passage_id": p.id, "source": p.source, "similarity": round(s, 3)}
+    sources = [{"passage_id": p.id, "source": p.source, "similarity": round(s, 3), "document_id": p.document_id,
+                "version": p.version, "sha256": p.sha256}
                for p, s in zip(found.passages, found.scores) if p.id in result.passages_used]
     return Answered(result, sources=sources, stale_skipped=found.stale_skipped,
                     public_reason=public_reason(result.reason) if result.status != "answered" else None, settings=tuned)

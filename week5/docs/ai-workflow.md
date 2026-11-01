@@ -495,3 +495,26 @@ A running record, added to as each step lands. The full decision history is in
   stopped both sessions. The files were then reconciled into one version, and the full suite was re-run
   with a single session.
 - **Regression:** see [regression-week4.md](regression-week4.md).
+
+
+# Week 5: advanced RAG, LLM agents and ML automation
+
+## Step 0: setup and regression baseline
+
+- `week5/` was copied from the git-tracked files of `week4/` only, with fresh local secrets. The Week 4 checklist, study guide, Loom script and regression evidence are renamed with a `-week4` suffix.
+- Code comments point at the decisions in `docs/REQUIREMENTS.md`. Instead of editing the code (which would change a generated, byte-checked report), the Week 5 checklist carries Week 4's decisions and lessons over word for word.
+- Baseline: backend 763 passed and 1 skipped, frontend 53, `verify_release` reproduced, all five browser suites green. The +2 tests compared with Week 4 were traced to the docs link test, which runs once per file in `docs/`.
+
+## Step 1: document versions, update and delete re-indexing, metadata
+
+- **Option A approved:** versions hold the text, and the document is the stable identity. Soft delete ("retire") instead of hard delete, to keep the audit trail.
+- **User additions:**
+  - every citation names its edition (v1 IDs unchanged for the frozen Week 4 set; `@v2` from version 2);
+  - every evaluation run records a corpus snapshot and refuses a different corpus.
+- **Migration designed for reversibility.** The first draft could not be undone: going backwards would have made the text fields required before they were refilled. It was fixed by refilling inside 0003 at the point where the fields become nullable. It is tested forward and back with Django's migration executor, and was applied to the real local database (13 chunks kept, IDs unchanged).
+- **Week 4 tests changed, and why:**
+  - the citation assertion now includes the new `document_id` and `version` fields (the requested contract addition);
+  - two "search must never re-index" guards patched functions that had moved, so they were pointed at the functions that really embed now. Left as they were, they would have kept passing while guarding nothing.
+
+  All other Week 4 tests pass unchanged, helped by keeping v1 passage IDs and v1 audit details in Week 4's form.
+- **Audit migration checked with `sqlmigrate`:** only `choices` change (no-op SQL), so the append-only triggers survive.

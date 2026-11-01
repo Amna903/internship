@@ -22,3 +22,9 @@ FROZEN_SHA256 = {
     "policies/rescheduling.md": "6a1e12a241f68b361f88372c14cf6f0f1eebe5b0a2afb81656ea3e6487667885",
     "policies/telehealth.md": "3b11b21980242ee8c006bdc43bdfa8ccf49172074af20f3abc906a7e39fd34a8",
 }
+
+# The corpus the Week 4 development and evaluation sets were written against: exactly these six policies,
+# each as version 1 with its frozen text, and nothing else searchable. The runners check it before any case
+# runs and refuse to run against anything else (Week 5 Step 1), so results can't quietly drift.
+WEEK4_CORPUS = {name.removeprefix("policies/"): (1, sha) for name, sha in FROZEN_SHA256.items()
+                if name.startswith("policies/")}

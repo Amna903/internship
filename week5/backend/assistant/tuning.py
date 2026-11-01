@@ -147,6 +147,9 @@ def run_once(q: dict, llm: LLMClient, embedder: Embedder, top_k: int, floor: flo
 
 
 def tune(llm: LLMClient, embedder: Embedder) -> dict:
+    from . import frozen
+    from .documents import check_corpus
+    corpus = check_corpus(frozen.WEEK4_CORPUS)  # the dev set was written against the same six policies
     dev = load_dev()
     base_seed = settings.ASSISTANT["SEED"]
     seeds = [base_seed + i for i in range(RUNS_PER_K)]
@@ -154,7 +157,7 @@ def tune(llm: LLMClient, embedder: Embedder) -> dict:
     floor = choose_floor(top_scores, dev)
     runs = {str(k): {q["id"]: [run_once(q, llm, embedder, k, floor, s) for s in seeds] for q in dev} for k in TOP_K_OPTIONS}
     recorded = {"model": llm.model, "embedder": embedder.identity, "temperature": settings.ASSISTANT["TEMPERATURE"],
-                "seeds": seeds, "dev_questions": len(dev), "top_scores": top_scores, "runs": runs}
+                "seeds": seeds, "dev_questions": len(dev), "corpus": corpus, "top_scores": top_scores, "runs": runs}
     return recorded | {"chosen": decide(recorded, dev)}
 
 

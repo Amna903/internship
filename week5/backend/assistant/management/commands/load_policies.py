@@ -7,8 +7,8 @@ from django.core.management.base import BaseCommand, CommandError
 from accounts.models import User
 from assistant.embeddings import get_embedder
 from assistant.frozen import FROZEN_SHA256, POLICY_DIR
-from assistant.indexing import approve
-from assistant.models import PolicyDocument
+from assistant.documents import approve, create_document
+from assistant.models import DocumentVersion, PolicyDocument
 
 
 class Command(BaseCommand):
@@ -27,10 +27,10 @@ class Command(BaseCommand):
             digest = hashlib.sha256(data).hexdigest()
             if FROZEN_SHA256.get(f"policies/{path.name}") != digest:
                 raise CommandError(f"{path.name} does not match its frozen SHA-256; refusing to load it.")
-            if PolicyDocument.objects.filter(sha256=digest).exists():
+            if DocumentVersion.objects.filter(sha256=digest, document__source=PolicyDocument.Source.SEED).exists():
                 continue
-            document = PolicyDocument.objects.create(filename=path.name, sha256=digest, content=data.decode("utf-8"),
-                                                     source=PolicyDocument.Source.SEED)
+            document = create_document(path.name, data.decode("utf-8"), digest, PolicyDocument.Source.SEED, None,
+                                       policy_area=path.stem)
             approve(document, approver, embedder)
             loaded += 1
         self.stdout.write(f"Loaded {loaded} new policies (embedder {embedder.identity}).")
