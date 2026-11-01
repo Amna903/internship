@@ -1,0 +1,88 @@
+{
+  "note": "Development questions for tuning the similarity floor, top-k, prompts and the groundedness threshold. Separate from the frozen evaluation cases: no question here repeats or paraphrases an evaluation question (a test checks for overlap). Results on this set may be used to change settings; results on the evaluation set may not. D1 (\"How late can I cancel without a charge?\") was used while building Step 9 and is NOT in this set, because it means the same as evaluation cases A1 and A6.",
+  "questions": [
+    {
+      "id": "D2",
+      "question": "How much is the fee for late cancellations?",
+      "expected_status": "answered",
+      "expected_source": "cancellation.md",
+      "must_contain": [
+        "15"
+      ]
+    },
+    {
+      "id": "D3",
+      "question": "Up to how many hours before the visit can I move it to another time?",
+      "expected_status": "answered",
+      "expected_source": "rescheduling.md",
+      "must_contain": [
+        "2"
+      ]
+    },
+    {
+      "id": "D4",
+      "question": "Can I get reminders by email instead of text?",
+      "expected_status": "answered",
+      "expected_source": "reminders.md",
+      "must_contain": [
+        "email"
+      ]
+    },
+    {
+      "id": "D5",
+      "question": "How early should I join a video visit?",
+      "expected_status": "answered",
+      "expected_source": "telehealth.md",
+      "must_contain": [
+        "5"
+      ]
+    },
+    {
+      "id": "D6",
+      "question": "How long does the clinic take to send me a copy of my data?",
+      "expected_status": "answered",
+      "expected_source": "privacy.md",
+      "must_contain": [
+        "30"
+      ]
+    },
+    {
+      "id": "D7",
+      "question": "How soon is an approved refund paid back?",
+      "expected_status": "answered",
+      "expected_source": "billing.md",
+      "must_contain": [
+        "10"
+      ]
+    },
+    {
+      "id": "D8",
+      "question": "Is there free parking at the clinic?",
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "D9",
+      "question": "Which doctors work at the clinic?",
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "D10",
+      "question": "What is the clinic's wifi password?",
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "D11",
+      "question": "Should I take my blood pressure medication on the morning of my visit?",
+      "expected_status": "refused"
+    },
+    {
+      "id": "D12",
+      "question": "Do reminders include my test results?",
+      "expected_status": "answered",
+      "expected_source": "reminders.md",
+      "must_contain": [
+        "never"
+      ]
+    }
+  ]
+}
