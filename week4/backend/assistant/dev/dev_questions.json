@@ -1,5 +1,5 @@
 {
-  "note": "Development questions for tuning the similarity floor, top-k, prompts and the groundedness threshold. Separate from the frozen evaluation cases: no question here repeats or paraphrases an evaluation question (a test checks for overlap). Results on this set may be used to change settings; results on the evaluation set may not. D1 (\"How late can I cancel without a charge?\") was used while building Step 9 and is NOT in this set, because it means the same as evaluation cases A1 and A6.",
+  "note": "Development questions for tuning the similarity floor, top-k, prompts and the groundedness threshold. Separate from the frozen evaluation cases: no question here repeats or paraphrases an evaluation question (a test checks for overlap). Results on this set may be used to change settings; results on the evaluation set may not. D1 (\"How late can I cancel without a charge?\") was used while building Step 9 and is NOT in this set, because it means the same as evaluation cases A1 and A6. Correction (2026-11-01, after the first tuning run): D12 required the word \"never\", but a correct answer can say \"No, reminders don't include test results\"; it now accepts any of no / never / not. Recorded in dev_tuning.md and docs/ai-workflow.md.",
   "questions": [
     {
       "id": "D2",
@@ -80,8 +80,10 @@
       "question": "Do reminders include my test results?",
       "expected_status": "answered",
       "expected_source": "reminders.md",
-      "must_contain": [
-        "never"
+      "must_contain_any": [
+        "no",
+        "never",
+        "not"
       ]
     }
   ]

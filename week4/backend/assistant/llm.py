@@ -51,19 +51,23 @@ class LLMClient:
 
     model = "unknown"
 
-    def chat(self, messages: list[dict], json_schema: dict) -> LLMReply:
+    def chat(self, messages: list[dict], json_schema: dict, seed: int | None = None) -> LLMReply:
         raise NotImplementedError
 
 
 class OllamaClient(LLMClient):
     def __init__(self, base_url: str, model: str, temperature: float, max_output_tokens: int, context_tokens: int,
-                 timeout_seconds: float):
+                 timeout_seconds: float, seed: int = 42):
         self.base_url = base_url.rstrip("/")
         self.model = model
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens
         self.context_tokens = context_tokens
         self.timeout_seconds = timeout_seconds
+        # Ollama's sampling seed: with a fixed seed (and temperature 0.1) the same prompt gives the same answer
+        # on the same machine, so tuning and evaluation runs can be repeated. Different hardware or Ollama
+        # versions may still differ.
+        self.seed = seed
 
     def _post(self, path: str, payload: dict) -> dict:
         request = urllib.request.Request(f"{self.base_url}{path}", data=json.dumps(payload).encode(),
@@ -82,7 +86,7 @@ class OllamaClient(LLMClient):
         except (ValueError, json.JSONDecodeError) as exc:
             raise LLMUnavailable("model server sent a response that is not JSON") from exc
 
-    def chat(self, messages: list[dict], json_schema: dict) -> LLMReply:
+    def chat(self, messages: list[dict], json_schema: dict, seed: int | None = None) -> LLMReply:
         started = time.monotonic()
         body = self._post("/api/chat", {
             "model": self.model, "messages": messages, "stream": False,
@@ -90,7 +94,7 @@ class OllamaClient(LLMClient):
             # still validates it (assistant/schema.py), because a constrained reply can be empty or cut off.
             "format": json_schema,
             "options": {"temperature": self.temperature, "num_predict": self.max_output_tokens,
-                        "num_ctx": self.context_tokens},
+                        "num_ctx": self.context_tokens, "seed": self.seed if seed is None else seed},
         })
         try:
             text = body["message"]["content"]
@@ -117,10 +121,10 @@ class FakeLLM(LLMClient):
     model: str = "fake-llm"
     seen: list = field(default_factory=list)
 
-    def chat(self, messages: list[dict], json_schema: dict) -> LLMReply:
+    def chat(self, messages: list[dict], json_schema: dict, seed: int | None = None) -> LLMReply:
         self.seen.append(messages)
-        reply = self.replies.pop(0) if self.replies else json.dumps(
-            {"status": "insufficient_information", "answer": "", "citations": []})
+        # Default when a test scripts nothing: a valid "no answer" reply in the current schema.
+        reply = self.replies.pop(0) if self.replies else json.dumps({"answer": "", "citations": [], "refused": False})
         if isinstance(reply, Exception):
             raise reply
         prompt_chars = sum(len(m["content"]) for m in messages)
@@ -135,4 +139,4 @@ def get_llm() -> LLMClient:
         return FakeLLM()
     return OllamaClient(base_url=cfg["OLLAMA_URL"], model=cfg["MODEL"], temperature=cfg["TEMPERATURE"],
                         max_output_tokens=cfg["MAX_OUTPUT_TOKENS"], context_tokens=cfg["CONTEXT_TOKENS"],
-                        timeout_seconds=cfg["TIMEOUT_SECONDS"])
+                        timeout_seconds=cfg["TIMEOUT_SECONDS"], seed=cfg["SEED"])

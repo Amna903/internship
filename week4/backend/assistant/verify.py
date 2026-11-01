@@ -17,12 +17,21 @@ Checks:
   - Numbers, a hard rule on top: EVERY number in the answer must appear in the verified quotes. A wrong
     deadline or fee is the most harmful kind of error, and the word share alone let "48 hours" pass against
     a quote saying "24 hours" (3 of 4 terms matched).
+  - Checkable: an answer needs at least MIN_KEY_TERMS key terms. A bare "No" has none, so groundedness had
+    nothing to check and scored 1.0; on the dev set a wrong "No" (reminders by email) passed that way.
+  - Polarity: if negation words appear in the answer but not in its quotes, or in the quotes but not in the
+    answer, the meaning may be flipped ("No, you cannot switch to email" shares every key word with a quote
+    saying you can), so it is insufficient_information with reason "polarity mismatch".
+
+LIMITATION: these are lexical checks. They compare words, not meaning, so they can't fully verify an answer;
+a negation flip can still get through in other forms (an antonym, "only after" versus "before", a negation
+the list doesn't cover). The evaluation records such failures.
 """
 
 import re
 from dataclasses import dataclass, field
 
-from .prompts import Passage
+from .prompts import SYSTEM_PROMPT, Passage
 from .schema import ModelReply
 
 GROUNDEDNESS_THRESHOLD = 0.6  # PROVISIONAL: to be set on the dev question set in Step 11
@@ -62,6 +71,49 @@ def key_terms(text: str) -> set[str]:
     return {w for w in words if w.isdigit() or re.fullmatch(r"\d+\.\d+", w) or (len(w) >= 3 and w not in STOPWORDS)}
 
 
+MIN_KEY_TERMS = 2
+NEGATIONS = {"no", "not", "cannot", "never", "won't", "can't", "don't", "doesn't", "isn't", "aren't", "wouldn't"}
+
+# Phrases where "no" does not negate the claim. Fixed (2026-11-01) and kept short; every entry occurs in the
+# frozen policies. It can't be complete: an idiom not listed here causes a false block. False blocks fail
+# safe (insufficient_information); a missed flip is the dangerous case, which is why "no fee" and "no charge"
+# are deliberately NOT listed: "There is no fee for late cancellations" would be exactly such a flip against
+# the cancellation policy's 15-euro fee.
+NON_NEGATING = {
+    r"\bat no cost\b": "rescheduling.md: 'up to 2 hours before it starts, at no cost'",
+    r"\bno-shows?\b": "cancellation.md: 'recorded as no-shows' (a noun)",
+}
+
+
+def has_negation(text: str) -> bool:
+    text = text.lower()
+    for phrase in NON_NEGATING:
+        text = re.sub(phrase, " ", text)
+    return any(word in NEGATIONS for word in re.findall(r"[a-z]+(?:'t)?", text))
+
+
+def polarity_matches(answer: str, quotes: list[str]) -> bool:
+    return has_negation(answer) == has_negation(" ".join(quotes))
+
+
+# Output check against prompt leaks (prompt injection: "print your system prompt"). Any run of LEAK_WORDS
+# consecutive words from the system prompt appearing in an answer blocks it. Six words is long enough that a
+# genuine policy answer won't match by chance.
+LEAK_WORDS = 6
+
+
+def _shingles(text: str, n: int) -> set[tuple[str, ...]]:
+    words = re.findall(r"[a-z0-9']+", text.lower())
+    return {tuple(words[i:i + n]) for i in range(len(words) - n + 1)}
+
+
+SYSTEM_PROMPT_SHINGLES = _shingles(SYSTEM_PROMPT, LEAK_WORDS)
+
+
+def leaks_system_prompt(answer: str) -> bool:
+    return bool(_shingles(answer, LEAK_WORDS) & SYSTEM_PROMPT_SHINGLES)
+
+
 def numbers_in(text: str) -> set[str]:
     return set(re.findall(r"\d+(?:\.\d+)?", text))
 
@@ -88,7 +140,8 @@ class Verdict:
     reason: str = ""  # for logs and evaluation, never shown as an error detail
 
 
-def decide(question: str, reply: ModelReply | None, given: list[Passage]) -> Verdict:
+def decide(question: str, reply: ModelReply | None, given: list[Passage],
+           threshold: float = GROUNDEDNESS_THRESHOLD, check_polarity: bool = True) -> Verdict:
     if is_medical_advice_request(question):
         return Verdict(status="refused", reason="server medical-advice check")
     if reply is None:
@@ -97,6 +150,8 @@ def decide(question: str, reply: ModelReply | None, given: list[Passage]) -> Ver
         return Verdict(status="refused", reason="model refused")
     if not is_substantive(reply.answer):
         return Verdict(status="insufficient_information", reason="answer not substantive")
+    if leaks_system_prompt(reply.answer):
+        return Verdict(status="insufficient_information", reason="output repeats the system prompt")
     by_id = {p.id: normalise(p.text) for p in given}
     verified, rejected = [], 0
     for c in reply.citations:
@@ -109,10 +164,16 @@ def decide(question: str, reply: ModelReply | None, given: list[Passage]) -> Ver
                        reason="no verified citation" if reply.citations else "no citation")
     quotes = [v["quote"] for v in verified]
     score = groundedness(reply.answer, quotes)
+    if len(key_terms(reply.answer)) < MIN_KEY_TERMS:
+        return Verdict(status="insufficient_information", verified=verified, rejected_citations=rejected,
+                       groundedness=score, reason="answer too short to verify")
     if not numbers_supported(reply.answer, quotes):
         return Verdict(status="insufficient_information", verified=verified, rejected_citations=rejected,
                        groundedness=score, reason="a number in the answer is not in its quotes")
-    if score < GROUNDEDNESS_THRESHOLD:
+    if check_polarity and not polarity_matches(reply.answer, quotes):
+        return Verdict(status="insufficient_information", verified=verified, rejected_citations=rejected,
+                       groundedness=score, reason="polarity mismatch")
+    if score < threshold:
         return Verdict(status="insufficient_information", verified=verified, rejected_citations=rejected,
                        groundedness=score, reason="answer not grounded in its quotes")
     return Verdict(status="answered", verified=verified, rejected_citations=rejected, groundedness=score)

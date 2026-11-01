@@ -25,6 +25,7 @@ class AuditEvent(models.Model):
         ADMIN_DOCUMENT_UPLOADED = "admin.document_uploaded", "Admin uploaded a policy document (pending)"
         ADMIN_DOCUMENT_APPROVED = "admin.document_approved", "Admin approved a policy document"
         ADMIN_DOCUMENTS_REINDEXED = "admin.documents_reindexed", "Admin re-indexed the policy documents"
+        ADMIN_ASSISTANT_ASKED = "admin.assistant_asked", "Admin asked the policy assistant"
 
     created_at = models.DateTimeField(auto_now_add=True)
     # Stable identifiers, not live links: DO_NOTHING + db_constraint=False means deleting the user or

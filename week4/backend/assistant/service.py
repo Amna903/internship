@@ -16,7 +16,7 @@ from .llm import LLMClient, LLMTimeout, LLMUnavailable
 from .privacy import redact
 from .prompts import Passage, build_prompt
 from .schema import ANSWER_SCHEMA, InvalidAnswer, parse_reply
-from .verify import decide, is_medical_advice_request
+from .verify import GROUNDEDNESS_THRESHOLD, decide, is_medical_advice_request
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,8 @@ def clean_question(question) -> str:
     return " ".join(question.split())
 
 
-def ask(question: str, ranked: list[Passage], llm: LLMClient) -> AssistantResult:
+def ask(question: str, ranked: list[Passage], llm: LLMClient,
+        groundedness_threshold: float = GROUNDEDNESS_THRESHOLD) -> AssistantResult:
     cfg = settings.ASSISTANT
     question, redactions = redact(clean_question(question))
     if is_medical_advice_request(question):
@@ -79,7 +80,7 @@ def ask(question: str, ranked: list[Passage], llm: LLMClient) -> AssistantResult
         logger.warning("assistant: invalid model output (%s)", exc.reason)
         return AssistantResult(status="invalid_output", reason=exc.reason, usage=usage, **base)
     given = [p for p in ranked if p.id in prompt.included]
-    verdict = decide(question, parsed, given)
+    verdict = decide(question, parsed, given, threshold=groundedness_threshold)
     if verdict.rejected_citations:
         logger.info("assistant: %d citation(s) rejected", verdict.rejected_citations)
     answer = {"answered": parsed.answer, "refused": REFUSAL_MESSAGE}.get(verdict.status, "")

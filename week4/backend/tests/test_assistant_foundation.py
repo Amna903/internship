@@ -210,11 +210,15 @@ def client(server, timeout=5.0):
 
 
 class TestOllamaClient:
+    def test_a_per_call_seed_overrides_the_default(self, ollama):
+        client(ollama).chat([{"role": "user", "content": "hi"}], schema.ANSWER_SCHEMA, seed=44)
+        assert FakeOllama.behaviour["seen"][0]["options"]["seed"] == 44
+
     def test_request_sends_schema_temperature_token_limit_and_context(self, ollama):
         result = client(ollama).chat([{"role": "user", "content": "hi"}], schema.ANSWER_SCHEMA)
         sent = FakeOllama.behaviour["seen"][0]
         assert sent["format"] == schema.ANSWER_SCHEMA and sent["stream"] is False
-        assert sent["options"] == {"temperature": 0.1, "num_predict": 512, "num_ctx": 4096}
+        assert sent["options"] == {"temperature": 0.1, "num_predict": 512, "num_ctx": 4096, "seed": 42}
         assert (result.prompt_tokens, result.output_tokens) == (321, 45)
 
     def test_slow_model_raises_timeout(self, ollama):

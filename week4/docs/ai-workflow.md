@@ -414,3 +414,23 @@ A running record, added to as each step lands. The full decision history is in
   status, refusals, strict output validation, the context budget, redaction, the real client against a
   local imitation of Ollama (request format, timeout, server error, unreachable server), safe errors, cost
   reporting and the admin-only status endpoint.
+
+## Step 11: tuning on the development set and the question endpoint
+
+- **Rules first.** The floor, top-k and groundedness rules were written and approved before tuning ran
+  (`assistant/tuning.py`), with three fixed seeds per value of k and a two-of-three majority.
+- **First run exposed terse answers.** Every answer was a fragment ("No", "2 hours"), so the word-overlap
+  groundedness check scored 1.0 everywhere and a wrong "No" passed with a real citation. Fixed with a
+  complete-sentence instruction, a minimum of two key terms, and a polarity check.
+- **My prompt example leaked a dev answer.** The first full-sentence example was literally the correct
+  answer to dev question D4; replaced with a neutral sentence before tuning ran again.
+- **The polarity check had a false block** (D3, "at no cost"); fixed with a short phrase list. The user's
+  first list included "no fee" and "no charge"; checking the policies showed they don't occur there and would
+  hide exactly the most harmful flip (the 15-euro fee), so the list was reduced to the two phrases that occur.
+- **A stale test default hid failures.** `FakeLLM`'s default reply still used the old schema, so unscripted
+  calls became 502s that some passing tests never checked; found from an unexpected count of "Bad Gateway"
+  log lines, fixed, and pinned by a test.
+- **Verification.** Live against the local model with dev questions only (answered / below floor without a
+  model call / refused before retrieval); automated tests for every status path, injection defences, safe
+  errors, rate limit and audit, with known lexical gaps kept as explicit tests.
+

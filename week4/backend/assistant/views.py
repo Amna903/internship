@@ -16,9 +16,13 @@ from audit.models import AuditEvent
 from audit.services import record_event
 from predictions.views import AdminOnlyAPIView
 
+from predictions.views import SmallJSONParser
+
+from .answering import answer_question
 from .embeddings import get_embedder
 from .indexing import approve
-from .llm import LLMError
+from .llm import LLMError, get_llm
+from .service import QuestionInvalid
 from .models import PolicyDocument
 from .uploads import MAX_UPLOAD_BYTES, UploadRejected, validate_upload
 
@@ -136,4 +140,71 @@ class DocumentApproveView(AdminOnlyAPIView):
         record_event(request, AuditEvent.Action.ADMIN_DOCUMENT_APPROVED, detail=f"document:{document.id}")
         document.refresh_from_db()
         return Response(document_json(document))
+
+
+DISCLAIMER = ("Educational assistant for a fictional clinic's policies. Answers come only from approved policy "
+              "documents and are checked against them; it gives no medical advice.")
+
+
+class AssistantError(APIException):
+    def __init__(self, http_status: int, code: str, message: str):
+        self.status_code = http_status
+        super().__init__(detail=message, code=code)
+
+
+ERRORS = {
+    "timeout": (status.HTTP_504_GATEWAY_TIMEOUT, "assistant_timeout",
+                "The assistant took too long to answer. Please try again."),
+    "unavailable": (status.HTTP_503_SERVICE_UNAVAILABLE, "assistant_unavailable",
+                    "The assistant is temporarily unavailable."),
+    "invalid_output": (status.HTTP_502_BAD_GATEWAY, "assistant_invalid_output",
+                       "The assistant could not produce a valid answer. Please try again."),
+}
+
+
+class AskView(AdminOnlyAPIView):
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "assistant"
+    parser_classes = [SmallJSONParser]
+
+    @extend_schema(
+        summary="Ask the clinic-policy assistant a question",
+        description=("Answers only from approved fictional policies, with citations the server has checked. "
+                     "Status is decided by the server: answered, insufficient_information or refused."),
+        responses={200: OpenApiResponse(description="answered, insufficient_information or refused"),
+                   400: OpenApiResponse(description="Invalid question"), 401: OpenApiResponse(description="Not signed in"),
+                   403: OpenApiResponse(description="Not an admin, or CSRF token missing"),
+                   429: OpenApiResponse(description="Rate limit exceeded"),
+                   502: OpenApiResponse(description="Model produced invalid output"),
+                   503: OpenApiResponse(description="Model unavailable"), 504: OpenApiResponse(description="Model timeout")},
+    )
+    def post(self, request):
+        data = request.data if isinstance(request.data, dict) else {}
+        if set(data) - {"question"}:
+            return rejection("Only a 'question' field is accepted.", "invalid_request")
+        try:
+            answered = answer_question(data.get("question"), get_llm(), get_embedder())
+        except QuestionInvalid as exc:
+            return rejection(str(exc), "invalid_question")
+        result = answered.result
+        # Audit: who asked, the outcome and the question's length. Never the question text.
+        question_length = len(data.get("question") or "")
+        record_event(request, AuditEvent.Action.ADMIN_ASSISTANT_ASKED, detail=f"{result.status}:{question_length}")
+        if result.status in ERRORS:
+            raise AssistantError(*ERRORS[result.status])
+        by_id = {s["passage_id"]: s["source"] for s in answered.sources}
+        return Response({
+            "status": result.status,
+            "answer": result.answer,
+            "citations": [{**c, "source": by_id.get(c["passage_id"], c["passage_id"].split("#")[0])}
+                          for c in result.citations],
+            "sources": answered.sources,
+            "reason": answered.public_reason,
+            "stale_chunks_skipped": answered.stale_skipped,
+            "usage": result.usage,
+            "model": result.model,
+            "model_called": result.model_called,
+            "settings": answered.settings,
+            "disclaimer": DISCLAIMER,
+        })
 
