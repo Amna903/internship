@@ -99,6 +99,7 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
      - eligible = 0 false retrievals on the 3 unanswerable dev questions;
      - pick the most as-shipped hits on the 12 answerable dev questions;
      - ties are broken in order: semantic before hybrid → gate S before S+K → higher floor → smaller top-k → chunk size closest to 80 → larger RRF k → higher f_kw.
+     - **Gap found by a test before any run (2026-11-02):** 40 and 120 are equally close to 80. The user decided **the larger chunk size wins** that tie. A test now checks that the tie order separates every configuration in the grid.
   5. **"After" = the dev winner.** The frozen evaluation set runs once for it, and its result is reported whatever it shows. The frozen set never chooses anything. If "after" doesn't beat "before", or the guardrail rises, that is the finding, and nothing is re-tuned.
   6. **Shipping: champion/challenger, decided on dev only.**
      - The champion is Week 4's retrieval (semantic, chunk size 80, floor 0.70, top-k 2).

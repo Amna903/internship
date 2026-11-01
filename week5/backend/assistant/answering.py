@@ -11,7 +11,7 @@ Internal reasons stay in logs and the evaluation; the API gets one of a few publ
 from dataclasses import dataclass, field
 
 from .embeddings import Embedder
-from .indexing import search
+from .indexing import RetrievalConfig, retrieve, search
 from .llm import LLMClient, LLMError
 from .privacy import redact
 from .service import REFUSAL_MESSAGE, AssistantResult, ask, clean_question
@@ -43,8 +43,10 @@ class Answered:
 
 
 def answer_question(question, llm: LLMClient, embedder: Embedder, tuned: dict | None = None,
-                    seed: int | None = None) -> Answered:
-    """`tuned` and `seed` default to the shipped values; only the evaluation runner passes others."""
+                    seed: int | None = None, area: str | None = None) -> Answered:
+    """`tuned` and `seed` default to the shipped values; only the evaluation runner passes others.
+    If `tuned` carries a "retrieval" setting (Week 5 Step 3), that method, gate and top-k are used; otherwise
+    Week 4's semantic search with the tuned floor and top-k. `area` is the opt-in metadata filter."""
     tuned = load_tuned() if tuned is None else tuned
     cleaned, redactions = redact(clean_question(question))
     if is_medical_advice_request(cleaned):
@@ -52,7 +54,12 @@ def answer_question(question, llm: LLMClient, embedder: Embedder, tuned: dict | 
                                  reason="server medical-advice check", model=llm.model)
         return Answered(result, public_reason=public_reason(result.reason), settings=tuned)
     try:
-        found = search(cleaned, embedder, top_k=tuned["top_k"], floor=tuned["floor"])
+        if tuned.get("retrieval"):
+            found = retrieve(cleaned, embedder, RetrievalConfig(**tuned["retrieval"]), area=area)
+        elif area:
+            found = retrieve(cleaned, embedder, RetrievalConfig(floor=tuned["floor"], top_k=tuned["top_k"]), area=area)
+        else:
+            found = search(cleaned, embedder, top_k=tuned["top_k"], floor=tuned["floor"])
     except LLMError as exc:
         result = AssistantResult(status="unavailable", reason=f"embedding failed: {exc.__class__.__name__}",
                                  redactions=redactions, model=llm.model)

@@ -328,10 +328,13 @@ class AskView(AdminOnlyAPIView):
     )
     def post(self, request):
         data = request.data if isinstance(request.data, dict) else {}
-        if set(data) - {"question"}:
-            return rejection("Only a 'question' field is accepted.", "invalid_request")
+        if set(data) - {"question", "area"}:
+            return rejection("Only 'question' and an optional 'area' are accepted.", "invalid_request")
+        area = data.get("area")
+        if area is not None and area not in POLICY_AREAS:
+            return rejection("area must be one of: " + ", ".join(POLICY_AREAS) + ".", "invalid_request")
         try:
-            answered = answer_question(data.get("question"), get_llm(), get_embedder())
+            answered = answer_question(data.get("question"), get_llm(), get_embedder(), area=area)
         except QuestionInvalid as exc:
             return rejection(str(exc), "invalid_question")
         result = answered.result

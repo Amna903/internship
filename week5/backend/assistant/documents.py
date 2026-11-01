@@ -68,8 +68,8 @@ def add_version(document: PolicyDocument, content: str, sha256: str, uploaded_by
                                               effective_date=effective_date, uploaded_by=uploaded_by)
 
 
-def _embed(version: DocumentVersion, embedder: Embedder) -> tuple[list[str], np.ndarray]:
-    texts = chunk(version.content)
+def _embed(version: DocumentVersion, embedder: Embedder, chunk_tokens: int | None = None) -> tuple[list[str], np.ndarray]:
+    texts = chunk(version.content, max_tokens=chunk_tokens) if chunk_tokens else chunk(version.content)
     return texts, (embedder.embed(texts) if texts else np.zeros((0, 0), dtype=np.float32))
 
 
@@ -88,10 +88,10 @@ class Approval:
     chunks: int
 
 
-def approve_version(version: DocumentVersion, admin, embedder: Embedder) -> Approval:
+def approve_version(version: DocumentVersion, admin, embedder: Embedder, chunk_tokens: int | None = None) -> Approval:
     if version.status != VStatus.PENDING:
         raise DocumentError("Only a version waiting for approval can be approved.", "not_pending")
-    texts, vectors = _embed(version, embedder)  # may raise LLMError: nothing has changed yet
+    texts, vectors = _embed(version, embedder, chunk_tokens)  # may raise LLMError: nothing has changed yet
     with transaction.atomic():
         document = PolicyDocument.objects.select_for_update().get(pk=version.document_id)
         version = DocumentVersion.objects.get(pk=version.pk)
@@ -151,13 +151,13 @@ def searchable_versions():
     return DocumentVersion.objects.filter(status=VStatus.CURRENT, document__status=Status.APPROVED).select_related("document")
 
 
-def reindex_all(embedder: Embedder) -> dict:
-    """Admin command only. Re-embed every searchable version with the current embedder and remove chunks
-    left over from other embedders."""
+def reindex_all(embedder: Embedder, chunk_tokens: int | None = None) -> dict:
+    """Admin command only. Re-embed every searchable version with the current embedder (and, if given, a new
+    chunk size) and remove chunks left over from other embedders."""
     versions = list(searchable_versions())
     chunks = 0
     for v in versions:
-        texts, vectors = _embed(v, embedder)
+        texts, vectors = _embed(v, embedder, chunk_tokens)
         with transaction.atomic():
             _write_chunks(v, texts, vectors, embedder)
         chunks += len(texts)

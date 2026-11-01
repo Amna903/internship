@@ -29,7 +29,7 @@ from django.db import transaction
 from . import frozen
 from .documents import CorpusMismatch, add_version, approve_version, check_corpus, create_document, retire
 from .embeddings import Embedder
-from .indexing import search
+from .indexing import RetrievalConfig, candidates, order, returned
 from .models import PolicyDocument
 from .tuning import load_tuned
 
@@ -49,7 +49,7 @@ def load_cases(path: Path = frozen.RETRIEVAL_CASES) -> list[dict]:
 
 # ---------------------------------------------------------------- the frozen corpus, built in isolation
 
-def build_corpus(embedder: Embedder) -> list[dict]:
+def build_corpus(embedder: Embedder, chunk_tokens: int | None = None) -> list[dict]:
     """Must run inside a transaction that the caller rolls back. Returns the checked snapshot."""
     for d in PolicyDocument.objects.exclude(status=PolicyDocument.Status.RETIRED):
         retire(d, None)
@@ -65,7 +65,7 @@ def build_corpus(embedder: Embedder) -> list[dict]:
             pending = built[name].versions.get(number=1)
         else:
             pending = add_version(built[name], data.decode("utf-8"), sha, None)
-        approve_version(pending, None, embedder)
+        approve_version(pending, None, embedder, chunk_tokens)
     return check_corpus(frozen.WEEK5_CORPUS)
 
 
@@ -93,16 +93,20 @@ def found_at(case: dict, ranked: Ranked, k: int) -> list[bool]:
     return [any(norm(e["quote"]) in t for t in top) for e in case["evidence"]]
 
 
-def score_case(case: dict, ranked: Ranked, floor: float, top_k: int) -> dict:
+def score_case(case: dict, ranked: Ranked, floor: float, top_k: int, shipped: list[str] | None = None) -> dict:
+    """`shipped`: the chunk texts the assistant would use. Without it, the Week 4 rule applies (the top-k
+    chunks of the ranking whose score clears the floor)."""
     top_score = ranked.scores[0] if ranked.scores else None
-    shipped_n = sum(1 for s in ranked.scores[:top_k] if s >= floor)
+    if shipped is None:
+        shipped = [t for t, s in zip(ranked.texts[:top_k], ranked.scores[:top_k]) if s >= floor]
     if not case["answerable"]:
         return {"id": case["id"], "answerable": False, "top_score": top_score,
-                "false_retrieval": shipped_n > 0, "shipped_returned": shipped_n}
+                "false_retrieval": len(shipped) > 0, "shipped_returned": len(shipped)}
     rank = first_rank(case, ranked)
+    got = [norm(t) for t in shipped]
     out = {"id": case["id"], "answerable": True, "top_score": top_score, "first_rank": rank,
-           "reciprocal_rank": 1 / rank if rank else 0.0, "shipped_returned": shipped_n,
-           "shipped_hit": all(found_at(case, ranked, shipped_n)) if shipped_n else False}
+           "reciprocal_rank": 1 / rank if rank else 0.0, "shipped_returned": len(shipped),
+           "shipped_hit": bool(shipped) and all(any(norm(e["quote"]) in t for t in got) for e in case["evidence"])}
     for k in KS:
         found = found_at(case, ranked, k)
         docs = set(ranked.documents[:k])
@@ -130,28 +134,39 @@ def aggregate(rows: list[dict]) -> dict:
 
 # ---------------------------------------------------------------- running
 
-def rank_all(cases: list[dict], embedder: Embedder) -> dict[str, Ranked]:
+def run_config(cases: list[dict], embedder: Embedder, cfg: RetrievalConfig, use_filters: bool = False) -> dict:
+    """Score each case under one configuration. Must run inside the corpus-building transaction.
+    `use_filters` applies a case's labelled area as the opt-in filter (as if the user picked it)."""
     out = {}
     for c in cases:
-        found = search(c["question"], embedder, top_k=10_000, floor=-1.0)
-        out[c["id"]] = Ranked([p.text for p in found.passages], [p.source for p in found.passages], found.scores,
-                              [p.id for p in found.passages])
+        cand = candidates(c["question"], embedder, area=c.get("area") if use_filters else None)
+        ranked_ids = order(cand, cfg)
+        ch = cand.chunks
+        ranked = Ranked([ch[i].text for i in ranked_ids], [ch[i].document.filename for i in ranked_ids],
+                        [float(cand.cosine[i]) for i in ranked_ids], [ch[i].passage_id for i in ranked_ids])
+        shipped = [ch[i].text for i in returned(cand, cfg)]
+        out[c["id"]] = (ranked, shipped)
     return out
 
 
-def evaluate(embedder: Embedder, cases: list[dict] | None = None, label: str = "baseline") -> dict:
+def evaluate(embedder: Embedder, cases: list[dict] | None = None, label: str = "baseline",
+             cfg: RetrievalConfig | None = None, use_filters: bool = False, method_note: str = "") -> dict:
     cases = cases if cases is not None else load_cases()
-    tuned = load_tuned()
+    if cfg is None:  # the Week 4 shipped retrieval, with the tuned floor and top-k
+        tuned = load_tuned()
+        cfg = RetrievalConfig(floor=tuned["floor"], top_k=tuned["top_k"], chunk_tokens=_chunk_tokens())
     with transaction.atomic():
-        snapshot = build_corpus(embedder)
-        ranked = rank_all(cases, embedder)
+        snapshot = build_corpus(embedder, cfg.chunk_tokens)
+        scored = run_config(cases, embedder, cfg, use_filters)
         transaction.set_rollback(True)  # the built corpus never outlives the run
-    rows = [score_case(c, ranked[c["id"]], tuned["floor"], tuned["top_k"]) | {
-        "top_passages": ranked[c["id"]].passage_ids[:5], "top_scores": [round(s, 3) for s in ranked[c["id"]].scores[:5]]}
+    rows = [score_case(c, scored[c["id"]][0], cfg.floor, cfg.top_k, shipped=scored[c["id"]][1]) | {
+        "top_passages": scored[c["id"]][0].passage_ids[:5], "top_scores": [round(x, 3) for x in scored[c["id"]][0].scores[:5]]}
         for c in cases]
     by = lambda key: {v: aggregate([r for r, c in zip(rows, cases) if c[key] == v]) for v in sorted({c[key] for c in cases})}
-    return {"label": label, "method": "semantic only (Week 4 retrieval)", "embedder": embedder.identity,
-            "settings": {"floor": tuned["floor"], "top_k": tuned["top_k"], "chunk_tokens": _chunk_tokens()},
+    method = method_note or ("semantic only (Week 4 retrieval)" if cfg.method == "semantic" and not use_filters else
+                             f"{cfg.method}, gate {cfg.gate}" + (" with the opt-in area filter" if use_filters else ""))
+    return {"label": label, "method": method, "embedder": embedder.identity,
+            "settings": cfg.as_dict() | {"filters": use_filters},
             "frozen_sha256": {k: frozen.WEEK5_FROZEN_SHA256[k] for k in ("eval/retrieval_cases.json",)},
             "corpus": snapshot, "overall": aggregate(rows), "by_category": by("category"), "by_author": by("author"),
             "cases": rows}
@@ -195,7 +210,7 @@ def build_report(result: dict, cases: list[dict]) -> str:
 
 The corpus (12 documents; cancellation is v2) is built inside a rolled-back transaction and checked against
 the frozen manifest before any question runs. A hit means a retrieved chunk contains the **whole** evidence quote.
-Chunk size {s['chunk_tokens']} tokens. "As shipped" uses the shipped floor {s['floor']:.2f} and top-k {s['top_k']}.
+Chunk size {s['chunk_tokens']} tokens. "As shipped" uses floor {s['floor']:.2f} and top-k {s['top_k']}{f", RRF k {s['rrf_k']}, gate {s['gate']}" + (f" (keyword threshold {s['f_kw']:.1f})" if s['gate'] == 'S+K' else '') if s['method'] == 'hybrid' else ''}.
 
 ## Overall ({o['answerable']} answerable + {o['unanswerable']} unanswerable)
 
