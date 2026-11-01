@@ -1,0 +1,131 @@
+{
+ "status": "FROZEN 2026-11-02 before any Step 4 run; user reviewed U01-U08",
+ "note": "Week 5 Step 4 answer key: key facts per answerable question; each fact is a list of acceptable phrasings, matched as whole words after normalising number words. A match does not count if not/no/never/cannot (or n't) appears within the 2 words before it.",
+ "keys": {
+  "U01": [
+   [
+    "3 hours"
+   ]
+  ],
+  "U02": [
+   [
+    "interpreter",
+    "translator"
+   ],
+   [
+    "free of charge",
+    "free",
+    "no cost",
+    "no charge",
+    "without charge"
+   ]
+  ],
+  "U03": [
+   [
+    "3 monthly payments",
+    "3 payments",
+    "3 monthly",
+    "3 instalments",
+    "3 installments"
+   ]
+  ],
+  "U04": [
+   [
+    "15 working days"
+   ]
+  ],
+  "U05": [
+   [
+    "lift",
+    "elevator"
+   ]
+  ],
+  "U06": [
+   [
+    "no interest",
+    "interest free",
+    "without interest",
+    "not charged interest"
+   ]
+  ],
+  "U07": [
+   [
+    "in writing",
+    "written authorisation",
+    "written authorization"
+   ]
+  ],
+  "U08": [
+   [
+    "welcome",
+    "allowed",
+    "permitted",
+    "can bring"
+   ]
+  ],
+  "A01": [
+   [
+    "14 days"
+   ]
+  ],
+  "A02": [
+   [
+    "10 euros"
+   ]
+  ],
+  "A03": [
+   [
+    "2 hours"
+   ]
+  ],
+  "A04": [
+   [
+    "10 working days"
+   ]
+  ],
+  "A05": [
+   [
+    "20 euros"
+   ],
+   [
+    "second",
+    "2nd"
+   ]
+  ],
+  "A06": [
+   [
+    "1 October 2026",
+    "October 1 2026",
+    "1 Oct 2026"
+   ]
+  ],
+  "A07": [
+   [
+    "video call",
+    "by phone",
+    "video"
+   ],
+   [
+    "patient app",
+    "app"
+   ]
+  ],
+  "A08": [
+   [
+    "14 days"
+   ]
+  ],
+  "A09": [
+   [
+    "5 working days"
+   ]
+  ],
+  "A10": [
+   [
+    "phone",
+    "calls you",
+    "call you"
+   ]
+  ]
+ }
+}

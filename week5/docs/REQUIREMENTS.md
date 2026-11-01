@@ -127,6 +127,19 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
   9. **Cost recorded:** model calls per question and the added latency (median and worst case), on dev and on the frozen set.
   10. **Honesty:** the frozen evaluation set is now used for a **second comparison** (the round-2 winner, run once). It still chooses nothing. **If round 2 also fails to improve the primary measure, A6 stays ◐ and Week 5 moves on.**
 
+- **Step 4 rules (approved by the user on 2026-11-02, committed before any Step 4 run):**
+  1. **Generation is evaluated separately from retrieval, in two modes:**
+     - **A, oracle context (the main measure):** each answerable question gets its gold chunk(s) **plus one near-miss distractor** (the highest-scoring non-gold chunk), so a single-evidence question sees 2 passages, matching top-k 2. Each unanswerable question gets its top 2 retrieved chunks;
+     - **B, end to end:** the shipped retrieval (the champion: floor 0.70, top-k 2).
+  2. **Metrics, with counts beside percentages:**
+     - citation precision (citations pointing at gold text) and recall (every evidence quote cited), plus server-rejected citations;
+     - the groundedness score and key-fact correctness;
+     - correct abstentions on unanswerable questions, false abstentions on answerable ones, and answered-but-wrong.
+  3. **Answer key `assistant/eval/generation_keys.json`, frozen and hash-pinned.** Key facts are lexical, whole words, after normalising number words ("three" → 3, "twice" → "2 times").
+     - **A match does not count if it is directly negated:** not / no / never / cannot (or *n't*) within the 2 words before it.
+     - The user reviewed U01–U08: U02 accepts "interpreter" or "translator"; U03 accepts "3 monthly payments", "3 payments", "3 monthly", "3 instalments" or "3 installments" (not "3 months").
+  4. **Reporting only. Nothing is tuned in Step 4.** The shipped settings stay. Runs use seeds 42–44 with a 2-of-3 majority, on the frozen Week 5 corpus built in a rolled-back transaction, with the snapshot checked. Problems found become candidates for a future dev round, and no checks change on these results.
+
 ## Retrieval (RAG improvements)
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |

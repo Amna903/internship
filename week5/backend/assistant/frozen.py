@@ -81,3 +81,8 @@ WEEK5_CORPUS = {name: (version, _pinned(file)) for name, version, file, _ in WEE
 # relevance gate isn't decided by 3 unanswerable questions. Dev only; the evaluation set is unchanged.
 RETRIEVAL_DEV_ROUND2 = ROOT / "dev" / "retrieval_dev_round2.json"
 WEEK5_FROZEN_SHA256["dev/retrieval_dev_round2.json"] = "ebade698ea5215491cf0205d28ef6921f0cb289beeb9a51212147fa904a9fc84"
+
+
+# Step 4 (2026-11-02): the generation answer key, frozen before any Step 4 run (the user reviewed U01-U08).
+GENERATION_KEYS = ROOT / "eval" / "generation_keys.json"
+WEEK5_FROZEN_SHA256["eval/generation_keys.json"] = "e8c3d6c063c706edfbea78c42c2d9d8ed2ac33b5aee3dc271ae747540f3e55b4"
