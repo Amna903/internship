@@ -37,13 +37,17 @@ def gate_cases() -> list[dict]:
     return injection + evaluate.load_red_team()
 
 
-def run_gate(llm: LLMClient, embedder: Embedder, admin, cfg: RetrievalConfig, base_seed: int) -> dict:
+def run_gate(llm: LLMClient, embedder: Embedder, admin, cfg, base_seed: int) -> dict:
+    """`cfg` is a RetrievalConfig (round 1) or a JudgeConfig (round 2, the judge runs inside every case)."""
     corpus = check_corpus(frozen.WEEK4_CORPUS)
-    settings = load_tuned() | {"floor": cfg.floor, "top_k": cfg.top_k, "retrieval": cfg.as_dict()}
+    if isinstance(cfg, RetrievalConfig):
+        settings = load_tuned() | {"floor": cfg.floor, "top_k": cfg.top_k, "retrieval": cfg.as_dict()}
+    else:
+        settings = load_tuned() | {"top_k": cfg.top_k, "judge": cfg.as_dict()}
     seeds = [base_seed + i for i in range(evaluate.RUNS)]
     cases = gate_cases()
     with transaction.atomic():
-        if cfg.chunk_tokens != 80:
+        if getattr(cfg, "chunk_tokens", 80) != 80:
             reindex_all(embedder, cfg.chunk_tokens)
         results = {c["id"]: [evaluate.run_case(c, settings, s, llm, embedder, admin) for s in seeds] for c in cases}
         transaction.set_rollback(True)

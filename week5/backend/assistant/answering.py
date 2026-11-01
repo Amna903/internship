@@ -54,7 +54,13 @@ def answer_question(question, llm: LLMClient, embedder: Embedder, tuned: dict | 
                                  reason="server medical-advice check", model=llm.model)
         return Answered(result, public_reason=public_reason(result.reason), settings=tuned)
     try:
-        if tuned.get("retrieval"):
+        if tuned.get("judge"):  # Step 3 round 2: semantic candidates filtered by the LLM relevance judge
+            from django.conf import settings as django_settings
+            from .judge import JudgeConfig, judged_retrieve
+            j = tuned["judge"]
+            found = judged_retrieve(cleaned, embedder, llm, JudgeConfig(j["n"], j["f_low"], j["top_k"]),
+                                    seed if seed is not None else django_settings.ASSISTANT["SEED"], area=area)
+        elif tuned.get("retrieval"):
             found = retrieve(cleaned, embedder, RetrievalConfig(**tuned["retrieval"]), area=area)
         elif area:
             found = retrieve(cleaned, embedder, RetrievalConfig(floor=tuned["floor"], top_k=tuned["top_k"]), area=area)

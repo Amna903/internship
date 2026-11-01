@@ -270,6 +270,7 @@ def _line(name: str, r: dict) -> str:
     o, s = r["overall"], r["settings"]
     setting = (f"{s['method']}, chunk {s['chunk_tokens']}, floor {s['floor']:.2f}, top-k {s['top_k']}"
                + (f", RRF k {s['rrf_k']}, gate {s['gate']}" if s["method"] == "hybrid" else "")
+               + (f", judge on top {s['n']}" if s["method"] == "judge" else "")
                + (", area filter" if s.get("filters") else ""))
     return (f"| {name} | {setting} | **{count(o['shipped_hits'], o['answerable'])}** | {count(o['false_retrievals'], o['unanswerable'])} | "
             f"{pct(o['recall@1'])} | {o['mrr']:.2f} | {pct(o['recall@3'])} |")
@@ -367,4 +368,72 @@ The user's questions (paraphrase, area hint, unanswerable) are harder for the sh
 
 The filter narrows what is searched, but it cannot lift a correct chunk over the floor, so it changes nothing
 as shipped here.
+""" + _round2_section(before)
+
+
+# ---------------------------------------------------------------- Step 3 round 2: the judge on the frozen set
+
+def evaluate_judged(embedder: Embedder, llm, cases: list[dict], jcfg, base_seed: int, label: str = "round2") -> dict:
+    """The round-2 winner on the frozen set, run once (rule 10). Ranks are semantic (the judge only filters)."""
+    import statistics
+    import time
+    from .judge import VerdictCache, judged
+    cases = cases if cases is not None else load_cases()
+    cache = VerdictCache()
+    seconds = []
+    with transaction.atomic():
+        snapshot = build_corpus(embedder, 80)
+        scored = {}
+        for c in cases:
+            cand = candidates(c["question"], embedder)
+            ranked_ids = order(cand, RetrievalConfig())
+            ch = cand.chunks
+            start = time.perf_counter()
+            keep = judged(c["question"], cand, jcfg, llm, cache, base_seed)
+            seconds.append(time.perf_counter() - start)
+            scored[c["id"]] = (Ranked([ch[i].text for i in ranked_ids], [ch[i].document.filename for i in ranked_ids],
+                                      [float(cand.cosine[i]) for i in ranked_ids], [ch[i].passage_id for i in ranked_ids]),
+                               [ch[i].text for i in keep], [ch[i].passage_id for i in keep])
+        transaction.set_rollback(True)
+    rows = [score_case(c, scored[c["id"]][0], jcfg.f_low, jcfg.top_k, shipped=scored[c["id"]][1]) | {
+        "top_passages": scored[c["id"]][0].passage_ids[:5], "top_scores": [round(x, 3) for x in scored[c["id"]][0].scores[:5]],
+        "returned": scored[c["id"]][2]} for c in cases]
+    by = lambda key: {v: aggregate([r for r, c in zip(rows, cases) if c[key] == v]) for v in sorted({c[key] for c in cases})}
+    return {"label": label, "method": "semantic candidates + LLM relevance judge (round 2)", "embedder": embedder.identity,
+            "model": llm.model, "settings": {"method": "judge", "n": jcfg.n, "floor": jcfg.f_low, "top_k": jcfg.top_k,
+                                             "chunk_tokens": 80, "filters": False},
+            "frozen_sha256": {k: frozen.WEEK5_FROZEN_SHA256[k] for k in ("eval/retrieval_cases.json",)},
+            "corpus": snapshot, "overall": aggregate(rows), "by_category": by("category"), "by_author": by("author"),
+            "cost": {"judge_calls": cache.calls, "seconds_median": round(statistics.median(seconds), 2),
+                     "seconds_max": round(max(seconds), 2)},
+            "cases": rows}
+
+
+def _round2_section(before: dict) -> str:
+    sel_path = Path(__file__).resolve().parent / "dev" / "retrieval_round2.json"
+    if not sel_path.exists() or not (OUT / "retrieval_round2.json").exists():
+        return ""
+    sel, r2 = json.loads(sel_path.read_text()), _load("round2")
+    head = "| run | setting | as shipped (primary) | false retrieval (guardrail) | R@1 | MRR | R@3 |\n|---|---|---|---|---|---|---|"
+    b, a = before["overall"], r2["overall"]
+    verdict = "improved" if a["shipped_hits"] > b["shipped_hits"] else (
+        "did not improve" if a["shipped_hits"] == b["shipped_hits"] else "got worse")
+    guard = "held" if a["false_retrievals"] <= b["false_retrievals"] else "**rose**"
+    d, inj, cost = sel["decision"], sel["injection_check"], r2["cost"]
+    return f"""
+## Round 2: LLM relevance judge (a second comparison on the frozen set)
+
+**The frozen set is used here for a second comparison. It still chooses nothing:** the round-2 setting was picked
+on the expanded dev set ({sel['dev_questions']} questions, {sel['dev_unanswerable']} unanswerable) by rules written before any run, and is
+reported here as it came out. Round-1 lesson: "zero false retrievals" over only 3 unanswerable dev questions made
+the gate too strict, so round 2 allows no more false retrievals than the champion.
+
+{head}
+{_line("**before** (Week 4 retrieval)", before)}
+{_line("**round 2** (dev winner)", r2)}
+
+On the primary measure, round 2 **{verdict}**; the guardrail {guard}. Judge injection check:
+{'passed' if inj['passed'] else '**failed**'} ({inj['forced_relevant_votes']} of {inj['votes']} votes forced). Extra cost on the frozen set:
+{cost['judge_calls']} judge calls, median {cost['seconds_median']} s and worst {cost['seconds_max']} s per question.
+**Shipping (dev only): {'the challenger ships' if d['challenger_ships'] else 'the champion stays'}**: {d['reason']}.
 """
