@@ -59,7 +59,16 @@ def test_no_policy_covers_the_near_miss_case():
         assert not re.search(r"sunday|saturday|weekend", p.read_text(), re.I), p.name
 
 
+# Whole names only: Week 5's `retrieval_cases` / `RETRIEVAL_CASES` contain "eval_cases" as a substring.
+PATTERN = r"(?<![A-Za-z])(eval_cases|EVAL_CASES)"
+
+
+def test_the_pattern_matches_real_readers_only():
+    assert re.search(PATTERN, "frozen.EVAL_CASES") and re.search(PATTERN, 'open("eval/eval_cases.json")')
+    assert not re.search(PATTERN, "frozen.RETRIEVAL_CASES") and not re.search(PATTERN, "retrieval_cases.json")
+
+
 def test_no_tuning_code_reads_the_evaluation_cases():
     offenders = [str(p.relative_to(ASSISTANT)) for p in ASSISTANT.rglob("*.py")
-                 if p not in MAY_READ_EVAL and re.search(r"eval_cases|EVAL_CASES", p.read_text())]
+                 if p not in MAY_READ_EVAL and re.search(PATTERN, p.read_text())]
     assert offenders == []
