@@ -133,3 +133,31 @@ def test_only_the_evaluation_harness_reads_the_evaluation_file():
     readers = {p.relative_to(ASSISTANT).as_posix() for p in ASSISTANT.rglob("*.py")
                if "retrieval_cases" in p.read_text() or "RETRIEVAL_CASES" in p.read_text()}
     assert readers <= {"frozen.py", "retrieval_eval.py"}, readers
+
+
+# ---------------- round 2 dev set (Step 3 round 2) ----------------
+
+DEV2 = load(frozen.RETRIEVAL_DEV_ROUND2)
+
+
+def test_round2_dev_is_round1_plus_ten_with_more_unanswerable_near_misses():
+    assert DEV2[:len(DEV)] == DEV and len(DEV2) == len(DEV) + 10
+    assert sum(not c["answerable"] for c in DEV2) == 10 and sum(c["answerable"] for c in DEV2) == 15
+
+
+@pytest.mark.parametrize("case", DEV2[len(DEV):], ids=lambda c: c["id"])
+def test_round2_additions_follow_the_hit_rule(case):
+    test_labels_follow_the_hit_rule(case)
+
+
+def test_round2_dev_shares_no_question_or_evidence_sentence_with_eval():
+    eval_sentences = {evidence_sentence(e) for c in EVAL for e in c["evidence"]}
+    assert not {norm(c["question"]) for c in DEV2} & {norm(c["question"]) for c in EVAL}
+    assert not [c["id"] for c in DEV2 for e in c["evidence"] if evidence_sentence(e) in eval_sentences]
+
+
+@pytest.mark.parametrize("case", [c for c in DEV2[len(DEV):] if not c["answerable"]], ids=lambda c: c["id"])
+def test_round2_unanswerable_topics_are_absent(case):
+    term = {"E04": r"valet", "E05": r"\bprice\b|telehealth visits? costs?", "E06": r"waiting room|child",
+            "E07": r"per year", "E08": r"language", "E09": r"\bwait", "E10": r"insurance"}[case["id"]]
+    assert not any(re.search(term, t, re.I) for t in TEXT.values())

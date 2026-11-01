@@ -75,3 +75,9 @@ def _pinned(file: str) -> str:
 
 # What must be searchable after the build: the current edition of each document.
 WEEK5_CORPUS = {name: (version, _pinned(file)) for name, version, file, _ in WEEK5_CORPUS_FILES}
+
+
+# Step 3 round 2 (2026-11-02): the dev set expanded by 10 questions (7 of them unanswerable near-misses), so the
+# relevance gate isn't decided by 3 unanswerable questions. Dev only; the evaluation set is unchanged.
+RETRIEVAL_DEV_ROUND2 = ROOT / "dev" / "retrieval_dev_round2.json"
+WEEK5_FROZEN_SHA256["dev/retrieval_dev_round2.json"] = "ebade698ea5215491cf0205d28ef6921f0cb289beeb9a51212147fa904a9fc84"
