@@ -5,6 +5,7 @@ Offline: FakeEmbedder and FakeLLM throughout."""
 import json
 
 import pytest
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import CommandError, call_command
 from django.db import connection
@@ -293,8 +294,17 @@ class TestCorpusSnapshot:
 
 # ---------------- data migration ----------------
 
-@pytest.mark.django_db(transaction=True)
-def test_migration_moves_week4_documents_into_v1_and_back(admin):
+# PostgreSQL can roll back schema changes, so there the test runs inside the usual rolled-back transaction.
+# A transactional test would end with a TRUNCATE of every table, which the append-only audit trigger
+# (Week 2) rightly blocks. SQLite can't change its schema inside a transaction, so there it is transactional
+# (SQLite's flush passes).
+ON_POSTGRES = settings.DATABASES["default"]["ENGINE"].endswith("postgresql")
+
+
+@pytest.mark.django_db(transaction=not ON_POSTGRES)
+def test_migration_moves_week4_documents_into_v1_and_back():
+    if ON_POSTGRES:
+        connection.cursor().execute("SET CONSTRAINTS ALL IMMEDIATE")  # no pending FK checks before ALTER TABLE
     executor = MigrationExecutor(connection)
     executor.migrate([("assistant", "0001_initial")])
     apps = executor.loader.project_state([("assistant", "0001_initial")]).apps

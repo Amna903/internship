@@ -518,3 +518,4 @@ A running record, added to as each step lands. The full decision history is in
 
   All other Week 4 tests pass unchanged, helped by keeping v1 passage IDs and v1 audit details in Week 4's form.
 - **Audit migration checked with `sqlmigrate`:** only `choices` change (no-op SQL), so the append-only triggers survive.
+- **CI caught a PostgreSQL-only failure.** The migration test first used a transactional test database, which pytest empties afterwards with `TRUNCATE`. On PostgreSQL the Week 2 append-only trigger blocks `TRUNCATE` on the audit table (correctly), so the test errored only in CI. Limiting the flush with `available_apps` hid the other apps from the migration loader. The fix: on PostgreSQL the test runs inside the normal rolled-back transaction (PostgreSQL can roll back schema changes, with constraints set to immediate); on SQLite it stays transactional. It was verified on local PostgreSQL 14 before pushing (281 tests across the assistant and audit files).
