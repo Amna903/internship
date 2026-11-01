@@ -161,13 +161,20 @@ flagged · FP: attenders flagged (an unneeded reminder) · FN: no-shows missed �
 | best gradient boosting: gradient_boosting (learning_rate=0.05, max_depth=3) | 0.1713 | 385 | 1,187 | 265 | 2,115 | 0.245 | 0.592 | 0.347 | 0.662 | 0.268 |
 | **chosen: logreg_raw (C=10.0)** | 0.1616 | 375 | 1,176 | 275 | 2,126 | 0.242 | 0.577 | 0.341 | 0.649 | 0.267 |
 
-**About this test set.** It is not brand new. The same 3,952 test rows were already scored once in
-Week 3, for release 1.0.0 ([release-1.0.0.md](release-1.0.0.md)). Week 4's choice was made by
-cross-validation on training rows and confirmed on validation; no Week 4 decision read a test number, and
-this section is the single Week 4 scoring. But anyone who saw the Week 3 test results (for example, that
-engineered features scored higher there) could in principle have been influenced, so treat these numbers
-as a well-guarded estimate rather than a first look at untouched data. A truly fresh check would need new
-rows from the generator with a different seed.
+**Status of these test numbers: exploratory evidence.** Two different things happened in Week 4, and
+they used the test set differently:
+
+1. **Experimental selection (sections 1–2): did not read the test set.** The model was chosen by
+   cross-validation on training rows and confirmed on validation. A test flips every test label and
+   checks that the choice, the cut-offs and the comparison model don't change.
+2. **Release decision (section 7): test-informed.** Keeping release 1.0.0 was decided after reading
+   section 5, so that decision is not independent of these numbers.
+
+On top of that, the same 3,952 test rows were already scored once in Week 3, for release 1.0.0
+([release-1.0.0.md](release-1.0.0.md)). This test set is therefore no longer a clean estimate
+for either model. The next final evaluation uses a **fresh holdout** reserved for it (`ml/holdout.py`: a
+different seed, patient IDs that cannot collide), judged under the champion/challenger rule frozen in
+`ml/release_rule.py` before any evaluation.
 
 ## 5. What did choosing the simplest model cost?
 

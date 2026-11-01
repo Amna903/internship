@@ -19,7 +19,9 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 - **Git:** all Week 4 work goes on the `week4` branch → a PR to `main` → reviewer **@ahmedhashir10**.
 - **Model choice is by cross-validation (from Step 3 on).** See the lesson below. The rule is now fixed: no further rule changes.
 - **Served model: still v1.0.0 (engineered logistic regression, C=0.1). Week 4 made no new release** (Step 4 decision, see Lessons). Its report (`release-1.0.0.md`) and files are rebuilt from Week 3's candidates and checked byte-for-byte; the dashboard's "About this model" panel names it, and a test pins that.
-- **Champion/challenger rule for future releases, written before any evaluation of a challenger:**
+- **Test results so far are exploratory evidence** (mentor review on PR #1). Week 4's experimental selection never read the test set, but the release decision did, and the set had already been scored in Week 3. `metrics.md` §4 states both.
+- **Fresh holdout reserved for the next final evaluation:** `backend/ml/holdout.py`, seed 20261101 (not 42), 2,000 patients, IDs offset by 10,000,000 so they cannot collide, fingerprint pinned. Never used for exploration, tuning, model choice or release selection; only that module may load it. Guarded by `tests/test_holdout.py`.
+- **Champion/challenger rule: FROZEN on 2026-11-01** in `backend/ml/release_rule.py` (behaviour pinned by `tests/test_release_rule.py`). Changing it needs a new, dated decision recorded here before the evaluation it applies to. The rule:
   1. The served model is the champion. A challenger replaces it only if, on the same training folds, its mean CV PR-AUC beats the champion's by **more than one standard error** of the champion's mean.
   2. The simplicity preference applies **between model families with different explainability** (logistic regression before trees). Between equally explainable models (two logistic regressions), it doesn't apply: the higher CV mean wins.
   3. The challenger is decided on CV before the test set is scored. The test score is reported, not used to choose; if it ever argues against a CV decision, that is recorded as a finding, as in Step 4.
@@ -105,7 +107,7 @@ The Week 3 checklist is kept, finished, in [REQUIREMENTS-week3.md](REQUIREMENTS-
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
 | C1 | Train-only fitting for preprocessing and tuning | 3 | ☑ | Pipeline fitted inside each fold; folds and search see the train part only | `tests/test_ml_tune.py::test_tuning_only_ever_sees_training_rows` | | |
-| C2 | Keep test data untouched until final evaluation | 4 | ☑ | No Week 4 choice read a test number (`evaluate_on_test` is the only scoring); caveats: the test set was scored in Week 3, and it informed the Week 4 release decision (see Lessons) | `tests/test_ml_compare.py::test_choice_cut_offs_and_rival_do_not_depend_on_test_labels` | | |
+| C2 | Keep test data untouched until final evaluation | 4 | ◐ | Experimental selection did not read the test set (CV choice, validation confirmation, cut-offs). **Not complete:** the same test set was scored in Week 3, and in Week 4 it informed the release decision to keep v1.0.0, so it is no longer untouched. Fix: a fresh holdout is reserved for the next final evaluation (`backend/ml/holdout.py`); current test results are exploratory evidence | `tests/test_ml_compare.py::test_choice_cut_offs_and_rival_do_not_depend_on_test_labels` (selection), `tests/test_holdout.py` (reserved holdout) | | |
 | C3 | Pin dependencies and random seeds | 0 | ◐ | `requirements.txt`, `ml/config.py` SEED | | | |
 | C4 | Document provenance, bias, imbalance and limitations | 14 | ◐ | [DATA_CARD.md](DATA_CARD.md) | | | |
 | C5 | Do not submit patient-identifiable data to external LLMs | 9 | ☐ | | | | |

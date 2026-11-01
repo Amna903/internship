@@ -170,7 +170,10 @@ def test_rival_is_the_best_other_model_by_cv_mean(comparison):
 
 def test_report_states_the_test_set_history_and_the_cost_question(comparison):
     report = train.build_report(comparison)
-    assert "It is not brand new" in report and "already scored once in\nWeek 3" in report
+    assert "exploratory evidence" in report
+    assert "**Experimental selection (sections 1–2): did not read the test set.**" in report
+    assert "**Release decision (section 7): test-informed.**" in report
+    assert "already scored once in Week 3" in report and "fresh holdout" in report
     assert "## 5. What did choosing the simplest model cost?" in report
     assert train.simplicity_cost_verdict(comparison.improvement) in report
 
