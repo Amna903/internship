@@ -4,8 +4,10 @@
 model with the same inputs keeps /v1/; changed inputs would need /v2/.
 """
 
+import hashlib
 import json
 import logging
+from functools import lru_cache
 
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse, extend_schema
 from rest_framework import status
@@ -54,6 +56,35 @@ class SmallJSONParser(JSONParser):
             return json.loads(raw)
         except (UnicodeDecodeError, ValueError):
             raise ParseError("Request body is not valid JSON.") from None
+
+
+class ClustersUnavailableError(APIException):
+    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+    default_detail = "The cluster view is temporarily unavailable."
+    default_code = "clusters_unavailable"
+
+
+CLUSTER_VIEW = config.ML_DIR / "reports" / "cluster_view.json"
+CLUSTER_VIEW_KEYS = {"disclaimer", "control", "real"}
+
+
+@lru_cache(maxsize=1)
+def load_cluster_view() -> tuple[dict, str]:
+    """The committed Step 8 result and its SHA-256. Read from disk, never computed during a request."""
+    raw = CLUSTER_VIEW.read_bytes()
+    view = json.loads(raw)
+    if not CLUSTER_VIEW_KEYS <= set(view):
+        raise ValueError("cluster view is missing sections")
+    return view, hashlib.sha256(raw).hexdigest()
+
+
+def _cluster_view() -> tuple[dict, str]:
+    try:
+        return load_cluster_view()
+    except (OSError, ValueError) as exc:
+        # The reason goes to the server log only; clients get a generic 503.
+        logger.error("cluster view unavailable: %s", exc.__class__.__name__)
+        raise ClustersUnavailableError() from None
 
 
 def _model():
@@ -130,3 +161,28 @@ class NoShowModelView(AdminOnlyAPIView):
             "libraries": meta["libraries"],
             "artifact_sha256": meta["artifact_sha256"],
         })
+
+
+class ClustersView(AdminOnlyAPIView):
+    """Exploratory clusters (Week 4 Step 8). The PCA points and cluster descriptions come from the
+    positive-control data (planted habits, fictional), labelled as such; for the real synthetic patients
+    the response gives the verdict and the clusters K-Means formed anyway, marked as misleading."""
+
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "clusters"
+
+    @extend_schema(
+        summary="Exploratory clusters: verdict on real data, PCA picture and descriptions on control data",
+        description=("Educational, synthetic. Reads committed results; no clustering runs during a request. "
+                     "Clusters describe booking patterns, not categories of people, and are never a medical "
+                     "or personal assessment."),
+        responses={200: OpenApiResponse(description="Cluster view"), 401: OpenApiResponse(description="Not signed in as admin"),
+                   403: OpenApiResponse(description="Not an admin"), 429: OpenApiResponse(description="Rate limit exceeded"),
+                   503: OpenApiResponse(description="Cluster results unavailable")},
+    )
+    def get(self, request):
+        view, digest = _cluster_view()
+        # Audit: who looked, and which results they saw.
+        record_event(request, AuditEvent.Action.ADMIN_CLUSTERS_VIEWED, detail=f"cluster_view:{digest[:12]}")
+        return Response({"results_version": digest[:12], "results_sha256": digest, **view})
+

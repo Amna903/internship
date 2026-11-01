@@ -21,6 +21,7 @@ class AuditEvent(models.Model):
         ADMIN_PROFILE_DEACTIVATED = "admin.profile_deactivated", "Admin deactivated profile"
         ADMIN_PROFILE_ACTIVATED = "admin.profile_activated", "Admin reactivated profile"
         ADMIN_PREDICTION_MADE = "admin.prediction_made", "Admin requested a no-show estimate"
+        ADMIN_CLUSTERS_VIEWED = "admin.clusters_viewed", "Admin viewed the exploratory clusters"
 
     created_at = models.DateTimeField(auto_now_add=True)
     # Stable identifiers, not live links: DO_NOTHING + db_constraint=False means deleting the user or

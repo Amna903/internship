@@ -220,6 +220,7 @@ REST_FRAMEWORK = {
         "login": os.environ.get("THROTTLE_LOGIN", "10/min"),
         "signup": os.environ.get("THROTTLE_SIGNUP", "20/hour"),
         "predictions": os.environ.get("THROTTLE_PREDICTIONS", "60/min"),
+        "clusters": os.environ.get("THROTTLE_CLUSTERS", "60/min"),
     },
 }
 
