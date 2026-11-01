@@ -5,8 +5,8 @@ Run:  python -m ml.verify_release      (exit code 0 = reproduced, 1 = something 
 It regenerates the dataset, the three reports and the model release in a temporary folder, then checks:
   level 1  dataset SHA-256 equals the one recorded in the committed metadata
   level 2  eda.md, cluster_features.md, release-<version>.md and errors.md are identical; tuning.json has the same choice exactly,
-           CV means and bar within 0.002, single fold scores within 0.01; tuning.md, metrics.md and
-           explain.md have the same text and choice, with scores within 0.002 and cut-off figures within 0.005
+           CV means and bar within 0.002, single fold scores within 0.01; tuning.md, metrics.md,
+           explain.md, clusters.json and clusters.md have the same text and choice, with scores within 0.002 and cut-off figures within 0.005
            (forests differ slightly between CPUs); metadata metrics, threshold, schema, seed and
            estimator are identical
   level 3  the rebuilt and the committed model give the same probabilities (within 1e-9)
@@ -25,7 +25,7 @@ from pathlib import Path
 
 import numpy as np
 
-from . import artifact, cluster_features, config, eda, errors, explain, train, tune
+from . import artifact, cluster, cluster_features, config, eda, errors, explain, train, tune
 from .models import GRID_CANDIDATES
 from .data import dataset_hash, generate
 from .inference import load
@@ -214,6 +214,11 @@ def main() -> int:
     checks.append(("2", f"metrics.md regenerated: {reason}", ok))
     ok, reason = reports_match(explain.REPORT.read_text(), explain.build_report(explain.analyse(df)))
     checks.append(("2", f"explain.md regenerated: {reason}", ok))
+    clustering = cluster.run(df)
+    ok, reason = reports_match(cluster.RESULT.read_text(), cluster.to_json(clustering))
+    checks.append(("2", f"clusters.json regenerated: {reason}", ok))
+    ok, reason = reports_match(cluster.REPORT.read_text(), cluster.build_report(clustering))
+    checks.append(("2", f"clusters.md regenerated: {reason}", ok))
 
     with tempfile.TemporaryDirectory() as tmp:
         rebuilt_dir = Path(tmp)
