@@ -93,3 +93,10 @@ CONVERSATIONS = ROOT / "eval" / "conversations.json"
 HISTORY_REDTEAM = ROOT / "eval" / "history_redteam.json"
 WEEK5_FROZEN_SHA256["eval/conversations.json"] = "0120953bae3f303b89c7bd33a910f11daf43e55939cbd951fd20caa3ae21f21e"
 WEEK5_FROZEN_SHA256["eval/history_redteam.json"] = "d6b8ec594421e8370df86fecacb1d103e92bc7bdac4635108fa18622dc5b0d6a"
+
+# Step 8 (2026-11-02): agent tool-selection tasks with the recovery set (T-U1..T-U8 by the user) and the agent
+# red-team (A1-A6 by the user), frozen before any Step 8 code. Dates are against the fixed clock 2026-11-02.
+AGENT_TASKS = ROOT / "eval" / "agent_tasks.json"
+AGENT_REDTEAM = ROOT / "eval" / "agent_redteam.json"
+WEEK5_FROZEN_SHA256["eval/agent_tasks.json"] = "14160f3e6bf0b371a46a8484a2c98df9614b5231d2950f9338aa7fefba6f3615"
+WEEK5_FROZEN_SHA256["eval/agent_redteam.json"] = "99f84d666ba1e06f2c6b3429eb52e1a362afd86608c1c32a964c96dde45e1b49"

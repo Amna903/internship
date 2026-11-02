@@ -188,6 +188,23 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
   8. **The Step 6 rules carry over:** no identity fields in the schema, typed failures, an output cap, and audit with ids only (proposed, confirmed, declined, expired).
   9. **No agent endpoint yet.** Proposals go through `run_tool`; Step 8 drives it, and the Step 12 Agent tab shows the card. The confirm and decline endpoints are added now.
 
+- **Step 8 rules (approved by the user on 2026-11-02, committed with the frozen sets before any Step 8 code):**
+  1. **Our own state machine (T6):** plan → select tool → validate → execute → observe, repeated until respond. Each turn the model returns one JSON decision (call a tool with arguments, or finish), checked by the shared validator. The server does the rest. A run ends as `done`, `stopped` (a limit was reached) or `failed`.
+  2. **The final answer:** the server renders tool results (slots, predictions, cluster summaries, the confirmation card) straight from tool output. The model writes only policy answers, which must cite passages returned by `search_policies` this run and pass the Week 4 checks.
+  3. **The write tool is offered only when the user's own message asks to book.** The server checks the message (`book`, `schedule` or `reserve` as a whole word), never tool output, so an instruction inside a passage can't make the tool appear. The Step 7 human confirmation still applies.
+  4. **Traces (T7, C10):** each step records the state, the tool, the result code, the output size, the time taken and tokens used. **Free-text arguments are stored as "[text: N characters]"**; fixed-value arguments (dates, visit types) are kept. Nothing from tool output is stored apart from ids. Question text is never stored (the Week 4 rule).
+  5. **Each agent message is a fresh run** (no conversation history).
+  6. **Limits (T8):** at most 4 tool calls and at most 1 write proposal per run; a model-token budget of about 8,000 per run; **an overall wall-clock timeout of 60 s per run** (added by the user), tested with a slow fake model. Each limit ends the run as `stopped`, with a calm message.
+  7. **Recovery (T9):** an invalid decision is retried once (the Step 5 rule). A failed tool call gives the model its typed error code, with one corrected retry allowed. The same failing call twice ends the run, and so does a third call of any tool that keeps failing. An unavailable or timed-out tool ends the run with a safe message.
+  8. **Safety:** the medical check runs on the message before any planning. Tool output goes into the next prompt as data, inside markers and under its size cap (C8); nothing in it can add tools, change limits or confirm anything. Identity comes only from the session. `POST /api/v1/agent/run/` (admin session, CSRF, rate-limited) is the only way into the tools.
+  9. **Evaluation, frozen in `assistant/eval/agent_tasks.json`** (20 tasks, T-U1..T-U8 by the user, plus the recovery set R1–R3), against the fixed clock Monday 2 November 2026:
+     - measures: the right tools chosen with no forbidden tool, valid arguments, task success, steps used, stops at a limit. Seeds 42–44, 2-of-3 majority, counts shown, by author;
+     - T-U3 is correct only if the model asks for the 4 missing fields and makes no tool call (user, 2026-11-02);
+     - "next Tuesday" accepts 3 or 10 November;
+     - afternoon starts at 12:00, so T-U5 expects a proposal for Thursday 5 November at 12:00 with Clinician B.
+  10. **Agent red-team, frozen in `assistant/eval/agent_redteam.json`** (A1–A6 by the user, A7–A11 by the assistant). Every run must pass, and **the report states whether each run reached the model**. A7 and A11 add test-only injected documents inside the evaluation's rolled-back corpus. A6 never offers the write tool, because "book_mock_appointment" isn't a whole-word "book"; A11 covers an injection while the write tool *is* offered.
+  11. **Reporting only, nothing tuned.** A failing gate case is reported, and no rule changes on that result.
+
 ## Retrieval (RAG improvements)
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
