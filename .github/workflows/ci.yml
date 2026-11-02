@@ -1,8 +1,8 @@
 # Each week is a self-contained app, so each is checked on its own. To save GitHub Actions minutes, the
 # "plan" job runs only the jobs a push needs (.github/scripts/ci_plan.sh): the changed week's backend,
 # frontend and (if ml/ or requirements changed) ML reproducibility. Markdown and docs/ never trigger jobs on
-# their own. The FULL Week 1-5 regression runs on manual runs (Actions → CI → Run workflow), pushes to main,
-# and pull requests to main or week4 when opened, reopened or marked ready for review.
+# their own. The FULL Week 1-6 regression runs on manual runs (Actions → CI → Run workflow), pushes to main,
+# and pull requests to main, week4 or week5 when opened, reopened or marked ready for review.
 # To make failures block merging, mark the "ci-passed" job as a required status check in the
 # repository's branch protection rule for main (Settings → Branches).
 name: CI

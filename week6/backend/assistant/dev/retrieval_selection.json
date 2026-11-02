@@ -1,0 +1,235 @@
+{
+ "embedder": "ollama/nomic-embed-text:latest",
+ "dev_questions": 15,
+ "dev_answerable": 12,
+ "dev_unanswerable": 3,
+ "dev_sha256": "2c4e3620fefbbc89be826bc2a1f5ef722dfdb222f7852f343bbdc238540c3d0b",
+ "corpus": [
+  {
+   "filename": "accessibility.md",
+   "document_id": 13,
+   "version": 1,
+   "sha256": "13fb0bcf249d147509c43748b8dd5c16eea596ace9e4ffc11d02d4a1881cc9b4"
+  },
+  {
+   "filename": "billing.md",
+   "document_id": 7,
+   "version": 1,
+   "sha256": "b7f158d91efdfd4167b3981c54af7480b4094137f981bdc081d2c015769fc03b"
+  },
+  {
+   "filename": "cancellation.md",
+   "document_id": 8,
+   "version": 2,
+   "sha256": "f4c51ee5c08b6ade01c38d54e281cfd7f9ac63b079d12120b81f68e0bb41643e"
+  },
+  {
+   "filename": "interpreter-services.md",
+   "document_id": 14,
+   "version": 1,
+   "sha256": "187fe1ca0a650c79b5cb520149a6a3576f67154182fb4e90d45d753c601160a5"
+  },
+  {
+   "filename": "lab-results-admin.md",
+   "document_id": 15,
+   "version": 1,
+   "sha256": "c5d0f7dbeb22a6d51925dc67ea201dfbb051ec4cd4f26c934e4bce202581eeb1"
+  },
+  {
+   "filename": "parking.md",
+   "document_id": 16,
+   "version": 1,
+   "sha256": "a05551a631d571dc216a0d4d922f28f7fb503f1823fd595835cf3ed2acd31f88"
+  },
+  {
+   "filename": "payment-plans.md",
+   "document_id": 17,
+   "version": 1,
+   "sha256": "395d0cf7cdcdf25dc15daf864c6267a9c3376abbbb6c1e42b8c9dfaefaee18cb"
+  },
+  {
+   "filename": "privacy.md",
+   "document_id": 9,
+   "version": 1,
+   "sha256": "c9f2bc5f7d3264bb6ee9e504a2dc558f4a70b5438240e16ad14f211f3d24ba91"
+  },
+  {
+   "filename": "records-requests.md",
+   "document_id": 18,
+   "version": 1,
+   "sha256": "be159543f595f87c438b4d369d815d60831ff1162cbea494867d61920dc64fd1"
+  },
+  {
+   "filename": "reminders.md",
+   "document_id": 10,
+   "version": 1,
+   "sha256": "47a9067b477addeef2c744c0311c67895ef2f289f8332f40ea65f8a878328a8f"
+  },
+  {
+   "filename": "rescheduling.md",
+   "document_id": 11,
+   "version": 1,
+   "sha256": "6a1e12a241f68b361f88372c14cf6f0f1eebe5b0a2afb81656ea3e6487667885"
+  },
+  {
+   "filename": "telehealth.md",
+   "document_id": 12,
+   "version": 1,
+   "sha256": "3b11b21980242ee8c006bdc43bdfa8ccf49172074af20f3abc906a7e39fd34a8"
+  }
+ ],
+ "configurations": 4800,
+ "eligible": 741,
+ "tied_at_top": 114,
+ "best_hits": 4,
+ "winner": {
+  "method": "semantic",
+  "floor": 0.74,
+  "top_k": 2,
+  "rrf_k": 60,
+  "gate": "S",
+  "f_kw": 1.0,
+  "chunk_tokens": 120
+ },
+ "winner_score": {
+  "hits": 4,
+  "false": 0
+ },
+ "champion": {
+  "method": "semantic",
+  "floor": 0.7,
+  "top_k": 2,
+  "rrf_k": 60,
+  "gate": "S",
+  "f_kw": 1.0,
+  "chunk_tokens": 80
+ },
+ "champion_score": {
+  "hits": 6,
+  "false": 1
+ },
+ "decision": {
+  "challenger_ships": false,
+  "reason": "it does not beat the champion on dev (a tie keeps the champion)"
+ },
+ "best_by_method": {
+  "semantic, gate S": {
+   "best_hits": 4,
+   "tied_at_top": 6,
+   "winner": {
+    "method": "semantic",
+    "floor": 0.74,
+    "top_k": 2,
+    "rrf_k": 60,
+    "gate": "S",
+    "f_kw": 1.0,
+    "chunk_tokens": 120
+   }
+  },
+  "hybrid, gate S": {
+   "best_hits": 4,
+   "tied_at_top": 18,
+   "winner": {
+    "method": "hybrid",
+    "floor": 0.74,
+    "top_k": 2,
+    "rrf_k": 60,
+    "gate": "S",
+    "f_kw": 1.0,
+    "chunk_tokens": 120
+   }
+  },
+  "hybrid, gate S+K": {
+   "best_hits": 4,
+   "tied_at_top": 90,
+   "winner": {
+    "method": "hybrid",
+    "floor": 0.74,
+    "top_k": 2,
+    "rrf_k": 60,
+    "gate": "S+K",
+    "f_kw": 0.9,
+    "chunk_tokens": 120
+   }
+  }
+ },
+ "best_by_chunk_size": {
+  "40": 1,
+  "80": 3,
+  "120": 4,
+  "200": 4
+ },
+ "returned": {
+  "champion": {
+   "D01": [
+    "telehealth.md#0",
+    "telehealth.md#1"
+   ],
+   "D02": [],
+   "D03": [],
+   "D04": [],
+   "D05": [
+    "payment-plans.md#1"
+   ],
+   "D06": [
+    "cancellation.md@v2#3",
+    "cancellation.md@v2#0"
+   ],
+   "D07": [
+    "reminders.md#1",
+    "reminders.md#0"
+   ],
+   "D08": [],
+   "D09": [],
+   "D10": [],
+   "D11": [
+    "records-requests.md#0",
+    "records-requests.md#1"
+   ],
+   "D12": [
+    "interpreter-services.md#0",
+    "interpreter-services.md#1"
+   ],
+   "D13": [
+    "interpreter-services.md#0",
+    "interpreter-services.md#1"
+   ],
+   "D14": [
+    "cancellation.md@v2#3"
+   ],
+   "D15": [
+    "rescheduling.md#0",
+    "telehealth.md#1"
+   ]
+  },
+  "winner": {
+   "D01": [
+    "telehealth.md#0"
+   ],
+   "D02": [],
+   "D03": [],
+   "D04": [],
+   "D05": [],
+   "D06": [],
+   "D07": [
+    "reminders.md#0"
+   ],
+   "D08": [],
+   "D09": [],
+   "D10": [],
+   "D11": [
+    "records-requests.md#0",
+    "privacy.md#0"
+   ],
+   "D12": [
+    "interpreter-services.md#0"
+   ],
+   "D13": [],
+   "D14": [],
+   "D15": [
+    "telehealth.md#0",
+    "rescheduling.md#0"
+   ]
+  }
+ }
+}

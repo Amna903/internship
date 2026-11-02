@@ -12,15 +12,15 @@
 # (first push, force push), it falls back to FULL.
 # Inputs (environment): EVENT, ACTION, BASE_REF, REF, BEFORE, AFTER, BASE_SHA, HEAD_SHA.
 set -euo pipefail
-WEEKS=(week1 week2 week3 week4 week5)
-ML_WEEKS=(week3 week4 week5)
-NEWEST=week5
+WEEKS=(week1 week2 week3 week4 week5 week6)
+ML_WEEKS=(week3 week4 week5 week6)
+NEWEST=week6
 json() { local out=""; for w in "$@"; do out+="\"$w\","; done; echo "[${out%,}]"; }
 full() { echo "backend=$(json "${WEEKS[@]}")"; echo "frontend=$(json "${WEEKS[@]}")"; echo "ml=$(json "${ML_WEEKS[@]}")"; echo "mode=full"; exit 0; }
 
 [ "$EVENT" = "workflow_dispatch" ] && full
 [ "$EVENT" = "push" ] && [ "$REF" = "refs/heads/main" ] && full
-if [ "$EVENT" = "pull_request" ] && [[ "$ACTION" =~ ^(opened|reopened|ready_for_review)$ ]] && [[ "$BASE_REF" =~ ^(main|week4)$ ]]; then
+if [ "$EVENT" = "pull_request" ] && [[ "$ACTION" =~ ^(opened|reopened|ready_for_review)$ ]] && [[ "$BASE_REF" =~ ^(main|week4|week5)$ ]]; then
   full
 fi
 

@@ -1,0 +1,147 @@
+# Week 6 requirement → evidence checklist
+
+Source: **"WEEK 6 | Production-Ready AI/ML Platform and Final Capstone"** in *Elevate Engine Weeks 4–6*. Each row is one line of that brief, worded as in the brief and split so none can be ticked half-done. Week 5's finished checklist is in [REQUIREMENTS-week5.md](REQUIREMENTS-week5.md).
+
+Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me** column is the date the user re-ran the check, left blank until then.
+
+## Decisions (Step 0, approved by the user on 2026-11-02; then built without per-step review)
+
+- **Git:** a `week6/` folder copied from `week5/`, on a `week6` branch made from `week5`. The PR targets `week5` (the reviewer sees only Week 6's changes) until the earlier PRs merge.
+- **Deployment:** a fully reproducible deployment procedure: Docker Compose with a Caddy reverse proxy for automatic HTTPS, a prod-like local run, and rollback and backup steps. No hosted free tier, since it can't run Ollama and would break the "no data leaves the machine" rule.
+- **Vector store:** embeddings stay in PostgreSQL. "Vector store unavailable" is shown as the embedding model being unavailable.
+- **LLM:** **Ollama on the host machine by default on a Mac** (the user's addition), with an optional `ollama` container (a Compose profile).
+- **Load testing:** Locust.
+- **Agent tests:** reuse the Week 5 frozen agent red-team set and the Step 13 cases (more than 10), plus a few new workflow cases marked `author: assistant`.
+- **The user's additions:**
+  1. Check that a **fresh clone in a new folder starts with `make up` from the README alone**.
+  2. **Docker build jobs run in CI only on PRs or manual runs**, to save minutes.
+  3. Host Ollama is the default on a Mac; the container is optional.
+- **Rules carried over:** rules and frozen sets committed before results; tuning on dev only; champion/challenger; no rule changes after seeing results; CI green before the next step; one push per step; honest reporting; a log of decisions made without review (below).
+- **Disk safety (after the 2026-11-02 incident, when a 40 GB Colima disk filled the Mac):** the Docker VM disk is capped at 15 GB, and free space is checked before every image build.
+
+## Decisions made without review
+
+| Step | Decision | Options considered | Reason |
+|---|---|---|---|
+
+## Integration and containers
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| I1 | Integrate Weeks 1–5 into one application (auth and profile CRUD, prediction, segmentation, LLM assistant, advanced RAG, approval-gated agent) | 0, 12 | ☐ | | | | |
+| I2 | Containerize frontend, backend, database, worker (and optional vector store) using Docker Compose | 1 | ☐ | | | | |
+| I3 | Environment-variable examples | 1 | ☐ | | | | |
+| I4 | Seed scripts | 1 | ☐ | | | | |
+| I5 | One-command local startup | 1 | ☐ | | | | |
+
+## Deployment and production settings
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| P1 | Deploy frontend/backend where feasible (or a fully reproducible deployment procedure) | 3 | ☐ | | | | |
+| P2 | HTTPS | 2, 3 | ☐ | | | | |
+| P3 | CORS | 2 | ☐ | | | | |
+| P4 | Secure session cookies | 2 | ☐ | | | | |
+| P5 | CSRF protection | 2 | ☐ | | | | |
+| P6 | Secret management | 2 | ☐ | | | | |
+| P7 | Separate development/production settings | 2 | ☐ | | | | |
+
+## CI
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| CI1 | Lint/format | 5 | ☐ | | | | |
+| CI2 | Unit tests | 5 | ☐ | | | | |
+| CI3 | API integration tests | 5 | ☐ | | | | |
+| CI4 | Model-pipeline smoke tests | 5 | ☐ | | | | |
+| CI5 | RAG regression tests | 5 | ☐ | | | | |
+| CI6 | Frontend build checks | 5 | ☐ | | | | |
+| CI7 | Publish a passing run | 5 | ☐ | | | | |
+
+## APIs and artifacts
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| E1 | Version model artifacts and preprocessing | 4 | ☐ | | | | |
+| E2 | Expose /health and /ready | 4 | ☐ | | | | |
+| E3 | Expose /api/v1/predict, /api/v1/clusters and assistant endpoints | 4 | ☐ | | | | |
+| E4 | OpenAPI documentation with representative requests/responses | 4 | ☐ | | | | |
+
+## Evaluation
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| V1 | Reproducible evaluation suite: supervised metrics | 9 | ☐ | | | | |
+| V2 | Unsupervised clustering quality | 9 | ☐ | | | | |
+| V3 | 20-question RAG benchmark | 9 | ☐ | | | | |
+| V4 | At least 10 agent safety/workflow tests | 9 | ☐ | | | | |
+| V5 | Document baseline versus final results | 9 | ☐ | | | | |
+
+## Observability
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| O1 | Structured logs | 6 | ☐ | | | | |
+| O2 | Correlation/request IDs | 6 | ☐ | | | | |
+| O3 | API latency/error metrics | 6 | ☐ | | | | |
+| O4 | Token usage and cost estimates | 6 | ☐ | | | | |
+| O5 | Admin operational dashboard or documented monitoring view | 6 | ☐ | | | | |
+
+## Load testing
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| L1 | Load test at least two core endpoints with a documented small synthetic workload | 8 | ☐ | | | | |
+| L2 | Report p50/p95 latency, throughput, errors | 8 | ☐ | | | | |
+| L3 | One measured optimization | 8 | ☐ | | | | |
+
+## Resilience
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| R1 | LLM timeout/provider failure → safe, observable response | 7 | ☐ | | | | |
+| R2 | Unavailable vector store → safe, observable response | 7 | ☐ | | | | |
+| R3 | Database outage → safe, observable response | 7 | ☐ | | | | |
+| R4 | Background worker failure → safe, observable response | 7 | ☐ | | | | |
+
+## Security
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| S1 | Security checklist: authorization, input validation, rate limiting, upload restrictions, prompt injection, agent write approvals, secrets | 10 | ☐ | | | | |
+| S2 | Automate high-risk regression tests | 10 | ☐ | | | | |
+
+## Documentation
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| D1 | Final architecture diagram | 11 | ☐ | | | | |
+| D2 | Data-flow diagram | 11 | ☐ | | | | |
+| D3 | Model card for the supervised model | 11 | ☐ | | | | |
+| D4 | Clustering limitations note | 11 | ☐ | | | | |
+| D5 | RAG evaluation report | 11 | ☐ | | | | |
+| D6 | Deployment/rollback/backup guide | 11 | ☐ | | | | |
+
+## Demo, constraints and acceptance
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| X1 | Live end-to-end demo: signup → profile completion → prediction → cluster visualization → cited LLM answer → agent tool call → human approval → audit trail | 12 | ☐ | | | | |
+| X2 | Synthetic data only; never present ML/LLM output as diagnosis or medical advice | all | ☐ | | | | |
+| X3 | Enforce user ownership, admin permissions, tool-level authorization; protect secrets; logs without sensitive payloads | 10 | ☐ | | | | |
+| X4 | Document reproducible builds, dependency versions, known limitations, model/data provenance, deployment costs, rollback steps | 11 | ☐ | | | | |
+| X5 | A reviewer can start the full stack from README and run all core flows with sample data (user's addition: verified from a fresh clone with `make up`) | 1, 13 | ☐ | | | | |
+| X6 | CI and automated tests pass; cross-user access, unauthorized agent writes and invalid inputs are rejected | 5, 10 | ☐ | | | | |
+| X7 | Supervised/unsupervised evaluation, RAG/agent safety results, load-test measurements with at least one improvement | 8, 9 | ☐ | | | | |
+| X8 | Deployed application or fully reproducible deployment procedure, failure recovery and observability evidence | 3, 6, 7 | ☐ | | | | |
+
+## Submission
+
+| # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
+|---|---|---|---|---|---|---|---|
+| F1 | Repository with final release tag, documented commit history and deployment configuration | 13 | ☐ | | | | |
+| F2 | README with links, setup, tests, architecture, API docs, screenshots, dataset/model limitations and known issues | 13 | ☐ | | | | |
+| F3 | 5–10 minute Loom (script and cue list prepared; the user records it) | 13 | ☐ | | | | |
+| F4 | Share links in the team channel (the user does this) | 13 | ☐ | | | | |
+| F5 | Keep all previous features working; regression-test evidence | 0, 13 | ◐ | Baseline: [regression.md](regression.md) (1543 passed, 2 skipped; frontend 62, build OK) | CI full regression on the PR | | |
+| F6 | Study guide (the user's standing request) | 13 | ☐ | | | | |
