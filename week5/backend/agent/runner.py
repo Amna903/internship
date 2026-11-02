@@ -37,6 +37,7 @@ from assistant.validation import SchemaError, validate
 from assistant.verify import decide, is_medical_advice_request
 
 from .dates import Resolution, resolve
+from .inputs import missing_fields
 from .registry import REGISTRY, ToolContext, ToolResult, run_tool
 
 logger = logging.getLogger(__name__)
@@ -283,6 +284,11 @@ def run_agent(message, ctx: ToolContext, llm: LLMClient, seed: int | None = None
                                     message=f"Unexpected arguments: {', '.join(extra)}.")
             elif (problem := date_problem(args, dates)):
                 result = ToolResult(tool=tool, ok=False, code="invalid_input", message=problem)
+            elif tool == "predict_no_show" and (unstated := missing_fields(args, cleaned)):
+                # input-check rule 1: no estimate from inputs the user didn't give
+                result = ToolResult(tool=tool, ok=False, code="invalid_input",
+                                    message="The user did not give: " + ", ".join(unstated)
+                                    + ". Finish with kind \"clarify\" and ask for them; never guess.")
             else:
                 result = tool_runner(tool, args, ctx)
             step |= {"code": "ok" if result.ok else result.code, "seconds": round(now() - t0, 3),

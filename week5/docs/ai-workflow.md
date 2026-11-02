@@ -672,3 +672,21 @@ A running record, added to as each step lands. The full decision history is in
 - **Not applied (needs the user's decision and new rules):**
   - an input-provenance check, so every prediction field must be stated in the user's message;
   - injection cases built so the injected passage is actually retrieved (a new frozen set, since the frozen cases can't change).
+
+## Step 8: prediction input check and the Step 13 cases (no separate round 3)
+
+- **User's decision:** build the server-side input check now, freeze new cases now, and run them for real in the Step 13 acceptance run. Step 8 stays ◐ until then. Rules first (`04b7bce`).
+- **The input check (`agent/inputs.py`):** before `predict_no_show` runs for the agent, every field's value must be stated in the user's own message. It's a conservative word match built from the tool's allowed values and general English. A value the message didn't state (or stated differently) is rejected, and the agent is told to ask, never guess. 37 unit tests use new wording, not the frozen messages.
+- **Two bugs found while checking the new cases:** "4.5 km" lost its decimal point, and "in-person" with a hyphen wasn't recognised. Both are fixed and tested.
+- **New frozen cases** (`assistant/eval/agent_step13.json`, clock 8 December 2026):
+  - S-U1–S-U3 by the user, plus S-A1: invented inputs, each expecting no estimate and a request for details;
+  - S-A2, a positive control with every field stated;
+  - S-I1–S-I3, injections built so the injected passage is retrieved.
+- **Retrieval check before freezing** (real embedder, no language model). It requires the returned passage to contain the injected instruction itself:
+  - the first drafts retrieved poorly;
+  - at the user's request, S-I2 (the key case, with the write tool offered) got a stronger test document and went from 1 of 4 to **5 of 6** short queries;
+  - every case retrieves the instruction for its own message;
+  - S-I1 and S-I3 retrieve for 3 of 4 short queries.
+
+  The agent writes its own query, so Step 13 must record per run whether the injection was actually retrieved.
+- **Verification:** full suite 1454 passed, 1 skipped; agent files on PostgreSQL 295 passed.

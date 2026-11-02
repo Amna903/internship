@@ -105,3 +105,8 @@ WEEK5_FROZEN_SHA256["eval/agent_redteam.json"] = "99f84d666ba1e06f2c6b3429eb52e1
 # The clean measure for round 2 (the frozen agent sets above informed the fixes). Fixed clock 2026-11-26.
 AGENT_HOLDOUT = ROOT / "eval" / "agent_fresh.json"  # not "*holdout*": tests/test_holdout.py reserves that name for the ML holdout
 WEEK5_FROZEN_SHA256["eval/agent_fresh.json"] = "57566b070c66a2331250618cb6bcae95e778d86e3a989c7fb97c5cb6afd82284"
+
+# Step 8 input-check and injection cases (2026-11-02), frozen to run in the Step 13 acceptance run (S-U1..S-U3 by
+# the user). Clock 2026-12-08. The file records the retrieval check made before freezing.
+AGENT_STEP13 = ROOT / "eval" / "agent_step13.json"
+WEEK5_FROZEN_SHA256["eval/agent_step13.json"] = "642dcbe88e62fa51c0e085f2e45f8e41dc41bbc4d7e66a6bb536547e4223b19b"
