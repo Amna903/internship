@@ -1,11 +1,60 @@
-# HealthProfile: Week 5 (advanced RAG, LLM agents and ML automation), in progress
+# HealthProfile: Week 5 (advanced RAG, LLM agents and ML automation)
 
 > **Educational prototype on synthetic, fictional data.** Nothing here is medical advice, and the agent
 > can only take synthetic, low-risk admin actions, each needing human approval.
 
-Week 5 is being built step by step on the `week5` branch. The plan, the decisions so far and the
-requirement checklist are in [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md). Everything from Weeks 1–4
-below still works ([regression evidence](docs/regression.md)).
+Week 5 adds:
+- versioned documents, hybrid retrieval and evaluation (retrieval scored separately from generation);
+- validated structured outputs and signed conversation history;
+- a **controlled agent** with five typed tools, where the one write needs a human confirmation;
+- an **MCP server**, **Celery + Redis background jobs**, **drift monitoring** and an **admin audit page**.
+
+Checklist with evidence: [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md). Study guide: [docs/study-guide.md](docs/study-guide.md). Loom script: [docs/loom-script.md](docs/loom-script.md).
+
+## Results (honest summary)
+
+| Area | Result |
+|---|---|
+| Retrieval improvement (A6) | **Not achieved** on the frozen set (champion kept; [before/after](backend/assistant/eval/retrieval_before_after.md)) |
+| Generation | Key fact 9 of 18 with the right text given, 7 of 18 end to end; correct abstention 5 of 5 ([report](backend/assistant/eval/generation_eval.md)) |
+| Agent | Fresh holdout 5 of 6 (first use); input check 5 of 5; frozen sets 14 of 20 (third run); **safety gate passed** in every round ([Step 13](backend/assistant/eval/step13_acceptance.md)) |
+| Prompt injection via tools (C8) | **Not demonstrated end to end**: the model never retrieved the injected passage in a real run |
+| Background jobs | A real worker on real Redis: retried, bounded at 3 attempts, recovered |
+| Drift | No drift PSI 0.006; planted drift 0.80; failures flagged ([monitoring](backend/ml/reports/monitoring.md)) |
+| Browser acceptance (real model) | 12 of 14 checks; the multi-tool demo request failed (the agent asked to clarify) |
+
+![Agent tab: a proposal card built by the server, awaiting human confirmation](docs/screenshots/w5-05-approval-card.png)
+
+![Audit page: runs, approvals, retrieval sources, jobs and model versions](docs/screenshots/w5-08-audit-page.png)
+
+## Architecture and decisions
+
+The model suggests; the server decides. See the diagram and decisions in [ARCHITECTURE.md](docs/ARCHITECTURE.md), the tool contracts in [TOOLS.md](docs/TOOLS.md), the threat notes in [THREATS.md](docs/THREATS.md), and MCP in [MCP.md](docs/MCP.md). Decisions made without review (Steps 10–14) are logged in REQUIREMENTS.md.
+
+## API examples
+
+```bash
+# Run the agent (admin session + CSRF)
+POST /api/v1/agent/run/            {"message": "Please book the first telehealth slot on Thursday morning."}
+# -> {"status": "done", "pending_action": {"action_id": "…"}, "steps": [...], "results": [...]}
+POST /api/v1/agent/actions/<id>/confirm/   (header Idempotency-Key: confirm-…)
+# Approve a document version -> 202 with a background job
+POST /api/v1/assistant/documents/<id>/versions/2/approve/
+GET  /api/v1/assistant/jobs/<job_id>/      # queued | running | succeeded | failed
+GET  /api/v1/monitoring/?days=7            # PSI, latency, failure rate
+GET  /api/v1/audit/overview/               # the audit page's data
+```
+
+More in [docs/API.md](docs/API.md).
+
+## Limitations
+
+- A small local model (3B): task success is modest, and safety comes from the server's checks.
+- Names aren't redacted. MCP is stdio-only (no remote access or OAuth).
+- Drift is measured on predictions only; latency baselines are machine-specific.
+- Job status reads share the assistant's rate limit (10 per minute), so polling can be throttled. The browser demo raised it to 60 per minute on the dev server.
+
+Everything from Weeks 1–4 below still works ([regression evidence](docs/regression.md)).
 
 ---
 

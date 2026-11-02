@@ -381,7 +381,7 @@ Every decision I would normally have asked about is listed here with its reason.
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| T1 | Controlled tool-using agent with at least four typed tools | 6, 8 | ☑ | `agent/runner.py` over the five typed tools in `agent/registry.py` (four read tools, one write that only proposes). [agent_eval.md](../backend/assistant/eval/agent_eval.md): **right tools 17 of 20; valid arguments and task success 9 of 20** (round 1). Round 2 ([agent_eval_round2.md](../backend/assistant/eval/agent_eval_round2.md)): **fresh holdout 5 of 6** (the clean measure); frozen sets 13 of 20 in a second run after eval-informed fixes. **New in round 2: the agent invents missing prediction inputs** (see the workflow entry) | `tests/test_agent_runner.py`, `tests/test_agent_tools.py`, `tests/test_agent_eval.py` | | |
+| T1 | Controlled tool-using agent with at least four typed tools | 6, 8 | ☑ | `agent/runner.py` over the five typed tools in `agent/registry.py` (four read tools, one write that only proposes). [agent_eval.md](../backend/assistant/eval/agent_eval.md): **right tools 17 of 20; valid arguments and task success 9 of 20** (round 1). Round 2 ([agent_eval_round2.md](../backend/assistant/eval/agent_eval_round2.md)): **fresh holdout 5 of 6** (the clean measure); frozen sets 13 of 20 in a second run after eval-informed fixes. **New in round 2: the agent invents missing prediction inputs** (see the workflow entry). **Step 13: the server-side input check held (0 invented estimates in 12 runs; positive control 3/3); gate passed** | `tests/test_agent_runner.py`, `tests/test_agent_tools.py`, `tests/test_agent_eval.py` | | |
 | T2 | Tool: search approved documents | 6 | ☑ | `search_policies` in `agent/read_tools.py`: the shipped retrieval unchanged; redaction and the medical check on the query (refused before any embedding); up to 3 passages with edition; text marked untrusted | `tests/test_agent_tools.py` (`TestSearch`) | | |
 | T3 | Tool: check fictional appointment availability | 6 | ☑ | `check_availability`: a predictable generated schedule (weekdays 09:00–16:30, fictional Clinicians A–D), an injectable clock, a start date within 60 days, a window of at most 14 days, at most 10 slots | `tests/test_agent_tools.py` (`TestAvailability`, fixed clock) | | |
 | T4 | Tool: request supervised ML prediction | 6 | ☑ | `predict_no_show`: input schema derived from the API's feature spec, the API's cross-field rules, the served `no-show-1.0.0`, with disclaimer | `tests/test_agent_tools.py` (`TestPrediction`: same answer as the served model) | | |
@@ -438,48 +438,48 @@ Every decision I would normally have asked about is listed here with its reason.
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| C1 | Authorize each tool at execution time; do not trust prompts to enforce security | 6–8 | ☐ | | | | |
-| C2 | Allowlists | 6–8 | ☐ | | | | |
-| C3 | Schema validation | 5–8 | ☐ | | | | |
+| C1 | Authorize each tool at execution time; do not trust prompts to enforce security | 6–8 | ☑ | `run_tool` authorises every call from the server-side context; again at confirmation; the MCP token re-checked per call; the job worker re-checks admin rights | `test_agent_tools.py`, `test_agent_write.py`, `test_agent_mcp.py`, `test_index_jobs.py` | | |
+| C2 | Allowlists | 6–8 | ☑ | The registry is the tool allowlist; tools are offered per request (the write tool only on a booking request); MCP exposes read tools only; enum and range allowlists in every schema | `test_agent_runner.py`, `test_agent_mcp.py` | | |
+| C3 | Schema validation | 5–8 | ☑ | `assistant/validation.py` for model output, agent decisions, tool inputs and outputs, and API bodies | `test_assistant_history.py`, `test_agent_tools.py` | | |
 | C4 | Idempotency keys for writes | 7 | ☑ | `Idempotency-Key` header required on confirm. The same key and action replays the first result; the same key for another action gets 409 (unique per user). One booking per clinician and time is a database constraint, and the constraint decides a race | `tests/test_agent_write.py` (`TestConfirm`, `TestRaces`) | | |
-| C5 | Bounded retries | 5, 10 | ☐ | | | | |
-| C6 | Per-request timeouts | 6–10 | ☐ | | | | |
-| C7 | Defend against prompt injection in retrieved content | 3, 8 | ☐ | | | | |
+| C5 | Bounded retries | 5, 10 | ☑ | LLM: 1 retry for invalid output; agent: 1 corrected retry per tool; jobs: 3 attempts, transient errors only | `test_assistant_history.py`, `test_agent_runner.py`, `test_index_jobs.py` | | |
+| C6 | Per-request timeouts | 6–10 | ☑ | Per-tool deadlines (registry), 60 s per agent run, the LLM HTTP timeout, a job soft limit of 120 s and hard limit of 150 s, a 2 s broker connect timeout | `test_agent_tools.py`, `test_agent_runner.py`, `test_index_jobs.py` | | |
+| C7 | Defend against prompt injection in retrieved content | 3, 8 | ☑ | Retrieved text is marked untrusted inside markers it can't close; answers must cite passages given that turn; disguised H9d (cite secret.md) passed with the model called on every turn | `test_agent_runner.py`, [step13_acceptance.md](../backend/assistant/eval/step13_acceptance.md) | | |
 | C8 | Defend against prompt injection in tool responses | 8, 13 | ◐ | Tool output is data inside markers it can't close, under size caps; the write tool is offered only on a booking request; confirming is a human endpoint. **Step 13 (real model): the gate passed, but in all 9 injection runs (S-I1–S-I3 × 3 seeds) the model never called `search_policies`**: it clarified, declined or answered without searching. So the injected text never reached it, again (0 runs retrieved and passed). By the rule fixed beforehand, C8 stays ◐: the defence is shown by offline tests only, **not demonstrated end to end** | `tests/test_agent_runner.py` (`test_tool_output_cannot_close_its_marker`), [step13_acceptance.md](../backend/assistant/eval/step13_acceptance.md) | | |
-| C9 | Redact secrets and personal data from prompts | 5–8 | ☐ | | | | |
+| C9 | Redact secrets and personal data from prompts | 5–8 | ☑ | Identifiers and numbers are redacted before prompts; disguised H3d (a phone number) passed with the model called. **Names aren't redacted** (Week 4 gap) | `test_assistant_history.py`, [step13_acceptance.md](../backend/assistant/eval/step13_acceptance.md) | | |
 | C10 | Redact secrets and personal data from traces | 8 | ☑ | Free-text arguments are masked; names and numbers in a query never reach `AgentRun`; no message, tool output or answer text is stored | `tests/test_agent_runner.py` (`test_free_text_arguments_are_masked…`, `test_a_run_returns_results_and_records_a_trace_without_text`) | | |
-| C11 | Redact secrets and personal data from logs | 8–10 | ☐ | | | | |
-| C12 | Agent capabilities limited to synthetic, low-risk administration | 6–8 | ☐ | | | | |
-| C13 | No autonomous clinical recommendations or real-world patient changes | 6–8 | ☐ | | | | |
+| C11 | Redact secrets and personal data from logs | 8–10 | ☑ | Logs carry ids, codes and error classes only (jobs, MCP, model loading); never question, document or input text | `test_index_jobs.py` (`…only_its_class_is_logged`), `test_monitoring.py` | | |
+| C12 | Agent capabilities limited to synthetic, low-risk administration | 6–8 | ☑ | Fictional schedule and mock bookings only; read tools on synthetic data; no real-patient tool exists | `test_agent_write.py`, `test_agent_tools.py` | | |
+| C13 | No autonomous clinical recommendations or real-world patient changes | 6–8 | ☑ | No clinical tool; the medical check runs before planning; predictions carry a disclaimer; writes need a human | `test_agent_runner.py`, `test_assistant_history.py` | | |
 
 ## Acceptance checks
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| A1 | Demonstrate a successful multi-tool workflow | 13 | ☐ | | | | |
-| A2 | Demonstrate an unauthorized tool denial | 13 | ☐ | | | | |
-| A3 | Demonstrate a rejected write | 13 | ☐ | | | | |
-| A4 | Demonstrate an explicitly approved write | 13 | ☐ | | | | |
-| A5 | Demonstrate document re-indexing | 1, 13 | ◐ | Update, approve, retire and restore are built and tested offline (G1–G3). The real-model demo is in Step 13 | `tests/test_assistant_versions.py` | | |
+| A1 | Demonstrate a successful multi-tool workflow | 13 | ◐ | **Browser demo FAILED:** the request asked for availability plus the fee; `check_availability` was rejected as `invalid_input` and the agent asked for clarification (3 of 3 demo runs, recorded as they came out). Multi-tool success does occur in the frozen agent sets ([step13_acceptance.md](../backend/assistant/eval/step13_acceptance.md): the third run, 14 of 20 tasks) and in the booking demo (availability, then proposal) | [e2e/run_acceptance_e2e.py](../e2e/run_acceptance_e2e.py) (real stack and model; 12 of 14 checks), w5-04 | | |
+| A2 | Demonstrate an unauthorized tool denial | 13 | ☑ | A member gets 401 on the agent API; the write tool isn't offered for a non-booking request; MCP refuses non-admin tokens | [e2e/run_acceptance_e2e.py](../e2e/run_acceptance_e2e.py) (real stack and model; 12 of 14 checks), `tests/test_agent_tools.py`, `tests/test_agent_mcp.py` | | |
+| A3 | Demonstrate a rejected write | 13 | ☑ | A proposal declined on the server-built card: status declined, nothing booked | [e2e/run_acceptance_e2e.py](../e2e/run_acceptance_e2e.py) (real stack and model; 12 of 14 checks), w5-05 | | |
+| A4 | Demonstrate an explicitly approved write | 13 | ☑ | A proposal confirmed by the human with an `Idempotency-Key`; the fictional booking is shown | [e2e/run_acceptance_e2e.py](../e2e/run_acceptance_e2e.py) (real stack and model; 12 of 14 checks), w5-06 | | |
+| A5 | Demonstrate document re-indexing | 1, 13 | ☑ | A v1 upload approved through a real job, then v2 approved after a failure; the assistant cites `bag-lockers.md@v2#0` | [e2e/run_acceptance_e2e.py](../e2e/run_acceptance_e2e.py) (real stack and model; 12 of 14 checks), w5-07, `tests/test_assistant_versions.py` | | |
 | A6 | Measurable retrieval improvement with the 20-question test set | 3 | ◐ | **Not achieved on the primary measure, after two rounds.** Round 1 (dev winner): 5 of 18 against 11 of 18 (worse). Round 2 (LLM relevance judge): 11 of 18 against 11 of 18 (a tie: it gained 5 low-scoring paraphrases, U02/U05/U06/U08/A10, and lost 5 correct passages the judge rejected, U03/A01/A02/A05/A08); guardrail 0 of 5 in both. The round-2 challenger beat the champion on dev (10 against 6 of 15, false 0 against 3 of 10) but **failed the pre-declared safety gate** (R6), so the champion stays. The user kept the champion (no post-result change to the gate rule): the R6 failure looks like a lexical false positive (a true, cited, conditional answer containing the forbidden phrase), and the frozen set shows no net gain, at about +5 s per question for the judge. As agreed, A6 stays ◐ and Week 5 moves on. See [retrieval_before_after.md](../backend/assistant/eval/retrieval_before_after.md) | | | |
-| A7 | Show a background job failure/retry | 13 | ☐ | | | | |
-| A8 | Show the audit trail | 13 | ☐ | | | | |
-| A9 | Show a bounded agent loop | 13 | ☐ | | | | |
-| A10 | Show structured-output validation | 13 | ☐ | | | | |
-| A11 | Submit an architecture diagram | 14 | ☐ | | | | |
-| A12 | Submit typed tool contracts | 14 | ☐ | | | | |
-| A13 | Submit an evaluation report | 14 | ☐ | | | | |
-| A14 | Submit security threat notes | 14 | ☐ | | | | |
+| A7 | Show a background job failure/retry | 13 | ☑ | A worker with an unreachable embedder: the job failed after 3 of 3 attempts (`unavailable`); a healthy worker then succeeded | [e2e/run_acceptance_e2e.py](../e2e/run_acceptance_e2e.py) (real stack and model; 12 of 14 checks), `tests/test_index_worker.py` | | |
+| A8 | Show the audit trail | 13 | ☑ | The audit page shows runs, approvals, jobs (a failed 3/3) and model versions. The script's leak check flagged "lockers": investigated, it's the filename inside passage ids (`bag-lockers.md@v2#0`), which the rules allow as an identifier; no document text or email appears | [e2e/run_acceptance_e2e.py](../e2e/run_acceptance_e2e.py) (real stack and model; 12 of 14 checks), w5-08, `tests/test_audit_overview.py` | | |
+| A9 | Show a bounded agent loop | 13 | ☑ | Each run stays within 4 tool calls, 1 proposal, 8,000 tokens and 60 s; the trace is shown; 0 of 60 Step 8 task runs hit a limit | [e2e/run_acceptance_e2e.py](../e2e/run_acceptance_e2e.py) (real stack and model; 12 of 14 checks), `tests/test_agent_runner.py` (`TestLimits`) | | |
+| A10 | Show structured-output validation | 13 | ☑ | One validator on the schemas sent to Ollama; one retry for invalid output; an invalid agent decision is recorded as `invalid_decision`. This is shown by tests, because the real model produced no invalid output in the recorded runs | `tests/test_assistant_history.py` (`TestValidator`, `TestRetry`), `tests/test_agent_runner.py` | | |
+| A11 | Submit an architecture diagram | 14 | ☑ | [ARCHITECTURE.md](ARCHITECTURE.md) (Week 5 diagram) |  | | |
+| A12 | Submit typed tool contracts | 14 | ☑ | [TOOLS.md](TOOLS.md), generated from the registry |  | | |
+| A13 | Submit an evaluation report | 14 | ☑ | Retrieval: [baseline](../backend/assistant/eval/retrieval_baseline.md), [before/after](../backend/assistant/eval/retrieval_before_after.md); generation: [generation_eval.md](../backend/assistant/eval/generation_eval.md); conversation: [conversation_eval.md](../backend/assistant/eval/conversation_eval.md); agent: [round 1](../backend/assistant/eval/agent_eval.md), [round 2](../backend/assistant/eval/agent_eval_round2.md), [step13_acceptance.md](../backend/assistant/eval/step13_acceptance.md); monitoring: [monitoring.md](../backend/ml/reports/monitoring.md) |  | | |
+| A14 | Submit security threat notes | 14 | ☑ | [THREATS.md](THREATS.md), [MCP.md](MCP.md) |  | | |
 
 ## Required submission
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| R1 | GitHub repository with meaningful commits | all | ☐ | | | | |
-| R2 | Setup and run/test commands | 14 | ☐ | | | | |
-| R3 | README architecture decisions, limitations, screenshots and API examples | 14 | ☐ | | | | |
-| R4 | 5–10 minute Loom: working demo, code architecture, actual AI prompts and refinements, context management, blast-radius controls, debugging and verification | 14 | ☐ | | | | |
-| R5 | Post repository and Loom links in the team channel | 14 | ☐ | | | | |
-| R6 | Keep all previous features working and provide regression-test evidence | 0, 14 | ☐ | | | | |
-| R7 | Git workflow: branch, PR, reviewer @ahmedhashir10 (mentor instruction) | 0, 14 | ☐ | | | | |
-| R8 | Study guide (user's standing request) | 14 | ☐ | | | | |
+| R1 | GitHub repository with meaningful commits | all | ☑ | One commit per sub-step proving the order (rules → freeze → code → results), one push per step |  | | |
+| R2 | Setup and run/test commands | 14 | ☑ | README "Run and test" (including Redis and the worker) and [API.md](API.md) |  | | |
+| R3 | README architecture decisions, limitations, screenshots and API examples | 14 | ☑ | README Week 5 section: decisions, limitations, screenshots, API examples |  | | |
+| R4 | 5–10 minute Loom: working demo, code architecture, actual AI prompts and refinements, context management, blast-radius controls, debugging and verification | 14 | ◐ | Script and cue list ready: [loom-script.md](loom-script.md). **The user records it** |  | | |
+| R5 | Post repository and Loom links in the team channel | 14 | ☐ | The user posts the links |  | | |
+| R6 | Keep all previous features working and provide regression-test evidence | 0, 14 | ☑ | The full Week 1–5 regression runs in CI when PR #2 is marked ready for review; Week 5 suite 1535+ passed locally |  | | |
+| R7 | Git workflow: branch, PR, reviewer @ahmedhashir10 (mentor instruction) | 0, 14 | ☑ | Branch `week5`, PR #2 (base `week4` until PR #1 merges), reviewer @ahmedhashir10 |  | | |
+| R8 | Study guide (user's standing request) | 14 | ☑ | [study-guide.md](study-guide.md) |  | | |
