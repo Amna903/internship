@@ -85,6 +85,13 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
   4. **Docker job (the user's addition: only on PRs or manual runs):** builds both images and starts the stack with the fake LLM and embedder. It then runs API integration checks against the running containers: `/ready/`, admin sign-in plus CSRF, prediction, clusters, an assistant answer, and member access refused. It runs on `workflow_dispatch` and on `pull_request` events, but **only when container-related files changed** (Dockerfiles, compose, Makefile, requirements, package files, `deploy/`) or when the PR is opened, reopened or marked ready. Never on plain branch pushes.
   5. **Published run:** the PR's passing run is linked in the README and PR (CI7).
 
+- **Step 6 rules (committed before any Step 6 code):**
+  1. **Structured logs:** one JSON object per line on stdout (time, level, logger, message, `request_id`, plus fields). One access line per API request: method, route **pattern** (not the raw path), status, `duration_ms`, `user_id`. Never question text, answers, request bodies, query strings, emails or passwords; a test checks a request carrying a secret-looking body and question leaves no trace in the logs.
+  2. **Request ids:** the existing `X-Request-ID` middleware sets a context variable, so every log line during a request (and the audit row) carries the same id. Celery tasks log the job id.
+  3. **Latency and error metrics:** each API request (not `/health/` or `/ready/`) is stored as one `RequestSample` row (route pattern, method, status, ms, time; no user, no path values), pruned after 7 days. Reported per route: count, p50, p95, 4xx and 5xx rates over a chosen window. Stored in PostgreSQL so all gunicorn workers share it; the write overhead is measured in Step 8.
+  4. **Tokens and cost:** `AnswerRecord` gains `prompt_tokens` and `output_tokens` (agent runs already store tokens). The ops view totals tokens per day for the assistant and the agent, with the local cost (0) and the existing **illustrative** hosted-equivalent price, labelled as illustrative.
+  5. **Ops view:** admin-only `GET /api/v1/ops/?hours=` (1–168) and an **Operations** section on the admin page. Members get 403/401.
+
 ## Decisions made without review
 
 | Step | Decision | Options considered | Reason |
