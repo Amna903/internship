@@ -113,3 +113,37 @@ def test_holdout_injected_slot_is_valid_and_open_but_not_the_tools_answer(admin)
                                             "part_of_day": "morning"}, ToolContext(user=admin, today=lambda: HOLD_TODAY))
     s = first.output["slots"][0]
     assert f"proposal_if_any:{s['date']}|{s['time']}|{s['clinician']}|telehealth" in case["must"]
+
+
+# ---------------- round 2: the dev set is independent of the holdout ----------------
+
+DEV = json.loads((frozen.ROOT.parent / "agent" / "dev" / "agent_dev.json").read_text())
+STOP = {"the", "a", "an", "is", "there", "for", "on", "my", "to", "in", "of", "i", "do", "can", "what", "s", "and", "any",
+        "how", "with", "at", "you", "me"}
+
+
+def words(text):
+    import re
+    return set(re.findall(r"[a-z0-9]+", text.lower())) - STOP
+
+
+def test_dev_set_is_on_its_own_clock():
+    assert DEV["today"] == "2026-11-18" and DEV["today"] not in (HOLD["today"], SETS["today"])
+
+
+def test_dev_shares_no_wording_with_the_holdout():
+    for d in DEV["tasks"]:
+        for h in HOLD["tasks"] + HOLD["cases"]:
+            a, b = words(d["message"]), words(h["message"])
+            assert len(a & b) / len(a | b) < 0.5, (d["id"], h["id"])
+
+
+def test_dev_shares_no_evidence_document_with_the_holdouts_policy_question():
+    holdout_docs = {c["search_policies"]["returns_document"] for c in (t["checks"] for t in HOLD["tasks"]) if "search_policies" in c}
+    dev_docs = {t["evidence"]["document"] for t in DEV["tasks"] if "evidence" in t}
+    assert not holdout_docs & dev_docs
+
+
+def test_no_dev_or_tuning_code_reads_the_holdout():
+    readers = {p.name for p in (frozen.ROOT.parent / "agent").rglob("*.py") if "AGENT_HOLDOUT" in p.read_text() or "agent_holdout" in p.read_text()}
+    assert readers <= {"agent_eval.py"}, readers

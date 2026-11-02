@@ -74,6 +74,7 @@ register(Tool(
 CLINICIANS = {"in_person": ("Clinician A", "Clinician B", "Clinician C"),
               "telehealth": ("Clinician B", "Clinician C", "Clinician D")}
 TIMES = [f"{h:02d}:{m:02d}" for h in range(9, 17) for m in (0, 30)]
+OPEN_WEEKDAYS = (0, 1, 2, 3, 4)  # Monday to Friday; the date resolver's "next week" follows this
 HORIZON_DAYS, MAX_WINDOW_DAYS, MAX_SLOTS = 60, 14, 10
 SEED = "week5-availability-v1"
 
@@ -98,7 +99,7 @@ def check_availability(args: dict, ctx) -> dict:
     slots, more = [], False
     for offset in range(args.get("days", 7)):
         day = start + timedelta(days=offset)
-        if day.weekday() >= 5:
+        if day.weekday() not in OPEN_WEEKDAYS:
             continue
         for t in TIMES:
             if part == "morning" and t >= "12:00" or part == "afternoon" and t < "12:00":

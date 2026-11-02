@@ -19,12 +19,13 @@ Safety by construction:
   stored as "[text: N characters]"; never the message, tool output or answer text.
 """
 
+import copy
 import json
 import logging
 import re
 import time
 from dataclasses import dataclass, field
-from datetime import date
+from datetime import date, timedelta
 from typing import Callable
 
 from assistant.llm import LLMClient, LLMError
@@ -35,6 +36,7 @@ from assistant.service import REFUSAL_MESSAGE, clean_question
 from assistant.validation import SchemaError, validate
 from assistant.verify import decide, is_medical_advice_request
 
+from .dates import Resolution, resolve
 from .registry import REGISTRY, ToolContext, ToolResult, run_tool
 
 logger = logging.getLogger(__name__)
@@ -117,6 +119,7 @@ class AgentResult:
     seconds: float = 0.0
     redactions: int = 0
     offered: list = field(default_factory=list)
+    dates: dict = field(default_factory=dict)  # round 2: what the server resolved (dates only, no message text)
 
 
 def offered_tools(message: str) -> list[str]:
@@ -124,8 +127,72 @@ def offered_tools(message: str) -> list[str]:
     return names + ([WRITE_TOOL] if WRITE_INTENT.search(message) else [])
 
 
+AGENT_OMITS = {"search_policies": ("area",)}  # round 2, rule 4: no area filter for the agent's search
+
+
+def agent_schema(tool: str) -> dict:
+    """The tool's input schema as offered to the agent (round 2): the agent's search has no area filter."""
+    schema = copy.deepcopy(REGISTRY[tool].input_schema)
+    for key in AGENT_OMITS.get(tool, ()):
+        schema["properties"].pop(key, None)
+        schema["required"] = [k for k in schema.get("required", []) if k != key]
+    return schema
+
+
+def decision_schema(tools: list[str]) -> dict:
+    """Round 2, rule 3: each offered tool's own argument schema goes with the decision, so the model's
+    structured output is typed per tool (sent to Ollama; the server validates again)."""
+    finish_ = {"type": "object", "properties": {k: DECISION_SCHEMA["properties"][k] for k in ("action", "kind", "answer", "citations")},
+               "required": ["action", "kind", "answer"]}
+    finish_["properties"]["action"] = {"type": "string", "enum": ["finish"]}
+    calls = [{"type": "object", "properties": {"action": {"type": "string", "enum": ["call_tool"]},
+                                                "tool": {"type": "string", "enum": [t]}, "args": agent_schema(t)},
+              "required": ["action", "tool", "args"]} for t in tools]
+    return {"anyOf": [finish_, *calls]}
+
+
+def coerce(args: dict, schema: dict) -> dict:
+    """Only unambiguous cases: an integer written as digits, and "true"/"false". Never "null", empty strings
+    or number words; anything else is left for the tool's schema to reject."""
+    out = dict(args)
+    for key, value in args.items():
+        kind = schema.get("properties", {}).get(key, {}).get("type")
+        kinds = kind if isinstance(kind, list) else [kind]
+        if isinstance(value, str) and ("integer" in kinds or "number" in kinds) and re.fullmatch(r"-?\d+", value.strip()):
+            out[key] = int(value.strip())
+        elif isinstance(value, str) and "boolean" in kinds and value.strip().lower() in ("true", "false"):
+            out[key] = value.strip().lower() == "true"
+    return out
+
+
+DATE_ARGS = ("start_date", "date")
+
+
+def date_problem(args: dict, dates: Resolution) -> str | None:
+    """Round 2, rule 2: if the message names a date, every date argument must be one the server resolved."""
+    if not dates.mentioned or not any(k in args for k in DATE_ARGS):
+        return None
+    allowed = dates.allowed()
+    if not allowed:
+        return "The date in this request has passed or isn't valid. Ask the user for a valid date; don't book."
+    hint = "Use one of these dates: " + ", ".join(sorted(allowed)) + "."
+    if "date" in args and args["date"] not in allowed:
+        return hint
+    if "start_date" in args:
+        try:
+            start = date.fromisoformat(str(args["start_date"]))
+        except ValueError:
+            return hint
+        days = args.get("days", 7) if isinstance(args.get("days", 7), int) else 7
+        window = {(start + timedelta(days=i)).isoformat() for i in range(max(days, 1))}
+        if not window & allowed:
+            return hint
+    return None
+
+
 def system_prompt(tools: list[str], today: date) -> str:
-    specs = "\n".join(json.dumps(REGISTRY[n].spec(), ensure_ascii=False) for n in tools)
+    specs = "\n".join(json.dumps({**REGISTRY[n].spec(), "input_schema": agent_schema(n)}, ensure_ascii=False)
+                       for n in tools)
     booking_rule = (" book_mock_appointment only proposes a booking; the admin confirms it outside this chat."
                     if WRITE_TOOL in tools else "")  # never name a tool that isn't offered
     return SYSTEM.format(today=f"{today:%A %-d %B %Y} ({today.isoformat()})", tools=specs, booking_rule=booking_rule)
@@ -169,8 +236,11 @@ def run_agent(message, ctx: ToolContext, llm: LLMClient, seed: int | None = None
         res.status, res.answer, res.stopped_reason = "refused", REFUSAL_MESSAGE, "medical"
         return res
     res.offered = offered_tools(cleaned)
+    dates = resolve(cleaned, ctx.today())
+    res.dates = {"resolved": dates.dates, "unresolved": dates.unresolved}
+    schema = decision_schema(res.offered)
     messages = [{"role": "system", "content": system_prompt(res.offered, ctx.today())},
-                {"role": "user", "content": f"Request:\n{cleaned}"}]
+                {"role": "user", "content": f"Request:\n{cleaned}" + (f"\n\n{dates.prompt_lines()}" if dates.mentioned else "")}]
     passages: dict[str, Passage] = {}
     failures: dict[str, int] = {}
     last_failed_call = None
@@ -186,11 +256,13 @@ def run_agent(message, ctx: ToolContext, llm: LLMClient, seed: int | None = None
     try:
         while True:
             check_limits()
-            decision = _decide(llm, messages, base_seed + res.model_calls, res, check_limits)
+            decision = _decide(llm, messages, base_seed + res.model_calls, res, check_limits, schema)
             if decision["action"] == "finish":
                 _finish(decision, cleaned, passages, res, groundedness_threshold)
                 break
             tool, args = decision.get("tool", ""), decision.get("args", {})
+            if tool in REGISTRY and isinstance(args, dict):
+                args = coerce(args, agent_schema(tool))  # the trace and the tool see what is actually executed
             step = {"n": len(res.steps) + 1, "state": "execute", "tool": tool if tool in REGISTRY else "[unknown]",
                     "args": trace_args(tool, args)}
             if res.tool_calls >= MAX_TOOL_CALLS:
@@ -203,6 +275,11 @@ def run_agent(message, ctx: ToolContext, llm: LLMClient, seed: int | None = None
             elif tool == WRITE_TOOL and proposals >= MAX_PROPOSALS:
                 result = ToolResult(tool=tool, ok=False, code="limit_reached",
                                     message="Only one booking proposal is allowed per request.")
+            elif extra := sorted(map(str, set(args) - set(agent_schema(tool)["properties"])))[:5]:
+                result = ToolResult(tool=tool, ok=False, code="invalid_input",
+                                    message=f"Unexpected arguments: {', '.join(extra)}.")
+            elif (problem := date_problem(args, dates)):
+                result = ToolResult(tool=tool, ok=False, code="invalid_input", message=problem)
             else:
                 result = tool_runner(tool, args, ctx)
             step |= {"code": "ok" if result.ok else result.code, "seconds": round(now() - t0, 3),
@@ -228,11 +305,11 @@ def run_agent(message, ctx: ToolContext, llm: LLMClient, seed: int | None = None
     return res
 
 
-def _decide(llm, messages, seed, res: AgentResult, check_limits) -> dict:
+def _decide(llm, messages, seed, res: AgentResult, check_limits, schema: dict = DECISION_SCHEMA) -> dict:
     convo = list(messages)
     for attempt in range(2):  # one retry for an invalid decision
         try:
-            reply = llm.chat(convo, DECISION_SCHEMA, seed=seed + attempt * 100)
+            reply = llm.chat(convo, schema, seed=seed + attempt * 100)
         except LLMError:
             raise _Stop("failed", "model_unavailable") from None
         res.model_calls += 1

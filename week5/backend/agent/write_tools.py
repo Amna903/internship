@@ -15,7 +15,7 @@ from audit.models import AuditEvent
 from audit.services import record_event
 
 from .models import MockBooking, PendingAction
-from .read_tools import CLINICIANS, HORIZON_DAYS, TIMES, is_open, obj
+from .read_tools import CLINICIANS, HORIZON_DAYS, OPEN_WEEKDAYS, TIMES, is_open, obj
 from .registry import Tool, ToolFailure, allowed, register
 
 EXPIRY = timedelta(minutes=10)
@@ -41,7 +41,7 @@ def card(action: PendingAction) -> dict:
 
 
 def slot_free(day: date, time: str, clinician: str, visit_type: str) -> bool:
-    return (day.weekday() < 5 and time in TIMES and clinician in CLINICIANS[visit_type]
+    return (day.weekday() in OPEN_WEEKDAYS and time in TIMES and clinician in CLINICIANS[visit_type]
             and is_open(day, time, clinician, visit_type)
             and not MockBooking.objects.filter(date=day, time=time, clinician=clinician).exists())
 
