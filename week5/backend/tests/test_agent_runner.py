@@ -267,3 +267,16 @@ class TestEndpoint:
     def test_members_and_missing_csrf_are_rejected(self, browser, admin_browser, fake):
         assert browser.post(RUN, {"message": "hi"}).status_code in (401, 403)
         assert admin_browser.post(RUN, {"message": "hi"}, csrf=False).status_code == 403
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("word", ["None", "null", "N/A", " "])
+def test_a_placeholder_answer_is_never_shown(ctx, word):
+    r, _ = agent("Hello?", ctx, finish("clarify", word))
+    assert r.answer == "I need a few more details to do that."
+
+
+@pytest.mark.django_db
+def test_the_booking_rule_tells_the_model_to_check_availability_first(ctx):
+    _, llm = agent("Book a slot on Thursday.", ctx, finish("decline", "No."))
+    assert "first call check_availability" in llm.seen[0][0]["content"]
