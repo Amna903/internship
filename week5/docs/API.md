@@ -620,3 +620,20 @@ curl -b jar.txt -H "X-CSRFToken: $CSRF" -H "Idempotency-Key: confirm-6f0c-1" \
 Pending actions expire after 10 minutes. Each admin may have at most 3 open, and may make at most 6 proposals
 per 10 minutes; over either limit the tool returns `limit_reached` and stores nothing. Audit events
 (`agent.action_proposed`, `_confirmed`, `_declined`, `_expired`, `_failed`) hold ids only.
+
+## Week 5: the agent (admin only)
+
+### `POST /api/v1/agent/run/`
+
+```bash
+curl -b jar.txt -H "X-CSRFToken: $CSRF" -H "Content-Type: application/json" \
+  -d '{"message": "Book the first telehealth slot on Thursday afternoon."}' http://127.0.0.1:8000/api/v1/agent/run/
+```
+
+Each message is a fresh run. The agent plans and calls the typed tools; the server validates and runs every
+call. `results` holds tool outputs rendered by the server. `answer` is either a policy answer verified against
+cited passages, or a brief clarify/decline. A proposed booking comes back as `pending_action`; nothing is booked
+until the admin confirms it at `/api/v1/agent/actions/<id>/confirm/`. `status` is `done`, `stopped` (a limit:
+4 tool calls, 8,000 tokens or 60 s), `failed` (a tool or the model kept failing) or `refused` (a medical
+question, before any planning). Limit: 10 per minute. Each run stores a trace (`AgentRun`) with free text
+masked, and an `agent.run` audit event with the run id and status.

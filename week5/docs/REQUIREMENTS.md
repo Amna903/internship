@@ -243,15 +243,15 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| T1 | Controlled tool-using agent with at least four typed tools | 6 | ◐ | The four typed tools and the registry: `agent/registry.py`. Input and output schemas are checked by the Step 5 validator; authorisation on every call, from the server-side `ToolContext` only (no identity fields in any schema, tested); deadline; output cap (refused, never truncated); typed failures; one audit event per call. **The agent that uses them is Step 8** | `tests/test_agent_tools.py` (registry and security rules) | | |
+| T1 | Controlled tool-using agent with at least four typed tools | 6, 8 | ☑ | `agent/runner.py` over the five typed tools in `agent/registry.py` (four read tools, one write that only proposes). [agent_eval.md](../backend/assistant/eval/agent_eval.md): **right tools 17 of 20; valid arguments and task success 9 of 20** (see the Step 8 workflow entry) | `tests/test_agent_runner.py`, `tests/test_agent_tools.py`, `tests/test_agent_eval.py` | | |
 | T2 | Tool: search approved documents | 6 | ☑ | `search_policies` in `agent/read_tools.py`: the shipped retrieval unchanged; redaction and the medical check on the query (refused before any embedding); up to 3 passages with edition; text marked untrusted | `tests/test_agent_tools.py` (`TestSearch`) | | |
 | T3 | Tool: check fictional appointment availability | 6 | ☑ | `check_availability`: a predictable generated schedule (weekdays 09:00–16:30, fictional Clinicians A–D), an injectable clock, a start date within 60 days, a window of at most 14 days, at most 10 slots | `tests/test_agent_tools.py` (`TestAvailability`, fixed clock) | | |
 | T4 | Tool: request supervised ML prediction | 6 | ☑ | `predict_no_show`: input schema derived from the API's feature spec, the API's cross-field rules, the served `no-show-1.0.0`, with disclaimer | `tests/test_agent_tools.py` (`TestPrediction`: same answer as the served model) | | |
 | T5 | Tool: retrieve anonymized cluster summaries | 6 | ☑ | `cluster_summaries`: committed results only; cluster descriptions and sizes, never individual points; groups under 10 hidden; the real-data verdict | `tests/test_agent_tools.py` (`TestClusters`) | | |
-| T6 | Stateful multi-step workflow: plan → tool selection → validation → execution → response | 8 | ☐ | | | | |
-| T7 | Tool-call traces | 8 | ☐ | | | | |
-| T8 | Maximum-step limit | 8 | ☐ | | | | |
-| T9 | Recovery from failed tools | 8 | ☐ | | | | |
+| T6 | Stateful multi-step workflow: plan → tool selection → validation → execution → response | 8 | ☑ | `run_agent`: one JSON decision per turn, checked by the validator; server-side execution; ends as done, stopped or failed; server-rendered results; model text only as a verified policy answer or a brief clarify/decline | `tests/test_agent_runner.py` (`TestAnswers`, `TestGates`) | | |
+| T7 | Tool-call traces | 8 | ☑ | `AgentRun.steps`: state, tool, result code, output size, time and tokens per step; free text stored as "[text: N characters]" | `tests/test_agent_runner.py` (`TestDataAndTraces`, `TestEndpoint`) | | |
+| T8 | Maximum-step limit | 8 | ☑ | 4 tool calls, 1 proposal, 8,000 tokens and 60 s per run, each ending calmly; the 60 s limit is tested with a slow fake model. Real runs: 0 of 60 task runs hit a limit; A9 stayed within 4 calls | `tests/test_agent_runner.py` (`TestLimits`) | | |
+| T9 | Recovery from failed tools | 8 | ☑ | One corrected retry; the same failing call twice, or a second failure of a tool, ends the run. [agent_eval.md](../backend/assistant/eval/agent_eval.md): **recovery R1–R3 passed, bounded and calm in 9 of 9 runs** (each tried the failing tool once) | `tests/test_agent_runner.py` (`TestRecovery`) | | |
 
 ## Write tool and approval
 
@@ -307,9 +307,9 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
 | C5 | Bounded retries | 5, 10 | ☐ | | | | |
 | C6 | Per-request timeouts | 6–10 | ☐ | | | | |
 | C7 | Defend against prompt injection in retrieved content | 3, 8 | ☐ | | | | |
-| C8 | Defend against prompt injection in tool responses | 8 | ☐ | | | | |
+| C8 | Defend against prompt injection in tool responses | 8 | ◐ | Tool output is data inside markers that it can't close, under size caps; the write tool is offered only on the user's own request; confirming is a human endpoint. [agent_eval.md](../backend/assistant/eval/agent_eval.md): **A7 passed; A11 FAILED in 1 of 3 runs**: a proposal for a real slot from the tool's list, but the wrong date and the second slot, not the first. Not the injected slot. Recorded as a gate failure | `tests/test_agent_runner.py` (`test_tool_output_cannot_close_its_marker`), `tests/test_agent_eval.py` | | |
 | C9 | Redact secrets and personal data from prompts | 5–8 | ☐ | | | | |
-| C10 | Redact secrets and personal data from traces | 8 | ☐ | | | | |
+| C10 | Redact secrets and personal data from traces | 8 | ☑ | Free-text arguments are masked; names and numbers in a query never reach `AgentRun`; no message, tool output or answer text is stored | `tests/test_agent_runner.py` (`test_free_text_arguments_are_masked…`, `test_a_run_returns_results_and_records_a_trace_without_text`) | | |
 | C11 | Redact secrets and personal data from logs | 8–10 | ☐ | | | | |
 | C12 | Agent capabilities limited to synthetic, low-risk administration | 6–8 | ☐ | | | | |
 | C13 | No autonomous clinical recommendations or real-world patient changes | 6–8 | ☐ | | | | |
