@@ -182,9 +182,9 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| L1 | Load test at least two core endpoints with a documented small synthetic workload | 8 | ☐ | | | | |
-| L2 | Report p50/p95 latency, throughput, errors | 8 | ☐ | | | | |
-| L3 | One measured optimization | 8 | ☐ | | | | |
+| L1 | Load test at least two core endpoints with a documented small synthetic workload | 8 | ☑ | `loadtest/locustfile.py`, `run.sh`, overlay; predict and clusters, 10 users, 3×60 s | [LOADTEST.md](LOADTEST.md), `loadtest/results/` | | |
+| L2 | Report p50/p95 latency, throughput, errors | 8 | ☑ | `loadtest/summarize.py` (median of 3) | Baseline: predict p50 15 / p95 27 ms, 22.4 req/s; clusters 9 / 16 ms, 7.9 req/s; 0 errors | | |
+| L3 | One measured optimization | 8 | ◐ | One change measured: gunicorn 3 → 9 workers | **Negative result:** p95 27 → 51 ms; reverted per the committed rule; no second attempt (see LOADTEST.md) | | |
 
 ## Resilience
 

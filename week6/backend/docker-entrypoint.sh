@@ -1,6 +1,6 @@
 #!/bin/sh
 # Week 6 Step 1. "api": migrate, seed synthetic data, load the frozen policies (non-fatal if Ollama is not
-# reachable yet; `make seed` retries), then serve with gunicorn. "worker": the Celery worker.
+# reachable yet; `make seed` retries), then serve with gunicorn  "worker": the Celery worker.
 set -e
 case "$1" in
   api)
