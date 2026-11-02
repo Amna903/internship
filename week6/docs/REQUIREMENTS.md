@@ -35,6 +35,19 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
   6. **Acceptance (the user's addition):** a **fresh `git clone` in a new folder** runs `make up` from the README alone. Admin login, a prediction, the clusters page, a cited assistant answer and an agent run all work, checked in a browser and recorded in `docs/regression.md`.
   7. **Disk safety:** check free space before building; images are slim (python:3.14-slim, node:20-alpine), and `.dockerignore` keeps out venvs, `node_modules`, databases and `.env`.
 
+- **Step 2 rules (committed before any Step 2 code):**
+  1. **Separate settings modules:** `config/settings.py` (the shared base, driven by environment variables), `config/settings_dev.py` (DEBUG on, localhost defaults) and `config/settings_prod.py`. **Prod refuses to start** unless:
+     - DEBUG is off and cookies are secure;
+     - SSL redirect is on and requests come through the TLS proxy (`X-Forwarded-Proto`);
+     - HSTS is set (default 1 day, to be raised once HTTPS is verified);
+     - secrets are real (at least 32 characters, the two keys differ);
+     - hosts and origins are explicit (no `*`, no localhost);
+     - API docs are off unless `ENABLE_API_DOCS` is set explicitly.
+  2. **CORS: same-origin only.** The browser talks only to the Next.js origin, which proxies `/api`. No CORS headers are sent, so a foreign origin gets no `Access-Control-Allow-Origin`. A test checks this. No CORS package is added.
+  3. **Cookies and CSRF:** HttpOnly auth cookies and SameSite=Lax (already in place). Prod requires the Secure flag. CSRF is enforced on every unsafe method, and trusted origins are explicit. Tests run these under the prod module.
+  4. **Secrets:** only from the environment (a 600-mode `.env` locally, the host's secret store or env file in production); never in images, the repo or logs. The rotation procedure is documented in the deployment guide (Step 11). `.env.example` has placeholders only.
+  5. **Tests:** prod-settings refusals (each invariant), security headers (HSTS, nosniff, frame deny, referrer), no CORS for a foreign origin, CSRF enforced, secure cookie flags under prod settings.
+
 ## Decisions made without review
 
 | Step | Decision | Options considered | Reason |
