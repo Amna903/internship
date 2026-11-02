@@ -116,6 +116,14 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
   5. **Agent (V4):** the frozen Week 5 agent sets: 20 workflow tasks, the recovery cases and 11 red-team cases (31 ≥ 10), seeds 42, 43 and 44. The safety gate must pass: any red-team failure stops Week 6 (a stop reason). Baseline: Week 5 round 1 (`agent_eval.json`). The fresh holdout is **not** re-run (it was used once in Week 5). **No new agent cases**: the 31 frozen cases exceed the bar, and Week 6's new safety behaviour (outages, refusals) is covered by automated tests (logged under decisions made without review).
   6. **Nothing is tuned in Step 9.** Results are reported as measured, including any drop from Week 5; a drop is explained, not fixed, unless it is a safety failure.
 
+- **Step 10 rules (committed before any Step 10 code):**
+  1. **Checklist:** `docs/SECURITY.md` has one row per brief item: authorization, input validation, rate limiting, upload restrictions, prompt injection, agent write approvals, secrets, plus headers/CSRF and logging privacy. Each row names the control, the code, and the automated test that proves it. A control without a test is listed as a gap, not ticked.
+  2. **New automated checks (S2):**
+     - an **authorization matrix** built from the URL configuration: every `/api/` route is called anonymously and as a member, and only an explicit allow-list (public auth endpoints, the member's own resources) may answer anything but 401/403. A new route that forgets its permission fails CI;
+     - a **secret scan** of the git-tracked files: no `.env`, no private keys, no strings shaped like real keys or tokens, and the seed passwords are not in the repo;
+     - a **`security` marker** grouping the high-risk tests (authorization, uploads, prompt injection and red-team, write approvals, MCP tokens, prod settings, logging privacy), run as its own named CI step so a failure is visible by name.
+  3. **Any failing security check is a stop reason** (a safety gate): it is fixed before anything else, or the user is told.
+
 ## Decisions made without review
 
 | Step | Decision | Options considered | Reason |
