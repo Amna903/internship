@@ -70,11 +70,11 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 |---|---|---|---|---|---|---|---|
 | P1 | Deploy frontend/backend where feasible (or a fully reproducible deployment procedure) | 3 | ☐ | | | | |
 | P2 | HTTPS | 2, 3 | ☐ | | | | |
-| P3 | CORS | 2 | ☐ | | | | |
-| P4 | Secure session cookies | 2 | ☐ | | | | |
-| P5 | CSRF protection | 2 | ☐ | | | | |
-| P6 | Secret management | 2 | ☐ | | | | |
-| P7 | Separate development/production settings | 2 | ☐ | | | | |
+| P3 | CORS | 2 | ☑ | Same-origin only: the browser talks to the Next.js origin, which proxies `/api`; no CORS headers are sent | `tests/test_prod_settings.py` (`test_no_cors_for_a_foreign_origin`) | | |
+| P4 | Secure session cookies | 2 | ☑ | HttpOnly and SameSite=Lax auth cookies; Secure is required by `config/settings_prod.py` | `tests/test_prod_settings.py` | | |
+| P5 | CSRF protection | 2 | ☑ | Django CSRF on every unsafe method; explicit https trusted origins in prod | `tests/test_prod_settings.py` (`test_csrf_is_enforced…`) | | |
+| P6 | Secret management | 2 | ◐ | Environment only (`.env` mode 600, never in images or the repo); prod rejects weak or shared keys; rotation is documented in Step 11 | `tests/test_prod_settings.py` | | |
+| P7 | Separate development/production settings | 2 | ☑ | `config/settings_dev.py` and `config/settings_prod.py` over the env-driven base; prod refuses to start with any unsafe value | `tests/test_prod_settings.py` (10 refusals) | | |
 
 ## CI
 

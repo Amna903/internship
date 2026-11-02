@@ -13,10 +13,9 @@ x-backend: &backend
     OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
     DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,backend}
     CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
-    # Local `make up` is the development configuration over plain HTTP on 127.0.0.1 (the settings refuse
-    # insecure cookies when DEBUG is off). The prod profile (Step 3, HTTPS) sets DEBUG off and secure cookies.
-    COOKIE_SECURE: ${COOKIE_SECURE:-false}
-    DJANGO_DEBUG: ${DJANGO_DEBUG:-true}
+    # Local `make up` uses the development settings over plain HTTP on 127.0.0.1. Production uses
+    # docker-compose.prod.yml (config.settings_prod behind the HTTPS proxy), which refuses unsafe values.
+    DJANGO_SETTINGS_MODULE: ${DJANGO_SETTINGS_MODULE:-config.settings_dev}
   extra_hosts:
     - "host.docker.internal:host-gateway"
   depends_on:
