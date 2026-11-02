@@ -15,12 +15,13 @@ from django.utils import timezone
 
 from agent.models import AgentRun
 from assistant.costs import cost_report
-from assistant.models import AnswerRecord
+from assistant.models import AnswerRecord, IndexJob
 
 from .models import RequestSample
 
 RETENTION = timedelta(days=7)
 PRUNE_CHANCE = 0.01
+STUCK = timedelta(minutes=5)
 logger = logging.getLogger(__name__)
 
 
@@ -88,6 +89,18 @@ def tokens(hours):
     return [{"day": d, **v} for d, v in sorted(days.items(), reverse=True)]
 
 
+def jobs():
+    """Week 6 Step 7 (R4): queued jobs no worker has picked up point to a dead or missing worker."""
+    queued = IndexJob.objects.filter(status=IndexJob.Status.QUEUED)
+    return {
+        "queued": queued.count(),
+        "queued_over_5_min": queued.filter(queued_at__lt=timezone.now() - STUCK).count(),
+        "failed_last_24h": IndexJob.objects.filter(
+            status=IndexJob.Status.FAILED, queued_at__gte=timezone.now() - timedelta(hours=24)
+        ).count(),
+    }
+
+
 def ops(hours):
     rows = routes(hours)
     total = sum(r["count"] for r in rows)
@@ -97,5 +110,6 @@ def ops(hours):
         "rate_5xx": round(sum(r["rate_5xx"] * r["count"] for r in rows) / total, 3) if total else 0.0,
         "routes": rows,
         "tokens_by_day": tokens(hours),
+        "jobs": jobs(),
         "cost_note": "Local model: no per-call cost. Hosted equivalent uses illustrative prices, not a quote.",
     }

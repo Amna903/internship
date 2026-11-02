@@ -10,6 +10,8 @@ Internal reasons stay in logs and the evaluation; the API gets one of a few publ
 
 from dataclasses import dataclass, field
 
+from django.db import DatabaseError
+
 from .embeddings import Embedder
 from .indexing import RetrievalConfig, retrieve, search
 from .llm import LLMClient, LLMError
@@ -118,6 +120,15 @@ def _answer(question, llm, embedder, tuned, seed, area, history) -> Answered:
         result = AssistantResult(
             status="unavailable",
             reason=f"embedding failed: {exc.__class__.__name__}",
+            redactions=redactions,
+            model=llm.model,
+        )
+        return Answered(result, settings=tuned, cleaned=cleaned)
+    except DatabaseError as exc:
+        # Week 6 Step 7 (R2): the passage store (PostgreSQL) could not be read.
+        result = AssistantResult(
+            status="retrieval_unavailable",
+            reason=f"passage store failed: {exc.__class__.__name__}",
             redactions=redactions,
             model=llm.model,
         )

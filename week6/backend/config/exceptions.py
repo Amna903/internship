@@ -3,7 +3,10 @@
 {"error": {"code": "validation_error", "message": "...", "details": {...}}}
 """
 
+import logging
+
 from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
+from django.db import DatabaseError
 from django.http import Http404, JsonResponse
 from rest_framework import exceptions, status
 from rest_framework.response import Response
@@ -14,6 +17,9 @@ class Conflict(exceptions.APIException):
     status_code = status.HTTP_409_CONFLICT
     default_detail = "The request conflicts with the current state of the resource."
     default_code = "conflict"
+
+
+logger = logging.getLogger(__name__)
 
 
 def envelope(code: str, message: str, details: dict | None = None) -> dict:
@@ -27,6 +33,14 @@ def error_response(code: str, message: str, http_status: int, details: dict | No
 def api_exception_handler(exc, context):
     # DRF's handler turns Django's Http404 / PermissionDenied into responses but leaves `exc`
     # untouched (no `.detail`). Convert up front so one code path builds the envelope.
+    # Week 6 Step 7 (R3): a database outage is a calm, retryable 503, never a 500 page. Never the error text.
+    if isinstance(exc, DatabaseError):
+        logger.error("database unavailable", extra={"event": "database_unavailable"}, exc_info=exc)
+        response = error_response(
+            "service_unavailable", "The service is temporarily unavailable. Please try again shortly.", 503
+        )
+        response["Retry-After"] = "30"
+        return response
     if isinstance(exc, Http404):
         exc = exceptions.NotFound()
     elif isinstance(exc, DjangoPermissionDenied):

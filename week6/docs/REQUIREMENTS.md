@@ -102,6 +102,8 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 
 | Step | Decision | Options considered | Reason |
 |---|---|---|---|
+| 7 | Django's `SessionMiddleware` is replaced by a **subclass** that keeps the 503 when the session can't be read on the way out; found by the live rehearsal (the first run returned 500 with the database down) | Catch it in a custom 500 handler | The subclass changes nothing when the database is up, and the fix is tested. |
+| 7 | `Retry-After` is checked on the backend directly: the Next.js proxy does not pass it on to the browser | Patch the proxy | The 503 code and message still reach the browser; the header is a hint for API clients, which call the backend. |
 | 4 | Examples are added by **one post-processing hook**, not by rewriting the Week 4/5 views; drf-spectacular's existing "unable to guess serializer" notices (10 Week 4/5 APIViews) are left as they are | Convert those views to serializers | That would be a risky change to working, tested views for documentation only. The hook documents their bodies and responses, and a test checks it. |
 | 3 | Python's resolver can't resolve `*.localhost`, so the HTTPS smoke test resolves it through Chromium (`--host-resolver-rules`) | Edit /etc/hosts (needs sudo) | No system change is needed. |
 | 1 | Local `make up` runs with **DEBUG on over HTTP** (bound to 127.0.0.1); production is the HTTPS `prod` profile with DEBUG off | DEBUG off with secure cookies on localhost; relax the cookie check | The settings rightly refuse insecure cookies with DEBUG off. Secure cookies on http://localhost work in Chrome but not Safari, and relaxing the check would weaken production. |
@@ -181,10 +183,10 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| R1 | LLM timeout/provider failure → safe, observable response | 7 | ☐ | | | | |
-| R2 | Unavailable vector store → safe, observable response | 7 | ☐ | | | | |
-| R3 | Database outage → safe, observable response | 7 | ☐ | | | | |
-| R4 | Background worker failure → safe, observable response | 7 | ☐ | | | | |
+| R1 | LLM timeout/provider failure → safe, observable response | 7 | ☑ | Existing `504 assistant_timeout` / `503 assistant_unavailable`; log events `llm_timeout`, `llm_unavailable` | `tests/test_resilience.py::TestLLM`; live: unreachable Ollama URL → 503 | | |
+| R2 | Unavailable vector store → safe, observable response | 7 | ☑ | Embedder failure → `503 assistant_unavailable`; passage-store `DatabaseError` → `503 retrieval_unavailable` (model never called) | `TestVectorStore` | | |
+| R3 | Database outage → safe, observable response | 7 | ☑ | `config/exceptions.py`: `DatabaseError` → `503 service_unavailable` + `Retry-After: 30`; `OutageSafeSessionMiddleware`; 3 s connect timeout | `TestDatabase`, session-outage test; live: `db` stopped → 503, `/ready/` 503, recovery | | |
+| R4 | Background worker failure → safe, observable response | 7 | ☑ | Broker down → `503 queue_unavailable`; ops view `jobs.queued_over_5_min`; late acks redeliver | `TestWorker`; live: worker stopped → job queued and counted → worker back → succeeded | | |
 
 ## Security
 

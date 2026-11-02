@@ -31,3 +31,14 @@ Operations rehearsal:
 - `make backup` wrote a 128 KB `pg_dump`;
 - `make restore` brought it back (7 users before and after; a deleted table was restored);
 - `make tag TAG=rehearsal` then `make rollback TAG=rehearsal` restarted on the tagged images, and `/ready/` returned 200.
+
+## Step 7: live resilience rehearsal (`e2e/resilience_rehearsal.py`, local Compose stack)
+
+First run: 7/10. With the database stopped, the API returned **500**, because Django's session middleware re-read the session after the 503 was built. Fixed (`OutageSafeSessionMiddleware`, with a regression test). The other two failures were in the script (it read the header through the proxy, and re-uploaded duplicate content).
+
+Final run: **10/10**:
+- LLM unreachable → 503 `assistant_unavailable`;
+- database stopped → 503 `service_unavailable` with `Retry-After: 30`, `/ready/` 503, recovery once the database is back;
+- worker stopped → approval 202, job stays `queued` and the ops view counts it, worker back → `succeeded`.
+
+Full suite: 1596 passed, 2 skipped.

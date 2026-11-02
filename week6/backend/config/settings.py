@@ -117,7 +117,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "config.middleware.RequestIDMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
+    "config.middleware.OutageSafeSessionMiddleware",  # Week 6 Step 7: Django's, keeping 503s during an outage
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -147,6 +147,9 @@ DATABASES = {
         conn_max_age=60,
     )
 }
+if DATABASES["default"]["ENGINE"].endswith("postgresql"):
+    # Week 6 Step 7: fail fast during a database outage (a calm 503 within seconds, not a hung request).
+    DATABASES["default"].setdefault("OPTIONS", {})["connect_timeout"] = 3
 
 # --------------------------------------------------------------------------
 # Passwords: Argon2id first (OWASP recommendation), PBKDF2 kept so older hashes still verify.
@@ -283,6 +286,8 @@ LOGGING = {
     "formatters": {"json": {"()": "config.logging.JsonFormatter"}},
     "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "json"}},
     "root": {"handlers": ["console"], "level": "INFO"},
+    # Django's own request errors go through the same JSON handler (its default handler prints tracebacks).
+    "loggers": {"django": {"handlers": ["console"], "level": "INFO", "propagate": False}},
 }
 
 if CONFIG_ERRORS:

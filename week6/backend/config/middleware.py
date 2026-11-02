@@ -3,6 +3,9 @@ import re
 import time
 import uuid
 
+from django.contrib.sessions.middleware import SessionMiddleware
+from django.db import DatabaseError
+
 from .logging import request_id as current_request_id
 
 _SAFE_ID = re.compile(r"^[A-Za-z0-9-]{8,64}$")
@@ -38,7 +41,11 @@ class RequestIDMiddleware:
     def _record(self, request, status, ms):
         match = getattr(request, "resolver_match", None)
         route = "/" + match.route if match else "unmatched"
-        user = getattr(request, "user", None)
+        try:
+            user = getattr(request, "user", None)
+            user_id = user.pk if user is not None and user.is_authenticated else None
+        except DatabaseError:  # Week 6 Step 7: during an outage, reading the session must not turn a 503 into a 500
+            user_id = None
         access_log.info(
             "request",
             extra={
@@ -46,9 +53,20 @@ class RequestIDMiddleware:
                 "route": route,
                 "status": status,
                 "duration_ms": round(ms, 1),
-                "user_id": user.pk if user is not None and user.is_authenticated else None,
+                "user_id": user_id,
             },
         )
         from monitoring.metrics import record
 
         record(route, request.method, status, ms)
+
+
+class OutageSafeSessionMiddleware(SessionMiddleware):
+    """Week 6 Step 7 (R3): if the session can't be read on the way out (database down), keep the calm 503 the
+    view already built instead of turning it into a 500. Nothing is saved, as there is nothing to save to."""
+
+    def process_response(self, request, response):
+        try:
+            return super().process_response(request, response)
+        except DatabaseError:
+            return response

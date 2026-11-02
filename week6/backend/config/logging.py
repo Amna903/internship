@@ -25,5 +25,5 @@ class JsonFormatter(logging.Formatter):
         }
         line.update({k: getattr(record, k) for k in FIELDS if hasattr(record, k)})
         if record.exc_info:
-            line["error"] = record.exc_info[0].__name__
+            line["error"] = record.exc_info[0].__name__  # the class only: messages can hold SQL or values
         return json.dumps(line, default=str)

@@ -439,6 +439,11 @@ ERRORS = {
         "assistant_unavailable",
         "The assistant is temporarily unavailable.",
     ),
+    "retrieval_unavailable": (
+        status.HTTP_503_SERVICE_UNAVAILABLE,
+        "retrieval_unavailable",
+        "The policy search is temporarily unavailable. Please try again shortly.",
+    ),
     "invalid_output": (
         status.HTTP_502_BAD_GATEWAY,
         "assistant_invalid_output",
@@ -537,6 +542,9 @@ class AskView(AdminOnlyAPIView):
             output_tokens=(result.usage or {}).get("output_tokens", 0),
         )
         if result.status in ERRORS:
+            # Week 6 Step 7 (R1, R2): a stable event code for the logs; the reason names a class, never text.
+            code = {"timeout": "llm_timeout", "unavailable": "llm_unavailable"}.get(result.status, result.status)
+            logger.warning("assistant failed safely", extra={"event": code})
             raise AssistantError(*ERRORS[result.status])
         nxt = answered.history
         return Response(
