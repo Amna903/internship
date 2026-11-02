@@ -246,6 +246,8 @@ SPECTACULAR_SETTINGS = {
     ),
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    # Week 6 Step 4: representative examples for the core endpoints, plus /health/ and /ready/.
+    "POSTPROCESSING_HOOKS": ["drf_spectacular.hooks.postprocess_schema_enums", "config.openapi.add_examples"],
     "COMPONENT_SPLIT_REQUEST": True,
 }
 ENABLE_API_DOCS = env_bool("ENABLE_API_DOCS", DEBUG)

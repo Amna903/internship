@@ -183,7 +183,21 @@ class NoShowModelView(AdminOnlyAPIView):
             "seed": meta["seed"],
             "libraries": meta["libraries"],
             "artifact_sha256": meta["artifact_sha256"],
+            # Week 6: preprocessing lives in the same pipeline file, so it is versioned and SHA-pinned with the model.
+            "preprocessing": preprocessing_steps(model.pipeline),
         })
+
+
+def preprocessing_steps(pipeline) -> list[dict]:
+    """The fitted pipeline's steps (names and classes only), read from the loaded artifact."""
+    steps = []
+    for name, step in getattr(pipeline, "steps", []):
+        row = {"step": name, "class": type(step).__name__}
+        if hasattr(step, "transformers"):
+            row["transformers"] = [{"name": n, "class": type(t).__name__, "columns": list(c) if not isinstance(c, str) else c}
+                                   for n, t, c in step.transformers]
+        steps.append(row)
+    return steps
 
 
 class ClustersView(AdminOnlyAPIView):

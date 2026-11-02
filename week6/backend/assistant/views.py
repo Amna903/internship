@@ -200,7 +200,7 @@ class IndexJobsView(AdminOnlyAPIView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "jobs"
 
-    @extend_schema(summary="Background indexing jobs, newest first (at most 50; optional ?status=)",
+    @extend_schema(operation_id="v1_assistant_jobs_list", summary="Background indexing jobs, newest first (at most 50; optional ?status=)",
                    responses={200: OpenApiResponse(description="Jobs"), 400: OpenApiResponse(description="Unknown status")})
     def get(self, request):
         jobs = IndexJob.objects.select_related("version")

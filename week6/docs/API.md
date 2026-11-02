@@ -654,3 +654,10 @@ validation-split baseline, PSI and verdict (`stable` < 0.10 ≤ `watch` ≤ 0.25
 predictions → `not enough data`), latency p50/p95, failure rate, `flags` (`possible_drift`, `failure_rate`,
 `latency`, `baseline_is_for_another_version`) and the fixed synthetic-data disclaimer. 400 `invalid_filter` for a
 bad `days`.
+
+## Week 6: brief paths, probes and the OpenAPI examples
+
+- `POST /api/v1/predict/` is the same view as `/api/v1/predictions/no-show/` (admin session and CSRF). Example body: see `config/openapi.py` (`PREDICT_IN`).
+- `GET /api/v1/clusters/` returns the exploratory clusters; `GET /api/v1/models/no-show/` returns the model card, including `preprocessing` (pipeline steps read from the versioned, SHA-256-pinned artifact) and `artifact_sha256`.
+- `GET /health/` is liveness. `GET /ready/` is readiness (database, broker and model gate it; the LLM is reported): 200 or 503, with check names and ok/error only.
+- Interactive docs: `/api/docs/` (Swagger UI) and `/api/schema/` in development; **turned off in production** (`settings_prod`). Every core endpoint carries a representative request and response example.

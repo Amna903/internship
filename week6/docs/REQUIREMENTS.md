@@ -73,6 +73,7 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 
 | Step | Decision | Options considered | Reason |
 |---|---|---|---|
+| 4 | Examples are added by **one post-processing hook**, not by rewriting the Week 4/5 views; drf-spectacular's existing "unable to guess serializer" notices (10 Week 4/5 APIViews) are left as they are | Convert those views to serializers | That would be a risky change to working, tested views for documentation only. The hook documents their bodies and responses, and a test checks it. |
 | 3 | Python's resolver can't resolve `*.localhost`, so the HTTPS smoke test resolves it through Chromium (`--host-resolver-rules`) | Edit /etc/hosts (needs sudo) | No system change is needed. |
 | 1 | Local `make up` runs with **DEBUG on over HTTP** (bound to 127.0.0.1); production is the HTTPS `prod` profile with DEBUG off | DEBUG off with secure cookies on localhost; relax the cookie check | The settings rightly refuse insecure cookies with DEBUG off. Secure cookies on http://localhost work in Chrome but not Safari, and relaxing the check would weaken production. |
 
@@ -114,10 +115,10 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| E1 | Version model artifacts and preprocessing | 4 | ☐ | | | | |
-| E2 | Expose /health and /ready | 4 | ☐ | | | | |
-| E3 | Expose /api/v1/predict, /api/v1/clusters and assistant endpoints | 4 | ☐ | | | | |
-| E4 | OpenAPI documentation with representative requests/responses | 4 | ☐ | | | | |
+| E1 | Version model artifacts and preprocessing | 4 | ☑ | `no-show-1.0.0`: model and preprocessing in one scikit-learn pipeline file, SHA-256 pinned (loading refuses a mismatch); `verify_release` rebuilds it byte for byte; the model card reports the preprocessing steps | `tests/test_openapi.py` (`…preprocessing_from_the_versioned_artifact`), CI ML reproducibility | | |
+| E2 | Expose /health and /ready | 4 | ☑ | `config/health.py`: `/health/` and `/ready/` | `tests/test_health.py` | | |
+| E3 | Expose /api/v1/predict, /api/v1/clusters and assistant endpoints | 4 | ☑ | `/api/v1/predict/` (alias), `/api/v1/clusters/`, `/api/v1/assistant/*`, `/api/v1/agent/*` | `tests/test_openapi.py` (`test_predict_alias…`) | | |
+| E4 | OpenAPI documentation with representative requests/responses | 4 | ☑ | drf-spectacular with examples for 10 core operations plus the probes (`config/openapi.py`); `/api/docs/` in dev | `tests/test_openapi.py` | | |
 
 ## Evaluation
 
