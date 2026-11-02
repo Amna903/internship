@@ -9,9 +9,11 @@ const TABS = [
   { href: "/admin/predictions", label: "Predictions" },
   { href: "/admin/clusters", label: "Clusters" },
   { href: "/admin/assistant", label: "Assistant" },
+  { href: "/admin/agent", label: "Agent" },
+  { href: "/admin/audit", label: "Audit" },
 ];
 
-/** The three Week 4 ML tabs. Each tab is its own route, so it can be linked and reloaded. */
+/** The admin tools tabs (Week 4's three, plus Week 5's Agent and Audit). Each tab is its own route, so it can be linked and reloaded. */
 export function AdminTabs() {
   const path = usePathname();
   return (

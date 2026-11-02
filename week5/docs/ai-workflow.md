@@ -720,3 +720,13 @@ A running record, added to as each step lands. The full decision history is in
   All three met the expectations declared beforehand, and nothing was tuned.
 - **Bug caught by a test:** the failure log used the config's version string `1.0.0`, but the loaded model calls itself `no-show-1.0.0`. Failed rows would have been counted as a different model version. Fixed with one shared constant.
 - **Limits:** drift is measured on the output distribution only (not per input). Latency is machine-specific.
+
+## Step 12: Agent tab and admin audit page
+
+- **Decided without review; rules first.**
+- **Agent tab:**
+  - sends one request and shows the status, server-rendered tool results, the trace and the disclaimer;
+  - the approval card is fetched from the server by action id (never built from model text);
+  - Confirm reuses the same `Idempotency-Key` per card, so a retried click replays instead of double-booking.
+- **Audit page:** one admin-only overview endpoint (newest 25 of each section). A test fills every section through real flows and checks that no message, answer, document text or email appears.
+- **Verification:** backend overview tests, 4 new frontend unit tests (62 in all), typecheck, build. The browser check with the real model is part of the Step 13 acceptance run.

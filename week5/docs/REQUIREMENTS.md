@@ -402,11 +402,11 @@ Every decision I would normally have asked about is listed here with its reason.
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| D1 | Admin-facing audit page: agent actions | 12 | ☐ | | | | |
-| D2 | Audit page: approval decisions | 12 | ☐ | | | | |
-| D3 | Audit page: retrieval sources | 12 | ☐ | | | | |
-| D4 | Audit page: job status | 12 | ☐ | | | | |
-| D5 | Audit page: model versions | 12 | ☐ | | | | |
+| D1 | Admin-facing audit page: agent actions | 12 | ☑ | `monitoring/overview.py`, `GET /api/v1/audit/overview/`, `frontend/app/admin/audit/page.tsx`: agent runs (status, stop reason, tools → result codes, proposal) and tool-call events. Agent tab: `frontend/app/admin/agent/page.tsx` | `tests/test_audit_overview.py`; browser check in Step 13 | | |
+| D2 | Audit page: approval decisions | 12 | ☑ | `monitoring/overview.py`, `GET /api/v1/audit/overview/`, `frontend/app/admin/audit/page.tsx`: proposed writes (status, by agent, decided) and document version approvals and rejections | `tests/test_audit_overview.py` | | |
+| D3 | Audit page: retrieval sources | 12 | ☑ | `monitoring/overview.py`, `GET /api/v1/audit/overview/`, `frontend/app/admin/audit/page.tsx`: passage ids and editions given and cited per answer (from `AnswerRecord`) | `tests/test_audit_overview.py` | | |
+| D4 | Audit page: job status | 12 | ☑ | `monitoring/overview.py`, `GET /api/v1/audit/overview/`, `frontend/app/admin/audit/page.tsx`: index jobs with attempts and error codes | `tests/test_audit_overview.py` | | |
+| D5 | Audit page: model versions | 12 | ☑ | `monitoring/overview.py`, `GET /api/v1/audit/overview/`, `frontend/app/admin/audit/page.tsx`: served no-show model, monitoring baseline, LLM and embedder in use and recorded; drift summary | `tests/test_audit_overview.py` | | |
 
 ## Engineering constraints
 

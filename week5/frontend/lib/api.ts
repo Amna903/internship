@@ -69,8 +69,9 @@ async function ensureCsrf(): Promise<string> {
   return token;
 }
 
-async function raw(method: string, path: string, body?: unknown, signal?: AbortSignal): Promise<Response> {
-  const headers: Record<string, string> = { Accept: "application/json" };
+async function raw(method: string, path: string, body?: unknown, signal?: AbortSignal,
+                   extra: Record<string, string> = {}): Promise<Response> {
+  const headers: Record<string, string> = { Accept: "application/json", ...extra };
   if (body !== undefined) headers["Content-Type"] = "application/json";
   if (method !== "GET") headers["X-CSRFToken"] = await ensureCsrf();
   return fetch(path, { method, headers, credentials: "same-origin", signal, body: body === undefined ? undefined : JSON.stringify(body) });
@@ -104,12 +105,14 @@ export interface RequestOpts {
   refresh?: boolean;
   /** Abort the request (e.g. a superseded search). Rejects with a DOMException named "AbortError". */
   signal?: AbortSignal;
+  /** Extra request headers (Week 5: the Idempotency-Key on confirming a write). */
+  headers?: Record<string, string>;
 }
 
 export async function api<T>(method: string, path: string, body?: unknown, opts: RequestOpts = {}): Promise<T> {
-  let res = await raw(method, path, body, opts.signal);
+  let res = await raw(method, path, body, opts.signal, opts.headers);
   if (res.status === 401 && opts.refresh && (await refreshSession())) {
-    res = await raw(method, path, body, opts.signal);
+    res = await raw(method, path, body, opts.signal, opts.headers);
   }
   return parse<T>(res);
 }
@@ -227,4 +230,30 @@ export const assistantApi = {
   // A follow-up sends back the previous answer's signed history; without it, a new conversation starts.
   ask: (question: string, history: string | null = null) =>
     api<AskResponse>("POST", "/api/v1/assistant/ask/", history ? { question, history } : { question }),
+};
+
+// ---- Week 5: the agent, its approval cards, and the audit page (admin session) ----
+
+export interface AgentStep { n: number; state: string; tool?: string; code?: string; seconds?: number }
+export interface ActionCard {
+  action_id: string; status: string; summary: string; proposed_by_agent: boolean; proposed_by: string;
+  expires_at: string; replayed?: boolean;
+  booking?: { id: number; date: string; time: string; clinician: string; visit_type: string };
+}
+export interface AgentRunResponse {
+  run_id: string; status: string; kind: string | null; answer: string | null; citations: Citation[];
+  results: { tool: string; output: Record<string, unknown> }[]; pending_action: { action_id: string } | null;
+  stopped_reason: string | null; steps: AgentStep[]; tool_calls: number; tokens: number; model: string; disclaimer: string;
+}
+
+export const agentApi = {
+  run: (message: string) => api<AgentRunResponse>("POST", "/api/v1/agent/run/", { message }),
+  action: (id: string) => api<ActionCard>("GET", `/api/v1/agent/actions/${id}/`),
+  confirm: (id: string, key: string) =>
+    api<ActionCard>("POST", `/api/v1/agent/actions/${id}/confirm/`, undefined, { headers: { "Idempotency-Key": key } }),
+  decline: (id: string) => api<ActionCard>("POST", `/api/v1/agent/actions/${id}/decline/`),
+};
+
+export const auditApi = {
+  overview: () => api<Record<string, any>>("GET", "/api/v1/audit/overview/"),
 };
