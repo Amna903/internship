@@ -661,3 +661,9 @@ bad `days`.
 - `GET /api/v1/clusters/` returns the exploratory clusters; `GET /api/v1/models/no-show/` returns the model card, including `preprocessing` (pipeline steps read from the versioned, SHA-256-pinned artifact) and `artifact_sha256`.
 - `GET /health/` is liveness. `GET /ready/` is readiness (database, broker and model gate it; the LLM is reported): 200 or 503, with check names and ok/error only.
 - Interactive docs: `/api/docs/` (Swagger UI) and `/api/schema/` in development; **turned off in production** (`settings_prod`). Every core endpoint carries a representative request and response example.
+
+### Week 6 Step 6: operations view
+
+`GET /api/v1/ops/?hours=24` (admin only; `hours` 1–168, else `400 invalid_filter`). Returns `window_hours`, `requests`, overall `rate_5xx`, `routes` (per method and route **pattern**: `count`, `p50_ms`, `p95_ms`, `rate_4xx`, `rate_5xx`; `/health/` and `/ready/` are not sampled), `tokens_by_day` (assistant tokens with local cost `0` and an **illustrative** hosted-equivalent cost; agent tokens), and `cost_note`. Samples are kept 7 days.
+
+Every response carries `X-Request-ID` (a well-formed incoming one is reused). Logs are one JSON object per line on stdout with the same `request_id`; they never contain question text, answers, request bodies, query strings or path values.

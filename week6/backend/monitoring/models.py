@@ -22,3 +22,16 @@ class PredictionLog(models.Model):
 
     class Meta:
         ordering = ["-created_at", "-id"]
+
+
+class RequestSample(models.Model):
+    """Week 6 Step 6: one API request's latency and status. Route pattern only: no path values, no user."""
+
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    route = models.CharField(max_length=200)
+    method = models.CharField(max_length=8)
+    status = models.PositiveSmallIntegerField()
+    ms = models.FloatField()
+
+    class Meta:
+        ordering = ["-created_at", "-id"]

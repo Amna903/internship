@@ -143,6 +143,9 @@ class AnswerRecord(models.Model):
     turn = models.PositiveSmallIntegerField(default=1)
     retries = models.PositiveSmallIntegerField(default=0)
     budget = models.JSONField(default=dict)
+    # Week 6 Step 6: token counts reported by the model server, for the ops view's usage and cost totals.
+    prompt_tokens = models.PositiveIntegerField(default=0)
+    output_tokens = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

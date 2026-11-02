@@ -6,6 +6,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from predictions.views import AdminOnlyAPIView
 
 from .drift import summary
+from .metrics import ops
 from .overview import overview
 
 
@@ -37,3 +38,23 @@ class AuditOverviewView(AdminOnlyAPIView):
     )
     def get(self, request):
         return Response(overview())
+
+
+class OpsView(AdminOnlyAPIView):
+    """Week 6 Step 6 (O3–O5): per-route latency and error rates, and token usage with cost estimates."""
+
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "predictions"
+
+    @extend_schema(
+        summary="Operations: per-route p50/p95 latency and error rates, token usage and cost estimates",
+        responses={200: OpenApiResponse(description="Ops summary"), 400: OpenApiResponse(description="Bad ?hours")},
+    )
+    def get(self, request):
+        raw = request.query_params.get("hours", "24")
+        if not raw.isdigit() or not 1 <= int(raw) <= 168:
+            return Response(
+                {"error": {"code": "invalid_filter", "message": "hours must be a whole number from 1 to 168."}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(ops(int(raw)))

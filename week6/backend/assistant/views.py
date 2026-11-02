@@ -533,6 +533,8 @@ class AskView(AdminOnlyAPIView):
             turn=turn,
             retries=result.retries,
             budget=result.budget or {},
+            prompt_tokens=(result.usage or {}).get("prompt_tokens", 0),
+            output_tokens=(result.usage or {}).get("output_tokens", 0),
         )
         if result.status in ERRORS:
             raise AssistantError(*ERRORS[result.status])

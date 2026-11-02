@@ -157,11 +157,11 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| O1 | Structured logs | 6 | ☐ | | | | |
-| O2 | Correlation/request IDs | 6 | ☐ | | | | |
-| O3 | API latency/error metrics | 6 | ☐ | | | | |
-| O4 | Token usage and cost estimates | 6 | ☐ | | | | |
-| O5 | Admin operational dashboard or documented monitoring view | 6 | ☐ | | | | |
+| O1 | Structured logs | 6 | ☑ | `config/logging.py` JSON formatter; one access line per API request (route pattern, status, ms, user id) | `tests/test_ops.py::TestLogs` (no question, card number, query string or path value leaks) | | |
+| O2 | Correlation/request IDs | 6 | ☑ | `config/middleware.py` sets the request id as logging context; echoed in `X-Request-ID` and audit rows; job ids on worker logs | `test_every_line_during_an_answer_shares_the_id...` | | |
+| O3 | API latency/error metrics | 6 | ☑ | `monitoring.RequestSample` + `monitoring/metrics.py`: per-route count, p50, p95, 4xx/5xx rates | `TestMetrics` (percentiles, probes excluded, DB error never breaks a request) | | |
+| O4 | Token usage and cost estimates | 6 | ☑ | `AnswerRecord.prompt_tokens/output_tokens`; daily totals with local cost 0 and illustrative hosted equivalent | `TestTokens` | | |
+| O5 | Admin operational dashboard or documented monitoring view | 6 | ☑ | `GET /api/v1/ops/?hours=` (admin only) and the Operations tables on `/admin/audit` | `TestOpsView` | | |
 
 ## Load testing
 

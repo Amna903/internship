@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { AdminTabs, useAdminNav } from "@/components/AdminTabs";
 import { Shell } from "@/components/Shell";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { ApiError, AuditOverview, auditApi } from "@/lib/api";
+import { ApiError, AuditOverview, Ops, auditApi } from "@/lib/api";
 
 const when = (t: string | null) => (t ? new Date(t).toLocaleString() : "—");
 
@@ -58,8 +58,13 @@ export default function AuditPage() {
   const nav = useAdminNav();
   const [data, setData] = useState<AuditOverview | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
+  const [ops, setOps] = useState<Ops | null>(null);
 
   useEffect(() => {
+    auditApi
+      .ops()
+      .then(setOps)
+      .catch(() => setOps(null));
     auditApi
       .overview()
       .then(setData)
@@ -81,6 +86,36 @@ export default function AuditPage() {
         <div className="alert warn" role="alert">
           {failure}
         </div>
+      )}
+      {ops && (
+        <>
+          <Table
+            id="ops-routes"
+            title={`Operations: API latency and errors (last ${ops.window_hours} h, ${ops.requests} requests)`}
+            head={["Route", "Count", "p50 ms", "p95 ms", "4xx", "5xx"]}
+            rows={ops.routes.map((r) => [
+              `${r.method} ${r.route}`,
+              r.count,
+              r.p50_ms,
+              r.p95_ms,
+              r.rate_4xx,
+              r.rate_5xx,
+            ])}
+          />
+          <Table
+            id="ops-tokens"
+            title="Operations: token usage and cost estimates"
+            head={["Day", "Assistant tokens", "Local cost $", "Hosted equivalent $ (illustrative)", "Agent tokens"]}
+            rows={ops.tokens_by_day.map((d) => [
+              d.day,
+              d.assistant.total_tokens,
+              d.assistant.cost_usd,
+              d.assistant.hosted_equivalent_usd,
+              d.agent_tokens,
+            ])}
+          />
+          <p className="disclaimer small">{ops.cost_note}</p>
+        </>
       )}
       {data &&
         (() => {

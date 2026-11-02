@@ -57,7 +57,9 @@ def _finish(job: IndexJob, status: str, code: str = "", chunks: int | None = Non
     job.save(update_fields=["status", "error_code", "chunks", "finished_at"])
     if status == Status.FAILED:
         _audit(job, AuditEvent.Action.ADMIN_INDEX_JOB_FAILED, f"job:{job.id}:{code}")
-        logger.warning("index job %s failed after %s attempt(s): %s", job.id, job.attempts, code)
+        logger.warning(
+            "index job %s failed after %s attempt(s): %s", job.id, job.attempts, code, extra={"job_id": job.id}
+        )
 
 
 def queue_approval(version: DocumentVersion, admin, request_id: str = "") -> tuple[IndexJob, bool]:
@@ -118,7 +120,7 @@ def run_job(job_id: int, embedder=None) -> int | None:
         if job.attempts < job.max_attempts:
             job.status, job.error_code = Status.QUEUED, code
             job.save(update_fields=["status", "error_code"])
-            logger.info("index job %s attempt %s: %s, retrying", job.id, job.attempts, code)
+            logger.info("index job %s attempt %s: %s, retrying", job.id, job.attempts, code, extra={"job_id": job.id})
             backoff = CONFIG["BACKOFF_SECONDS"]
             return backoff[min(job.attempts, len(backoff)) - 1]
         _finish(job, Status.FAILED, code)
@@ -127,7 +129,7 @@ def run_job(job_id: int, embedder=None) -> int | None:
         _finish(job, Status.FAILED, "time_limit")
         return None
     except Exception as exc:  # never retried; only the class is logged (messages could carry text)
-        logger.error("index job %s failed unexpectedly (%s)", job.id, type(exc).__name__)
+        logger.error("index job %s failed unexpectedly (%s)", job.id, type(exc).__name__, extra={"job_id": job.id})
         _finish(job, Status.FAILED, "internal_error")
         return None
     _finish(job, Status.SUCCEEDED, chunks=approval.chunks)

@@ -440,6 +440,28 @@ export interface AuditOverview {
   };
 }
 
+export interface Ops {
+  window_hours: number;
+  requests: number;
+  rate_5xx: number;
+  routes: {
+    method: string;
+    route: string;
+    count: number;
+    p50_ms: number | null;
+    p95_ms: number | null;
+    rate_4xx: number;
+    rate_5xx: number;
+  }[];
+  tokens_by_day: {
+    day: string;
+    agent_tokens: number;
+    assistant: { total_tokens: number; cost_usd: number; hosted_equivalent_usd: number };
+  }[];
+  cost_note: string;
+}
+
 export const auditApi = {
   overview: () => api<AuditOverview>("GET", "/api/v1/audit/overview/"),
+  ops: (hours = 24) => api<Ops>("GET", `/api/v1/ops/?hours=${hours}`),
 };
