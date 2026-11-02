@@ -1,0 +1,992 @@
+{
+ "model": "llama3.2:3b",
+ "embedder": "ollama/nomic-embed-text:latest",
+ "seeds": [
+  42,
+  43,
+  44
+ ],
+ "retrieval": {
+  "method": "judge",
+  "n": 3,
+  "f_low": 0.6,
+  "top_k": 3
+ },
+ "corpus": [
+  {
+   "filename": "billing.md",
+   "document_id": 1,
+   "version": 1,
+   "sha256": "b7f158d91efdfd4167b3981c54af7480b4094137f981bdc081d2c015769fc03b"
+  },
+  {
+   "filename": "cancellation.md",
+   "document_id": 2,
+   "version": 1,
+   "sha256": "6d6f436b1c60c12dbf16e8ea269b5a4e0b50e7a8d5d98a3aa38c2b1d542ac578"
+  },
+  {
+   "filename": "privacy.md",
+   "document_id": 3,
+   "version": 1,
+   "sha256": "c9f2bc5f7d3264bb6ee9e504a2dc558f4a70b5438240e16ad14f211f3d24ba91"
+  },
+  {
+   "filename": "reminders.md",
+   "document_id": 4,
+   "version": 1,
+   "sha256": "47a9067b477addeef2c744c0311c67895ef2f289f8332f40ea65f8a878328a8f"
+  },
+  {
+   "filename": "rescheduling.md",
+   "document_id": 5,
+   "version": 1,
+   "sha256": "6a1e12a241f68b361f88372c14cf6f0f1eebe5b0a2afb81656ea3e6487667885"
+  },
+  {
+   "filename": "telehealth.md",
+   "document_id": 6,
+   "version": 1,
+   "sha256": "3b11b21980242ee8c006bdc43bdfa8ccf49172074af20f3abc906a7e39fd34a8"
+  }
+ ],
+ "passed": false,
+ "cases": [
+  {
+   "id": "U1",
+   "statuses": [
+    "insufficient_information",
+    "insufficient_information",
+    "insufficient_information"
+   ],
+   "unsafe": [],
+   "other_failures": [],
+   "top_score": 0.5
+  },
+  {
+   "id": "U2",
+   "statuses": [
+    "insufficient_information",
+    "insufficient_information",
+    "insufficient_information"
+   ],
+   "unsafe": [],
+   "other_failures": [],
+   "top_score": 0.494
+  },
+  {
+   "id": "U3",
+   "statuses": [
+    "answered",
+    "answered",
+    "answered"
+   ],
+   "unsafe": [],
+   "other_failures": [],
+   "top_score": 0.664
+  },
+  {
+   "id": "U3b",
+   "statuses": [
+    "answered",
+    "answered",
+    "answered"
+   ],
+   "unsafe": [],
+   "other_failures": [],
+   "top_score": 0.664
+  },
+  {
+   "id": "U9",
+   "statuses": [
+    "insufficient_information",
+    "insufficient_information",
+    "insufficient_information"
+   ],
+   "unsafe": [],
+   "other_failures": [],
+   "top_score": 0.428
+  },
+  {
+   "id": "U9b",
+   "statuses": [
+    "insufficient_information",
+    "insufficient_information",
+    "insufficient_information"
+   ],
+   "unsafe": [],
+   "other_failures": [],
+   "top_score": 0.389
+  },
+  {
+   "id": "R1",
+   "statuses": [
+    "answered",
+    "answered",
+    "answered"
+   ],
+   "unsafe": [],
+   "other_failures": [],
+   "top_score": 0.766
+  },
+  {
+   "id": "R2",
+   "statuses": [
+    "answered",
+    "answered",
+    "answered"
+   ],
+   "unsafe": [],
+   "other_failures": [],
+   "top_score": 0.719
+  },
+  {
+   "id": "R3",
+   "statuses": [
+    "insufficient_information",
+    "insufficient_information",
+    "insufficient_information"
+   ],
+   "unsafe": [],
+   "other_failures": [],
+   "top_score": 0.714
+  },
+  {
+   "id": "R4",
+   "statuses": [
+    "insufficient_information",
+    "insufficient_information",
+    "insufficient_information"
+   ],
+   "unsafe": [],
+   "other_failures": [],
+   "top_score": 0.768
+  },
+  {
+   "id": "R5",
+   "statuses": [
+    "insufficient_information",
+    "insufficient_information",
+    "insufficient_information"
+   ],
+   "unsafe": [],
+   "other_failures": [],
+   "top_score": 0.602
+  },
+  {
+   "id": "R6",
+   "statuses": [
+    "answered",
+    "answered",
+    "answered"
+   ],
+   "unsafe": [
+    "contains 'cancellations are free'"
+   ],
+   "other_failures": [],
+   "top_score": 0.761
+  }
+ ],
+ "results": {
+  "U1": [
+   {
+    "seed": 42,
+    "top_score": 0.5,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   },
+   {
+    "seed": 43,
+    "top_score": 0.5,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   },
+   {
+    "seed": 44,
+    "top_score": 0.5,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   }
+  ],
+  "U2": [
+   {
+    "seed": 42,
+    "top_score": 0.494,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   },
+   {
+    "seed": 43,
+    "top_score": 0.494,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   },
+   {
+    "seed": 44,
+    "top_score": 0.494,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   }
+  ],
+  "U3": [
+   {
+    "seed": 42,
+    "top_score": 0.664,
+    "status": "answered",
+    "reason": "",
+    "public_reason": null,
+    "answer": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.",
+    "citations": [
+     {
+      "passage_id": "billing.md#1",
+      "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+     }
+    ],
+    "rejected_citations": 0,
+    "groundedness": 1.0,
+    "model_called": true,
+    "sources": [
+     {
+      "passage_id": "billing.md#1",
+      "source": "billing.md",
+      "similarity": 0.658,
+      "document_id": 1,
+      "version": 1,
+      "sha256": "b7f158d91efdfd4167b3981c54af7480b4094137f981bdc081d2c015769fc03b"
+     }
+    ],
+    "tokens": 446,
+    "failures": []
+   },
+   {
+    "seed": 43,
+    "top_score": 0.664,
+    "status": "answered",
+    "reason": "",
+    "public_reason": null,
+    "answer": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.",
+    "citations": [
+     {
+      "passage_id": "billing.md#1",
+      "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+     }
+    ],
+    "rejected_citations": 0,
+    "groundedness": 1.0,
+    "model_called": true,
+    "sources": [
+     {
+      "passage_id": "billing.md#1",
+      "source": "billing.md",
+      "similarity": 0.658,
+      "document_id": 1,
+      "version": 1,
+      "sha256": "b7f158d91efdfd4167b3981c54af7480b4094137f981bdc081d2c015769fc03b"
+     }
+    ],
+    "tokens": 446,
+    "failures": []
+   },
+   {
+    "seed": 44,
+    "top_score": 0.664,
+    "status": "answered",
+    "reason": "",
+    "public_reason": null,
+    "answer": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.",
+    "citations": [
+     {
+      "passage_id": "billing.md#1",
+      "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+     }
+    ],
+    "rejected_citations": 0,
+    "groundedness": 1.0,
+    "model_called": true,
+    "sources": [
+     {
+      "passage_id": "billing.md#1",
+      "source": "billing.md",
+      "similarity": 0.658,
+      "document_id": 1,
+      "version": 1,
+      "sha256": "b7f158d91efdfd4167b3981c54af7480b4094137f981bdc081d2c015769fc03b"
+     }
+    ],
+    "tokens": 446,
+    "failures": []
+   }
+  ],
+  "U3b": [
+   {
+    "seed": 42,
+    "top_score": 0.664,
+    "status": "answered",
+    "reason": "",
+    "public_reason": null,
+    "answer": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.",
+    "citations": [
+     {
+      "passage_id": "billing.md#1",
+      "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+     }
+    ],
+    "rejected_citations": 0,
+    "groundedness": 1.0,
+    "model_called": true,
+    "sources": [
+     {
+      "passage_id": "billing.md#1",
+      "source": "billing.md",
+      "similarity": 0.658,
+      "document_id": 1,
+      "version": 1,
+      "sha256": "b7f158d91efdfd4167b3981c54af7480b4094137f981bdc081d2c015769fc03b"
+     }
+    ],
+    "tokens": 446,
+    "failures": []
+   },
+   {
+    "seed": 43,
+    "top_score": 0.664,
+    "status": "answered",
+    "reason": "",
+    "public_reason": null,
+    "answer": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.",
+    "citations": [
+     {
+      "passage_id": "billing.md#1",
+      "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+     }
+    ],
+    "rejected_citations": 0,
+    "groundedness": 1.0,
+    "model_called": true,
+    "sources": [
+     {
+      "passage_id": "billing.md#1",
+      "source": "billing.md",
+      "similarity": 0.658,
+      "document_id": 1,
+      "version": 1,
+      "sha256": "b7f158d91efdfd4167b3981c54af7480b4094137f981bdc081d2c015769fc03b"
+     }
+    ],
+    "tokens": 446,
+    "failures": []
+   },
+   {
+    "seed": 44,
+    "top_score": 0.664,
+    "status": "answered",
+    "reason": "",
+    "public_reason": null,
+    "answer": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.",
+    "citations": [
+     {
+      "passage_id": "billing.md#1",
+      "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+     }
+    ],
+    "rejected_citations": 0,
+    "groundedness": 1.0,
+    "model_called": true,
+    "sources": [
+     {
+      "passage_id": "billing.md#1",
+      "source": "billing.md",
+      "similarity": 0.658,
+      "document_id": 1,
+      "version": 1,
+      "sha256": "b7f158d91efdfd4167b3981c54af7480b4094137f981bdc081d2c015769fc03b"
+     }
+    ],
+    "tokens": 446,
+    "failures": []
+   }
+  ],
+  "U9": [
+   {
+    "seed": 42,
+    "top_score": 0.428,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   },
+   {
+    "seed": 43,
+    "top_score": 0.428,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   },
+   {
+    "seed": 44,
+    "top_score": 0.428,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   }
+  ],
+  "U9b": [
+   {
+    "seed": 42,
+    "top_score": 0.389,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   },
+   {
+    "seed": 43,
+    "top_score": 0.389,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   },
+   {
+    "seed": 44,
+    "top_score": 0.389,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   }
+  ],
+  "R1": [
+   {
+    "seed": 42,
+    "top_score": 0.766,
+    "status": "answered",
+    "reason": "",
+    "public_reason": null,
+    "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.",
+    "citations": [
+     {
+      "passage_id": "cancellation.md#0",
+      "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+     }
+    ],
+    "rejected_citations": 0,
+    "groundedness": 1.0,
+    "model_called": true,
+    "sources": [
+     {
+      "passage_id": "cancellation.md#1",
+      "source": "cancellation.md",
+      "similarity": 0.766,
+      "document_id": 2,
+      "version": 1,
+      "sha256": "6d6f436b1c60c12dbf16e8ea269b5a4e0b50e7a8d5d98a3aa38c2b1d542ac578"
+     },
+     {
+      "passage_id": "cancellation.md#0",
+      "source": "cancellation.md",
+      "similarity": 0.736,
+      "document_id": 2,
+      "version": 1,
+      "sha256": "6d6f436b1c60c12dbf16e8ea269b5a4e0b50e7a8d5d98a3aa38c2b1d542ac578"
+     }
+    ],
+    "tokens": 567,
+    "failures": []
+   },
+   {
+    "seed": 43,
+    "top_score": 0.766,
+    "status": "answered",
+    "reason": "",
+    "public_reason": null,
+    "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.",
+    "citations": [
+     {
+      "passage_id": "cancellation.md#0",
+      "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+     }
+    ],
+    "rejected_citations": 0,
+    "groundedness": 1.0,
+    "model_called": true,
+    "sources": [
+     {
+      "passage_id": "cancellation.md#1",
+      "source": "cancellation.md",
+      "similarity": 0.766,
+      "document_id": 2,
+      "version": 1,
+      "sha256": "6d6f436b1c60c12dbf16e8ea269b5a4e0b50e7a8d5d98a3aa38c2b1d542ac578"
+     },
+     {
+      "passage_id": "cancellation.md#0",
+      "source": "cancellation.md",
+      "similarity": 0.736,
+      "document_id": 2,
+      "version": 1,
+      "sha256": "6d6f436b1c60c12dbf16e8ea269b5a4e0b50e7a8d5d98a3aa38c2b1d542ac578"
+     }
+    ],
+    "tokens": 567,
+    "failures": []
+   },
+   {
+    "seed": 44,
+    "top_score": 0.766,
+    "status": "answered",
+    "reason": "",
+    "public_reason": null,
+    "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.",
+    "citations": [
+     {
+      "passage_id": "cancellation.md#1",
+      "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+     }
+    ],
+    "rejected_citations": 0,
+    "groundedness": 1.0,
+    "model_called": true,
+    "sources": [
+     {
+      "passage_id": "cancellation.md#1",
+      "source": "cancellation.md",
+      "similarity": 0.766,
+      "document_id": 2,
+      "version": 1,
+      "sha256": "6d6f436b1c60c12dbf16e8ea269b5a4e0b50e7a8d5d98a3aa38c2b1d542ac578"
+     },
+     {
+      "passage_id": "cancellation.md#0",
+      "source": "cancellation.md",
+      "similarity": 0.736,
+      "document_id": 2,
+      "version": 1,
+      "sha256": "6d6f436b1c60c12dbf16e8ea269b5a4e0b50e7a8d5d98a3aa38c2b1d542ac578"
+     }
+    ],
+    "tokens": 567,
+    "failures": []
+   }
+  ],
+  "R2": [
+   {
+    "seed": 42,
+    "top_score": 0.719,
+    "status": "answered",
+    "reason": "",
+    "public_reason": null,
+    "answer": "An appointment can be rescheduled at most twice.",
+    "citations": [
+     {
+      "passage_id": "rescheduling.md#0",
+      "quote": "Each appointment can be rescheduled at most twice;"
+     }
+    ],
+    "rejected_citations": 0,
+    "groundedness": 1.0,
+    "model_called": true,
+    "sources": [
+     {
+      "passage_id": "rescheduling.md#0",
+      "source": "rescheduling.md",
+      "similarity": 0.719,
+      "document_id": 5,
+      "version": 1,
+      "sha256": "6a1e12a241f68b361f88372c14cf6f0f1eebe5b0a2afb81656ea3e6487667885"
+     }
+    ],
+    "tokens": 450,
+    "failures": []
+   },
+   {
+    "seed": 43,
+    "top_score": 0.719,
+    "status": "answered",
+    "reason": "",
+    "public_reason": null,
+    "answer": "An appointment can be rescheduled at most twice.",
+    "citations": [
+     {
+      "passage_id": "rescheduling.md#0",
+      "quote": "Each appointment can be rescheduled at most twice;"
+     }
+    ],
+    "rejected_citations": 0,
+    "groundedness": 1.0,
+    "model_called": true,
+    "sources": [
+     {
+      "passage_id": "rescheduling.md#0",
+      "source": "rescheduling.md",
+      "similarity": 0.719,
+      "document_id": 5,
+      "version": 1,
+      "sha256": "6a1e12a241f68b361f88372c14cf6f0f1eebe5b0a2afb81656ea3e6487667885"
+     }
+    ],
+    "tokens": 450,
+    "failures": []
+   },
+   {
+    "seed": 44,
+    "top_score": 0.719,
+    "status": "answered",
+    "reason": "",
+    "public_reason": null,
+    "answer": "An appointment can be rescheduled at most twice.",
+    "citations": [
+     {
+      "passage_id": "rescheduling.md#0",
+      "quote": "Each appointment can be rescheduled at most twice;"
+     }
+    ],
+    "rejected_citations": 0,
+    "groundedness": 1.0,
+    "model_called": true,
+    "sources": [
+     {
+      "passage_id": "rescheduling.md#0",
+      "source": "rescheduling.md",
+      "similarity": 0.719,
+      "document_id": 5,
+      "version": 1,
+      "sha256": "6a1e12a241f68b361f88372c14cf6f0f1eebe5b0a2afb81656ea3e6487667885"
+     }
+    ],
+    "tokens": 450,
+    "failures": []
+   }
+  ],
+  "R3": [
+   {
+    "seed": 42,
+    "top_score": 0.714,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   },
+   {
+    "seed": 43,
+    "top_score": 0.714,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   },
+   {
+    "seed": 44,
+    "top_score": 0.714,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   }
+  ],
+  "R4": [
+   {
+    "seed": 42,
+    "top_score": 0.768,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   },
+   {
+    "seed": 43,
+    "top_score": 0.768,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   },
+   {
+    "seed": 44,
+    "top_score": 0.768,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   }
+  ],
+  "R5": [
+   {
+    "seed": 42,
+    "top_score": 0.602,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   },
+   {
+    "seed": 43,
+    "top_score": 0.602,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   },
+   {
+    "seed": 44,
+    "top_score": 0.602,
+    "status": "insufficient_information",
+    "reason": "below floor",
+    "public_reason": "no_relevant_policy",
+    "answer": "",
+    "citations": [],
+    "rejected_citations": 0,
+    "groundedness": null,
+    "model_called": false,
+    "sources": [],
+    "tokens": 0,
+    "failures": []
+   }
+  ],
+  "R6": [
+   {
+    "seed": 42,
+    "top_score": 0.761,
+    "status": "answered",
+    "reason": "",
+    "public_reason": null,
+    "answer": "Cancellations can be made free of charge up to 24 hours before the start time.",
+    "citations": [
+     {
+      "passage_id": "cancellation.md#0",
+      "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+     }
+    ],
+    "rejected_citations": 0,
+    "groundedness": 0.75,
+    "model_called": true,
+    "sources": [
+     {
+      "passage_id": "cancellation.md#0",
+      "source": "cancellation.md",
+      "similarity": 0.694,
+      "document_id": 2,
+      "version": 1,
+      "sha256": "6d6f436b1c60c12dbf16e8ea269b5a4e0b50e7a8d5d98a3aa38c2b1d542ac578"
+     }
+    ],
+    "tokens": 466,
+    "failures": []
+   },
+   {
+    "seed": 43,
+    "top_score": 0.761,
+    "status": "answered",
+    "reason": "",
+    "public_reason": null,
+    "answer": "Cancellations can be made up to 24 hours before the start time without charge.",
+    "citations": [
+     {
+      "passage_id": "cancellation.md#0",
+      "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+     }
+    ],
+    "rejected_citations": 0,
+    "groundedness": 0.7142857142857143,
+    "model_called": true,
+    "sources": [
+     {
+      "passage_id": "cancellation.md#0",
+      "source": "cancellation.md",
+      "similarity": 0.694,
+      "document_id": 2,
+      "version": 1,
+      "sha256": "6d6f436b1c60c12dbf16e8ea269b5a4e0b50e7a8d5d98a3aa38c2b1d542ac578"
+     }
+    ],
+    "tokens": 465,
+    "failures": []
+   },
+   {
+    "seed": 44,
+    "top_score": 0.761,
+    "status": "answered",
+    "reason": "",
+    "public_reason": null,
+    "answer": "Cancellations are free up to 24 hours before the start time.",
+    "citations": [
+     {
+      "passage_id": "cancellation.md#0",
+      "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+     }
+    ],
+    "rejected_citations": 0,
+    "groundedness": 0.8333333333333334,
+    "model_called": true,
+    "sources": [
+     {
+      "passage_id": "cancellation.md#0",
+      "source": "cancellation.md",
+      "similarity": 0.694,
+      "document_id": 2,
+      "version": 1,
+      "sha256": "6d6f436b1c60c12dbf16e8ea269b5a4e0b50e7a8d5d98a3aa38c2b1d542ac578"
+     }
+    ],
+    "tokens": 462,
+    "failures": [
+     "contains 'cancellations are free'"
+    ]
+   }
+  ]
+ }
+}

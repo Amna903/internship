@@ -1,0 +1,356 @@
+{
+ "status": "FROZEN 2026-11-02 for Step 3 round 2: the only set used for round-2 choices (round-1 dev + 10 new)",
+ "note": "Week 5 retrieval DEV set, round 2.",
+ "cases": [
+  {
+   "id": "D01",
+   "question": "How early should I join a telehealth visit?",
+   "author": "assistant",
+   "category": "direct",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "telehealth.md",
+     "version": 1,
+     "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "D02",
+   "question": "What is the hourly rate for an unvalidated parking ticket?",
+   "author": "assistant",
+   "category": "unanswerable",
+   "answerable": false,
+   "evidence": [],
+   "area": null,
+   "notes": "near-miss: the rate is mentioned but never given"
+  },
+  {
+   "id": "D03",
+   "question": "How many reschedules are allowed?",
+   "author": "assistant",
+   "category": "keyword",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "rescheduling.md",
+     "version": 1,
+     "quote": "Each appointment can be rescheduled at most twice; after that, it must be cancelled and booked again."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "D04",
+   "question": "Can my sister phone up and get my address from you?",
+   "author": "assistant",
+   "category": "paraphrase",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "privacy.md",
+     "version": 1,
+     "quote": "Staff never give out phone numbers, addresses or other personal details of patients, by phone, email or in this assistant."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "D05",
+   "question": "Billing question: what happens if I miss a monthly payment?",
+   "author": "assistant",
+   "category": "area_hint",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "payment-plans.md",
+     "version": 1,
+     "quote": "If a monthly payment is missed, the plan ends and the remaining balance is due within 30 days."
+    }
+   ],
+   "area": "billing",
+   "notes": ""
+  },
+  {
+   "id": "D06",
+   "question": "Can I cancel an appointment by email?",
+   "author": "assistant",
+   "category": "current_version",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "cancellation.md",
+     "version": 2,
+     "quote": "by email to the front desk"
+    }
+   ],
+   "area": null,
+   "notes": "only v2 allows email; privacy.md and lab-results-admin.md also mention email (distractors)"
+  },
+  {
+   "id": "D07",
+   "question": "If I turn off reminders, does a late cancellation still count?",
+   "author": "assistant",
+   "category": "multi_doc",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "reminders.md",
+     "version": 1,
+     "quote": "Turning reminders off does not change the cancellation policy."
+    },
+    {
+     "document": "cancellation.md",
+     "version": 2,
+     "quote": "Cancellations with less than 24 hours' notice are recorded as late cancellations."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "D08",
+   "question": "Do you offer home visits?",
+   "author": "assistant",
+   "category": "unanswerable",
+   "answerable": false,
+   "evidence": [],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "D09",
+   "question": "How do I ask for a longer appointment because of a disability?",
+   "author": "assistant",
+   "category": "direct",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "accessibility.md",
+     "version": 1,
+     "quote": "Patients who need a longer appointment slot because of a disability can ask for one when booking, at no extra cost."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "D10",
+   "question": "Where do I put my bike?",
+   "author": "assistant",
+   "category": "paraphrase",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "parking.md",
+     "version": 1,
+     "quote": "Bicycle racks are available beside the side door."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "D11",
+   "question": "How many days does the clinic take to answer a request for a copy of my data?",
+   "author": "assistant",
+   "category": "keyword",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "privacy.md",
+     "version": 1,
+     "quote": "the clinic responds within 30 days"
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "D12",
+   "question": "Access question: how far ahead must I ask for an interpreter?",
+   "author": "assistant",
+   "category": "area_hint",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "interpreter-services.md",
+     "version": 1,
+     "quote": "An interpreter should be requested when booking, or at least 3 working days before the appointment."
+    }
+   ],
+   "area": "access",
+   "notes": ""
+  },
+  {
+   "id": "D13",
+   "question": "Which languages do your interpreters speak?",
+   "author": "assistant",
+   "category": "unanswerable",
+   "answerable": false,
+   "evidence": [],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "D14",
+   "question": "I didn't show up and didn't cancel. What is that counted as?",
+   "author": "assistant",
+   "category": "paraphrase",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "cancellation.md",
+     "version": 2,
+     "quote": "Missed appointments without any cancellation are recorded as no-shows and are treated the same way as late cancellations."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "D15",
+   "question": "Can a video visit be switched to in person, and until when can I reschedule?",
+   "author": "assistant",
+   "category": "multi_doc",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "telehealth.md",
+     "version": 1,
+     "quote": "A telehealth visit can be changed to an in-person visit when rescheduling, if a slot is available."
+    },
+    {
+     "document": "rescheduling.md",
+     "version": 1,
+     "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "E01",
+   "question": "My hearing isn't great. Is there anything at reception to help me?",
+   "author": "assistant",
+   "category": "paraphrase",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "accessibility.md",
+     "version": 1,
+     "quote": "A hearing loop is available at the front desk and in every consultation room."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "E02",
+   "question": "How will I know when my test result is back?",
+   "author": "assistant",
+   "category": "paraphrase",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "lab-results-admin.md",
+     "version": 1,
+     "quote": "Patients get a notification in the app when a new result is available."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "E03",
+   "question": "When should I turn up for a face-to-face appointment?",
+   "author": "assistant",
+   "category": "paraphrase",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "parking.md",
+     "version": 1,
+     "quote": "Patients should arrive 10 minutes before an in-person appointment to check in at the front desk."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "E04",
+   "question": "Is valet parking available?",
+   "author": "assistant",
+   "category": "unanswerable",
+   "answerable": false,
+   "evidence": [],
+   "area": null,
+   "notes": "near-miss: parking.md"
+  },
+  {
+   "id": "E05",
+   "question": "How much does a telehealth visit cost?",
+   "author": "assistant",
+   "category": "unanswerable",
+   "answerable": false,
+   "evidence": [],
+   "area": null,
+   "notes": "near-miss: 'cost' appears ('at no cost', 'costs 10 euros') but no visit price is given"
+  },
+  {
+   "id": "E06",
+   "question": "Is there a waiting room for children?",
+   "author": "assistant",
+   "category": "unanswerable",
+   "answerable": false,
+   "evidence": [],
+   "area": null,
+   "notes": "near-miss: front desk and accessibility words"
+  },
+  {
+   "id": "E07",
+   "question": "How many telehealth visits can I have per year?",
+   "author": "assistant",
+   "category": "unanswerable",
+   "answerable": false,
+   "evidence": [],
+   "area": null,
+   "notes": "near-miss: telehealth.md"
+  },
+  {
+   "id": "E08",
+   "question": "Do reminders come in languages other than English?",
+   "author": "assistant",
+   "category": "unanswerable",
+   "answerable": false,
+   "evidence": [],
+   "area": null,
+   "notes": "near-miss: reminders.md and interpreter-services.md"
+  },
+  {
+   "id": "E09",
+   "question": "How long do I usually wait when I call the main line?",
+   "author": "assistant",
+   "category": "unanswerable",
+   "answerable": false,
+   "evidence": [],
+   "area": null,
+   "notes": "near-miss: several documents mention the main line"
+  },
+  {
+   "id": "E10",
+   "question": "Does the clinic accept health insurance?",
+   "author": "assistant",
+   "category": "unanswerable",
+   "answerable": false,
+   "evidence": [],
+   "area": null,
+   "notes": "near-miss: billing and payment documents"
+  }
+ ]
+}

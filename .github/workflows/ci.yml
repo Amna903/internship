@@ -1,4 +1,8 @@
-# Runs on every push and pull request. Each week is a self-contained app, so each is checked on its own.
+# Each week is a self-contained app, so each is checked on its own. To save GitHub Actions minutes, the
+# "plan" job runs only the jobs a push needs (.github/scripts/ci_plan.sh): the changed week's backend,
+# frontend and (if ml/ or requirements changed) ML reproducibility. Markdown and docs/ never trigger jobs on
+# their own. The FULL Week 1-5 regression runs on manual runs (Actions → CI → Run workflow), pushes to main,
+# and pull requests to main or week4 when opened, reopened or marked ready for review.
 # To make failures block merging, mark the "ci-passed" job as a required status check in the
 # repository's branch protection rule for main (Settings → Branches).
 name: CI
@@ -7,6 +11,8 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,13 +22,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.plan.outputs.backend }}
+      frontend: ${{ steps.plan.outputs.frontend }}
+      ml: ${{ steps.plan.outputs.ml }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          ACTION: ${{ github.event.action }}
+          BASE_REF: ${{ github.base_ref }}
+          REF: ${{ github.ref }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          bash .github/scripts/ci_plan.sh | tee -a "$GITHUB_OUTPUT"
+
   backend:
     name: backend (${{ matrix.week }}, ${{ matrix.db }})
+    needs: plan
+    if: needs.plan.outputs.backend != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        week: [week1, week2, week3, week4]
+        week: ${{ fromJSON(needs.plan.outputs.backend) }}
         db: [postgres, sqlite]
     services:
       postgres:
@@ -34,6 +65,12 @@ jobs:
         ports: ["5432:5432"]
         options: >-
           --health-cmd "pg_isready -U ci" --health-interval 5s --health-timeout 5s --health-retries 10
+      # Week 5 Step 10: the real-worker job test needs a real Redis broker (REQUIRE_REDIS=1: it must not skip).
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 5s --health-retries 10
     defaults:
       run:
         working-directory: ${{ matrix.week }}/backend
@@ -41,6 +78,8 @@ jobs:
       # Only for the postgres leg; the sqlite leg leaves it empty and settings fall back to SQLite.
       DATABASE_URL: ${{ matrix.db == 'postgres' && 'postgres://ci:ci@localhost:5432/ci' || '' }}
       DJANGO_SETTINGS_MODULE: config.settings_test
+      REQUIRE_REDIS: "1"
+      REDIS_TEST_URL: redis://localhost:6379/15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -56,11 +95,13 @@ jobs:
 
   frontend:
     name: frontend (${{ matrix.week }})
+    needs: plan
+    if: needs.plan.outputs.frontend != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        week: [week1, week2, week3, week4]
+        week: ${{ fromJSON(needs.plan.outputs.frontend) }}
     defaults:
       run:
         working-directory: ${{ matrix.week }}/frontend
@@ -80,11 +121,13 @@ jobs:
   # model from scratch, exactly as the README documents, and compare with the committed files.
   ml-reproducibility:
     name: ML reproducibility (${{ matrix.week }})
+    needs: plan
+    if: needs.plan.outputs.ml != '[]'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        week: [week3, week4]
+        week: ${{ fromJSON(needs.plan.outputs.ml) }}
     defaults:
       run:
         working-directory: ${{ matrix.week }}/backend
@@ -103,12 +146,14 @@ jobs:
       - name: Rebuild reports and model, compare with the committed release
         run: python -m ml.verify_release
 
-  # Single required check for branch protection: fails if any job above failed or was cancelled.
+  # Single required check for branch protection: fails if the plan failed, or any job it asked for failed or
+  # was cancelled. A job the plan skipped (nothing in it changed) counts as passing.
   ci-passed:
     if: always()
-    needs: [backend, frontend, ml-reproducibility]
+    needs: [plan, backend, frontend, ml-reproducibility]
     runs-on: ubuntu-latest
     steps:
       - run: |
-          [ "${{ needs.backend.result }}" = "success" ] && [ "${{ needs.frontend.result }}" = "success" ] \
-            && [ "${{ needs.ml-reproducibility.result }}" = "success" ]
+          ok() { [ "$1" = "success" ] || [ "$1" = "skipped" ]; }
+          [ "${{ needs.plan.result }}" = "success" ] && ok "${{ needs.backend.result }}" \
+            && ok "${{ needs.frontend.result }}" && ok "${{ needs.ml-reproducibility.result }}"

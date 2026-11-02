@@ -1,0 +1,9132 @@
+{
+  "disclaimer": "Exploratory clustering of synthetic, fictional engagement data. Clusters describe booking patterns, not categories of people, and are never a medical or personal assessment.",
+  "control": {
+    "label": "Positive-control data with planted habits (fictional), not real patients",
+    "patients": 1500,
+    "seed": 7,
+    "k": 3,
+    "pca_variance": [
+      0.35137421309014355,
+      0.2591676404604878
+    ],
+    "ari": 0.51786239486612,
+    "recovery": "partially recovered",
+    "clusters": [
+      {
+        "cluster": 0,
+        "size": 420,
+        "share": 0.28,
+        "profile": {
+          "mean_lead_time": 9.32425344496773,
+          "telehealth_share": 0.7531843421129135,
+          "phone_share": 0.12308346415489271,
+          "app_share": 0.7331666812023955,
+          "mean_hour": 16.320582592011164,
+          "appointments": 3.9571428571428573
+        },
+        "description": "Books in the app more often; more telehealth visits; later appointment times.",
+        "most_common_planted_habit": {
+          "habit": "telehealth app users",
+          "share": 0.85
+        }
+      },
+      {
+        "cluster": 1,
+        "size": 359,
+        "share": 0.23933333333333334,
+        "profile": {
+          "mean_lead_time": 29.409856523853737,
+          "telehealth_share": 0.13644050935137286,
+          "phone_share": 0.12784962638723085,
+          "app_share": 0.1849128973780784,
+          "mean_hour": 10.482791705354378,
+          "appointments": 4.022284122562674
+        },
+        "description": "Books further ahead; earlier appointment times; books by phone less often.",
+        "most_common_planted_habit": {
+          "habit": "early planners",
+          "share": 0.8607242339832869
+        }
+      },
+      {
+        "cluster": 2,
+        "size": 721,
+        "share": 0.4806666666666667,
+        "profile": {
+          "mean_lead_time": 6.0607635198828,
+          "telehealth_share": 0.19901706784508444,
+          "phone_share": 0.5307290259440052,
+          "app_share": 0.16181534985279783,
+          "mean_hour": 13.502539612491072,
+          "appointments": 4.109570041608877
+        },
+        "description": "Books by phone more often; books closer to the date; books in the app less often.",
+        "most_common_planted_habit": {
+          "habit": "last-minute phone bookers",
+          "share": 0.5228848821081831
+        }
+      }
+    ],
+    "points": [
+      {
+        "x": 0.652,
+        "y": -0.272,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.393,
+        "y": -0.516,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.309,
+        "y": 1.436,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 2.255,
+        "y": -1.004,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.444,
+        "y": 1.252,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.205,
+        "y": 0.042,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.635,
+        "y": 1.36,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.257,
+        "y": -0.166,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.238,
+        "y": -0.021,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.93,
+        "y": 1.439,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.442,
+        "y": -0.325,
+        "cluster": 0,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.268,
+        "y": -1.362,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.183,
+        "y": -0.272,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.438,
+        "y": 0.944,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.681,
+        "y": 0.414,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.563,
+        "y": -0.123,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.612,
+        "y": 0.03,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.781,
+        "y": -1.583,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.882,
+        "y": 1.359,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.552,
+        "y": -0.82,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.505,
+        "y": -1.572,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.346,
+        "y": 0.539,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.181,
+        "y": -0.93,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.206,
+        "y": 0.548,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 2.6,
+        "y": -0.552,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.112,
+        "y": 0.543,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.427,
+        "y": 1.764,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.37,
+        "y": 1.032,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.072,
+        "y": 0.357,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.169,
+        "y": 0.81,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.255,
+        "y": 0.054,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.956,
+        "y": -0.455,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.86,
+        "y": -0.786,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.483,
+        "y": 0.244,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.359,
+        "y": 1.124,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.734,
+        "y": 0.972,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.832,
+        "y": -0.439,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.614,
+        "y": -0.094,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.804,
+        "y": 0.925,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.302,
+        "y": 1.161,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.47,
+        "y": -0.727,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.235,
+        "y": -0.099,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.265,
+        "y": -1.29,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.025,
+        "y": 1.515,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.407,
+        "y": 0.701,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.401,
+        "y": -0.917,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.11,
+        "y": -0.886,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.288,
+        "y": 0.098,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.623,
+        "y": -0.408,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.508,
+        "y": -1.111,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.582,
+        "y": 0.134,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.894,
+        "y": -1.323,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.012,
+        "y": 0.194,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.038,
+        "y": -1.171,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.27,
+        "y": -0.317,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.527,
+        "y": -0.847,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 3.159,
+        "y": -1.668,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.532,
+        "y": 0.768,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 2.712,
+        "y": -0.421,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.018,
+        "y": -1.409,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.322,
+        "y": -0.659,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.318,
+        "y": -0.849,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.149,
+        "y": 1.244,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.143,
+        "y": -1.206,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.369,
+        "y": 1.062,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.505,
+        "y": 0.696,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.157,
+        "y": -1.455,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.211,
+        "y": -0.155,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.246,
+        "y": 1.517,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.289,
+        "y": -0.608,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.966,
+        "y": -0.422,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.54,
+        "y": 0.642,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.564,
+        "y": -0.214,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.142,
+        "y": -0.86,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.985,
+        "y": -1.126,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.555,
+        "y": 1.715,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.864,
+        "y": -0.712,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.015,
+        "y": 1.982,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.815,
+        "y": -0.649,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.211,
+        "y": -0.887,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.213,
+        "y": -0.978,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.753,
+        "y": -0.536,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.379,
+        "y": 1.687,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 3.165,
+        "y": -1.146,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.023,
+        "y": 0.559,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.193,
+        "y": 0.528,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.142,
+        "y": -0.832,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.411,
+        "y": -1.3,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.456,
+        "y": -1.112,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.817,
+        "y": 0.78,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.951,
+        "y": -0.542,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.592,
+        "y": -0.383,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.458,
+        "y": -0.169,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.191,
+        "y": 0.119,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 2.362,
+        "y": -0.738,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.525,
+        "y": -0.042,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.673,
+        "y": -0.327,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.747,
+        "y": -0.589,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.561,
+        "y": -0.219,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.603,
+        "y": 1.828,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.449,
+        "y": 0.325,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.773,
+        "y": -0.587,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.333,
+        "y": 0.363,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.828,
+        "y": 0.355,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.694,
+        "y": -1.283,
+        "cluster": 1,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.024,
+        "y": 1.248,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.803,
+        "y": 1.156,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.364,
+        "y": -1.477,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.534,
+        "y": -1.545,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.667,
+        "y": -0.563,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 3.882,
+        "y": -1.133,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.239,
+        "y": 1.036,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.336,
+        "y": 0.703,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.172,
+        "y": 1.037,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.345,
+        "y": 1.404,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.935,
+        "y": -0.319,
+        "cluster": 0,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.341,
+        "y": -1.078,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.35,
+        "y": -0.211,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.618,
+        "y": 0.324,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.53,
+        "y": 0.499,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.838,
+        "y": -0.087,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.378,
+        "y": 1.091,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.088,
+        "y": 1.268,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.315,
+        "y": 0.286,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.459,
+        "y": 0.363,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.956,
+        "y": -1.297,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.609,
+        "y": -1.088,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.56,
+        "y": 1.696,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.191,
+        "y": 0.562,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.071,
+        "y": -0.095,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.304,
+        "y": -0.239,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.603,
+        "y": 1.181,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.203,
+        "y": -0.086,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.69,
+        "y": -0.924,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.843,
+        "y": 0.721,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.99,
+        "y": -1.45,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.269,
+        "y": 1.446,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.449,
+        "y": -0.611,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.928,
+        "y": -0.965,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.202,
+        "y": 0.49,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.533,
+        "y": 0.018,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.756,
+        "y": 0.222,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.393,
+        "y": -1.036,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.146,
+        "y": -0.076,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.624,
+        "y": 0.454,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.39,
+        "y": -1.165,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.609,
+        "y": 0.832,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.062,
+        "y": 0.158,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.475,
+        "y": -0.191,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.402,
+        "y": -0.589,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.01,
+        "y": -1.09,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.688,
+        "y": -0.547,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.152,
+        "y": 0.682,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.06,
+        "y": -0.915,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.321,
+        "y": 1.14,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.503,
+        "y": 0.951,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.464,
+        "y": 1.798,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.427,
+        "y": 0.356,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.778,
+        "y": 0.034,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.307,
+        "y": -0.907,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.499,
+        "y": 1.04,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.39,
+        "y": 1.09,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.832,
+        "y": -1.51,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.334,
+        "y": 0.437,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.878,
+        "y": -0.174,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.528,
+        "y": 1.445,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.817,
+        "y": 0.657,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.523,
+        "y": 0.646,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.672,
+        "y": 0.137,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.134,
+        "y": 0.232,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.32,
+        "y": -0.362,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.627,
+        "y": 1.495,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.954,
+        "y": 0.393,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.215,
+        "y": -0.704,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.46,
+        "y": 0.002,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.113,
+        "y": 0.174,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.431,
+        "y": 1.73,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.518,
+        "y": -0.426,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.486,
+        "y": -1.473,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.587,
+        "y": 1.71,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.378,
+        "y": 0.54,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.375,
+        "y": 0.993,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.288,
+        "y": -0.562,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.071,
+        "y": 0.908,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.289,
+        "y": 1.8,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.158,
+        "y": 0.532,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.021,
+        "y": -0.594,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.143,
+        "y": 1.045,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.314,
+        "y": 0.885,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.627,
+        "y": 0.414,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.484,
+        "y": 0.449,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.424,
+        "y": 0.679,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.027,
+        "y": -1.241,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.197,
+        "y": 0.279,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.246,
+        "y": 0.853,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.962,
+        "y": -1.477,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.233,
+        "y": 1.797,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.039,
+        "y": 0.233,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.578,
+        "y": -0.37,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.417,
+        "y": -1.419,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.121,
+        "y": -0.104,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.535,
+        "y": 0.916,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.816,
+        "y": -0.758,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.596,
+        "y": 1.097,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.722,
+        "y": 0.548,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.072,
+        "y": 1.686,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.077,
+        "y": 0.217,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.594,
+        "y": 0.141,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.382,
+        "y": 1.126,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.425,
+        "y": -0.558,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.514,
+        "y": 0.529,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.913,
+        "y": -0.083,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.386,
+        "y": 0.623,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.322,
+        "y": 0.664,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.553,
+        "y": 0.55,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.817,
+        "y": -1.228,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.678,
+        "y": -0.98,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.102,
+        "y": 0.204,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.657,
+        "y": -1.36,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.08,
+        "y": 1.097,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.577,
+        "y": -0.186,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.524,
+        "y": -0.229,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.989,
+        "y": 0.791,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.572,
+        "y": 1.856,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.329,
+        "y": 0.649,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.554,
+        "y": 0.797,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.057,
+        "y": 0.395,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.668,
+        "y": 1.132,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.71,
+        "y": 1.622,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.37,
+        "y": -0.533,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.151,
+        "y": 1.133,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.197,
+        "y": 0.254,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.834,
+        "y": -0.652,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.399,
+        "y": 0.189,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.793,
+        "y": -0.293,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.947,
+        "y": 0.099,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.606,
+        "y": 0.198,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.597,
+        "y": 1.6,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.722,
+        "y": -0.658,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.136,
+        "y": -0.005,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.391,
+        "y": 1.042,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.307,
+        "y": 1.081,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.722,
+        "y": -0.807,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.572,
+        "y": 1.856,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.569,
+        "y": 1.501,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.483,
+        "y": -0.835,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.403,
+        "y": -0.899,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.64,
+        "y": 0.842,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.551,
+        "y": 0.687,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.095,
+        "y": 1.215,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.372,
+        "y": -1.257,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.111,
+        "y": -1.932,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.066,
+        "y": 0.859,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.407,
+        "y": -0.28,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.238,
+        "y": 0.315,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.484,
+        "y": 0.869,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.106,
+        "y": -0.147,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.015,
+        "y": 0.611,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.186,
+        "y": -1.431,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.776,
+        "y": -1.663,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.117,
+        "y": -0.241,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.824,
+        "y": 0.606,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.004,
+        "y": 0.503,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.159,
+        "y": -0.705,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.252,
+        "y": 0.802,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.333,
+        "y": -0.309,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.75,
+        "y": -1.361,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.251,
+        "y": 0.738,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.12,
+        "y": 0.828,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.132,
+        "y": -1.46,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.334,
+        "y": 1.569,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.68,
+        "y": 0.182,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.244,
+        "y": -1.447,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.621,
+        "y": 0.668,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.536,
+        "y": -1.226,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.037,
+        "y": -0.559,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.243,
+        "y": -0.711,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.964,
+        "y": 0.394,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.008,
+        "y": -1.185,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.935,
+        "y": 0.264,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.13,
+        "y": 0.642,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.683,
+        "y": -0.27,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.204,
+        "y": -0.254,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.184,
+        "y": 0.281,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.123,
+        "y": -0.617,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.328,
+        "y": -0.961,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.771,
+        "y": -0.711,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.305,
+        "y": -1.314,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.449,
+        "y": -0.388,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.119,
+        "y": 0.976,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.189,
+        "y": 0.133,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.072,
+        "y": 0.493,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.74,
+        "y": 0.34,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.064,
+        "y": 0.26,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.131,
+        "y": -1.193,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.718,
+        "y": 1.351,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.334,
+        "y": 0.927,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.562,
+        "y": -1.002,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.835,
+        "y": -0.305,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.224,
+        "y": -0.715,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.013,
+        "y": -0.062,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.119,
+        "y": 1.021,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.188,
+        "y": 1.155,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.737,
+        "y": -0.557,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.507,
+        "y": 1.733,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.635,
+        "y": 1.36,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.16,
+        "y": -0.226,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.364,
+        "y": 1.084,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.698,
+        "y": -1.703,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.693,
+        "y": 1.226,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.551,
+        "y": -1.063,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.403,
+        "y": 1.081,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.689,
+        "y": 1.54,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.597,
+        "y": -0.473,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.467,
+        "y": 0.102,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.805,
+        "y": -1.008,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.249,
+        "y": 0.855,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.543,
+        "y": -0.084,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.962,
+        "y": -0.5,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.417,
+        "y": 0.905,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.651,
+        "y": 0.25,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.153,
+        "y": 0.91,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.147,
+        "y": 0.498,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.564,
+        "y": 0.022,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.225,
+        "y": 0.313,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.23,
+        "y": -0.335,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.507,
+        "y": 0.129,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.988,
+        "y": -0.917,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.268,
+        "y": -0.695,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.1,
+        "y": -1.006,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.282,
+        "y": -1.602,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.541,
+        "y": -1.054,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.013,
+        "y": 0.148,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.086,
+        "y": 0.521,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.503,
+        "y": -0.166,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.965,
+        "y": 0.419,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 3.076,
+        "y": -1.144,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.68,
+        "y": -0.524,
+        "cluster": 0,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.365,
+        "y": -0.089,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.589,
+        "y": 0.363,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.431,
+        "y": -0.609,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.381,
+        "y": 0.406,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.071,
+        "y": 0.213,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.255,
+        "y": -0.471,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.115,
+        "y": -0.053,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.163,
+        "y": 0.516,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.489,
+        "y": 0.756,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.359,
+        "y": -0.344,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.287,
+        "y": 0.747,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.815,
+        "y": -1.115,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.132,
+        "y": -0.363,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.316,
+        "y": 0.978,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.39,
+        "y": -0.005,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.161,
+        "y": 0.085,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.053,
+        "y": 0.999,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.3,
+        "y": 1.464,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.302,
+        "y": 0.544,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.089,
+        "y": 0.212,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.599,
+        "y": 1.174,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.392,
+        "y": -0.32,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.026,
+        "y": -0.399,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.41,
+        "y": 0.551,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.207,
+        "y": 0.081,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.574,
+        "y": 0.469,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.009,
+        "y": 0.014,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.844,
+        "y": 0.1,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.83,
+        "y": -0.741,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.268,
+        "y": 0.026,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.781,
+        "y": -0.121,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.021,
+        "y": 0.274,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.529,
+        "y": 0.361,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 2.116,
+        "y": 0.208,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.286,
+        "y": -0.356,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.592,
+        "y": 0.687,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.415,
+        "y": -1.258,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.074,
+        "y": -1.308,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.33,
+        "y": -0.883,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.631,
+        "y": 1.007,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.697,
+        "y": 0.709,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.349,
+        "y": 0.431,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.36,
+        "y": 1.54,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.913,
+        "y": -0.843,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.527,
+        "y": 0.643,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.776,
+        "y": -0.748,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.233,
+        "y": -0.714,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.228,
+        "y": 0.195,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.496,
+        "y": 0.029,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.949,
+        "y": 0.492,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 3.041,
+        "y": -0.615,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.785,
+        "y": -1.25,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.865,
+        "y": -0.901,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.744,
+        "y": -0.474,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.127,
+        "y": -1.75,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.238,
+        "y": 1.533,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.416,
+        "y": 0.467,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.882,
+        "y": 0.692,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.189,
+        "y": 1.482,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.189,
+        "y": 1.658,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.179,
+        "y": -0.116,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.319,
+        "y": -1.252,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.271,
+        "y": -0.684,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.994,
+        "y": -0.864,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.769,
+        "y": -0.253,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.833,
+        "y": -0.641,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.231,
+        "y": -0.879,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.563,
+        "y": 1.095,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 2.022,
+        "y": -0.497,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.461,
+        "y": -1.333,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.695,
+        "y": -1.21,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.137,
+        "y": 0.565,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.696,
+        "y": 0.497,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.105,
+        "y": -0.182,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.789,
+        "y": -1.083,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.212,
+        "y": 0.002,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.787,
+        "y": -0.543,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.534,
+        "y": 0.303,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.76,
+        "y": 0.319,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.693,
+        "y": 0.639,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.607,
+        "y": -0.046,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.164,
+        "y": 0.129,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.313,
+        "y": 0.496,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.002,
+        "y": -0.232,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.084,
+        "y": -1.162,
+        "cluster": 0,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.061,
+        "y": 0.065,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.243,
+        "y": -1.513,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.655,
+        "y": 0.389,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.364,
+        "y": 0.537,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.753,
+        "y": -0.659,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.021,
+        "y": -1.23,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.784,
+        "y": -0.979,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.326,
+        "y": 1.305,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.818,
+        "y": 0.801,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.347,
+        "y": -0.503,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.725,
+        "y": 0.158,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.535,
+        "y": 0.444,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.03,
+        "y": -0.422,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.043,
+        "y": 0.516,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.627,
+        "y": -0.104,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.69,
+        "y": 0.063,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.924,
+        "y": -0.962,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.751,
+        "y": -1.591,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.451,
+        "y": 1.232,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.352,
+        "y": -0.763,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 2.344,
+        "y": -1.085,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.081,
+        "y": -1.336,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.931,
+        "y": -0.758,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.545,
+        "y": 0.798,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.736,
+        "y": -0.782,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.306,
+        "y": -1.488,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.595,
+        "y": -0.488,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.769,
+        "y": -0.073,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.467,
+        "y": 1.756,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.089,
+        "y": -1.602,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.085,
+        "y": -0.571,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.726,
+        "y": -0.265,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.677,
+        "y": 0.285,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.282,
+        "y": 1.207,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.255,
+        "y": -0.203,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 2.865,
+        "y": -0.806,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.484,
+        "y": -0.971,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.506,
+        "y": 0.045,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.615,
+        "y": -1.492,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.757,
+        "y": 0.691,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.247,
+        "y": 0.251,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.257,
+        "y": -0.718,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.467,
+        "y": 1.756,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.612,
+        "y": 1.327,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.021,
+        "y": 0.561,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.619,
+        "y": -0.935,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.432,
+        "y": -0.889,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.123,
+        "y": -0.943,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.656,
+        "y": 0.239,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.045,
+        "y": 0.353,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.664,
+        "y": 0.825,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.596,
+        "y": -0.042,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.324,
+        "y": -1.47,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.174,
+        "y": -0.462,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.898,
+        "y": -0.974,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.45,
+        "y": 0.25,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.063,
+        "y": 0.934,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.284,
+        "y": -1.463,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.041,
+        "y": 0.629,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.844,
+        "y": 0.403,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.147,
+        "y": -0.759,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.386,
+        "y": -1.369,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.215,
+        "y": -0.229,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.163,
+        "y": -0.951,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.606,
+        "y": -1.502,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.319,
+        "y": 0.254,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.187,
+        "y": 0.799,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.807,
+        "y": 1.318,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.081,
+        "y": 0.118,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.875,
+        "y": -1.885,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.964,
+        "y": -1.361,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.504,
+        "y": -1.19,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.803,
+        "y": 0.929,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.937,
+        "y": -0.332,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.791,
+        "y": 0.126,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.228,
+        "y": -1.118,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.346,
+        "y": -0.491,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.233,
+        "y": -0.214,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.656,
+        "y": 1.392,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 3.325,
+        "y": -0.831,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.22,
+        "y": 0.121,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.968,
+        "y": -1.774,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.429,
+        "y": -0.402,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.505,
+        "y": -0.008,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.139,
+        "y": 0.041,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.297,
+        "y": 0.924,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.006,
+        "y": 0.792,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 2.072,
+        "y": -0.672,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.097,
+        "y": -0.73,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.291,
+        "y": 1.426,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.301,
+        "y": 0.706,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.112,
+        "y": -0.833,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.071,
+        "y": -0.405,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.771,
+        "y": 0.181,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.942,
+        "y": -0.45,
+        "cluster": 0,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.562,
+        "y": -0.527,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.016,
+        "y": -0.186,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.553,
+        "y": -0.283,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.302,
+        "y": -0.462,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.004,
+        "y": -0.796,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.419,
+        "y": -1.7,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.49,
+        "y": -0.023,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.369,
+        "y": 1.021,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.717,
+        "y": 0.599,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.273,
+        "y": -1.343,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.599,
+        "y": 1.607,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.129,
+        "y": -1.282,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.627,
+        "y": -0.202,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.394,
+        "y": -0.351,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.289,
+        "y": -0.32,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.432,
+        "y": -0.449,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.495,
+        "y": 0.81,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.52,
+        "y": -1.52,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.043,
+        "y": -1.016,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.299,
+        "y": -0.529,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.071,
+        "y": 0.66,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.298,
+        "y": -0.091,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.136,
+        "y": -0.949,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.806,
+        "y": -0.211,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.328,
+        "y": 1.463,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.293,
+        "y": -0.799,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.606,
+        "y": 0.395,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.407,
+        "y": 1.324,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.179,
+        "y": -0.995,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.128,
+        "y": 0.478,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.046,
+        "y": 0.082,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.459,
+        "y": 0.685,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 2.298,
+        "y": -0.232,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.011,
+        "y": 0.68,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.474,
+        "y": 1.137,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.049,
+        "y": -0.417,
+        "cluster": 0,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.697,
+        "y": 0.972,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.306,
+        "y": 0.918,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.471,
+        "y": 0.026,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.951,
+        "y": -0.404,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.231,
+        "y": 0.08,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.017,
+        "y": -0.556,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.479,
+        "y": -0.116,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.308,
+        "y": -0.013,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.491,
+        "y": -0.254,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.3,
+        "y": 0.027,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.739,
+        "y": 1.71,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.138,
+        "y": 1.347,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.964,
+        "y": -1.616,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.877,
+        "y": 0.209,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.63,
+        "y": 0.279,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.473,
+        "y": -0.297,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.008,
+        "y": -0.436,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.316,
+        "y": -1.614,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.512,
+        "y": -0.76,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.427,
+        "y": 0.905,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.443,
+        "y": 0.869,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.788,
+        "y": 0.583,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.96,
+        "y": 0.341,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.632,
+        "y": -0.363,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.294,
+        "y": 0.502,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.252,
+        "y": 1.147,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.386,
+        "y": 1.312,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.061,
+        "y": -1.634,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.338,
+        "y": -1.13,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.602,
+        "y": -0.076,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.311,
+        "y": 0.055,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.41,
+        "y": -0.046,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.974,
+        "y": -0.414,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.367,
+        "y": -0.712,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.798,
+        "y": 0.305,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.715,
+        "y": 1.299,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.556,
+        "y": 0.624,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.602,
+        "y": -1.606,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.397,
+        "y": 0.667,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 2.88,
+        "y": -0.661,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.985,
+        "y": -1.126,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.322,
+        "y": 0.273,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.465,
+        "y": 0.403,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.024,
+        "y": -1.709,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.644,
+        "y": -1.247,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.627,
+        "y": 1.884,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.767,
+        "y": -0.447,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.618,
+        "y": 0.465,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.42,
+        "y": -1.242,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.369,
+        "y": 0.814,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.07,
+        "y": -1.062,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.519,
+        "y": -0.319,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.198,
+        "y": -1.597,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.045,
+        "y": 0.204,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.292,
+        "y": -1.579,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.489,
+        "y": 1.724,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.216,
+        "y": -0.212,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.805,
+        "y": -0.029,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.922,
+        "y": -1.278,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.622,
+        "y": 1.466,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.262,
+        "y": -0.508,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.272,
+        "y": 0.977,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.757,
+        "y": 0.621,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.106,
+        "y": -0.637,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.612,
+        "y": 0.136,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.008,
+        "y": 0.657,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.72,
+        "y": 0.95,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.241,
+        "y": -1.52,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.511,
+        "y": -0.288,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.069,
+        "y": -1.496,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.414,
+        "y": -0.449,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.323,
+        "y": 0.675,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.905,
+        "y": -0.027,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.167,
+        "y": -0.005,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.98,
+        "y": -1.438,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.416,
+        "y": 0.604,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 2.03,
+        "y": -0.21,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.63,
+        "y": -0.992,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.397,
+        "y": 0.777,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.42,
+        "y": 1.303,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.239,
+        "y": 0.656,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.478,
+        "y": -0.053,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.456,
+        "y": -0.528,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.387,
+        "y": 1.681,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.164,
+        "y": -1.123,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.258,
+        "y": -0.246,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.397,
+        "y": 0.074,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.76,
+        "y": -1.143,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.553,
+        "y": 0.454,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.15,
+        "y": 1.257,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.481,
+        "y": 0.92,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.406,
+        "y": -0.453,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.27,
+        "y": -0.09,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.052,
+        "y": 0.789,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.992,
+        "y": -1.166,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.038,
+        "y": -0.022,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.992,
+        "y": 0.061,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.11,
+        "y": 1.19,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.987,
+        "y": 0.355,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.745,
+        "y": -0.329,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.05,
+        "y": -0.698,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.71,
+        "y": -0.011,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.275,
+        "y": 1.146,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.818,
+        "y": 0.575,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.914,
+        "y": -0.972,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.389,
+        "y": -0.742,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.633,
+        "y": 0.371,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.278,
+        "y": 0.119,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.295,
+        "y": -0.942,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.072,
+        "y": -0.998,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.446,
+        "y": -1.02,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.593,
+        "y": 0.036,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.523,
+        "y": 0.195,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.78,
+        "y": 0.134,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.796,
+        "y": -0.66,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.894,
+        "y": 0.136,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 2.447,
+        "y": 0.088,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.801,
+        "y": -1.32,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.451,
+        "y": -0.099,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.876,
+        "y": -0.724,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.266,
+        "y": 0.559,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.994,
+        "y": -1.291,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.646,
+        "y": -1.256,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 3.184,
+        "y": -1.318,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.98,
+        "y": -0.81,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.286,
+        "y": -1.27,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.031,
+        "y": 0.33,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.679,
+        "y": 0.242,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.079,
+        "y": 0.505,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.078,
+        "y": -0.399,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.092,
+        "y": -1.329,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.798,
+        "y": -1.446,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.009,
+        "y": 0.673,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.613,
+        "y": 0.692,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.712,
+        "y": -0.394,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.856,
+        "y": 0.185,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.453,
+        "y": -0.301,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.613,
+        "y": 0.297,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.382,
+        "y": 0.909,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.492,
+        "y": -0.432,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.159,
+        "y": 0.813,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.493,
+        "y": -0.346,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.172,
+        "y": 0.587,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.137,
+        "y": 1.16,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.157,
+        "y": -1.321,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.745,
+        "y": 0.618,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.374,
+        "y": 0.988,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.022,
+        "y": 1.771,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.664,
+        "y": 0.347,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.472,
+        "y": 0.641,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.873,
+        "y": -1.824,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.125,
+        "y": -0.213,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.935,
+        "y": -0.701,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.506,
+        "y": 1.024,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.009,
+        "y": -0.615,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.569,
+        "y": -1.078,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.982,
+        "y": -1.128,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.144,
+        "y": -0.684,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.244,
+        "y": -1.08,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.735,
+        "y": -0.303,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.54,
+        "y": -1.068,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.381,
+        "y": 1.275,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.534,
+        "y": -1.476,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.985,
+        "y": -0.904,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.225,
+        "y": -0.369,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.268,
+        "y": -0.519,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.912,
+        "y": 0.241,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.284,
+        "y": -0.29,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.311,
+        "y": -0.279,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.701,
+        "y": 0.646,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.589,
+        "y": 0.145,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.674,
+        "y": 0.89,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.175,
+        "y": -0.257,
+        "cluster": 0,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.09,
+        "y": -0.713,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.029,
+        "y": -0.333,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.029,
+        "y": 0.439,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.108,
+        "y": 0.479,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.182,
+        "y": 1.455,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.616,
+        "y": 0.91,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.119,
+        "y": 0.755,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.884,
+        "y": 0.462,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.06,
+        "y": 0.186,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.894,
+        "y": -1.395,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.847,
+        "y": 0.35,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.841,
+        "y": -0.806,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.33,
+        "y": -0.179,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.089,
+        "y": 0.284,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.553,
+        "y": 1.605,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.868,
+        "y": 0.843,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.161,
+        "y": 1.394,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 2.718,
+        "y": -0.575,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.204,
+        "y": 1.273,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.258,
+        "y": -0.094,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.374,
+        "y": -0.361,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.029,
+        "y": 1.027,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.005,
+        "y": 1.616,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.167,
+        "y": 0.387,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.648,
+        "y": -0.088,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.618,
+        "y": 1.666,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.186,
+        "y": 0.731,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.028,
+        "y": 2.114,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.107,
+        "y": 0.4,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.085,
+        "y": -1.906,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.246,
+        "y": -1.004,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.135,
+        "y": 1.134,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.492,
+        "y": -0.449,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.746,
+        "y": 1.838,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.537,
+        "y": 0.358,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.268,
+        "y": 1.235,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.452,
+        "y": -0.272,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.398,
+        "y": 1.522,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 3.463,
+        "y": -1.315,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.448,
+        "y": 0.11,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.234,
+        "y": -1.181,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.203,
+        "y": -0.407,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.942,
+        "y": -0.886,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.101,
+        "y": -0.873,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.885,
+        "y": 0.194,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.876,
+        "y": -0.903,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.668,
+        "y": -0.07,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.71,
+        "y": 0.173,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.296,
+        "y": -0.682,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.595,
+        "y": -0.818,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.653,
+        "y": -0.852,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.451,
+        "y": 0.89,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.376,
+        "y": -0.473,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.554,
+        "y": 1.649,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.977,
+        "y": -0.554,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.249,
+        "y": -0.409,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.649,
+        "y": 1.678,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.4,
+        "y": -0.824,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.107,
+        "y": -0.543,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.542,
+        "y": 1.231,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.02,
+        "y": 0.539,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.213,
+        "y": 1.994,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.494,
+        "y": 1.275,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.376,
+        "y": -0.532,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.264,
+        "y": -1.159,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.851,
+        "y": -0.116,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.854,
+        "y": -0.013,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.964,
+        "y": 0.629,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.616,
+        "y": -0.212,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.411,
+        "y": -0.501,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.96,
+        "y": 0.341,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.572,
+        "y": 1.026,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.846,
+        "y": -0.467,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.715,
+        "y": 0.06,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.055,
+        "y": -0.56,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.864,
+        "y": -1.61,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.714,
+        "y": -0.783,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.364,
+        "y": 0.965,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.735,
+        "y": 0.314,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.832,
+        "y": 0.86,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.735,
+        "y": -0.939,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.385,
+        "y": 1.426,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.543,
+        "y": 0.847,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.219,
+        "y": 0.825,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.418,
+        "y": -0.083,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.531,
+        "y": 0.884,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.685,
+        "y": -1.926,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.049,
+        "y": 0.31,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.54,
+        "y": 0.519,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.841,
+        "y": 0.573,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.739,
+        "y": -0.822,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.443,
+        "y": 0.17,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.121,
+        "y": 0.458,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.151,
+        "y": -0.391,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.414,
+        "y": -1.67,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.248,
+        "y": -1.109,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.684,
+        "y": 0.299,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.572,
+        "y": -0.362,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.112,
+        "y": -1.225,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.921,
+        "y": -1.596,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.944,
+        "y": -0.199,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.327,
+        "y": -0.963,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.655,
+        "y": 1.252,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.031,
+        "y": 0.53,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.876,
+        "y": 0.683,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.733,
+        "y": -1.013,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.817,
+        "y": -0.74,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.359,
+        "y": -0.167,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.298,
+        "y": -1.793,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.303,
+        "y": 1.114,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.124,
+        "y": 0.3,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.354,
+        "y": -0.425,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.1,
+        "y": -0.443,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.646,
+        "y": -0.824,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.283,
+        "y": -0.917,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.801,
+        "y": -1.382,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.047,
+        "y": -0.286,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.279,
+        "y": 1.919,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.44,
+        "y": -0.83,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.363,
+        "y": 0.179,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.52,
+        "y": 0.808,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.819,
+        "y": -0.363,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.241,
+        "y": 1.146,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.249,
+        "y": -0.176,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.496,
+        "y": -0.386,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.314,
+        "y": -0.526,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.155,
+        "y": 1.057,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.547,
+        "y": 0.689,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 2.191,
+        "y": -0.462,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.634,
+        "y": -0.642,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.361,
+        "y": -0.519,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.255,
+        "y": -0.381,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.811,
+        "y": -0.644,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.335,
+        "y": -0.299,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.103,
+        "y": 0.188,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.993,
+        "y": -0.762,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.502,
+        "y": -0.464,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.402,
+        "y": -0.215,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.003,
+        "y": -1.317,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.143,
+        "y": 1.034,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.233,
+        "y": 0.514,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 2.752,
+        "y": -1.112,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.527,
+        "y": 1.733,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.445,
+        "y": -0.911,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.0,
+        "y": -1.037,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.545,
+        "y": -0.95,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.789,
+        "y": 1.419,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.111,
+        "y": -0.129,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.137,
+        "y": -0.4,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.896,
+        "y": -0.135,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 2.313,
+        "y": -0.669,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.214,
+        "y": -1.185,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.032,
+        "y": -1.3,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.454,
+        "y": 1.194,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.863,
+        "y": 0.059,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.209,
+        "y": 1.221,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.908,
+        "y": -0.248,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.485,
+        "y": -0.026,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.601,
+        "y": -0.02,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.944,
+        "y": 0.223,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.29,
+        "y": 1.014,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.095,
+        "y": 0.125,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.25,
+        "y": 0.59,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.331,
+        "y": -0.134,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.046,
+        "y": -1.463,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.663,
+        "y": 1.515,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.569,
+        "y": 1.501,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.408,
+        "y": -0.819,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.492,
+        "y": -1.484,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.649,
+        "y": 0.397,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.199,
+        "y": -0.821,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.08,
+        "y": -0.462,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.19,
+        "y": -0.274,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.48,
+        "y": 0.753,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.125,
+        "y": 1.34,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.801,
+        "y": -0.23,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.563,
+        "y": 0.304,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.045,
+        "y": 0.215,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.164,
+        "y": 0.051,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.587,
+        "y": -0.011,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.699,
+        "y": -0.472,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.088,
+        "y": -0.633,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.423,
+        "y": -1.582,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.143,
+        "y": -0.301,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.697,
+        "y": 0.113,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.563,
+        "y": 0.583,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.557,
+        "y": 0.548,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.562,
+        "y": 0.788,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.115,
+        "y": 0.589,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.736,
+        "y": -0.683,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.005,
+        "y": -0.554,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.26,
+        "y": -0.032,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.578,
+        "y": 0.882,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.502,
+        "y": -0.641,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.969,
+        "y": 0.77,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.183,
+        "y": -0.518,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.576,
+        "y": 0.543,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.409,
+        "y": -0.836,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.779,
+        "y": -1.064,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.489,
+        "y": 0.036,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.61,
+        "y": 1.135,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.198,
+        "y": -1.117,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.133,
+        "y": -0.747,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.636,
+        "y": 0.685,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.334,
+        "y": 1.57,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.137,
+        "y": 1.079,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.259,
+        "y": -0.622,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.239,
+        "y": 0.227,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.569,
+        "y": -1.265,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.587,
+        "y": 1.287,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.002,
+        "y": -1.135,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.428,
+        "y": 0.22,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.32,
+        "y": -1.444,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.179,
+        "y": -1.6,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.86,
+        "y": -0.189,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.474,
+        "y": -0.268,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.787,
+        "y": -1.278,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.722,
+        "y": -1.342,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.337,
+        "y": 0.028,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.361,
+        "y": 1.317,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.804,
+        "y": 0.59,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.185,
+        "y": 0.405,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.518,
+        "y": 0.594,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.074,
+        "y": -0.612,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.166,
+        "y": 1.337,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.559,
+        "y": 1.553,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.44,
+        "y": -1.49,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.338,
+        "y": 0.671,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.27,
+        "y": -0.699,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.706,
+        "y": -1.028,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.976,
+        "y": -0.492,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.236,
+        "y": -0.821,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.511,
+        "y": 0.553,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.082,
+        "y": -0.014,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.845,
+        "y": -0.567,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.62,
+        "y": 0.217,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.171,
+        "y": -0.108,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.255,
+        "y": 1.015,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.285,
+        "y": -0.542,
+        "cluster": 0,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.07,
+        "y": 0.928,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.821,
+        "y": 0.115,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.58,
+        "y": 0.157,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.161,
+        "y": -0.461,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.625,
+        "y": -0.464,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.291,
+        "y": -1.243,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.233,
+        "y": 0.086,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.548,
+        "y": -0.126,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.069,
+        "y": 1.402,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.256,
+        "y": -0.303,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.494,
+        "y": 0.008,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.155,
+        "y": -0.656,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.329,
+        "y": 1.785,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.611,
+        "y": 0.113,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.736,
+        "y": 0.585,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.849,
+        "y": 1.396,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.059,
+        "y": -1.524,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.019,
+        "y": -0.038,
+        "cluster": 0,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.817,
+        "y": -0.477,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.092,
+        "y": -0.112,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.868,
+        "y": 0.289,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.136,
+        "y": -0.438,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.508,
+        "y": 0.228,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.355,
+        "y": 0.82,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.977,
+        "y": -0.822,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.781,
+        "y": -1.09,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.175,
+        "y": -0.327,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.408,
+        "y": 0.4,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.58,
+        "y": 1.59,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.866,
+        "y": 1.792,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.02,
+        "y": 0.273,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.712,
+        "y": 0.438,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.36,
+        "y": 0.601,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.165,
+        "y": 0.115,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.596,
+        "y": 0.312,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.847,
+        "y": -0.76,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.098,
+        "y": -0.148,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.73,
+        "y": 1.408,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.825,
+        "y": 0.533,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.479,
+        "y": 0.739,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.772,
+        "y": -0.762,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.6,
+        "y": -0.786,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.606,
+        "y": 0.257,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.395,
+        "y": 1.71,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.296,
+        "y": 0.693,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.661,
+        "y": -0.632,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.463,
+        "y": 1.248,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.138,
+        "y": -0.847,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.433,
+        "y": 0.975,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.492,
+        "y": 0.966,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.152,
+        "y": 0.227,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.157,
+        "y": 0.357,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.432,
+        "y": -0.576,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.086,
+        "y": 1.213,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.591,
+        "y": 1.476,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.4,
+        "y": -0.316,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.165,
+        "y": 1.082,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.084,
+        "y": 0.368,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 2.48,
+        "y": -0.5,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.88,
+        "y": -0.812,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.148,
+        "y": -0.719,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.253,
+        "y": -0.542,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.024,
+        "y": 1.248,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.066,
+        "y": -0.122,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.187,
+        "y": 0.218,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.317,
+        "y": -1.223,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.289,
+        "y": 1.343,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.46,
+        "y": 0.319,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.488,
+        "y": 0.62,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.557,
+        "y": -0.558,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.813,
+        "y": -0.683,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.775,
+        "y": 1.537,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.553,
+        "y": 0.794,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 2.313,
+        "y": -0.765,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.187,
+        "y": -1.081,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.605,
+        "y": 1.52,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.93,
+        "y": -0.586,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.421,
+        "y": -0.325,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.861,
+        "y": -0.712,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.752,
+        "y": -1.055,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.136,
+        "y": -1.592,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.354,
+        "y": -0.202,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.029,
+        "y": 0.324,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.112,
+        "y": 1.177,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.098,
+        "y": -0.053,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.594,
+        "y": 1.407,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.286,
+        "y": -0.068,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.133,
+        "y": 0.691,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.026,
+        "y": 0.506,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.506,
+        "y": 1.236,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.973,
+        "y": 0.288,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.022,
+        "y": -1.47,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.156,
+        "y": 0.867,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.87,
+        "y": -1.755,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.377,
+        "y": -0.226,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 3.002,
+        "y": -1.139,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.214,
+        "y": -1.679,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.915,
+        "y": 0.194,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.022,
+        "y": 0.145,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.291,
+        "y": -0.316,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.762,
+        "y": -0.923,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.221,
+        "y": -0.681,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.042,
+        "y": 0.207,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.588,
+        "y": 0.961,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.351,
+        "y": -1.456,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.912,
+        "y": -0.907,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.779,
+        "y": 1.503,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.798,
+        "y": -1.392,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.729,
+        "y": 0.743,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.392,
+        "y": 0.427,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.576,
+        "y": 0.207,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.838,
+        "y": -0.602,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.654,
+        "y": -0.563,
+        "cluster": 0,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.95,
+        "y": -0.813,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.493,
+        "y": 1.628,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.391,
+        "y": -0.774,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.759,
+        "y": -1.418,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.756,
+        "y": 0.208,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.17,
+        "y": -0.263,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.611,
+        "y": 0.664,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.615,
+        "y": -0.1,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.363,
+        "y": -0.118,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.254,
+        "y": -1.001,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.53,
+        "y": 1.172,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.236,
+        "y": 0.684,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.227,
+        "y": -0.864,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.606,
+        "y": -0.205,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.161,
+        "y": 0.298,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.822,
+        "y": 1.382,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.22,
+        "y": -1.31,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.501,
+        "y": 0.091,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.944,
+        "y": -0.224,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.548,
+        "y": 1.536,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.805,
+        "y": 1.552,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.128,
+        "y": 0.333,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.062,
+        "y": 0.378,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.264,
+        "y": 0.362,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.323,
+        "y": 0.399,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.417,
+        "y": 0.878,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.343,
+        "y": 1.581,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.105,
+        "y": 1.936,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.335,
+        "y": 1.235,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.434,
+        "y": 0.958,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.448,
+        "y": -0.085,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.855,
+        "y": -0.837,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.341,
+        "y": 1.086,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 2.683,
+        "y": -0.853,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.261,
+        "y": 0.693,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.439,
+        "y": 1.08,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.805,
+        "y": -0.637,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.411,
+        "y": 1.721,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.845,
+        "y": 0.514,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.492,
+        "y": -1.105,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.646,
+        "y": 0.018,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.643,
+        "y": 0.153,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.245,
+        "y": 0.494,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.593,
+        "y": 1.516,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.376,
+        "y": -0.153,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.197,
+        "y": -0.265,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.983,
+        "y": -0.953,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.517,
+        "y": 0.906,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.579,
+        "y": -1.349,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.401,
+        "y": 0.757,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.2,
+        "y": 0.764,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.668,
+        "y": -0.119,
+        "cluster": 0,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.503,
+        "y": 0.986,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 2.821,
+        "y": -0.315,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.483,
+        "y": -0.009,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.489,
+        "y": 1.822,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.168,
+        "y": 0.432,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.148,
+        "y": -0.389,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.967,
+        "y": 1.259,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.663,
+        "y": 0.59,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.656,
+        "y": 1.178,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.524,
+        "y": 0.672,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.954,
+        "y": -0.648,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.325,
+        "y": -0.501,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.297,
+        "y": -1.247,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.658,
+        "y": 0.566,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.08,
+        "y": -0.257,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.143,
+        "y": -1.269,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.278,
+        "y": -0.254,
+        "cluster": 0,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.471,
+        "y": -0.071,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.295,
+        "y": 0.236,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.712,
+        "y": -0.561,
+        "cluster": 0,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.53,
+        "y": -0.208,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.987,
+        "y": 0.353,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.428,
+        "y": 0.485,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.901,
+        "y": 0.596,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.596,
+        "y": 0.546,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.899,
+        "y": 0.171,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.536,
+        "y": 1.639,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.065,
+        "y": 0.359,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.542,
+        "y": 0.76,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.102,
+        "y": 0.733,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.409,
+        "y": 1.041,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.603,
+        "y": 0.198,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.52,
+        "y": -1.216,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.201,
+        "y": 0.069,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.591,
+        "y": 0.841,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.399,
+        "y": 0.454,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.756,
+        "y": -0.196,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.234,
+        "y": 0.259,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.44,
+        "y": -1.49,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.677,
+        "y": 0.845,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.758,
+        "y": 0.264,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.769,
+        "y": -1.344,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.022,
+        "y": -0.551,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.115,
+        "y": -1.361,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.784,
+        "y": -1.446,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.481,
+        "y": 0.572,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.785,
+        "y": -0.065,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.122,
+        "y": -0.057,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.841,
+        "y": 0.103,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.195,
+        "y": 0.955,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.85,
+        "y": -1.301,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.132,
+        "y": 0.216,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.84,
+        "y": -1.039,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.027,
+        "y": -1.37,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.931,
+        "y": -0.731,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.04,
+        "y": -1.082,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 3.901,
+        "y": -0.764,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.015,
+        "y": -1.402,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.299,
+        "y": 1.58,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.02,
+        "y": -0.148,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.892,
+        "y": -0.078,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.444,
+        "y": -0.602,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.643,
+        "y": -0.443,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.453,
+        "y": -0.25,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.238,
+        "y": -0.407,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.551,
+        "y": 0.528,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.934,
+        "y": -0.742,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.779,
+        "y": -0.86,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.203,
+        "y": 1.273,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.559,
+        "y": 0.05,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.225,
+        "y": 0.647,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.681,
+        "y": 1.33,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.481,
+        "y": -0.127,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.715,
+        "y": -1.27,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.522,
+        "y": -1.731,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.759,
+        "y": -0.992,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.065,
+        "y": -1.316,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.603,
+        "y": -1.336,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.981,
+        "y": -0.879,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.184,
+        "y": -0.7,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.932,
+        "y": 1.319,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.212,
+        "y": -1.133,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.19,
+        "y": 0.554,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.441,
+        "y": 1.808,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.188,
+        "y": -0.306,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.505,
+        "y": 1.26,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.85,
+        "y": -1.368,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.605,
+        "y": -0.592,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.963,
+        "y": 0.825,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.451,
+        "y": -1.46,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.426,
+        "y": -0.089,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.003,
+        "y": 1.276,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.265,
+        "y": -0.353,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.201,
+        "y": -1.661,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.65,
+        "y": 1.238,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.519,
+        "y": -0.305,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.742,
+        "y": 0.925,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.323,
+        "y": 1.055,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.317,
+        "y": -0.168,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.388,
+        "y": 0.572,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.347,
+        "y": -0.202,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.041,
+        "y": 0.623,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.873,
+        "y": 0.607,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.112,
+        "y": 0.718,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.872,
+        "y": -1.688,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.061,
+        "y": 0.843,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.481,
+        "y": -0.023,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.072,
+        "y": -0.205,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.321,
+        "y": 0.712,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.532,
+        "y": -0.68,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.544,
+        "y": -0.295,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.234,
+        "y": 0.822,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.422,
+        "y": 0.563,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.963,
+        "y": -1.547,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.833,
+        "y": -0.527,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.369,
+        "y": 0.041,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.57,
+        "y": 0.11,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.034,
+        "y": -0.096,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.155,
+        "y": -0.486,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.035,
+        "y": -0.667,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.113,
+        "y": 0.04,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.128,
+        "y": 0.656,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.53,
+        "y": 0.967,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 2.148,
+        "y": -0.47,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.158,
+        "y": -0.526,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.969,
+        "y": -0.243,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.454,
+        "y": 0.547,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.21,
+        "y": 1.005,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.411,
+        "y": -1.522,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.572,
+        "y": -1.031,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.452,
+        "y": -0.499,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.052,
+        "y": 0.384,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.531,
+        "y": -0.723,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.569,
+        "y": -1.178,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.805,
+        "y": 0.434,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.9,
+        "y": 0.344,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.232,
+        "y": 0.866,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.183,
+        "y": 0.973,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.461,
+        "y": 1.409,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.569,
+        "y": 0.108,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.776,
+        "y": -1.182,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.167,
+        "y": -1.072,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.735,
+        "y": 1.391,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.239,
+        "y": 1.458,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.658,
+        "y": -0.151,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.282,
+        "y": 0.438,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.336,
+        "y": -0.692,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.056,
+        "y": -1.124,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.346,
+        "y": -1.404,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.52,
+        "y": -0.843,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.957,
+        "y": -1.261,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.399,
+        "y": 0.226,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.554,
+        "y": -0.731,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.315,
+        "y": -0.018,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.031,
+        "y": -0.467,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.721,
+        "y": -0.009,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.253,
+        "y": -1.698,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.655,
+        "y": -0.564,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.593,
+        "y": 0.96,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.26,
+        "y": -1.668,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.754,
+        "y": 0.299,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.201,
+        "y": 0.748,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.053,
+        "y": 0.326,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.225,
+        "y": -0.217,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.737,
+        "y": -1.101,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.087,
+        "y": 1.417,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.464,
+        "y": 0.846,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.837,
+        "y": 1.497,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.479,
+        "y": 1.453,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.161,
+        "y": -1.564,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.113,
+        "y": 1.777,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.861,
+        "y": -0.889,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.112,
+        "y": 0.451,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.898,
+        "y": 0.035,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 5.004,
+        "y": -1.676,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.053,
+        "y": -0.992,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.121,
+        "y": -0.106,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.288,
+        "y": -0.314,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.326,
+        "y": -0.083,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 2.073,
+        "y": -0.083,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.224,
+        "y": 1.89,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.003,
+        "y": 0.208,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.036,
+        "y": -0.657,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.144,
+        "y": -1.317,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.624,
+        "y": -1.428,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.453,
+        "y": 1.705,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.528,
+        "y": 0.069,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.826,
+        "y": -0.15,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.412,
+        "y": -0.452,
+        "cluster": 1,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 2.156,
+        "y": -1.036,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.334,
+        "y": 0.487,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.791,
+        "y": -1.818,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.678,
+        "y": 0.264,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.096,
+        "y": 0.943,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.059,
+        "y": -0.697,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.49,
+        "y": -1.426,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.487,
+        "y": 0.483,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.857,
+        "y": 0.573,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.459,
+        "y": -0.797,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.17,
+        "y": -0.048,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.08,
+        "y": 0.913,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.495,
+        "y": -0.375,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.26,
+        "y": 0.519,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.191,
+        "y": 0.154,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.743,
+        "y": -1.305,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.413,
+        "y": 0.719,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.822,
+        "y": -0.867,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.582,
+        "y": 1.05,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.081,
+        "y": 0.702,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.085,
+        "y": -0.069,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.045,
+        "y": -0.172,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.338,
+        "y": 0.274,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.122,
+        "y": -0.659,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.454,
+        "y": -0.258,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.197,
+        "y": -1.398,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.032,
+        "y": 0.88,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.65,
+        "y": -0.06,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.534,
+        "y": 0.778,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.267,
+        "y": 0.073,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.134,
+        "y": -0.15,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.79,
+        "y": -0.899,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.479,
+        "y": 1.222,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.049,
+        "y": -0.289,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.608,
+        "y": 1.04,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.912,
+        "y": -0.907,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.2,
+        "y": -0.01,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.546,
+        "y": -0.058,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.417,
+        "y": 0.753,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.423,
+        "y": 0.111,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.374,
+        "y": -0.065,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.333,
+        "y": 0.144,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.478,
+        "y": 1.515,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.3,
+        "y": 0.224,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 3.213,
+        "y": -0.92,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.57,
+        "y": -0.458,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.991,
+        "y": 0.079,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.3,
+        "y": -0.471,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.668,
+        "y": -0.016,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.406,
+        "y": -0.107,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.611,
+        "y": 1.463,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.821,
+        "y": 0.756,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.761,
+        "y": 0.438,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.213,
+        "y": 0.294,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.739,
+        "y": 0.778,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.116,
+        "y": -1.14,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.43,
+        "y": 0.996,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.137,
+        "y": 1.502,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.585,
+        "y": -1.04,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.383,
+        "y": 0.096,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.441,
+        "y": -1.474,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.019,
+        "y": 0.078,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.023,
+        "y": 0.988,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.706,
+        "y": -0.644,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.333,
+        "y": -0.035,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.102,
+        "y": -0.8,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.956,
+        "y": -0.223,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.301,
+        "y": 0.186,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.269,
+        "y": 0.845,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.487,
+        "y": 0.804,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.215,
+        "y": 1.169,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.703,
+        "y": -1.036,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.168,
+        "y": 1.325,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 2.184,
+        "y": -0.582,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.711,
+        "y": 0.612,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.381,
+        "y": 1.348,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.994,
+        "y": 0.019,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.451,
+        "y": -0.527,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.172,
+        "y": 1.141,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.75,
+        "y": 0.332,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.091,
+        "y": 0.212,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.737,
+        "y": -1.76,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.303,
+        "y": 1.664,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.487,
+        "y": 1.069,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.237,
+        "y": 0.811,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.375,
+        "y": -1.4,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.301,
+        "y": 0.185,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.648,
+        "y": 0.672,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.294,
+        "y": 0.065,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.227,
+        "y": 1.079,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.376,
+        "y": 0.414,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.389,
+        "y": 1.256,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.987,
+        "y": -0.223,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.734,
+        "y": 0.487,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 3.941,
+        "y": -1.441,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.801,
+        "y": -0.34,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.862,
+        "y": -0.848,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 1.922,
+        "y": -0.705,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.486,
+        "y": -0.077,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.756,
+        "y": 0.41,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.189,
+        "y": 0.393,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.347,
+        "y": 0.157,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.113,
+        "y": 0.11,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.024,
+        "y": -0.516,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.882,
+        "y": -0.826,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.053,
+        "y": -0.172,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.353,
+        "y": 1.386,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.237,
+        "y": -1.413,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.134,
+        "y": 0.767,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.641,
+        "y": 0.592,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.372,
+        "y": 0.68,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.901,
+        "y": 0.633,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.01,
+        "y": -0.07,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -1.317,
+        "y": -1.591,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.11,
+        "y": 0.868,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.086,
+        "y": 0.478,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.223,
+        "y": -0.278,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.246,
+        "y": 0.178,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.074,
+        "y": 0.902,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.862,
+        "y": -0.942,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.343,
+        "y": 1.15,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.992,
+        "y": -1.06,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.295,
+        "y": 1.392,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.684,
+        "y": 0.287,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.251,
+        "y": 0.065,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.135,
+        "y": 0.47,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.465,
+        "y": 1.409,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.608,
+        "y": 0.275,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.495,
+        "y": -0.938,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.911,
+        "y": -1.095,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.644,
+        "y": 1.178,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.852,
+        "y": 1.349,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.295,
+        "y": -0.529,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.02,
+        "y": 0.427,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -1.04,
+        "y": -1.847,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.262,
+        "y": 1.044,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 2.084,
+        "y": -0.453,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.015,
+        "y": 1.431,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.587,
+        "y": -1.201,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.617,
+        "y": -0.007,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.135,
+        "y": -0.389,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.585,
+        "y": 1.312,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.704,
+        "y": -0.073,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.652,
+        "y": -0.432,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.412,
+        "y": -1.247,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 1.503,
+        "y": -0.129,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.037,
+        "y": -1.1,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -1.001,
+        "y": -1.146,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.419,
+        "y": -0.773,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.092,
+        "y": -0.129,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.042,
+        "y": -0.216,
+        "cluster": 1,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.809,
+        "y": -0.798,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": 0.18,
+        "y": 0.6,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.241,
+        "y": 0.284,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.155,
+        "y": 0.558,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.913,
+        "y": -0.001,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.65,
+        "y": 0.921,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.871,
+        "y": 0.095,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.137,
+        "y": 0.008,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.615,
+        "y": -0.487,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.757,
+        "y": 1.528,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.286,
+        "y": -0.022,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.678,
+        "y": -1.897,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.96,
+        "y": 0.368,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.647,
+        "y": 0.763,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.877,
+        "y": -1.036,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 1.88,
+        "y": 0.519,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.062,
+        "y": -0.62,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.116,
+        "y": 0.73,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.482,
+        "y": 0.673,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 1.513,
+        "y": -0.282,
+        "cluster": 1,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -0.291,
+        "y": 1.426,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": 0.031,
+        "y": -0.309,
+        "cluster": 0,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": -0.302,
+        "y": -0.164,
+        "cluster": 2,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": -0.635,
+        "y": 1.057,
+        "cluster": 2,
+        "planted_habit": "last-minute phone bookers"
+      },
+      {
+        "x": -0.33,
+        "y": 0.383,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.283,
+        "y": 0.171,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      },
+      {
+        "x": 0.731,
+        "y": 0.802,
+        "cluster": 2,
+        "planted_habit": "early planners"
+      },
+      {
+        "x": -1.054,
+        "y": -1.502,
+        "cluster": 0,
+        "planted_habit": "telehealth app users"
+      },
+      {
+        "x": 0.086,
+        "y": 0.133,
+        "cluster": 2,
+        "planted_habit": "mixed"
+      }
+    ]
+  },
+  "real": {
+    "patients": 5000,
+    "k": 3,
+    "pca_variance": [
+      0.2508932095573468,
+      0.2359402140846425
+    ],
+    "structure_found": {
+      "k-means": false,
+      "agglomerative (Ward)": false
+    },
+    "silhouette": 0.16924811339778348,
+    "baseline_bar": 0.17317526382248177,
+    "appointments_share_of_split": 0.627879274329328,
+    "misleading_clusters": [
+      {
+        "cluster": 0,
+        "size": 2377,
+        "share": 0.4754,
+        "profile": {
+          "mean_lead_time": 7.913581545365306,
+          "telehealth_share": 0.24172626560089747,
+          "phone_share": 0.2884938998737905,
+          "app_share": 0.24519702706492774,
+          "mean_hour": 13.071694012060018,
+          "appointments": 2.966344131257888
+        },
+        "description": "Fewer appointments in the data; books closer to the date."
+      },
+      {
+        "cluster": 1,
+        "size": 1617,
+        "share": 0.3234,
+        "profile": {
+          "mean_lead_time": 10.537115166150414,
+          "telehealth_share": 0.24205233713582502,
+          "phone_share": 0.30305776646221916,
+          "app_share": 0.2448922255508527,
+          "mean_hour": 13.002901932122711,
+          "appointments": 5.975262832405689
+        },
+        "description": "More appointments in the data."
+      },
+      {
+        "cluster": 2,
+        "size": 1006,
+        "share": 0.2012,
+        "profile": {
+          "mean_lead_time": 21.037626621225034,
+          "telehealth_share": 0.25582930985515484,
+          "phone_share": 0.31057938085771086,
+          "app_share": 0.24014957871816717,
+          "mean_hour": 13.085290637129603,
+          "appointments": 3.3429423459244534
+        },
+        "description": "Books further ahead; fewer appointments in the data."
+      }
+    ]
+  }
+}

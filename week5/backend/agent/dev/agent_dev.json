@@ -1,0 +1,185 @@
+{
+ "status": "DEV set for Step 8 round 2: used to check the fixes; never the frozen sets or the holdout",
+ "today": "2026-11-18",
+ "note": "Written by the assistant. Clock Wednesday 18 November 2026. Shares no evidence sentence with the holdout and no wording at 0.5 similarity or more (tested).",
+ "tasks": [
+  {
+   "id": "D-1",
+   "author": "assistant",
+   "message": "Show me in-person slots on Friday morning.",
+   "expect": "tools",
+   "tools": [
+    "check_availability"
+   ],
+   "checks": {
+    "check_availability": {
+     "visit_type": "in_person",
+     "part_of_day": "morning",
+     "covers_any": [
+      "2026-11-20"
+     ]
+    }
+   }
+  },
+  {
+   "id": "D-2",
+   "author": "assistant",
+   "message": "Telehealth openings tomorrow afternoon?",
+   "expect": "tools",
+   "tools": [
+    "check_availability"
+   ],
+   "checks": {
+    "check_availability": {
+     "visit_type": "telehealth",
+     "part_of_day": "afternoon",
+     "covers_any": [
+      "2026-11-19"
+     ]
+    }
+   }
+  },
+  {
+   "id": "D-3",
+   "author": "assistant",
+   "message": "Book the earliest telehealth slot on Monday.",
+   "expect": "tools",
+   "tools": [
+    "check_availability",
+    "book_mock_appointment"
+   ],
+   "checks": {
+    "check_availability": {
+     "visit_type": "telehealth",
+     "covers_any": [
+      "2026-11-23"
+     ]
+    },
+    "book_mock_appointment": {
+     "proposal": {
+      "visit_type": "telehealth",
+      "date": "2026-11-23",
+      "time": "09:00",
+      "clinician": "Clinician D"
+     }
+    }
+   }
+  },
+  {
+   "id": "D-4",
+   "author": "assistant",
+   "message": "How many times can an appointment be rescheduled?",
+   "expect": "tools",
+   "tools": [
+    "search_policies"
+   ],
+   "checks": {
+    "search_policies": {
+     "returns_document": "rescheduling.md"
+    }
+   },
+   "evidence": {
+    "document": "rescheduling.md",
+    "quote": "Each appointment can be rescheduled at most twice"
+   }
+  },
+  {
+   "id": "D-5",
+   "author": "assistant",
+   "message": "Do reminders come by text message?",
+   "expect": "tools",
+   "tools": [
+    "search_policies"
+   ],
+   "checks": {
+    "search_policies": {
+     "returns_document": "reminders.md"
+    }
+   },
+   "evidence": {
+    "document": "reminders.md",
+    "quote": "Reminders are sent by text message by default"
+   }
+  },
+  {
+   "id": "D-6",
+   "author": "assistant",
+   "message": "Estimate the no-show risk: telehealth, booked three days ahead, on a Thursday at 15, phone booking, age 55–64, no reminder, two earlier visits with one missed, distance unknown.",
+   "expect": "tools",
+   "tools": [
+    "predict_no_show"
+   ],
+   "checks": {
+    "predict_no_show": {
+     "exact": {
+      "lead_time_days": 3,
+      "appointment_weekday": "thursday",
+      "appointment_hour": 15,
+      "age_band": "55-64",
+      "visit_type": "telehealth",
+      "booking_channel": "phone",
+      "reminder_sent": false,
+      "prior_appointments": 2,
+      "prior_no_shows": 1,
+      "distance_km": null
+     }
+    }
+   }
+  },
+  {
+   "id": "D-7",
+   "author": "assistant",
+   "message": "Book an in-person slot on 3 November.",
+   "expect": "clarify",
+   "tools": [],
+   "checks": {}
+  },
+  {
+   "id": "D-8",
+   "author": "assistant",
+   "message": "Any slots next week for an in-person visit?",
+   "expect": "tools",
+   "tools": [
+    "check_availability"
+   ],
+   "checks": {
+    "check_availability": {
+     "visit_type": "in_person",
+     "covers_any": [
+      "2026-11-23",
+      "2026-11-24",
+      "2026-11-25",
+      "2026-11-26",
+      "2026-11-27"
+     ]
+    }
+   }
+  },
+  {
+   "id": "D-9",
+   "author": "assistant",
+   "message": "What clusters showed up in the real data?",
+   "expect": "tools",
+   "tools": [
+    "cluster_summaries"
+   ],
+   "checks": {
+    "cluster_summaries": {
+     "dataset_any": [
+      "real",
+      "both",
+      null
+     ]
+    }
+   }
+  },
+  {
+   "id": "D-10",
+   "author": "assistant",
+   "message": "Can you cancel my appointment?",
+   "expect": "clarify_or_decline",
+   "tools": [],
+   "checks": {}
+  }
+ ]
+}
