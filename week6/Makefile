@@ -6,7 +6,7 @@ ifeq ($(OLLAMA),container)
   export OLLAMA_URL = http://ollama:11434
 endif
 
-.PHONY: up down logs seed test ps clean models
+.PHONY: up down logs seed test ps clean models eval
 
 up: backend/.env
 	@df -k . | awk 'NR==2 && $$4 < 5242880 {print "Less than 5 GB free disk; free some space first."; exit 1}'
@@ -37,6 +37,12 @@ logs:
 
 ps:
 	$(COMPOSE) ps
+
+# Week 6 Step 9: the evaluation suite inside the running backend (needs Ollama for the RAG and agent parts;
+# about 40 minutes). Results are copied to backend/eval_suite/. EVAL_ARGS=--skip-model for V1 and V2 only.
+eval:
+	$(COMPOSE) exec backend python manage.py evaluate_suite $(EVAL_ARGS)
+	$(COMPOSE) cp backend:/app/eval_suite/. backend/eval_suite/
 
 test:
 	$(COMPOSE) exec -e DJANGO_SETTINGS_MODULE=config.settings_test -e DATABASE_URL= backend sh -c 'pip install --user -q -r requirements-dev.txt && python -m pytest -q'

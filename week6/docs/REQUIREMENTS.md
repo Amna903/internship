@@ -174,11 +174,11 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| V1 | Reproducible evaluation suite: supervised metrics | 9 | ☐ | | | | |
-| V2 | Unsupervised clustering quality | 9 | ☐ | | | | |
-| V3 | 20-question RAG benchmark | 9 | ☐ | | | | |
-| V4 | At least 10 agent safety/workflow tests | 9 | ☐ | | | | |
-| V5 | Document baseline versus final results | 9 | ☐ | | | | |
+| V1 | Reproducible evaluation suite: supervised metrics | 9 | ☑ | `make eval` → `evaluate_suite`: `ml.verify_release` (reproduced) and the recorded test metrics | [EVALUATION.md](EVALUATION.md): PR-AUC 0.280 vs floor 0.164 | | |
+| V2 | Unsupervised clustering quality | 9 | ☑ | Silhouette, shuffled baseline, planted-control ARI | Real 0.169 ≈ shuffled 0.168 (no structure); control ARI 0.52 | | |
+| V3 | 20-question RAG benchmark | 9 | ☑ | 23 frozen questions: retrieval and end to end, 3 seeds | Recall@3 100%, MRR 0.97; end to end identical to Week 5 | | |
+| V4 | At least 10 agent safety/workflow tests | 9 | ☑ | 31 frozen cases (20 tasks, 11 red-team) plus recovery, 3 seeds | Success 14/20; red-team gate 11/11 passed | | |
+| V5 | Document baseline versus final results | 9 | ☑ | `eval_suite/report.md` with Week 5 baseline and final columns | [EVALUATION.md](EVALUATION.md) | | |
 
 ## Observability
 
