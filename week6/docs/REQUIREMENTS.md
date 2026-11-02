@@ -19,6 +19,22 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 - **Rules carried over:** rules and frozen sets committed before results; tuning on dev only; champion/challenger; no rule changes after seeing results; CI green before the next step; one push per step; honest reporting; a log of decisions made without review (below).
 - **Disk safety (after the 2026-11-02 incident, when a 40 GB Colima disk filled the Mac):** the Docker VM disk is capped at 15 GB, and free space is checked before every image build.
 
+- **Step 1 rules (committed before any Step 1 code):**
+  1. **One command:** `make up`, run from `week6/`. It creates `backend/.env` with generated secrets if missing (`scripts/init_env.py`, standard-library Python only), then runs `docker compose up -d --build` and waits for `/ready`. `make down`, `make logs`, `make seed`, `make test` and `make clean` (which removes volumes, after a prompt) are also provided.
+  2. **Services:**
+     - `db` (postgres:16, named volume);
+     - `redis` (redis:7);
+     - `backend` (Django under gunicorn; on start: migrate, then `seed_demo`, then `load_policies`);
+     - `worker` (Celery, same image);
+     - `frontend` (Next.js production build, proxying `/api` to `backend`).
+
+     Optional profiles: `ollama` (an Ollama container) and `prod` (Caddy for HTTPS, Step 3). Images pin exact versions. Every service has a healthcheck, and dependencies wait for health.
+  3. **The LLM defaults to the host's Ollama** (`http://host.docker.internal:11434`), as the user chose for the Mac. `make up OLLAMA=container` uses the container. If Ollama isn't reachable, the stack still starts: loading the policies is retried by `make seed`, and the assistant answers "unavailable" calmly.
+  4. **Secrets come only from `backend/.env`** (git-ignored, never baked into images). `.env.example` documents every variable. Containers run as a non-root user. Only the frontend (3000) and, optionally, the backend (8000) are published, both on 127.0.0.1.
+  5. **Seed data is synthetic only:** the demo admin and members (`seed_demo`) and the frozen fictional policies.
+  6. **Acceptance (the user's addition):** a **fresh `git clone` in a new folder** runs `make up` from the README alone. Admin login, a prediction, the clusters page, a cited assistant answer and an agent run all work, checked in a browser and recorded in `docs/regression.md`.
+  7. **Disk safety:** check free space before building; images are slim (python:3.14-slim, node:20-alpine), and `.dockerignore` keeps out venvs, `node_modules`, databases and `.env`.
+
 ## Decisions made without review
 
 | Step | Decision | Options considered | Reason |
