@@ -28,11 +28,18 @@ class Command(BaseCommand):
             started = time.perf_counter()
             model.predict([row])
             timings.append((time.perf_counter() - started) * 1000)
-        baseline = {"model_version": model.version, "dataset_sha256": dataset_hash(df), "split": "validation",
-                    "rows": len(rows), "bins": [round(i / 10, 1) for i in range(11)],
-                    "shares": [round(s, 4) for s in shares(probabilities)],
-                    "latency_ms": {"p50": round(float(np.percentile(timings, 50)), 2),
-                                   "p95": round(float(np.percentile(timings, 95)), 2),
-                                   "note": "single-row predictions timed on the build machine; machine-specific"}}
+        baseline = {
+            "model_version": model.version,
+            "dataset_sha256": dataset_hash(df),
+            "split": "validation",
+            "rows": len(rows),
+            "bins": [round(i / 10, 1) for i in range(11)],
+            "shares": [round(s, 4) for s in shares(probabilities)],
+            "latency_ms": {
+                "p50": round(float(np.percentile(timings, 50)), 2),
+                "p95": round(float(np.percentile(timings, 95)), 2),
+                "note": "single-row predictions timed on the build machine; machine-specific",
+            },
+        }
         BASELINE.write_text(json.dumps(baseline, indent=2) + "\n")
         self.stdout.write(f"wrote {BASELINE.name}: {len(rows)} validation rows")

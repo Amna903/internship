@@ -24,6 +24,7 @@ def test_ready_reports_each_check(client):
 def test_a_failing_dependency_makes_ready_503_without_details(client, monkeypatch, name):
     def boom():
         raise RuntimeError("postgres://user:secret@db:5432")
+
     monkeypatch.setattr(health, name, boom)
     r = client.get("/ready/")
     assert r.status_code == 503 and r.json()["status"] == "not_ready" and "secret" not in r.text
@@ -33,6 +34,7 @@ def test_a_failing_dependency_makes_ready_503_without_details(client, monkeypatc
 def test_an_unreachable_llm_does_not_gate_readiness(client, monkeypatch):
     def down():
         raise OSError("connection refused")
+
     monkeypatch.setattr(health, "_llm", down)
     r = client.get("/ready/")
     assert r.status_code == 200 and r.json()["checks"]["llm"]["status"] == "error"

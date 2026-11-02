@@ -47,8 +47,10 @@ SCORE_TOLERANCE = 0.002
 # tie margin that model selection already treats as noise.
 CUTOFF_TOLERANCE = train.TIE_MARGIN
 # Where cut-off figures live: the decision-threshold section, and the per-algorithm confusion matrices.
-CUTOFF_SECTIONS = [("## 3. Decision threshold", "## 4."),
-                   ("### Confusion matrix for each algorithm", "**About this test set.**")]
+CUTOFF_SECTIONS = [
+    ("## 3. Decision threshold", "## 4."),
+    ("### Confusion matrix for each algorithm", "**About this test set.**"),
+]
 # Confusion-matrix counts (TP, FP, FN, TN) move with the cut-off. Their tolerance is DERIVED from the same
 # CUTOFF_TOLERANCE, applied to the rate each count belongs to, using the committed row's own totals:
 #   TP, FN count no-shows: recall = TP / no-shows, so TP and FN may move floor(0.005 x no-shows) rows
@@ -65,13 +67,19 @@ def confusion_count_tolerances(cells: list[str]) -> dict[str, int]:
     """For one confusion-matrix row (cells: model, cut-off, TP, FP, FN, TN, ...), rows each count may move."""
     tp, fp, fn, tn = (int(c.replace(",", "")) for c in cells[2:6])
     no_shows, attenders = tp + fn, fp + tn
-    return {"tp": math.floor(CUTOFF_TOLERANCE * no_shows), "fn": math.floor(CUTOFF_TOLERANCE * no_shows),
-            "fp": math.floor(CUTOFF_TOLERANCE * attenders), "tn": math.floor(CUTOFF_TOLERANCE * attenders)}
+    return {
+        "tp": math.floor(CUTOFF_TOLERANCE * no_shows),
+        "fn": math.floor(CUTOFF_TOLERANCE * no_shows),
+        "fp": math.floor(CUTOFF_TOLERANCE * attenders),
+        "tn": math.floor(CUTOFF_TOLERANCE * attenders),
+    }
 
 
 def _is_confusion_row(line: str) -> bool:
     cells = [c.strip() for c in line.strip().strip("|").split("|")]
     return line.startswith("|") and len(cells) == 11 and all(re.fullmatch(r"[\d,]+", c) for c in cells[2:6])
+
+
 # Whole-percent "gap closed" column: rounded from PR-AUC, so a 0.001 move can flip the last digit.
 PERCENT_TOLERANCE = 1
 
@@ -117,8 +125,10 @@ def reports_match(committed: str, rebuilt: str) -> tuple[bool, str]:
             if "." in a and not a.endswith("%"):
                 kind = "cut-off figures" if in_cutoff else "scores"
                 worst[kind] = max(worst[kind], abs(x - y))
-    return True, (f"same text and choice; scores within {SCORE_TOLERANCE} (largest {worst['scores']:.3f}), "
-                  f"cut-off figures within {CUTOFF_TOLERANCE} (largest {worst['cut-off figures']:.3f})")
+    return True, (
+        f"same text and choice; scores within {SCORE_TOLERANCE} (largest {worst['scores']:.3f}), "
+        f"cut-off figures within {CUTOFF_TOLERANCE} (largest {worst['cut-off figures']:.3f})"
+    )
 
 
 # Tolerances for a rebuilt search, by what each number is used for. CI measured on Linux vs Mac: means moved
@@ -137,7 +147,9 @@ def tuning_matches(committed: dict, rebuilt: dict) -> tuple[bool, str]:
     for key in ["seed", "n_splits", "n_iter", "train_rows", "search_space", "chosen"]:
         if committed[key] != rebuilt[key]:
             return False, f"{key} differs: {committed[key]} became {rebuilt[key]}"
-    a_rows = [(json.dumps(x["params"]), x) for x in committed["search"]] + [(g["label"], g) for g in committed["grid_cv"]]
+    a_rows = [(json.dumps(x["params"]), x) for x in committed["search"]] + [
+        (g["label"], g) for g in committed["grid_cv"]
+    ]
     b_rows = [(json.dumps(x["params"]), x) for x in rebuilt["search"]] + [(g["label"], g) for g in rebuilt["grid_cv"]]
     if [k for k, _ in a_rows] != [k for k, _ in b_rows]:
         return False, "different settings were drawn or cross-validated"
@@ -152,8 +164,10 @@ def tuning_matches(committed: dict, rebuilt: dict) -> tuple[bool, str]:
         if fold_move > TUNING_FOLD_TOLERANCE:
             return False, f"a fold score of {key} moved {fold_move:.4f}"
         worst_mean, worst_fold = max(worst_mean, mean_move), max(worst_fold, fold_move)
-    return True, (f"same choice; means and bar within {TUNING_MEAN_TOLERANCE} (largest {worst_mean:.4f}), "
-                  f"fold scores within {TUNING_FOLD_TOLERANCE} (largest {worst_fold:.4f})")
+    return True, (
+        f"same choice; means and bar within {TUNING_MEAN_TOLERANCE} (largest {worst_mean:.4f}), "
+        f"fold scores within {TUNING_FOLD_TOLERANCE} (largest {worst_fold:.4f})"
+    )
 
 
 # Tolerances for a rebuilt clustering, by what each number is used for. CI measured on Linux vs Mac: the
@@ -192,22 +206,38 @@ def clusters_match(committed: dict, rebuilt: dict) -> tuple[bool, str]:
             for k in a["silhouette"][m]:
                 problems.append(close(a["silhouette"][m][k], b["silhouette"][m][k], f"{part} silhouette {m} k={k}"))
         for k in a["inertia"]:
-            problems.append(close(a["inertia"][k], b["inertia"][k], f"{part} inertia k={k}",
-                                  CLUSTER_INERTIA_RELATIVE * abs(a["inertia"][k])))
+            problems.append(
+                close(
+                    a["inertia"][k],
+                    b["inertia"][k],
+                    f"{part} inertia k={k}",
+                    CLUSTER_INERTIA_RELATIVE * abs(a["inertia"][k]),
+                )
+            )
     real_a, real_b = committed["real"], rebuilt["real"]
     for m, v in real_a["methods"].items():
         w = real_b["methods"][m]
         if v["structure_found"] != w["structure_found"]:
             return False, f"verdict for {m} changed"
-        if v["false_patterns"]["checks"] != w["false_patterns"]["checks"] or \
-                v["false_patterns"]["main_feature"] != w["false_patterns"]["main_feature"]:
+        if (
+            v["false_patterns"]["checks"] != w["false_patterns"]["checks"]
+            or v["false_patterns"]["main_feature"] != w["false_patterns"]["main_feature"]
+        ):
             return False, f"false-pattern result for {m} changed"
         problems.append(close(v["silhouette"], w["silhouette"], f"real silhouette {m}"))
         problems.append(close(v["baseline_bar"], w["baseline_bar"], f"baseline bar {m}"))
-        problems.append(close(float(np.median(real_a["baseline"][m])), float(np.median(real_b["baseline"][m])),
-                              f"baseline median {m}"))
-        problems.append(close(v["false_patterns"]["largest_single_share"], w["false_patterns"]["largest_single_share"],
-                              f"largest one-appointment share {m}"))
+        problems.append(
+            close(
+                float(np.median(real_a["baseline"][m])), float(np.median(real_b["baseline"][m])), f"baseline median {m}"
+            )
+        )
+        problems.append(
+            close(
+                v["false_patterns"]["largest_single_share"],
+                w["false_patterns"]["largest_single_share"],
+                f"largest one-appointment share {m}",
+            )
+        )
         for f, share in v["false_patterns"]["variance_explained"].items():
             problems.append(close(share, w["false_patterns"]["variance_explained"][f], f"variance explained {m} {f}"))
     ctl_a, ctl_b = committed["control"], rebuilt["control"]
@@ -222,32 +252,48 @@ def clusters_match(committed: dict, rebuilt: dict) -> tuple[bool, str]:
     problems = [p for p in problems if p]
     if problems:
         return False, problems[0]
-    return True, (f"same verdicts and k; silhouettes, bars, baseline medians and ARIs within {SCORE_TOLERANCE} "
-                  f"(largest {worst:.4f}); single baseline runs not compared (Ward ties, see code)")
+    return True, (
+        f"same verdicts and k; silhouettes, bars, baseline medians and ARIs within {SCORE_TOLERANCE} "
+        f"(largest {worst:.4f}); single baseline runs not compared (Ward ties, see code)"
+    )
 
 
 def tuning_diagnostics(committed: dict, rebuilt: dict) -> str:
     """Facts about a rebuilt search, printed whether or not the checks pass: same choice? how far did the
     means (what the rule uses) and single fold scores move? did any setting cross the one-SE bar?"""
+
     def means(r):
         return {json.dumps(x["params"]): x["mean"] for x in r["search"]} | {g["label"]: g["mean"] for g in r["grid_cv"]}
 
     def folds(r):
-        return {json.dumps(x["params"]): x["fold_scores"] for x in r["search"]} | {g["label"]: g["fold_scores"]
-                                                                                    for g in r["grid_cv"]}
+        return {json.dumps(x["params"]): x["fold_scores"] for x in r["search"]} | {
+            g["label"]: g["fold_scores"] for g in r["grid_cv"]
+        }
 
     m_a, m_b, f_a, f_b = means(committed), means(rebuilt), folds(committed), folds(rebuilt)
     mean_diff = max(abs(m_a[k] - m_b[k]) for k in m_a)
     fold_diff = max(abs(x - y) for k in f_a for x, y in zip(f_a[k], f_b[k]))
     eligible = [{json.dumps(x["params"]) for x in r["search"] if x["mean"] >= r["bar"]} for r in (committed, rebuilt)]
-    return (f"INFO  tuning: same choice: {committed['chosen'] == rebuilt['chosen']} "
-            f"(committed {committed['chosen']}, rebuilt {rebuilt['chosen']}); largest move of a mean "
-            f"{mean_diff:.4f}, of a single fold score {fold_diff:.4f}; bar {committed['bar']:.4f} -> "
-            f"{rebuilt['bar']:.4f}; settings crossing the bar: {len(eligible[0] ^ eligible[1])}")
+    return (
+        f"INFO  tuning: same choice: {committed['chosen'] == rebuilt['chosen']} "
+        f"(committed {committed['chosen']}, rebuilt {rebuilt['chosen']}); largest move of a mean "
+        f"{mean_diff:.4f}, of a single fold score {fold_diff:.4f}; bar {committed['bar']:.4f} -> "
+        f"{rebuilt['bar']:.4f}; settings crossing the bar: {len(eligible[0] ^ eligible[1])}"
+    )
 
 
-COMPARED_METADATA_KEYS = ["model", "version", "estimator", "seed", "features", "decision", "metrics", "training_data",
-                          "task", "disclaimer"]
+COMPARED_METADATA_KEYS = [
+    "model",
+    "version",
+    "estimator",
+    "seed",
+    "features",
+    "decision",
+    "metrics",
+    "training_data",
+    "task",
+    "disclaimer",
+]
 
 
 def compare_metadata(committed: dict, rebuilt: dict) -> list[str]:
@@ -260,14 +306,26 @@ def main() -> int:
 
     df = generate()
     committed_meta = json.loads(artifact.artifact_paths()[1].read_text())
-    checks.append(("1", "dataset SHA-256 equals the committed metadata",
-                   dataset_hash(df) == committed_meta["training_data"]["sha256"]))
+    checks.append(
+        (
+            "1",
+            "dataset SHA-256 equals the committed metadata",
+            dataset_hash(df) == committed_meta["training_data"]["sha256"],
+        )
+    )
 
-    checks.append(("2", f"{train.RELEASE_REPORT.name} regenerated identically",
-                   train.RELEASE_REPORT.read_text() == train.release_report(df)))
-    for name, module, build in [("eda.md", eda, lambda: eda.build_report(df)),
-                                ("cluster_features.md", cluster_features, lambda: cluster_features.build_report(df)),
-                                ("errors.md", errors, lambda: errors.build_report(errors.analyse(df)))]:
+    checks.append(
+        (
+            "2",
+            f"{train.RELEASE_REPORT.name} regenerated identically",
+            train.RELEASE_REPORT.read_text() == train.release_report(df),
+        )
+    )
+    for name, module, build in [
+        ("eda.md", eda, lambda: eda.build_report(df)),
+        ("cluster_features.md", cluster_features, lambda: cluster_features.build_report(df)),
+        ("errors.md", errors, lambda: errors.build_report(errors.analyse(df))),
+    ]:
         checks.append(("2", f"{name} regenerated identically", module.REPORT.read_text() == build()))
     tuning = tune.run(df)
     committed_tuning = json.loads(tune.RESULT.read_text())
@@ -277,8 +335,10 @@ def main() -> int:
     step2 = train.run(df, candidates=GRID_CANDIDATES, score_test=False)
     # The report is rebuilt from the COMMITTED result (checked against the rebuilt one just above, within
     # tolerance), so near-tied forests can't change which settings the report names on another machine.
-    ok, reason = reports_match(tune.REPORT.read_text(), tune.build_report(
-        committed_tuning, {c.label: s.pr_auc for c, s in step2.validation.items()}))
+    ok, reason = reports_match(
+        tune.REPORT.read_text(),
+        tune.build_report(committed_tuning, {c.label: s.pr_auc for c, s in step2.validation.items()}),
+    )
     checks.append(("2", f"tuning.md regenerated: {reason}", ok))
     ok, reason = reports_match(train.REPORT.read_text(), train.comparison_report(df))
     checks.append(("2", f"metrics.md regenerated: {reason}", ok))
@@ -299,30 +359,49 @@ def main() -> int:
         rebuilt_dir = Path(tmp)
         rebuilt_meta = artifact.build(rebuilt_dir)
         differing = compare_metadata(committed_meta, rebuilt_meta)
-        checks.append(("2", "metadata identical (" + (", ".join(differing) if differing else
-                                                      "metrics, threshold, schema, seed, estimator") + ")", not differing))
+        checks.append(
+            (
+                "2",
+                "metadata identical ("
+                + (", ".join(differing) if differing else "metrics, threshold, schema, seed, estimator")
+                + ")",
+                not differing,
+            )
+        )
 
         rows = model_input(split(df)[2])
         committed_p = load().pipeline.predict_proba(rows)[:, 1]
         rebuilt_p = load(rebuilt_dir).pipeline.predict_proba(rows)[:, 1]
         largest = float(np.max(np.abs(committed_p - rebuilt_p)))
-        checks.append(("3", f"same probabilities on {len(rows):,} test rows (largest difference {largest:.1e})",
-                       largest <= 1e-9))
+        checks.append(
+            ("3", f"same probabilities on {len(rows):,} test rows (largest difference {largest:.1e})", largest <= 1e-9)
+        )
 
-        same_platform = (rebuilt_meta["built_on"] == committed_meta["built_on"]
-                         and rebuilt_meta["libraries"] == committed_meta["libraries"])
+        same_platform = (
+            rebuilt_meta["built_on"] == committed_meta["built_on"]
+            and rebuilt_meta["libraries"] == committed_meta["libraries"]
+        )
         if same_platform:
-            checks.append(("4", "model file byte-identical",
-                           rebuilt_meta["artifact_sha256"] == committed_meta["artifact_sha256"]))
+            checks.append(
+                ("4", "model file byte-identical", rebuilt_meta["artifact_sha256"] == committed_meta["artifact_sha256"])
+            )
         else:
-            checks.append(("4", f"byte identity not checked: committed file built on {committed_meta['built_on']}, "
-                                f"this run on {rebuilt_meta['built_on']}", None))
+            checks.append(
+                (
+                    "4",
+                    f"byte identity not checked: committed file built on {committed_meta['built_on']}, "
+                    f"this run on {rebuilt_meta['built_on']}",
+                    None,
+                )
+            )
 
     for level, name, ok in checks:
         print(f"{'PASS' if ok else 'SKIP' if ok is None else 'FAIL'}  level {level}  {name}")
     failed = [name for _, name, ok in checks if ok is False]
-    print(f"\n{config.MODEL_NAME}-{config.MODEL_VERSION}: " +
-          ("reproduced" if not failed else f"NOT reproduced ({len(failed)} check(s) failed)"))
+    print(
+        f"\n{config.MODEL_NAME}-{config.MODEL_VERSION}: "
+        + ("reproduced" if not failed else f"NOT reproduced ({len(failed)} check(s) failed)")
+    )
     return 1 if failed else 0
 
 

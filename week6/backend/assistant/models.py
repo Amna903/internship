@@ -15,8 +15,17 @@ import numpy as np
 from django.conf import settings
 from django.db import models
 
-POLICY_AREAS = ("billing", "cancellation", "privacy", "reminders", "rescheduling", "telehealth", "access", "results",
-                "other")
+POLICY_AREAS = (
+    "billing",
+    "cancellation",
+    "privacy",
+    "reminders",
+    "rescheduling",
+    "telehealth",
+    "access",
+    "results",
+    "other",
+)
 
 
 class PolicyDocument(models.Model):
@@ -33,14 +42,18 @@ class PolicyDocument(models.Model):
     policy_area = models.CharField(max_length=20, choices=[(a, a) for a in POLICY_AREAS], default="other")
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
     source = models.CharField(max_length=10, choices=Source.choices)
-    current_version = models.ForeignKey("DocumentVersion", on_delete=models.PROTECT, null=True, blank=True,
-                                        related_name="+")
-    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
-                                    related_name="+")
-    approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
-                                    related_name="+")  # who approved the current version
-    retired_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
-                                   related_name="+")
+    current_version = models.ForeignKey(
+        "DocumentVersion", on_delete=models.PROTECT, null=True, blank=True, related_name="+"
+    )
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )  # who approved the current version
+    retired_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     approved_at = models.DateTimeField(null=True, blank=True)  # when the current version was approved
     retired_at = models.DateTimeField(null=True, blank=True)
@@ -65,10 +78,12 @@ class DocumentVersion(models.Model):
     sha256 = models.CharField(max_length=64)
     status = models.CharField(max_length=12, choices=Status.choices, default=Status.PENDING)
     effective_date = models.DateField(null=True, blank=True)
-    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
-                                    related_name="+")
-    decided_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
-                                   related_name="+")  # approved or rejected it
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+    decided_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )  # approved or rejected it
     created_at = models.DateTimeField(auto_now_add=True)
     decided_at = models.DateTimeField(null=True, blank=True)
 
@@ -96,8 +111,11 @@ class Chunk(models.Model):
 
     class Meta:
         ordering = ["document_id", "position"]
-        constraints = [models.UniqueConstraint(fields=["version", "position", "embedding_model"],
-                                               name="chunk_unique_per_version_and_model")]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["version", "position", "embedding_model"], name="chunk_unique_per_version_and_model"
+            )
+        ]
 
     @property
     def passage_id(self) -> str:
@@ -111,8 +129,9 @@ class AnswerRecord(models.Model):
     """Which document editions one assistant answer used, so the audit can always tell. Linked to the
     `admin.assistant_asked` audit event. Never stores the question or the answer text."""
 
-    audit_event = models.OneToOneField("audit.AuditEvent", on_delete=models.DO_NOTHING, db_constraint=False,
-                                       related_name="+")
+    audit_event = models.OneToOneField(
+        "audit.AuditEvent", on_delete=models.DO_NOTHING, db_constraint=False, related_name="+"
+    )
     status = models.CharField(max_length=30)
     public_reason = models.CharField(max_length=40, blank=True)
     model = models.CharField(max_length=100, blank=True)
@@ -159,8 +178,13 @@ class IndexJob(models.Model):
 
     class Meta:
         ordering = ["-queued_at", "-id"]
-        constraints = [models.UniqueConstraint(fields=["version"], condition=models.Q(status__in=["queued", "running"]),
-                                               name="one_open_index_job_per_version")]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["version"],
+                condition=models.Q(status__in=["queued", "running"]),
+                name="one_open_index_job_per_version",
+            )
+        ]
 
     def __str__(self) -> str:
         return f"index job {self.pk} ({self.status})"

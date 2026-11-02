@@ -29,6 +29,7 @@ def forests(result):
 
 # ---- Three algorithms ----
 
+
 def test_logistic_regression_random_forest_and_gradient_boosting_are_all_trained(comparison):
     trained = {c.name for c in comparison.validation}
     assert {"logreg_raw", "logreg_engineered", "random_forest", "gradient_boosting"} <= trained
@@ -53,6 +54,7 @@ def test_random_forest_gives_identical_probabilities_when_trained_twice(df):
 
 # ---- Simplicity order, fixed before training ----
 
+
 def test_complexity_follows_the_written_simplicity_order():
     rank = {name: i for i, name in enumerate(SIMPLICITY_ORDER)}
     for c in CANDIDATES:
@@ -68,6 +70,7 @@ def test_a_tie_between_forest_and_boosting_goes_to_the_forest():
 
 
 # ---- Train versus validation ----
+
 
 def test_train_and_out_of_bag_scores_exist_for_the_right_models(comparison):
     assert set(comparison.train) == set(comparison.validation)
@@ -104,8 +107,12 @@ def test_warning_fires_on_a_tree_built_to_memorise_and_not_on_the_floor(df):
     train_rows, validation, _ = split(df)
     X, y = model_input(train_rows), train_rows[config.LABEL]
     X_val, y_val = model_input(validation), validation[config.LABEL]
-    memoriser = Pipeline([("preprocess", build_preprocessor(engineered=True)),
-                          ("model", DecisionTreeClassifier(min_samples_leaf=1, random_state=config.SEED))]).fit(X, y)
+    memoriser = Pipeline(
+        [
+            ("preprocess", build_preprocessor(engineered=True)),
+            ("model", DecisionTreeClassifier(min_samples_leaf=1, random_state=config.SEED)),
+        ]
+    ).fit(X, y)
     floor = build(next(c for c in CANDIDATES if c.family == "floor")).fit(X, y)
     for model, expected in [(memoriser, True), (floor, False)]:
         tr = train.score(y, model.predict_proba(X)[:, 1])
@@ -127,6 +134,7 @@ def test_report_says_the_warning_is_not_a_verdict(comparison):
 
 
 # ---- Step 4: the test set, scored once ----
+
 
 def test_final_evaluation_scores_the_test_set_once_with_every_algorithm(comparison):
     names = {label.split(": ")[1].split(" (")[0] for label in comparison.test if ": " in label}
@@ -180,8 +188,10 @@ def test_report_states_the_test_set_history_and_the_cost_question(comparison):
 
 # ---- Release decision: keep serving the first release ----
 
+
 def test_served_model_is_still_the_first_release():
     import json
+
     meta = json.loads((config.ARTIFACT_DIR / f"{config.MODEL_NAME}-{train.FIRST_RELEASE}.json").read_text())
     assert config.MODEL_VERSION == train.FIRST_RELEASE
     assert meta["estimator"] == train.SERVED_ESTIMATOR
@@ -209,9 +219,11 @@ def test_confusion_count_tolerances_are_derived_from_the_0_005_rate_tolerance():
     assert confusion_count_tolerances(cells) == {"tp": 3, "fn": 3, "fp": 16, "tn": 16}
 
 
-_SECTION = ("### Confusion matrix for each algorithm (test)\n"
-            "| rf | 0.1943 | 328 | 886 | 322 | 2,416 | 0.270 | 0.505 | 0.352 | 0.665 | 0.278 |\n"
-            "**About this test set.**")
+_SECTION = (
+    "### Confusion matrix for each algorithm (test)\n"
+    "| rf | 0.1943 | 328 | 886 | 322 | 2,416 | 0.270 | 0.505 | 0.352 | 0.665 | 0.278 |\n"
+    "**About this test set.**"
+)
 
 
 def _moved(tp=328, fp=886, fn=322, tn="2,416"):
@@ -248,10 +260,17 @@ def test_committed_comparison_report_is_up_to_date(comparison):
 
 # ---- Same choice on every machine ----
 
+
 def test_within_family_order_is_depth_then_leaf_then_more_trees():
     def forest(depth, leaf, trees=300):
-        return Candidate("improved", "random_forest", True,
-                         (("max_depth", depth), ("min_samples_leaf", leaf), ("n_estimators", trees)), complexity=2)
+        return Candidate(
+            "improved",
+            "random_forest",
+            True,
+            (("max_depth", depth), ("min_samples_leaf", leaf), ("n_estimators", trees)),
+            complexity=2,
+        )
+
     ordered = [forest(6, 50), forest(6, 20), forest(10, 50), forest(None, 50)]
     assert sorted(reversed(ordered), key=lambda c: c.within_family_simplicity) == ordered
     # More trees only steady the vote, they don't memorise: on a remaining tie, more trees win.
@@ -264,7 +283,10 @@ def test_near_tied_forests_resolve_to_the_simpler_one_whatever_their_order():
     deep = Candidate("improved", "random_forest", True, (("max_depth", None), ("min_samples_leaf", 50)), complexity=2)
     shallow = Candidate("improved", "random_forest", True, (("max_depth", 6), ("min_samples_leaf", 50)), complexity=2)
     for deep_score, shallow_score in [(0.2845, 0.281), (0.281, 0.2845)]:
-        scores = {deep: train.Scores(deep_score, 0.65, 0.13, 0.16), shallow: train.Scores(shallow_score, 0.65, 0.13, 0.16)}
+        scores = {
+            deep: train.Scores(deep_score, 0.65, 0.13, 0.16),
+            shallow: train.Scores(shallow_score, 0.65, 0.13, 0.16),
+        }
         assert train.select(scores) == shallow
 
 
@@ -284,9 +306,11 @@ def test_scores_keep_the_strict_tolerance():
 
 def test_only_cut_off_figures_get_the_looser_tolerance():
     """The real CI case: recall at the decision threshold moved by 0.004 between Mac and Linux."""
-    section = ("## 3. Decision threshold (chosen on validation)\n"
-               "| validation (where it was chosen) | 0.1879 | 0.254 | 0.526 | 0.342 | 33.5% |\n"
-               "## 4. Test set")
+    section = (
+        "## 3. Decision threshold (chosen on validation)\n"
+        "| validation (where it was chosen) | 0.1879 | 0.254 | 0.526 | 0.342 | 33.5% |\n"
+        "## 4. Test set"
+    )
     assert reports_match(section, section.replace("0.526", "0.522").replace("33.5%", "33.3%"))[0]
     assert not reports_match(section, section.replace("0.526", "0.516"))[0]
     assert not reports_match(section, section.replace("33.5%", "34.5%"))[0]
@@ -296,6 +320,7 @@ def test_only_cut_off_figures_get_the_looser_tolerance():
 
 
 # ---- Step 3 rule: choose by cross-validation, confirm on validation ----
+
 
 def test_comparison_is_chosen_by_cross_validation_with_the_one_standard_error_rule(comparison):
     assert comparison.cv is not None

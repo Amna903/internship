@@ -9,8 +9,14 @@ from assistant import evaluate, tuning
 
 
 def run(status="answered", answer="", citations=(), rejected=0):
-    r = {"status": status, "answer": answer, "citations": list(citations), "rejected_citations": rejected,
-         "reason": "", "tokens": 0}
+    r = {
+        "status": status,
+        "answer": answer,
+        "citations": list(citations),
+        "rejected_citations": rejected,
+        "reason": "",
+        "tokens": 0,
+    }
     return r
 
 
@@ -31,6 +37,7 @@ def test_shipped_setting_is_exactly_the_dev_tuned_one_and_b_differs_only_in_top_
 def test_the_runner_never_writes_the_shipped_configuration(tmp_path, monkeypatch):
     """The only files the runner writes are its own results and report; the dev-tuned values are read, never written."""
     import inspect
+
     source = inspect.getsource(evaluate)
     assert "tuning.save" not in source and "dev_tuning" not in source.split('"""', 2)[2]
     assert evaluate.RESULT.parent.name == "eval" and evaluate.REPORT.parent.name == "eval"
@@ -38,7 +45,9 @@ def test_the_runner_never_writes_the_shipped_configuration(tmp_path, monkeypatch
 
 def test_status_and_answer_rules():
     a1 = case("A1")
-    good = run(answer="You can cancel free of charge up to 24 hours before.", citations=[cite("cancellation.md#0", "q")])
+    good = run(
+        answer="You can cancel free of charge up to 24 hours before.", citations=[cite("cancellation.md#0", "q")]
+    )
     assert evaluate.run_failures(a1, good) == []
     assert evaluate.run_failures(a1, run(status="insufficient_information"))
     wrong_source = run(answer="Up to 24 hours before.", citations=[cite("billing.md#0", "q")])
@@ -84,6 +93,7 @@ def test_majority_of_three_runs():
 def test_recorded_results_rescore_identically_and_used_the_frozen_cases():
     result = json.loads(evaluate.RESULT.read_text())
     from assistant import frozen
+
     assert result["frozen_eval_sha256"] == frozen.FROZEN_SHA256["eval/eval_cases.json"]
     cases = {c["id"]: c for c in evaluate.load_cases()}
     for name, runs in result["results"].items():
@@ -104,11 +114,15 @@ def test_red_team_set_is_labelled_diagnostic_and_separate_from_the_frozen_cases(
     assert not frozen_ids & {c["id"] for c in doc["cases"]}
 
 
-@pytest.mark.parametrize("reason, status, expected", [
-    ("below floor", "insufficient_information", "similarity floor (model not called)"),
-    ("server medical-advice check", "refused", "server medical check (model not called)"),
-    ("polarity mismatch", "insufficient_information", "after the model: polarity mismatch"),
-    ("", "answered", "answered (all checks passed)")])
+@pytest.mark.parametrize(
+    "reason, status, expected",
+    [
+        ("below floor", "insufficient_information", "similarity floor (model not called)"),
+        ("server medical-advice check", "refused", "server medical check (model not called)"),
+        ("polarity mismatch", "insufficient_information", "after the model: polarity mismatch"),
+        ("", "answered", "answered (all checks passed)"),
+    ],
+)
 def test_decided_by_labels(reason, status, expected):
     assert evaluate.decided_by({"reason": reason, "status": status}) == expected
 
@@ -116,7 +130,10 @@ def test_decided_by_labels(reason, status, expected):
 @pytest.mark.skipif(not evaluate.RESULT.exists(), reason="evaluation not run yet")
 def test_recorded_diagnostics_rescore_identically():
     result = json.loads(evaluate.RESULT.read_text())
-    sets = {"no_floor": {c["id"]: c for c in evaluate.load_cases()}, "red_team": {c["id"]: c for c in evaluate.load_red_team()}}
+    sets = {
+        "no_floor": {c["id"]: c for c in evaluate.load_cases()},
+        "red_team": {c["id"]: c for c in evaluate.load_red_team()},
+    }
     for name, case_map in sets.items():
         d = result["diagnostics"][name]
         assert set(d["results"]) == set(case_map)
@@ -124,4 +141,3 @@ def test_recorded_diagnostics_rescore_identically():
             assert all(evaluate.run_failures(case_map[cid], r) == r["failures"] for r in runs), (name, cid)
     assert result["diagnostics"]["red_team"]["settings"] == result["settings"][evaluate.SHIPPED]
     assert result["diagnostics"]["no_floor"]["settings"]["floor"] == -1.0
-

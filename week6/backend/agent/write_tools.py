@@ -34,16 +34,24 @@ def summary(action: PendingAction) -> str:
 
 
 def card(action: PendingAction) -> dict:
-    return {"action_id": str(action.id), "status": action.status, "summary": summary(action),
-            "proposed_by_agent": action.proposed_by_agent,
-            "proposed_by": AGENT_LABEL if action.proposed_by_agent else "Proposed by you.",
-            "expires_at": action.expires_at.isoformat()}
+    return {
+        "action_id": str(action.id),
+        "status": action.status,
+        "summary": summary(action),
+        "proposed_by_agent": action.proposed_by_agent,
+        "proposed_by": AGENT_LABEL if action.proposed_by_agent else "Proposed by you.",
+        "expires_at": action.expires_at.isoformat(),
+    }
 
 
 def slot_free(day: date, time: str, clinician: str, visit_type: str) -> bool:
-    return (day.weekday() in OPEN_WEEKDAYS and time in TIMES and clinician in CLINICIANS[visit_type]
-            and is_open(day, time, clinician, visit_type)
-            and not MockBooking.objects.filter(date=day, time=time, clinician=clinician).exists())
+    return (
+        day.weekday() in OPEN_WEEKDAYS
+        and time in TIMES
+        and clinician in CLINICIANS[visit_type]
+        and is_open(day, time, clinician, visit_type)
+        and not MockBooking.objects.filter(date=day, time=time, clinician=clinician).exists()
+    )
 
 
 def expire_stale(user=None) -> None:
@@ -58,6 +66,7 @@ def expire_stale(user=None) -> None:
 
 def _req(user, request_id=""):
     from types import SimpleNamespace
+
     return SimpleNamespace(user=user, request_id=request_id)
 
 
@@ -81,31 +90,51 @@ def book_mock_appointment(args: dict, ctx) -> dict:
         if not slot_free(day, args["time"], args["clinician"], args["visit_type"]):
             raise ToolFailure("slot_taken")
         action = PendingAction.objects.create(
-            tool="book_mock_appointment", user=ctx.user, proposed_by_agent=ctx.via_agent,
+            tool="book_mock_appointment",
+            user=ctx.user,
+            proposed_by_agent=ctx.via_agent,
             args={k: args[k] for k in ("visit_type", "date", "time", "clinician")},
-            expires_at=timezone.now() + EXPIRY)
+            expires_at=timezone.now() + EXPIRY,
+        )
         record_event(_req(ctx.user, ctx.request_id), AuditEvent.Action.AGENT_ACTION_PROPOSED, detail=str(action.id))
     return {**card(action), "status": "pending_confirmation"}
 
 
-register(Tool(
-    name="book_mock_appointment",
-    description="Propose booking one open slot in the fictional schedule. Nothing is booked until the admin "
-                "confirms it outside the chat. Use check_availability first.",
-    input_schema=obj({"visit_type": {"type": "string", "enum": list(CLINICIANS)},
-                      "date": {"type": "string", "pattern": r"^\d{4}-\d{2}-\d{2}$"},
-                      "time": {"type": "string", "enum": TIMES},
-                      "clinician": {"type": "string", "enum": ALL_CLINICIANS}},
-                     ["visit_type", "date", "time", "clinician"]),
-    output_schema=obj({"action_id": {"type": "string"}, "status": {"type": "string", "enum": ["pending_confirmation"]},
-                       "summary": {"type": "string"}, "proposed_by_agent": {"type": "boolean"},
-                       "proposed_by": {"type": "string"}, "expires_at": {"type": "string"}},
-                      ["action_id", "status", "summary", "proposed_by_agent", "proposed_by", "expires_at"]),
-    handler=book_mock_appointment, permission="write", timeout_seconds=5.0, max_output_chars=800,
-))
+register(
+    Tool(
+        name="book_mock_appointment",
+        description="Propose booking one open slot in the fictional schedule. Nothing is booked until the admin "
+        "confirms it outside the chat. Use check_availability first.",
+        input_schema=obj(
+            {
+                "visit_type": {"type": "string", "enum": list(CLINICIANS)},
+                "date": {"type": "string", "pattern": r"^\d{4}-\d{2}-\d{2}$"},
+                "time": {"type": "string", "enum": TIMES},
+                "clinician": {"type": "string", "enum": ALL_CLINICIANS},
+            },
+            ["visit_type", "date", "time", "clinician"],
+        ),
+        output_schema=obj(
+            {
+                "action_id": {"type": "string"},
+                "status": {"type": "string", "enum": ["pending_confirmation"]},
+                "summary": {"type": "string"},
+                "proposed_by_agent": {"type": "boolean"},
+                "proposed_by": {"type": "string"},
+                "expires_at": {"type": "string"},
+            },
+            ["action_id", "status", "summary", "proposed_by_agent", "proposed_by", "expires_at"],
+        ),
+        handler=book_mock_appointment,
+        permission="write",
+        timeout_seconds=5.0,
+        max_output_chars=800,
+    )
+)
 
 
 # ---------------------------------------------------------------- confirm and decline (not tools)
+
 
 class ActionError(Exception):
     def __init__(self, code: str, http: int):
@@ -153,16 +182,19 @@ def _book(action: PendingAction, user, idempotency_key: str, request_id: str) ->
     if slot_free(day, a["time"], a["clinician"], a["visit_type"]):
         try:
             with transaction.atomic():  # savepoint: the constraint decides a race
-                booking = MockBooking.objects.create(date=day, time=a["time"], clinician=a["clinician"],
-                                                     visit_type=a["visit_type"], created_by=user)
+                booking = MockBooking.objects.create(
+                    date=day, time=a["time"], clinician=a["clinician"], visit_type=a["visit_type"], created_by=user
+                )
         except IntegrityError:
             booking = None
     action.status = PendingAction.Status.CONFIRMED if booking else PendingAction.Status.FAILED
     action.booking, action.decided_at, action.idempotency_key = booking, timezone.now(), idempotency_key
     action.save(update_fields=["status", "booking", "decided_at", "idempotency_key"])
-    record_event(_req(user, request_id),
-                 AuditEvent.Action.AGENT_ACTION_CONFIRMED if booking else AuditEvent.Action.AGENT_ACTION_FAILED,
-                 detail=f"{action.id}:{booking.id}" if booking else str(action.id))
+    record_event(
+        _req(user, request_id),
+        AuditEvent.Action.AGENT_ACTION_CONFIRMED if booking else AuditEvent.Action.AGENT_ACTION_FAILED,
+        detail=f"{action.id}:{booking.id}" if booking else str(action.id),
+    )
 
 
 def decline(action_id, user, request_id: str = "") -> PendingAction:
@@ -180,4 +212,5 @@ def decline(action_id, user, request_id: str = "") -> PendingAction:
 
 def _write_tool() -> Tool:
     from .registry import REGISTRY
+
     return REGISTRY["book_mock_appointment"]

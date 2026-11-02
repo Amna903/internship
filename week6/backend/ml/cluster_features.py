@@ -57,21 +57,25 @@ OUTLIER_Z = 5.0
 def patient_table(df: pd.DataFrame) -> pd.DataFrame:
     """One row per patient, indexed by patient_id, columns in FEATURES order."""
     g = df.groupby("patient_id")
-    return pd.DataFrame({
-        "mean_lead_time": g["lead_time_days"].mean(),
-        "telehealth_share": g["visit_type"].agg(lambda s: (s == "telehealth").mean()),
-        "phone_share": g["booking_channel"].agg(lambda s: (s == "phone").mean()),
-        "app_share": g["booking_channel"].agg(lambda s: (s == "app").mean()),
-        "mean_hour": g["appointment_hour"].mean(),
-        "appointments": g.size().astype(float),
-    })[list(FEATURES)]
+    return pd.DataFrame(
+        {
+            "mean_lead_time": g["lead_time_days"].mean(),
+            "telehealth_share": g["visit_type"].agg(lambda s: (s == "telehealth").mean()),
+            "phone_share": g["booking_channel"].agg(lambda s: (s == "phone").mean()),
+            "app_share": g["booking_channel"].agg(lambda s: (s == "app").mean()),
+            "mean_hour": g["appointment_hour"].mean(),
+            "appointments": g.size().astype(float),
+        }
+    )[list(FEATURES)]
 
 
 def scaling_facts(table: pd.DataFrame) -> dict:
     z = (table - table.mean()) / table.std(ddof=0)
     q1, q3 = table.quantile(0.25), table.quantile(0.75)
-    return {f: {"max_abs_z": float(z[f].abs().max()), "iqr": float(q3[f] - q1[f]), "skew": float(table[f].skew())}
-            for f in table.columns}
+    return {
+        f: {"max_abs_z": float(z[f].abs().max()), "iqr": float(q3[f] - q1[f]), "skew": float(table[f].skew())}
+        for f in table.columns
+    }
 
 
 def choose_scaler(facts: dict) -> tuple[str, str]:
@@ -81,10 +85,14 @@ def choose_scaler(facts: dict) -> tuple[str, str]:
     if not outliers:
         return "standard", f"no feature has max |z| above {OUTLIER_Z}"
     if zero_spread:
-        return "standard", (f"{', '.join(outliers)} has outliers, but {', '.join(zero_spread)} has zero IQR, which "
-                            "RobustScaler can't divide by")
-    return "robust", (f"{', '.join(f'`{f}`' for f in outliers)} has extreme outliers (max |z| above {OUTLIER_Z}), and "
-                      "every feature has a non-zero IQR")
+        return "standard", (
+            f"{', '.join(outliers)} has outliers, but {', '.join(zero_spread)} has zero IQR, which "
+            "RobustScaler can't divide by"
+        )
+    return "robust", (
+        f"{', '.join(f'`{f}`' for f in outliers)} has extreme outliers (max |z| above {OUTLIER_Z}), and "
+        "every feature has a non-zero IQR"
+    )
 
 
 def scaler_for(name: str):
@@ -101,21 +109,24 @@ def scaled(table: pd.DataFrame) -> tuple[np.ndarray, str, str]:
 
 # ---------------------------------------------------------------- report
 
+
 def build_report(df: pd.DataFrame) -> str:
     table = patient_table(df)
     facts = scaling_facts(table)
     name, reason = choose_scaler(facts)
     corr = table.corr()
-    pairs = [(a, b, corr.loc[a, b]) for i, a in enumerate(table.columns) for b in table.columns[i + 1:]]
+    pairs = [(a, b, corr.loc[a, b]) for i, a in enumerate(table.columns) for b in table.columns[i + 1 :]]
     strongest = max(pairs, key=lambda p: abs(p[2]))
     others = max((p for p in pairs if p[:2] != strongest[:2]), key=lambda p: abs(p[2]))
     feature_rows = "\n".join(
         f"| `{f}` | {d} | {table[f].median():.2f} | {facts[f]['iqr']:.2f} | {facts[f]['skew']:+.2f} | {facts[f]['max_abs_z']:.1f} |"
-        for f, d in FEATURES.items())
+        for f, d in FEATURES.items()
+    )
     excluded_rows = "\n".join(f"| `{c}` | {why} |" for c, why in EXCLUDED.items())
     single = int((table["appointments"] == 1).sum())
-    corr_rows = "\n".join("| `" + a + "` | " + " | ".join(f"{corr.loc[a, b]:+.2f}" for b in table.columns) + " |"
-                          for a in table.columns)
+    corr_rows = "\n".join(
+        "| `" + a + "` | " + " | ".join(f"{corr.loc[a, b]:+.2f}" for b in table.columns) + " |" for a in table.columns
+    )
 
     return f"""# Clustering features: one row per patient
 
@@ -147,13 +158,15 @@ tuning until clusters appear.
 
 The correlations agree:
 
-| | {' | '.join(f'`{c}`' for c in table.columns)} |
-|---|{'---|' * len(table.columns)}
+| | {" | ".join(f"`{c}`" for c in table.columns)} |
+|---|{"---|" * len(table.columns)}
 {corr_rows}
 
 The strongest pair is `{strongest[0]}` / `{strongest[1]}` ({strongest[2]:+.2f}): {
-"two shares of the same booking-channel draws, which compete for the same appointments, so a negative link is built in, not a habit."
-if {strongest[0], strongest[1]} == {"phone_share", "app_share"} else "see the table."}
+        "two shares of the same booking-channel draws, which compete for the same appointments, so a negative link is built in, not a habit."
+        if {strongest[0], strongest[1]} == {"phone_share", "app_share"}
+        else "see the table."
+    }
 Every other pair is within {abs(others[2]):.2f} of zero.
 
 ## 4. Scaling

@@ -9,14 +9,23 @@ from assistant import tuning, verify
 from assistant.prompts import Passage
 from assistant.schema import Citation, ModelReply
 
-RESCHEDULE = Passage("rescheduling.md#0", "rescheduling.md",
-                     "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost.")
-REMINDERS = Passage("reminders.md#0", "reminders.md",
-                    "Reminders are sent by text message by default; patients can switch to email or turn reminders off "
-                    "in the patient app. Reminders never contain test results or details of the reason for the visit.")
-FEE = Passage("cancellation.md#0", "cancellation.md",
-              "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to "
-              "every late cancellation after that.")
+RESCHEDULE = Passage(
+    "rescheduling.md#0",
+    "rescheduling.md",
+    "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost.",
+)
+REMINDERS = Passage(
+    "reminders.md#0",
+    "reminders.md",
+    "Reminders are sent by text message by default; patients can switch to email or turn reminders off "
+    "in the patient app. Reminders never contain test results or details of the reason for the visit.",
+)
+FEE = Passage(
+    "cancellation.md#0",
+    "cancellation.md",
+    "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to "
+    "every late cancellation after that.",
+)
 
 
 def judge(answer: str, passage: Passage, quote: str) -> verify.Verdict:
@@ -52,14 +61,25 @@ class TestPolarity:
         verdict = judge("Reminders never contain test results or the reason for the visit.", REMINDERS, NEVER)
         assert verdict.status == "answered", verdict.reason
 
-    @pytest.mark.parametrize("text, negated", [("at no cost", False), ("recorded as no-shows", False),
-                                               ("a no-show", False), ("no cost at all", True), ("not free", True),
-                                               ("you can't", True), ("there is no charge", True), ("no fee", True)])
+    @pytest.mark.parametrize(
+        "text, negated",
+        [
+            ("at no cost", False),
+            ("recorded as no-shows", False),
+            ("a no-show", False),
+            ("no cost at all", True),
+            ("not free", True),
+            ("you can't", True),
+            ("there is no charge", True),
+            ("no fee", True),
+        ],
+    )
     def test_negation_detection(self, text, negated):
         assert verify.has_negation(text) is negated
 
     def test_the_non_negating_list_is_short_fixed_and_justified_by_the_policies(self):
         from assistant import frozen
+
         policies = " ".join(p.read_text().lower() for p in frozen.POLICY_DIR.glob("*.md"))
         assert len(verify.NON_NEGATING) == 2
         for phrase, justification in verify.NON_NEGATING.items():
@@ -82,15 +102,22 @@ class TestKnownGaps:
     def test_lexical_checks_cannot_see_an_antonym_flip(self):
         """KNOWN GAP, recorded rather than hidden: 'refused' instead of 'paid back' flips the meaning, but no
         negation word appears, the number matches and most key terms are in the quote, so it is answered."""
-        refunds = Passage("billing.md#1", "billing.md", "Refunds are reviewed by the billing team and, if approved, "
-                          "paid back to the original payment method within 10 working days.")
+        refunds = Passage(
+            "billing.md#1",
+            "billing.md",
+            "Refunds are reviewed by the billing team and, if approved, "
+            "paid back to the original payment method within 10 working days.",
+        )
         verdict = judge("Refunds are refused within 10 working days.", refunds, refunds.text)
         assert verdict.status == "answered"
 
     def test_a_partly_unsupported_answer_passes_when_most_terms_match(self):
         """KNOWN GAP: 'switch to email' is not in the quote, but most key terms are, so groundedness passes."""
-        verdict = judge("Reminders are sent by text message by default; patients can switch to email.",
-                        REMINDERS, "Reminders are sent by text message by default")
+        verdict = judge(
+            "Reminders are sent by text message by default; patients can switch to email.",
+            REMINDERS,
+            "Reminders are sent by text message by default",
+        )
         assert verdict.status == "answered"
 
 
@@ -98,8 +125,11 @@ class TestTunedValues:
     def test_endpoint_values_come_from_the_dev_tuning(self):
         tuned = tuning.load_tuned()
         chosen = json.loads(tuning.RESULT.read_text())["chosen"]
-        assert tuned == {"floor": chosen["floor"], "top_k": chosen["top_k"],
-                         "groundedness_threshold": chosen["effective_groundedness_threshold"]}
+        assert tuned == {
+            "floor": chosen["floor"],
+            "top_k": chosen["top_k"],
+            "groundedness_threshold": chosen["effective_groundedness_threshold"],
+        }
 
     def test_chosen_values_follow_the_written_rules_from_the_recorded_runs(self):
         result = json.loads(tuning.RESULT.read_text())

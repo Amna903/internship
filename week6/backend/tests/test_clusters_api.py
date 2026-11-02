@@ -68,8 +68,10 @@ class TestResponse:
 
     def test_no_clustering_runs_during_a_request(self, admin_browser, monkeypatch):
         from ml import cluster
+
         def forbidden(*args, **kwargs):
             raise AssertionError("clustering must not run during a request")
+
         monkeypatch.setattr(cluster, "run", forbidden)
         monkeypatch.setattr(cluster, "kmeans_labels", forbidden)
         assert admin_browser.get(CLUSTERS).status_code == 200

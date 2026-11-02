@@ -15,15 +15,28 @@ from assistant.keyfacts import NUMBER_WORDS
 
 TENS = {"twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90}
 WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-FIELDS = ("lead_time_days", "appointment_weekday", "appointment_hour", "age_band", "visit_type", "booking_channel",
-          "reminder_sent", "prior_appointments", "prior_no_shows", "distance_km")
+FIELDS = (
+    "lead_time_days",
+    "appointment_weekday",
+    "appointment_hour",
+    "age_band",
+    "visit_type",
+    "booking_channel",
+    "reminder_sent",
+    "prior_appointments",
+    "prior_no_shows",
+    "distance_km",
+)
 
 
 def normalise(text: str) -> str:
     """Lower case, number words to digits (including "twenty-one"), dashes and punctuation to spaces."""
     t = text.lower().replace("’", "'")
-    t = re.sub(r"\b(" + "|".join(TENS) + r")[\s-]+(one|two|three|four|five|six|seven|eight|nine)\b",
-               lambda m: str(TENS[m.group(1)] + NUMBER_WORDS[m.group(2)]), t)
+    t = re.sub(
+        r"\b(" + "|".join(TENS) + r")[\s-]+(one|two|three|four|five|six|seven|eight|nine)\b",
+        lambda m: str(TENS[m.group(1)] + NUMBER_WORDS[m.group(2)]),
+        t,
+    )
     words = {**NUMBER_WORDS, **TENS}
     t = re.sub(r"\b(" + "|".join(sorted(words, key=len, reverse=True)) + r")\b", lambda m: str(words[m.group(1)]), t)
     t = re.sub(r"(\d)\s*[–—-]\s*(\d)", r"\1-\2", t)  # keep ranges like 35-44 together
@@ -70,13 +83,17 @@ def stated(message: str) -> dict[str, set]:
         s["reminder_sent"].add(False)
     elif re.search(r"\b(reminder sent|with a reminder|reminded|sent a reminder|reminders sent)\b", t):
         s["reminder_sent"].add(True)
-    s["prior_appointments"] = (_ints(r"\b(\d+) (?:earlier |previous |prior |past )?(?:appointments?|visits?)\b", t)
-                               | _ints(r"\bout of (\d+)\b", t))
+    s["prior_appointments"] = _ints(
+        r"\b(\d+) (?:earlier |previous |prior |past )?(?:appointments?|visits?)\b", t
+    ) | _ints(r"\bout of (\d+)\b", t)
     s["prior_no_shows"] = _ints(r"\b(\d+) (?:missed|no shows?|no-shows?)\b", t) | _ints(r"\bmissed (\d+)\b", t)
     if re.search(r"\b(none missed|never missed|none of them missed|no missed|missed none|0 missed)\b", t):
         s["prior_no_shows"].add(0)
     s["distance_km"] = {float(m.group(1)) for m in re.finditer(r"\b(\d+(?:\.\d+)?) ?(?:km|kilomet(?:er|re)s?)\b", t)}
-    if re.search(r"\b(distance (?:is )?unknown|unknown distance|distance not known|don't know the distance|distance unknown)\b", t):
+    if re.search(
+        r"\b(distance (?:is )?unknown|unknown distance|distance not known|don't know the distance|distance unknown)\b",
+        t,
+    ):
         s["distance_km"].add(None)
     return s
 

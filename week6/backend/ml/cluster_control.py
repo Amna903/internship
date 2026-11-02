@@ -43,11 +43,13 @@ def generate_control(seed: int = CONTROL_SEED, n_patients: int = N_PATIENTS) -> 
         habit_of[patient_id] = habit
         h = HABITS[habit]
         for _ in range(1 + int(rng.poisson(MEAN_APPOINTMENTS - 1))):
-            rows.append({
-                "patient_id": patient_id,
-                "lead_time_days": int(min(rng.exponential(h["lead"]), config.LEAD_TIME_MAX_DAYS)),
-                "visit_type": "telehealth" if rng.random() < h["telehealth"] else "in_person",
-                "booking_channel": rng.choice(config.BOOKING_CHANNELS, p=h["channel"]),
-                "appointment_hour": int(np.clip(round(rng.normal(h["hour"], HOUR_SD)), *config.HOUR_RANGE)),
-            })
+            rows.append(
+                {
+                    "patient_id": patient_id,
+                    "lead_time_days": int(min(rng.exponential(h["lead"]), config.LEAD_TIME_MAX_DAYS)),
+                    "visit_type": "telehealth" if rng.random() < h["telehealth"] else "in_person",
+                    "booking_channel": rng.choice(config.BOOKING_CHANNELS, p=h["channel"]),
+                    "appointment_hour": int(np.clip(round(rng.normal(h["hour"], HOUR_SD)), *config.HOUR_RANGE)),
+                }
+            )
     return pd.DataFrame(rows), pd.Series(habit_of, name="planted_habit")

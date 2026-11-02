@@ -26,13 +26,23 @@ def parts(df):
 
 def row(**overrides):
     """One valid feature row, with chosen values overridden."""
-    base = {"lead_time_days": 10, "appointment_weekday": "tuesday", "appointment_hour": 10, "age_band": "35-44",
-            "visit_type": "in_person", "booking_channel": "web", "reminder_sent": True,
-            "prior_appointments": 4, "prior_no_shows": 2, "distance_km": 5.0}
+    base = {
+        "lead_time_days": 10,
+        "appointment_weekday": "tuesday",
+        "appointment_hour": 10,
+        "age_band": "35-44",
+        "visit_type": "in_person",
+        "booking_channel": "web",
+        "reminder_sent": True,
+        "prior_appointments": 4,
+        "prior_no_shows": 2,
+        "distance_km": 5.0,
+    }
     return pd.DataFrame([{**base, **overrides}])[config.FEATURES]
 
 
 # ---------------- A. Split ----------------
+
 
 def test_no_patient_appears_in_two_parts(parts):
     train, validation, test = (set(p["patient_id"]) for p in parts)
@@ -58,6 +68,7 @@ def test_parts_are_roughly_60_20_20_and_representative(df, parts):
 
 # ---------------- B. Engineered features: edge cases ----------------
 
+
 def test_same_day_appointment_gives_log_lead_time_zero_not_minus_infinity():
     out = engineer(row(lead_time_days=0))
     assert out["log_lead_time"].iloc[0] == 0.0
@@ -72,7 +83,10 @@ def test_first_appointment_without_history_does_not_divide_by_zero():
 
 
 def test_new_patient_and_never_missed_are_distinguishable():
-    new, reliable = engineer(row(prior_appointments=0, prior_no_shows=0)), engineer(row(prior_appointments=5, prior_no_shows=0))
+    new, reliable = (
+        engineer(row(prior_appointments=0, prior_no_shows=0)),
+        engineer(row(prior_appointments=5, prior_no_shows=0)),
+    )
     assert new["prior_no_show_rate"].iloc[0] == reliable["prior_no_show_rate"].iloc[0] == 0.0
     assert new["has_history"].iloc[0] != reliable["has_history"].iloc[0]
 
@@ -92,10 +106,13 @@ def test_no_nan_or_infinity_anywhere_in_the_dataset(df):
 def test_engineering_learns_nothing_from_data(parts):
     # Stateless: the same row gets the same features whatever data came before it.
     one = row(lead_time_days=5)
-    assert engineer(one).equals(engineer(pd.concat([model_input(parts[0]).head(50), one]).tail(1).reset_index(drop=True)))
+    assert engineer(one).equals(
+        engineer(pd.concat([model_input(parts[0]).head(50), one]).tail(1).reset_index(drop=True))
+    )
 
 
 # ---------------- C/D. Pipeline: learns from training data only ----------------
+
 
 @pytest.fixture(scope="module", params=[False, True], ids=["raw", "engineered"])
 def fitted(request, parts):
@@ -108,7 +125,9 @@ def numeric_step(pipeline):
 
 def test_imputation_median_comes_from_training_split_only(fitted, df, parts):
     pipeline, _ = fitted
-    learned = dict(zip(numeric_step(pipeline).feature_names_in_, numeric_step(pipeline).named_steps["impute"].statistics_))
+    learned = dict(
+        zip(numeric_step(pipeline).feature_names_in_, numeric_step(pipeline).named_steps["impute"].statistics_)
+    )
     train_median = parts[0]["distance_km"].median()
     assert learned["distance_km"] == train_median
     assert train_median != df["distance_km"].median()  # so the check really tells the two apart
@@ -127,7 +146,10 @@ def test_transforming_validation_and_test_never_refits(fitted, parts):
     pipeline.transform(model_input(parts[1]))
     pipeline.transform(model_input(parts[2]))
     after = numeric_step(pipeline).named_steps["scale"].__dict__
-    assert all(np.array_equal(before[k], after[k]) if isinstance(before[k], np.ndarray) else before[k] == after[k] for k in before)
+    assert all(
+        np.array_equal(before[k], after[k]) if isinstance(before[k], np.ndarray) else before[k] == after[k]
+        for k in before
+    )
 
 
 def test_output_has_no_missing_values_and_a_missing_flag(fitted, parts):
@@ -157,6 +179,7 @@ def test_unseen_category_at_prediction_time_does_not_crash(fitted):
 
 # ---------------- Save / reload (custom transformers must survive joblib) ----------------
 
+
 def test_fitted_pipeline_survives_joblib_save_and_reload_in_a_fresh_process(fitted, parts, tmp_path):
     """ColumnGuard, EngineeredFeatures and _as_float are our own code. Loading a joblib file needs them
     importable under the same module path, so this reloads in a separate Python process (a fresh
@@ -178,7 +201,8 @@ def test_fitted_pipeline_survives_joblib_save_and_reload_in_a_fresh_process(fitt
         "print(json.dumps(p.transform(X).tolist()))"
     )
     backend = Path(__file__).resolve().parent.parent
-    result = subprocess.run([sys.executable, "-c", code, str(path), str(rows)], cwd=backend,
-                            capture_output=True, text=True, check=True)
+    result = subprocess.run(
+        [sys.executable, "-c", code, str(path), str(rows)], cwd=backend, capture_output=True, text=True, check=True
+    )
     reloaded = np.array(json.loads(result.stdout))
     np.testing.assert_allclose(reloaded, pipeline.transform(pd.read_csv(rows)), rtol=0, atol=1e-12)

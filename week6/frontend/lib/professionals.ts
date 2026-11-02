@@ -9,7 +9,13 @@ import raw from "@/data/professionals.json";
 export const DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
 export type Day = (typeof DAYS)[number];
 export const DAY_LABELS: Record<Day, string> = {
-  mon: "Monday", tue: "Tuesday", wed: "Wednesday", thu: "Thursday", fri: "Friday", sat: "Saturday", sun: "Sunday",
+  mon: "Monday",
+  tue: "Tuesday",
+  wed: "Wednesday",
+  thu: "Thursday",
+  fri: "Friday",
+  sat: "Saturday",
+  sun: "Sunday",
 };
 
 export const VISIT_TYPES = ["in_person", "video"] as const;
@@ -52,7 +58,13 @@ export function validateDirectory(data: unknown): string[] {
       return seen;
     }
     list.forEach((item, i) => {
-      if (!isObj(item) || typeof item.id !== "string" || !ID.test(item.id) || typeof item.name !== "string" || !item.name.trim()) {
+      if (
+        !isObj(item) ||
+        typeof item.id !== "string" ||
+        !ID.test(item.id) ||
+        typeof item.name !== "string" ||
+        !item.name.trim()
+      ) {
         errors.push(`${name}[${i}] needs a slug id and a name`);
       } else if (seen.has(item.id)) errors.push(`${name}[${i}] duplicate id "${item.id}"`);
       else seen.add(item.id);
@@ -70,14 +82,22 @@ export function validateDirectory(data: unknown): string[] {
     for (const key of ["title", "clinic", "bio"]) {
       if (typeof p[key] !== "string" || !(p[key] as string).trim()) errors.push(`${at}: ${key} is required`);
     }
-    if (!specialtyIds.has(p.specialtyId as string)) errors.push(`${at}: unknown specialtyId "${String(p.specialtyId)}"`);
+    if (!specialtyIds.has(p.specialtyId as string))
+      errors.push(`${at}: unknown specialtyId "${String(p.specialtyId)}"`);
     if (!locationIds.has(p.locationId as string)) errors.push(`${at}: unknown locationId "${String(p.locationId)}"`);
-    if (!isStrList(p.languages) || p.languages.length === 0) errors.push(`${at}: languages must be a non-empty string array`);
-    if (!Number.isInteger(p.yearsExperience) || (p.yearsExperience as number) < 0) errors.push(`${at}: yearsExperience must be an integer >= 0`);
-    if (!Number.isInteger(p.feePkr) || (p.feePkr as number) <= 0) errors.push(`${at}: feePkr must be a positive integer`);
+    if (!isStrList(p.languages) || p.languages.length === 0)
+      errors.push(`${at}: languages must be a non-empty string array`);
+    if (!Number.isInteger(p.yearsExperience) || (p.yearsExperience as number) < 0)
+      errors.push(`${at}: yearsExperience must be an integer >= 0`);
+    if (!Number.isInteger(p.feePkr) || (p.feePkr as number) <= 0)
+      errors.push(`${at}: feePkr must be a positive integer`);
 
     const visits = p.visitTypes;
-    if (!isStrList(visits) || visits.length === 0 || !visits.every((v) => (VISIT_TYPES as readonly string[]).includes(v))) {
+    if (
+      !isStrList(visits) ||
+      visits.length === 0 ||
+      !visits.every((v) => (VISIT_TYPES as readonly string[]).includes(v))
+    ) {
       errors.push(`${at}: visitTypes must be a non-empty subset of ${VISIT_TYPES.join(", ")}`);
     } else if (p.locationId === "online" && visits.includes("in_person")) {
       errors.push(`${at}: an online-only professional cannot offer in-person visits`);

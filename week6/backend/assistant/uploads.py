@@ -20,9 +20,15 @@ from pathlib import PurePosixPath, PureWindowsPath
 
 MAX_UPLOAD_BYTES = 50_000  # a policy is a few kilobytes; anything this large is not one
 ALLOWED_EXTENSIONS = {".txt", ".md"}
-BINARY_SIGNATURES = {b"%PDF": "PDF", b"PK\x03\x04": "ZIP or Office file", b"\x89PNG": "PNG image",
-                     b"\xff\xd8\xff": "JPEG image", b"GIF8": "GIF image", b"MZ": "Windows executable",
-                     b"\x7fELF": "executable"}
+BINARY_SIGNATURES = {
+    b"%PDF": "PDF",
+    b"PK\x03\x04": "ZIP or Office file",
+    b"\x89PNG": "PNG image",
+    b"\xff\xd8\xff": "JPEG image",
+    b"GIF8": "GIF image",
+    b"MZ": "Windows executable",
+    b"\x7fELF": "executable",
+}
 MAX_CONTROL_SHARE = 0.01
 MAX_NAME_LENGTH = 100
 

@@ -17,13 +17,23 @@ from monitoring.models import PredictionLog
 from .conftest import Browser, user_login
 
 URL = "/api/v1/monitoring/"
-ROW = {"lead_time_days": 5, "appointment_weekday": "monday", "appointment_hour": 10, "age_band": "35-44",
-       "visit_type": "in_person", "booking_channel": "web", "reminder_sent": True, "prior_appointments": 4,
-       "prior_no_shows": 0, "distance_km": 6.5}
+ROW = {
+    "lead_time_days": 5,
+    "appointment_weekday": "monday",
+    "appointment_hour": 10,
+    "age_band": "35-44",
+    "visit_type": "in_person",
+    "booking_channel": "web",
+    "reminder_sent": True,
+    "prior_appointments": 4,
+    "prior_no_shows": 0,
+    "distance_km": 6.5,
+}
 BASE = {"model_version": "no-show-1.0.0", "shares": [0.1] * 10, "latency_ms": {"p50": 1.0, "p95": 2.0}}
 
 
 # ---------------- the maths, by hand ----------------
+
 
 class TestPsi:
     def test_identical_distributions_score_zero(self):
@@ -39,8 +49,10 @@ class TestPsi:
     def test_bins_are_fixed_width_and_one_lands_in_the_last(self):
         assert shares([0.0, 0.05, 0.1, 0.99, 1.0]) == [0.4, 0.2, 0, 0, 0, 0, 0, 0, 0, 0.4]
 
-    @pytest.mark.parametrize("value, word", [(None, "not enough data"), (0.0999, "stable"), (0.1, "watch"),
-                                             (0.25, "watch"), (0.2501, "possible drift")])
+    @pytest.mark.parametrize(
+        "value, word",
+        [(None, "not enough data"), (0.0999, "stable"), (0.1, "watch"), (0.25, "watch"), (0.2501, "possible drift")],
+    )
     def test_thresholds_are_the_committed_ones(self, value, word):
         assert verdict(value) == word
 
@@ -75,6 +87,7 @@ class TestSummarise:
 
 # ---------------- logging from both paths ----------------
 
+
 @pytest.mark.django_db
 class TestLogging:
     def test_the_api_logs_ok_and_invalid_without_input_values(self, admin_browser):
@@ -89,17 +102,21 @@ class TestLogging:
     def test_the_api_logs_a_failure(self, admin_browser, monkeypatch):
         def down():
             raise ModelUnavailable("checksum")
+
         monkeypatch.setattr("predictions.views.get_model", down)
         assert admin_browser.post("/api/v1/predictions/no-show/", ROW).status_code == 503
         assert PredictionLog.objects.get().outcome == "failed"
 
     def test_the_agent_tool_logs_with_source_agent(self, admin):
         from agent.registry import ToolContext, run_tool
+
         ctx = ToolContext(user=admin, request_id="t", embedder=None, llm=None, via_agent=False)
         assert run_tool("predict_no_show", ROW, ctx).ok
         assert not run_tool("predict_no_show", {**ROW, "prior_no_shows": 9}, ctx).ok
         assert list(PredictionLog.objects.order_by("id").values_list("source", "outcome")) == [
-            ("agent", "ok"), ("agent", "invalid_input")]
+            ("agent", "ok"),
+            ("agent", "invalid_input"),
+        ]
 
     def test_pruning_keeps_90_days(self):
         old = PredictionLog.objects.create(model_version="v", source="api", outcome="ok", probability=0.1, latency_ms=1)
@@ -111,12 +128,15 @@ class TestLogging:
 
 # ---------------- the API, the baseline and the evidence ----------------
 
+
 @pytest.mark.django_db
 class TestApi:
     def test_summary_has_the_fixed_disclaimer_and_the_baseline(self, admin_browser):
         admin_browser.post("/api/v1/predictions/no-show/", ROW)
         body = admin_browser.get(URL).json()
-        assert body["disclaimer"] == drift.DISCLAIMER and "no claim about real-world medical impact" in body["disclaimer"]
+        assert (
+            body["disclaimer"] == drift.DISCLAIMER and "no claim about real-world medical impact" in body["disclaimer"]
+        )
         assert body["predictions"] == 1 and body["verdict"] == "not enough data" and len(body["baseline_shares"]) == 10
 
     @pytest.mark.parametrize("days", ["0", "91", "x", "-1"])

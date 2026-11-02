@@ -14,8 +14,21 @@ import math
 import re
 
 TYPES = {"object": dict, "array": list, "string": str, "boolean": bool, "integer": int, "number": (int, float)}
-KNOWN = {"type", "properties", "required", "additionalProperties", "items", "maxLength", "minLength", "maxItems",
-         "pattern", "enum", "minimum", "maximum", "description"}
+KNOWN = {
+    "type",
+    "properties",
+    "required",
+    "additionalProperties",
+    "items",
+    "maxLength",
+    "minLength",
+    "maxItems",
+    "pattern",
+    "enum",
+    "minimum",
+    "maximum",
+    "description",
+}
 
 
 class SchemaError(ValueError):

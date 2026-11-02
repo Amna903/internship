@@ -8,9 +8,33 @@ import pytest
 from ml import cluster_view
 from ml.verify_release import reports_match
 
-BANNED = ["risk", "patient type", "diagnos", "condition", "illness", "disease", "sick", "health", "unreliable",
-          "lazy", "bad", "good", "compliant", "non-compliant", "vulnerable", "high-risk", "low-risk", "age",
-          "young", "old", "elderly", "gender", "income", "poor", "rich"]
+BANNED = [
+    "risk",
+    "patient type",
+    "diagnos",
+    "condition",
+    "illness",
+    "disease",
+    "sick",
+    "health",
+    "unreliable",
+    "lazy",
+    "bad",
+    "good",
+    "compliant",
+    "non-compliant",
+    "vulnerable",
+    "high-risk",
+    "low-risk",
+    "age",
+    "young",
+    "old",
+    "elderly",
+    "gender",
+    "income",
+    "poor",
+    "rich",
+]
 
 
 @pytest.fixture(scope="module")
@@ -32,6 +56,7 @@ def test_descriptions_are_built_from_the_numbers(view):
     """Every phrase comes from PHRASES and points the right way for that cluster's mean."""
     from ml import cluster_features
     from ml.data import generate
+
     table = cluster_features.patient_table(generate())
     overall, spread = table.mean(), table.std(ddof=0)
     for c in view["real"]["misleading_clusters"]:

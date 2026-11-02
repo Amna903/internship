@@ -1,7 +1,6 @@
 """Week 5 Step 4: the generation harness (V4–V6). Oracle contexts, per-run scoring by hand, majority, and an
 offline end-to-end run that is rolled back. Fake model and FakeEmbedder."""
 
-
 import pytest
 from django.core.management import call_command
 
@@ -29,27 +28,45 @@ def test_oracle_context_has_the_gold_text_plus_exactly_one_distractor(corpus, ca
         assert len(ctx) == 2
         return
     quotes = [norm(e["quote"]) for e in case["evidence"]]
-    assert all(any(q in norm(p.text) for p in ctx) for q in quotes)          # every quote is there
+    assert all(any(q in norm(p.text) for p in ctx) for q in quotes)  # every quote is there
     distractors = [p for p in ctx if not any(q in norm(p.text) for q in quotes)]
     assert len(distractors) == 1 and len(ctx) <= len(quotes) + 1
-    assert not any(p.id.startswith("cancellation.md#") for p in ctx)          # never the superseded edition
+    assert not any(p.id.startswith("cancellation.md#") for p in ctx)  # never the superseded edition
 
 
 A01 = next(c for c in CASES if c["id"] == "A01")
 U09 = next(c for c in CASES if c["id"] == "U09")
-GOLD = {"billing.md#0": "Visit fees are charged after the appointment. A refund can be requested within 14 days of a "
-                        "payment, in the patient app or at the front desk.", "parking.md#0": "Park free for 3 hours."}
+GOLD = {
+    "billing.md#0": "Visit fees are charged after the appointment. A refund can be requested within 14 days of a "
+    "payment, in the patient app or at the front desk.",
+    "parking.md#0": "Park free for 3 hours.",
+}
 
 
-@pytest.mark.parametrize("status, answer, cited, expect", [
-    ("answered", "A refund can be requested within fourteen days.", ["billing.md#0"],
-     {"key_fact_ok": True, "citation_recall": True, "gold_citations": 1, "answered_wrong": False}),
-    ("answered", "A refund can be requested within 30 days.", ["billing.md#0"],
-     {"key_fact_ok": False, "answered_wrong": True, "citation_recall": True}),
-    ("answered", "A refund can be requested within 14 days.", ["parking.md#0"],
-     {"key_fact_ok": True, "citation_recall": False, "gold_citations": 0}),
-    ("insufficient_information", "", [], {"key_fact_ok": False, "false_abstention": True, "answered_wrong": False}),
-])
+@pytest.mark.parametrize(
+    "status, answer, cited, expect",
+    [
+        (
+            "answered",
+            "A refund can be requested within fourteen days.",
+            ["billing.md#0"],
+            {"key_fact_ok": True, "citation_recall": True, "gold_citations": 1, "answered_wrong": False},
+        ),
+        (
+            "answered",
+            "A refund can be requested within 30 days.",
+            ["billing.md#0"],
+            {"key_fact_ok": False, "answered_wrong": True, "citation_recall": True},
+        ),
+        (
+            "answered",
+            "A refund can be requested within 14 days.",
+            ["parking.md#0"],
+            {"key_fact_ok": True, "citation_recall": False, "gold_citations": 0},
+        ),
+        ("insufficient_information", "", [], {"key_fact_ok": False, "false_abstention": True, "answered_wrong": False}),
+    ],
+)
 def test_score_run_by_hand(status, answer, cited, expect):
     r = score_run(A01, KEYS["A01"], status, answer, [{"passage_id": p, "quote": "x"} for p in cited], GOLD)
     assert {k: r[k] for k in expect} == expect
@@ -61,14 +78,24 @@ def test_unanswerable_scoring():
 
 
 def test_majority_is_two_of_three():
-    assert majority([{"x": True}, {"x": True}, {"x": False}], "x") and not majority([{"x": True}, {}, {"x": False}], "x")
+    assert majority([{"x": True}, {"x": True}, {"x": False}], "x") and not majority(
+        [{"x": True}, {}, {"x": False}], "x"
+    )
 
 
 def test_aggregate_counts():
-    runs = {"A01": [score_run(A01, KEYS["A01"], "answered", "within 14 days", [{"passage_id": "billing.md#0"}], GOLD)
-                    | {"rejected_citations": 0, "groundedness": 0.9, "tokens": 10, "seconds": 1.0}] * 3,
-            "U09": [score_run(U09, None, "answered", "Yes.", [], {})
-                    | {"rejected_citations": 0, "groundedness": None, "tokens": 5, "seconds": 1.0}] * 3}
+    runs = {
+        "A01": [
+            score_run(A01, KEYS["A01"], "answered", "within 14 days", [{"passage_id": "billing.md#0"}], GOLD)
+            | {"rejected_citations": 0, "groundedness": 0.9, "tokens": 10, "seconds": 1.0}
+        ]
+        * 3,
+        "U09": [
+            score_run(U09, None, "answered", "Yes.", [], {})
+            | {"rejected_citations": 0, "groundedness": None, "tokens": 5, "seconds": 1.0}
+        ]
+        * 3,
+    }
     agg = aggregate([A01, U09], runs)
     assert (agg["key_fact_ok"], agg["abstained"], agg["gold_citations"], agg["citations"]) == (1, 0, 3, 3)
 

@@ -40,8 +40,9 @@ def _sigmoid(x):
     return 1.0 / (1.0 + np.exp(-x))
 
 
-def true_log_odds(lead_time_days, reminder_sent, age_band, distance_km, visit_type, weekday,
-                  booking_channel, hour, reliability):
+def true_log_odds(
+    lead_time_days, reminder_sent, age_band, distance_km, visit_type, weekday, booking_channel, hour, reliability
+):
     """The ground-truth formula for one appointment (scalars)."""
     reminder_strength = REMINDER_BASE + REMINDER_PER_LEAD * min(lead_time_days, 30) / 30
     return (
@@ -84,27 +85,41 @@ def generate(seed: int = config.SEED, n_patients: int = config.N_PATIENTS) -> pd
             channel = rng.choice(config.BOOKING_CHANNELS, p=[0.45, 0.30, 0.25])
             reminder = bool(rng.random() < 0.65)
 
-            probability = float(_sigmoid(true_log_odds(
-                lead_time, reminder, age_band, distance_km, visit_type, weekday, channel, hour, reliability,
-            )))
+            probability = float(
+                _sigmoid(
+                    true_log_odds(
+                        lead_time,
+                        reminder,
+                        age_band,
+                        distance_km,
+                        visit_type,
+                        weekday,
+                        channel,
+                        hour,
+                        reliability,
+                    )
+                )
+            )
             no_show = bool(rng.random() < probability)  # the weighted coin flip: noise is built in
 
-            rows.append({
-                "appointment_id": appointment_id,
-                "patient_id": patient_id,
-                "lead_time_days": lead_time,
-                "appointment_weekday": weekday,
-                "appointment_hour": hour,
-                "age_band": age_band,
-                "visit_type": visit_type,
-                "booking_channel": channel,
-                "reminder_sent": reminder,
-                "prior_appointments": prior_appointments,
-                "prior_no_shows": prior_no_shows,
-                "distance_km": distance_km,
-                config.ORACLE: round(probability, 6),
-                config.LABEL: no_show,
-            })
+            rows.append(
+                {
+                    "appointment_id": appointment_id,
+                    "patient_id": patient_id,
+                    "lead_time_days": lead_time,
+                    "appointment_weekday": weekday,
+                    "appointment_hour": hour,
+                    "age_band": age_band,
+                    "visit_type": visit_type,
+                    "booking_channel": channel,
+                    "reminder_sent": reminder,
+                    "prior_appointments": prior_appointments,
+                    "prior_no_shows": prior_no_shows,
+                    "distance_km": distance_km,
+                    config.ORACLE: round(probability, 6),
+                    config.LABEL: no_show,
+                }
+            )
             # This appointment becomes history for the patient's next one (time order matters).
             prior_appointments += 1
             prior_no_shows += int(no_show)

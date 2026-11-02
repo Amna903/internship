@@ -7,7 +7,9 @@ export default function ProfessionalNotFound() {
     <Layout>
       <Card className="narrow" title={<>We couldn&apos;t find that professional</>}>
         <p className="muted">The link may be mistyped, or the profile is no longer listed.</p>
-        <Link className="btn" href="/professionals">Browse all professionals</Link>
+        <Link className="btn" href="/professionals">
+          Browse all professionals
+        </Link>
       </Card>
     </Layout>
   );

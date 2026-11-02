@@ -6,7 +6,14 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { Layout } from "@/components/ui/Layout";
 import {
-  DAY_LABELS, VISIT_LABELS, availableDays, formatFee, getProfessional, locationName, professionals, specialtyName,
+  DAY_LABELS,
+  VISIT_LABELS,
+  availableDays,
+  formatFee,
+  getProfessional,
+  locationName,
+  professionals,
+  specialtyName,
 } from "@/lib/professionals";
 
 type Props = { params: Promise<{ id: string }> };
@@ -25,18 +32,28 @@ export default async function ProfessionalPage({ params }: Props) {
 
   return (
     <Layout>
-      <p className="small"><Link href="/professionals">← All professionals</Link></p>
+      <p className="small">
+        <Link href="/professionals">← All professionals</Link>
+      </p>
       <div className="detail-head">
         <div>
           <h1>{p.name}</h1>
-          <p className="muted">{p.title} · {p.clinic}, {locationName(p.locationId)}</p>
+          <p className="muted">
+            {p.title} · {p.clinic}, {locationName(p.locationId)}
+          </p>
           <div className="badges">
             <Badge>{specialtyName(p.specialtyId)}</Badge>
-            {p.visitTypes.map((v) => <Badge key={v} tone="neutral">{VISIT_LABELS[v]}</Badge>)}
+            {p.visitTypes.map((v) => (
+              <Badge key={v} tone="neutral">
+                {VISIT_LABELS[v]}
+              </Badge>
+            ))}
           </div>
         </div>
         <div className="detail-cta">
-          <Link className="btn" href={`/professionals/${p.id}/request`}>Request an appointment</Link>
+          <Link className="btn" href={`/professionals/${p.id}/request`}>
+            Request an appointment
+          </Link>
           <FavoriteButton id={p.id} name={p.name} />
         </div>
       </div>
@@ -45,18 +62,29 @@ export default async function ProfessionalPage({ params }: Props) {
         <Card title="About" as="section">
           <p>{p.bio}</p>
           <dl className="kv">
-            <dt>Fee</dt><dd>{formatFee(p.feePkr)} per session</dd>
-            <dt>Experience</dt><dd>{p.yearsExperience} years</dd>
-            <dt>Languages</dt><dd>{p.languages.join(", ")}</dd>
+            <dt>Fee</dt>
+            <dd>{formatFee(p.feePkr)} per session</dd>
+            <dt>Experience</dt>
+            <dd>{p.yearsExperience} years</dd>
+            <dt>Languages</dt>
+            <dd>{p.languages.join(", ")}</dd>
           </dl>
         </Card>
         <Card title="Weekly availability" as="section">
           <table className="availability">
             <caption className="visually-hidden">Available time slots by day</caption>
-            <thead><tr><th scope="col">Day</th><th scope="col">Times</th></tr></thead>
+            <thead>
+              <tr>
+                <th scope="col">Day</th>
+                <th scope="col">Times</th>
+              </tr>
+            </thead>
             <tbody>
               {availableDays(p).map((d) => (
-                <tr key={d}><th scope="row">{DAY_LABELS[d]}</th><td>{p.availability[d]!.join(", ")}</td></tr>
+                <tr key={d}>
+                  <th scope="row">{DAY_LABELS[d]}</th>
+                  <td>{p.availability[d]!.join(", ")}</td>
+                </tr>
               ))}
             </tbody>
           </table>

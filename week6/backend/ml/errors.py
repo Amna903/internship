@@ -31,15 +31,22 @@ CALIBRATION_BINS = 10
 FAMILY_ALPHA = 0.05  # overall false-alarm rate allowed across ALL calibration bins together
 # Bonferroni: each of the 10 bins is tested at 0.05/10, i.e. |z| > 2.81 (two-sided). A plain 2-SE rule
 # per bin would raise at least one false alarm ~40% of the time even for a perfectly calibrated model.
-CALIBRATION_Z_LIMIT = math.sqrt(2) * float(__import__("scipy.special", fromlist=["erfcinv"]).erfcinv(FAMILY_ALPHA / CALIBRATION_BINS))
+CALIBRATION_Z_LIMIT = math.sqrt(2) * float(
+    __import__("scipy.special", fromlist=["erfcinv"]).erfcinv(FAMILY_ALPHA / CALIBRATION_BINS)
+)
 
 
 # ---------------------------------------------------------------- building blocks (pure, unit-tested)
 
+
 def confusion(y, flagged) -> dict:
     y, flagged = np.asarray(y, dtype=bool), np.asarray(flagged, dtype=bool)
-    return {"tp": int((flagged & y).sum()), "fp": int((flagged & ~y).sum()),
-            "fn": int((~flagged & y).sum()), "tn": int((~flagged & ~y).sum())}
+    return {
+        "tp": int((flagged & y).sum()),
+        "fp": int((flagged & ~y).sum()),
+        "fn": int((~flagged & y).sum()),
+        "tn": int((~flagged & ~y).sum()),
+    }
 
 
 def rates(c: dict) -> dict:
@@ -74,8 +81,14 @@ def expected_calibration_error(table: pd.DataFrame) -> float:
 
 
 def group_table(y, flagged, probability, groups, order=None) -> pd.DataFrame:
-    frame = pd.DataFrame({"y": np.asarray(y, dtype=bool), "f": np.asarray(flagged, dtype=bool),
-                          "p": np.asarray(probability, dtype=float), "g": np.asarray(groups)})
+    frame = pd.DataFrame(
+        {
+            "y": np.asarray(y, dtype=bool),
+            "f": np.asarray(flagged, dtype=bool),
+            "p": np.asarray(probability, dtype=float),
+            "g": np.asarray(groups),
+        }
+    )
     rows = {}
     for group, part in frame.groupby("g", observed=True, sort=False):
         r = rates(confusion(part["y"], part["f"]))
@@ -86,9 +99,11 @@ def group_table(y, flagged, probability, groups, order=None) -> pd.DataFrame:
 
 def fairness_gaps(table: pd.DataFrame, a, b) -> dict:
     """Differences between two groups of a group_table (a minus b)."""
-    return {"fpr_gap": table.loc[a, "fpr"] - table.loc[b, "fpr"],
-            "recall_gap": table.loc[a, "recall"] - table.loc[b, "recall"],  # "equal opportunity"
-            "flag_rate_ratio": table.loc[a, "flag_rate"] / table.loc[b, "flag_rate"]}
+    return {
+        "fpr_gap": table.loc[a, "fpr"] - table.loc[b, "fpr"],
+        "recall_gap": table.loc[a, "recall"] - table.loc[b, "recall"],  # "equal opportunity"
+        "flag_rate_ratio": table.loc[a, "flag_rate"] / table.loc[b, "flag_rate"],
+    }
 
 
 def error_sources(y, flagged, true_probability, threshold) -> dict:
@@ -98,8 +113,10 @@ def error_sources(y, flagged, true_probability, threshold) -> dict:
     oracle_flag = np.asarray(true_probability) >= threshold
     fn, fp = ~flagged & y, flagged & ~y
     return {
-        "fn": int(fn.sum()), "fn_unavoidable": int((fn & ~oracle_flag).sum()),
-        "fp": int(fp.sum()), "fp_unavoidable": int((fp & oracle_flag).sum()),
+        "fn": int(fn.sum()),
+        "fn_unavoidable": int((fn & ~oracle_flag).sum()),
+        "fp": int(fp.sum()),
+        "fp_unavoidable": int((fp & oracle_flag).sum()),
     }
 
 
@@ -111,8 +128,12 @@ PLANTED_EFFECTS = [
     ("age 18-24 vs 55-64", +1, {"age_band": "18-24"}, {"age_band": "55-64"}),
     ("telehealth vs in person", -1, {"visit_type": "telehealth"}, {"visit_type": "in_person"}),
     ("distance 30 vs 5 km", +1, {"distance_km": 30.0}, {"distance_km": 5.0}),
-    ("past no-shows 2 of 4 vs 0 of 4", +1, {"prior_appointments": 4, "prior_no_shows": 2},
-     {"prior_appointments": 4, "prior_no_shows": 0}),
+    (
+        "past no-shows 2 of 4 vs 0 of 4",
+        +1,
+        {"prior_appointments": 4, "prior_no_shows": 2},
+        {"prior_appointments": 4, "prior_no_shows": 0},
+    ),
     ("friday vs tuesday", +1, {"appointment_weekday": "friday"}, {"appointment_weekday": "tuesday"}),
     ("phone vs web booking", -1, {"booking_channel": "phone"}, {"booking_channel": "web"}),
 ]
@@ -125,8 +146,14 @@ def effect_directions(pipeline, X: pd.DataFrame) -> list[dict]:
     results = []
     for name, planted_sign, high, low in PLANTED_EFFECTS:
         change = (pipeline.predict_proba(X.assign(**high))[:, 1] - pipeline.predict_proba(X.assign(**low))[:, 1]).mean()
-        results.append({"effect": name, "planted": planted_sign, "change": float(change),
-                        "matches": bool(np.sign(change) == planted_sign)})
+        results.append(
+            {
+                "effect": name,
+                "planted": planted_sign,
+                "change": float(change),
+                "matches": bool(np.sign(change) == planted_sign),
+            }
+        )
     return results
 
 
@@ -136,6 +163,7 @@ def coefficients(pipeline) -> pd.Series:
 
 
 # ---------------------------------------------------------------- the analysis
+
 
 @dataclass
 class Analysis:
@@ -170,8 +198,13 @@ def analyse(df: pd.DataFrame | None = None) -> Analysis:
     has_history = np.where(validation["prior_appointments"] > 0, "returning", "new patient")
     groups = {
         "age band": group_table(y_val, flagged, p_val, validation["age_band"], config.AGE_BANDS),
-        "lead time (days ahead)": group_table(y_val, flagged, p_val, lead_time_bucket(validation["lead_time_days"]).astype(str),
-                                              ["0–2", "3–7", "8–14", "15–30", "31+"]),
+        "lead time (days ahead)": group_table(
+            y_val,
+            flagged,
+            p_val,
+            lead_time_bucket(validation["lead_time_days"]).astype(str),
+            ["0–2", "3–7", "8–14", "15–30", "31+"],
+        ),
         "reminder sent": group_table(y_val, flagged, p_val, validation["reminder_sent"], [True, False]),
         "visit type": group_table(y_val, flagged, p_val, validation["visit_type"], config.VISIT_TYPES),
         "booking channel": group_table(y_val, flagged, p_val, validation["booking_channel"], config.BOOKING_CHANNELS),
@@ -183,8 +216,9 @@ def analyse(df: pd.DataFrame | None = None) -> Analysis:
     neutral = {"age_band": "35-44"}
     no_age = build(result.chosen).fit(model_input(train_rows).assign(**neutral), train_rows[config.LABEL])
     p_no_age = no_age.predict_proba(X_val.assign(**neutral))[:, 1]
-    no_age_table = group_table(y_val, p_no_age >= train.choose_threshold(y_val, p_no_age), p_no_age,
-                               validation["age_band"], config.AGE_BANDS)
+    no_age_table = group_table(
+        y_val, p_no_age >= train.choose_threshold(y_val, p_no_age), p_no_age, validation["age_band"], config.AGE_BANDS
+    )
     without_age = {
         "pr_auc_with": float(average_precision_score(y_val, p_val)),
         "pr_auc_without": float(average_precision_score(y_val, p_no_age)),
@@ -192,8 +226,17 @@ def analyse(df: pd.DataFrame | None = None) -> Analysis:
     }
 
     errors_frame = validation.assign(probability=p_val)
-    show = ["probability", config.ORACLE, "lead_time_days", "reminder_sent", "age_band", "visit_type",
-            "prior_appointments", "prior_no_shows", "distance_km"]
+    show = [
+        "probability",
+        config.ORACLE,
+        "lead_time_days",
+        "reminder_sent",
+        "age_band",
+        "visit_type",
+        "prior_appointments",
+        "prior_no_shows",
+        "distance_km",
+    ]
     confident_fp = errors_frame[flagged & ~y_val.to_numpy()].nlargest(5, "probability")[show]
     confident_fn = errors_frame[~flagged & y_val.to_numpy()].nsmallest(5, "probability")[show]
 
@@ -203,47 +246,71 @@ def analyse(df: pd.DataFrame | None = None) -> Analysis:
     test_age = group_table(test[config.LABEL], test_flagged, p_test, test["age_band"], config.AGE_BANDS)
 
     return Analysis(
-        model_label=result.chosen.label, threshold=threshold, validation_rows=len(validation),
-        val_confusion=confusion(y_val, flagged), test_confusion=confusion(test[config.LABEL], test_flagged),
-        calibration=calibration, ece=expected_calibration_error(calibration), groups=groups, test_age=test_age,
+        model_label=result.chosen.label,
+        threshold=threshold,
+        validation_rows=len(validation),
+        val_confusion=confusion(y_val, flagged),
+        test_confusion=confusion(test[config.LABEL], test_flagged),
+        calibration=calibration,
+        ece=expected_calibration_error(calibration),
+        groups=groups,
+        test_age=test_age,
         age_gaps=fairness_gaps(groups["age band"], "18-24", "55-64"),
         sources=error_sources(y_val, flagged, validation[config.ORACLE], threshold),
-        directions=effect_directions(pipeline, X_val), coefs=coefficients(pipeline), without_age=without_age,
-        confident_fp=confident_fp, confident_fn=confident_fn,
+        directions=effect_directions(pipeline, X_val),
+        coefs=coefficients(pipeline),
+        without_age=without_age,
+        confident_fp=confident_fp,
+        confident_fn=confident_fn,
     )
 
 
 # ---------------------------------------------------------------- report
+
 
 def _p(x: float) -> str:
     return f"{100 * x:.1f}%"
 
 
 def _group_md(table: pd.DataFrame, label: str) -> str:
-    lines = [f"| {label} | rows | no-show rate | mean prediction | flagged | false-positive rate | false-negative rate | precision |",
-             "|---|---|---|---|---|---|---|---|"]
+    lines = [
+        f"| {label} | rows | no-show rate | mean prediction | flagged | false-positive rate | false-negative rate | precision |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
     for group, r in table.iterrows():
-        lines.append(f"| {group} | {int(r['rows']):,} | {_p(r['no_show_rate'])} | {_p(r['mean_prediction'])} | "
-                     f"{_p(r['flag_rate'])} | {_p(r['fpr'])} | {_p(r['fnr'])} | {_p(r['precision'])} |")
+        lines.append(
+            f"| {group} | {int(r['rows']):,} | {_p(r['no_show_rate'])} | {_p(r['mean_prediction'])} | "
+            f"{_p(r['flag_rate'])} | {_p(r['fpr'])} | {_p(r['fnr'])} | {_p(r['precision'])} |"
+        )
     return "\n".join(lines)
 
 
 def _widest(table: pd.DataFrame, column: str) -> str:
-    return (f"widest {column.upper() if len(column) <= 3 else column} gap: {table[column].idxmax()} "
-            f"{_p(table[column].max())} vs {table[column].idxmin()} {_p(table[column].min())}")
+    return (
+        f"widest {column.upper() if len(column) <= 3 else column} gap: {table[column].idxmax()} "
+        f"{_p(table[column].max())} vs {table[column].idxmin()} {_p(table[column].min())}"
+    )
 
 
 def calibration_verdict(table: pd.DataFrame) -> str:
     flagged = int(table["flagged"].sum())
     naive = [str(int(b) + 1) for b in table.index[table["z"].abs() > 2]]
-    naive_note = (f" A naive per-bin 2-se rule would have flagged bin(s) {', '.join(naive)}: exactly the kind of "
-                  "false alarm the adjusted limit exists to prevent." if naive and flagged == 0 else "")
+    naive_note = (
+        f" A naive per-bin 2-se rule would have flagged bin(s) {', '.join(naive)}: exactly the kind of "
+        "false alarm the adjusted limit exists to prevent."
+        if naive and flagged == 0
+        else ""
+    )
     if flagged == 0:
-        return (f"**No recalibration needed.** No bin's gap exceeds the noise limit (|z| ≤ {CALIBRATION_Z_LIMIT:.2f} "
-                f"in every bin; largest |z| = {table['z'].abs().max():.2f})." + naive_note)
-    return (f"**Finding: {flagged} bin(s) exceed the noise limit.** Recalibration (e.g. `CalibratedClassifierCV`) "
-            "would be the next step. It is NOT applied here: the test set was already used in Step 4, and "
-            "changing the model now would make that score describe a different model than the one shipped.")
+        return (
+            f"**No recalibration needed.** No bin's gap exceeds the noise limit (|z| ≤ {CALIBRATION_Z_LIMIT:.2f} "
+            f"in every bin; largest |z| = {table['z'].abs().max():.2f})." + naive_note
+        )
+    return (
+        f"**Finding: {flagged} bin(s) exceed the noise limit.** Recalibration (e.g. `CalibratedClassifierCV`) "
+        "would be the next step. It is NOT applied here: the test set was already used in Step 4, and "
+        "changing the model now would make that score describe a different model than the one shipped."
+    )
 
 
 def build_report(a: Analysis) -> str:
@@ -267,16 +334,23 @@ def build_report(a: Analysis) -> str:
         for d in a.directions
     )
     all_match = all(d["matches"] for d in a.directions)
-    coef_rows = "\n".join(f"| `{name}` | {value:+.3f} |" for name, value in a.coefs.sort_values(key=abs, ascending=False).items())
+    coef_rows = "\n".join(
+        f"| `{name}` | {value:+.3f} |" for name, value in a.coefs.sort_values(key=abs, ascending=False).items()
+    )
 
     def mistakes(frame):
         header = "| probability | true probability | lead time | reminder | age | visit | prior | no-shows | distance |\n|---|---|---|---|---|---|---|---|---|"
-        return header + "\n" + "\n".join(
-            f"| {_p(row['probability'])} | {_p(row[config.ORACLE])} | {int(row['lead_time_days'])} d | "
-            f"{'yes' if row['reminder_sent'] else 'no'} | {row['age_band']} | {row['visit_type']} | "
-            f"{int(row['prior_appointments'])} | {int(row['prior_no_shows'])} | "
-            f"{'—' if pd.isna(row['distance_km']) else f'{row['distance_km']:.1f} km'} |"
-            for _, row in frame.iterrows())
+        return (
+            header
+            + "\n"
+            + "\n".join(
+                f"| {_p(row['probability'])} | {_p(row[config.ORACLE])} | {int(row['lead_time_days'])} d | "
+                f"{'yes' if row['reminder_sent'] else 'no'} | {row['age_band']} | {row['visit_type']} | "
+                f"{int(row['prior_appointments'])} | {int(row['prior_no_shows'])} | "
+                f"{'—' if pd.isna(row['distance_km']) else f'{row["distance_km"]:.1f} km'} |"
+                for _, row in frame.iterrows()
+            )
+        )
 
     return f"""# Error analysis: chosen no-show model
 
@@ -290,11 +364,11 @@ Model: **{a.model_label}** · decision threshold **{a.threshold:.4f}** (flag for
 
 | | missed (no-show) | attended |
 |---|---|---|
-| **flagged** | {c['tp']:,} true positives | {c['fp']:,} false positives |
-| **not flagged** | {c['fn']:,} false negatives | {c['tn']:,} true negatives |
+| **flagged** | {c["tp"]:,} true positives | {c["fp"]:,} false positives |
+| **not flagged** | {c["fn"]:,} false negatives | {c["tn"]:,} true negatives |
 
-Validation: precision {_p(r['precision'])} · recall {_p(r['recall'])} · false-positive rate {_p(r['fpr'])} ·
-flagged {_p(r['flag_rate'])}. Test (reporting only): {ct['tp']:,} TP · {ct['fp']:,} FP · {ct['fn']:,} FN · {ct['tn']:,} TN.
+Validation: precision {_p(r["precision"])} · recall {_p(r["recall"])} · false-positive rate {_p(r["fpr"])} ·
+flagged {_p(r["flag_rate"])}. Test (reporting only): {ct["tp"]:,} TP · {ct["fp"]:,} FP · {ct["fn"]:,} FN · {ct["tn"]:,} TN.
 
 What each error costs here:
 - **False positive** (flagged, attended anyway): one unnecessary reminder message. Cheap.
@@ -331,21 +405,21 @@ also cross the threshold. This follows from the planted drivers in the EDA, not 
 
 | | 18-24 | 55-64 | gap |
 |---|---|---|---|
-| false-positive rate (attenders flagged) | {_p(a.groups['age band'].loc['18-24', 'fpr'])} | {_p(a.groups['age band'].loc['55-64', 'fpr'])} | **{100 * g['fpr_gap']:+.1f} pts** |
-| recall (no-shows caught) | {_p(a.groups['age band'].loc['18-24', 'recall'])} | {_p(a.groups['age band'].loc['55-64', 'recall'])} | {100 * g['recall_gap']:+.1f} pts |
-| flagged | {_p(a.groups['age band'].loc['18-24', 'flag_rate'])} | {_p(a.groups['age band'].loc['55-64', 'flag_rate'])} | {g['flag_rate_ratio']:.1f}× |
+| false-positive rate (attenders flagged) | {_p(a.groups["age band"].loc["18-24", "fpr"])} | {_p(a.groups["age band"].loc["55-64", "fpr"])} | **{100 * g["fpr_gap"]:+.1f} pts** |
+| recall (no-shows caught) | {_p(a.groups["age band"].loc["18-24", "recall"])} | {_p(a.groups["age band"].loc["55-64", "recall"])} | {100 * g["recall_gap"]:+.1f} pts |
+| flagged | {_p(a.groups["age band"].loc["18-24", "flag_rate"])} | {_p(a.groups["age band"].loc["55-64", "flag_rate"])} | {g["flag_rate_ratio"]:.1f}× |
 
 **Cause.** Age is a real (planted) driver: 18–24-year-olds miss far more often. The model is right *on
 average* for each group (compare "no-show rate" and "mean prediction" in §3), yet a young patient who would
-have attended is {g['fpr_gap'] * 100:.0f} points more likely to be flagged than an older one.
+have attended is {g["fpr_gap"] * 100:.0f} points more likely to be flagged than an older one.
 
-Test set, reporting only: false-positive rate 18-24 {_p(a.test_age.loc['18-24', 'fpr'])} vs 55-64 {_p(a.test_age.loc['55-64', 'fpr'])}.
+Test set, reporting only: false-positive rate 18-24 {_p(a.test_age.loc["18-24", "fpr"])} vs 55-64 {_p(a.test_age.loc["55-64", "fpr"])}.
 
 **Mitigation options considered:**
 
 | option | effect (validation) | decision |
 |---|---|---|
-| (a) remove age from the model | PR-AUC {w['pr_auc_with']:.3f} → {w['pr_auc_without']:.3f}; false-positive gap {100 * g['fpr_gap']:+.1f} → {100 * gw['fpr_gap']:+.1f} pts | Not applied now (test set already used). A candidate for the next model version, with its own validation and test. |
+| (a) remove age from the model | PR-AUC {w["pr_auc_with"]:.3f} → {w["pr_auc_without"]:.3f}; false-positive gap {100 * g["fpr_gap"]:+.1f} → {100 * gw["fpr_gap"]:+.1f} pts | Not applied now (test set already used). A candidate for the next model version, with its own validation and test. |
 | (b) a different threshold per age group | could equalise false-positive rates | **Rejected**: it deliberately treats people differently by age. |
 | (c) supportive use only | the only action is an extra reminder; never refusal, penalty or priority | **Adopted.** A false positive costs one message. |
 
@@ -357,8 +431,8 @@ made the same mistake.
 
 | error | count | also made by perfect knowledge (unavoidable) | the model's own share |
 |---|---|---|---|
-| false negatives (missed no-shows) | {s['fn']:,} | {s['fn_unavoidable']:,} ({_p(s['fn_unavoidable'] / s['fn'])}) | {_p(1 - s['fn_unavoidable'] / s['fn'])} |
-| false positives (flagged attenders) | {s['fp']:,} | {s['fp_unavoidable']:,} ({_p(s['fp_unavoidable'] / s['fp'])}) | {_p(1 - s['fp_unavoidable'] / s['fp'])} |
+| false negatives (missed no-shows) | {s["fn"]:,} | {s["fn_unavoidable"]:,} ({_p(s["fn_unavoidable"] / s["fn"])}) | {_p(1 - s["fn_unavoidable"] / s["fn"])} |
+| false positives (flagged attenders) | {s["fp"]:,} | {s["fp_unavoidable"]:,} ({_p(s["fp_unavoidable"] / s["fp"])}) | {_p(1 - s["fp_unavoidable"] / s["fp"])} |
 
 Most errors are the coin flip's, not the model's: even knowing the exact probability, you cannot tell
 which of two 20% appointments will be missed.

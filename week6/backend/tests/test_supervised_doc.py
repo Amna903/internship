@@ -53,6 +53,7 @@ def first_column(table) -> list[str]:
 
 # ---------------- Definitions match the code ----------------
 
+
 def test_feature_table_lists_exactly_the_configured_features_with_their_kind(doc):
     rows = tables(section(doc, "Features"))[0]
     kind = {f: "numeric" for f in config.NUMERIC_FEATURES}
@@ -94,6 +95,7 @@ def test_dataset_section_states_the_real_size_and_seed(doc, df):
 
 # ---------------- Split ----------------
 
+
 def test_split_table_matches_the_real_split(doc, df):
     rows = tables(section(doc, "Split strategy"))[0]
     for (name, rows_, patients, rate, _), part in zip(rows, split(df)):
@@ -108,6 +110,7 @@ def test_parts_have_similar_no_show_rates_as_the_doc_claims(df):
 
 
 # ---------------- Leakage ----------------
+
 
 def test_leakage_table_matches_the_real_single_feature_scores(doc, df):
     rows = tables(section(doc, "Leakage checks"))[1]

@@ -65,6 +65,7 @@ class Threshold:
 @dataclass
 class Improvement:
     """Chosen model minus baseline, test PR-AUC, with a 95% interval from a patient-level bootstrap."""
+
     difference: float
     low: float
     high: float
@@ -76,8 +77,10 @@ class Improvement:
         if self.low > 0:
             return "a real improvement: the whole 95% interval is above zero"
         if self.difference > 0:
-            return ("not clearly better: the chosen model scored higher, but the 95% interval includes zero, "
-                    "so the gain could be luck")
+            return (
+                "not clearly better: the chosen model scored higher, but the 95% interval includes zero, "
+                "so the gain could be luck"
+            )
         return "no improvement: the chosen model did not beat the baseline on test. This is a finding, reported as-is"
 
 
@@ -202,8 +205,12 @@ def best_of(validation: dict, family: str = None, name: str = None, cv: dict | N
 def confusion_counts(y_true, probability, threshold: float) -> dict:
     y_true = np.asarray(y_true, dtype=bool)
     flagged = np.asarray(probability) >= threshold
-    return {"tp": int((flagged & y_true).sum()), "fp": int((flagged & ~y_true).sum()),
-            "fn": int((~flagged & y_true).sum()), "tn": int((~flagged & ~y_true).sum())}
+    return {
+        "tp": int((flagged & y_true).sum()),
+        "fp": int((flagged & ~y_true).sum()),
+        "fn": int((~flagged & y_true).sum()),
+        "tn": int((~flagged & ~y_true).sum()),
+    }
 
 
 BOOTSTRAP_RESAMPLES = 1000
@@ -222,15 +229,23 @@ def bootstrap_difference(y, chosen_probability, baseline_probability, groups) ->
         idx = np.concatenate([rows_of[p] for p in rng.choice(patients, size=patients.size, replace=True)])
         if y[idx].min() == y[idx].max():
             continue  # a resample with one class only has no PR-AUC
-        differences.append(average_precision_score(y[idx], chosen_probability[idx])
-                           - average_precision_score(y[idx], baseline_probability[idx]))
+        differences.append(
+            average_precision_score(y[idx], chosen_probability[idx])
+            - average_precision_score(y[idx], baseline_probability[idx])
+        )
     point = average_precision_score(y, chosen_probability) - average_precision_score(y, baseline_probability)
     low, high = np.percentile(differences, [2.5, 97.5])
     return Improvement(float(point), float(low), float(high), len(differences))
 
 
-def evaluate_on_test(fitted: dict, picks: dict, test: pd.DataFrame, threshold: float, cutoffs: dict | None = None,
-                     rival: str = "baseline"):
+def evaluate_on_test(
+    fitted: dict,
+    picks: dict,
+    test: pd.DataFrame,
+    threshold: float,
+    cutoffs: dict | None = None,
+    rival: str = "baseline",
+):
     """The ONLY place test rows are scored. Called once, after every decision is final.
     `cutoffs` (label -> validation cut-off) adds each algorithm's confusion matrix at its own cut-off."""
     X, y = model_input(test), test[config.LABEL]
@@ -248,8 +263,12 @@ def evaluate_on_test(fitted: dict, picks: dict, test: pd.DataFrame, threshold: f
     return results, apply_threshold(y, chosen_probability, threshold), improvement, per_model
 
 
-def run(df: pd.DataFrame | None = None, candidates: list[Candidate] = CANDIDATES,
-        score_test: bool = True, cv: dict | None = None) -> TrainingResult:
+def run(
+    df: pd.DataFrame | None = None,
+    candidates: list[Candidate] = CANDIDATES,
+    score_test: bool = True,
+    cv: dict | None = None,
+) -> TrainingResult:
     """With `cv` (fold scores per candidate), the choice is made by cross-validation (Week 4); without
     it, by validation (Week 3's rule, still used to rebuild the served release exactly)."""
     df = generate() if df is None else df
@@ -275,23 +294,38 @@ def run(df: pd.DataFrame | None = None, candidates: list[Candidate] = CANDIDATES
         "floor": best_of(val_scores, family="floor"),
         "baseline": best_of(val_scores, family="baseline", cv=cv),
         "best logistic + engineered": best_of(val_scores, name="logreg_engineered", cv=cv),
-        **({"best random forest": best_of(val_scores, name="random_forest", cv=cv)}
-           if any(c.name == "random_forest" for c in candidates) else {}),
+        **(
+            {"best random forest": best_of(val_scores, name="random_forest", cv=cv)}
+            if any(c.name == "random_forest" for c in candidates)
+            else {}
+        ),
         "best gradient boosting": best_of(val_scores, name="gradient_boosting", cv=cv),
         "chosen": chosen,
     }
     # Week 4: every algorithm gets its own F1-best cut-off on VALIDATION, fixed before the test is scored.
-    cutoffs = None if cv is None else {
-        label: choose_threshold(y_val, fitted[c].predict_proba(X_val)[:, 1])
-        for label, c in picks.items() if label != "floor"}
+    cutoffs = (
+        None
+        if cv is None
+        else {
+            label: choose_threshold(y_val, fitted[c].predict_proba(X_val)[:, 1])
+            for label, c in picks.items()
+            if label != "floor"
+        }
+    )
     # Week 3 asked "did the improved model beat the baseline?". In Week 4 the chosen model may BE the
     # baseline, so the question becomes "what did choosing the simplest model cost?": chosen versus the
     # best other model by CV mean, fixed here before the test set is scored.
-    rival = "baseline" if cv is None else max(
-        (k for k in picks if k not in ("floor", "chosen") and picks[k] != chosen),
-        key=lambda k: float(np.mean(cv[picks[k]])))
+    rival = (
+        "baseline"
+        if cv is None
+        else max(
+            (k for k in picks if k not in ("floor", "chosen") and picks[k] != chosen),
+            key=lambda k: float(np.mean(cv[picks[k]])),
+        )
+    )
     test_scores, test_threshold, improvement, per_model = (
-        evaluate_on_test(fitted, picks, test, threshold_value, cutoffs, rival) if score_test else ({}, None, None, None))
+        evaluate_on_test(fitted, picks, test, threshold_value, cutoffs, rival) if score_test else ({}, None, None, None)
+    )
 
     return TrainingResult(
         data_sha256=dataset_hash(df),
@@ -304,11 +338,16 @@ def run(df: pd.DataFrame | None = None, candidates: list[Candidate] = CANDIDATES
         chosen=chosen,
         chosen_pipeline=fitted[chosen],
         threshold=apply_threshold(y_val, chosen_val_probability, threshold_value),
-        test={("chosen: " + chosen.label if k == "chosen" else f"{k}: {picks[k].label}" if k in picks else k): v
-              for k, v in test_scores.items()},
+        test={
+            ("chosen: " + chosen.label if k == "chosen" else f"{k}: {picks[k].label}" if k in picks else k): v
+            for k, v in test_scores.items()
+        },
         test_threshold=test_threshold,
-        per_model_test=None if per_model is None else {
-            ("chosen: " + chosen.label if k == "chosen" else f"{k}: {picks[k].label}"): v for k, v in per_model.items()},
+        per_model_test=None
+        if per_model is None
+        else {
+            ("chosen: " + chosen.label if k == "chosen" else f"{k}: {picks[k].label}"): v for k, v in per_model.items()
+        },
         improvement=improvement,
         fitted=fitted,
         cv=cv,
@@ -319,18 +358,23 @@ def run(df: pd.DataFrame | None = None, candidates: list[Candidate] = CANDIDATES
 
 # ---------------------------------------------------------------- report
 
+
 def _gap_closed(s: Scores, floor: Scores, oracle: Scores) -> str:
     """How much of the distance from 'useless' (floor) to 'perfect knowledge' (oracle) a model covers."""
     return f"{100 * (s.pr_auc - floor.pr_auc) / (oracle.pr_auc - floor.pr_auc):.0f}%"
 
 
 def _row(label, s: Scores, floor: Scores, oracle: Scores, mark="") -> str:
-    return (f"| {mark}{label}{mark} | {s.pr_auc:.3f} | {s.roc_auc:.3f} | {s.brier:.4f} | {s.mean_prediction:.3f} "
-            f"| {_gap_closed(s, floor, oracle)} |")
+    return (
+        f"| {mark}{label}{mark} | {s.pr_auc:.3f} | {s.roc_auc:.3f} | {s.brier:.4f} | {s.mean_prediction:.3f} "
+        f"| {_gap_closed(s, floor, oracle)} |"
+    )
 
 
-HEADER = ("| model | PR-AUC ↑ | ROC-AUC ↑ | Brier ↓ | mean prediction | gap closed (floor → oracle) |\n"
-          "|---|---|---|---|---|---|")
+HEADER = (
+    "| model | PR-AUC ↑ | ROC-AUC ↑ | Brier ↓ | mean prediction | gap closed (floor → oracle) |\n"
+    "|---|---|---|---|---|---|"
+)
 
 
 def _fit_row(c: Candidate, result: "TrainingResult") -> str:
@@ -338,8 +382,10 @@ def _fit_row(c: Candidate, result: "TrainingResult") -> str:
     oob = result.out_of_bag.get(c)
     oob_cell = f"{oob.pr_auc:.3f} ({oob.pr_auc - va.pr_auc:+.3f})" if oob else "–"
     flag = "⚠ warning" if overfit_warning(tr, va) else ""
-    return (f"| {c.label} | {tr.pr_auc:.3f} | {va.pr_auc:.3f} | {tr.pr_auc - va.pr_auc:+.3f} | {oob_cell} "
-            f"| {tr.roc_auc:.3f} | {va.roc_auc:.3f} | {tr.brier:.4f} | {va.brier:.4f} | {flag} |")
+    return (
+        f"| {c.label} | {tr.pr_auc:.3f} | {va.pr_auc:.3f} | {tr.pr_auc - va.pr_auc:+.3f} | {oob_cell} "
+        f"| {tr.roc_auc:.3f} | {va.roc_auc:.3f} | {tr.brier:.4f} | {va.brier:.4f} | {flag} |"
+    )
 
 
 NOT_SCORED = """## 4. Test set: not scored yet
@@ -374,8 +420,10 @@ def _per_model_section(result: TrainingResult) -> str:
     for label, (cut, t, c) in result.per_model_test.items():
         s = result.test[label]
         name = f"**{label}**" if label.startswith("chosen") else label
-        rows.append(f"| {name} | {cut:.4f} | {c['tp']:,} | {c['fp']:,} | {c['fn']:,} | {c['tn']:,} | {t.precision:.3f} "
-                    f"| {t.recall:.3f} | {t.f1:.3f} | {s.roc_auc:.3f} | {s.pr_auc:.3f} |")
+        rows.append(
+            f"| {name} | {cut:.4f} | {c['tp']:,} | {c['fp']:,} | {c['fn']:,} | {c['tn']:,} | {t.precision:.3f} "
+            f"| {t.recall:.3f} | {t.f1:.3f} | {s.roc_auc:.3f} | {s.pr_auc:.3f} |"
+        )
     return """### Confusion matrix for each algorithm (test, each at its own validation cut-off)
 
 Every algorithm gets its own F1-best cut-off, chosen on validation before the test set was scored, so the
@@ -422,8 +470,10 @@ def simplicity_cost_verdict(imp: Improvement) -> str:
 
 def _comparison_section(result: TrainingResult) -> str:
     imp = result.improvement
-    interval = (f"**{imp.difference:+.3f}**, 95% interval\n**[{imp.low:+.3f}, {imp.high:+.3f}]** (bootstrap over whole "
-                f"patients, {imp.resamples} resamples, seed {config.SEED}).")
+    interval = (
+        f"**{imp.difference:+.3f}**, 95% interval\n**[{imp.low:+.3f}, {imp.high:+.3f}]** (bootstrap over whole "
+        f"patients, {imp.resamples} resamples, seed {config.SEED})."
+    )
     if result.rival is None:
         return f"""## 5. Did the improved model really beat the baseline?
 
@@ -444,16 +494,19 @@ Verdict: **{simplicity_cost_verdict(imp)}.** Reported as-is; the choice is not r
 def _test_sections(result: TrainingResult) -> tuple[str, str]:
     floor_test = next(s for k, s in result.test.items() if k.startswith("floor"))
     oracle_test = result.test["oracle ceiling (true probability)"]
-    test_rows = "\n".join(_row(k, s, floor_test, oracle_test, "**" if k.startswith("chosen") else "")
-                          for k, s in result.test.items())
+    test_rows = "\n".join(
+        _row(k, s, floor_test, oracle_test, "**" if k.startswith("chosen") else "") for k, s in result.test.items()
+    )
     baseline_test = next(s for k, s in result.test.items() if k.startswith("baseline"))
     chosen_test = next(s for k, s in result.test.items() if k.startswith("chosen"))
     tt = result.test_threshold
     extra = "" if result.per_model_test is None else "\n\n" + _per_model_section(result) + "\n\n" + TEST_HISTORY_NOTE
-    threshold_row = (f"| test (same threshold, applied once) | {tt.value:.4f} | {tt.precision:.3f} | {tt.recall:.3f} "
-                     f"| {tt.f1:.3f} | {100 * tt.flagged_share:.1f}% |\n\n"
-                     f"In words: of the appointments the model flags, about {100 * tt.precision:.0f}% are real no-shows\n"
-                     f"(precision), and it catches about {100 * tt.recall:.0f}% of all no-shows (recall).")
+    threshold_row = (
+        f"| test (same threshold, applied once) | {tt.value:.4f} | {tt.precision:.3f} | {tt.recall:.3f} "
+        f"| {tt.f1:.3f} | {100 * tt.flagged_share:.1f}% |\n\n"
+        f"In words: of the appointments the model flags, about {100 * tt.precision:.0f}% are real no-shows\n"
+        f"(precision), and it catches about {100 * tt.recall:.0f}% of all no-shows (recall)."
+    )
     sections = f"""## 4. Test set: scored once, after every decision above
 
 {HEADER}
@@ -471,22 +524,27 @@ until it passes."""
 
 
 COMPARISON_TITLE = "Model comparison: synthetic appointment no-shows"
-RELEASE_TITLE = (f"First release {config.MODEL_NAME}-{FIRST_RELEASE}: how it was chosen and its test score\n\n"
-                 "> Rebuilt from the candidates this release was chosen from (Week 3), so the served model stays\n"
-                 "> exactly reproducible. The Week 4 comparison of every model is in [metrics.md](metrics.md).")
+RELEASE_TITLE = (
+    f"First release {config.MODEL_NAME}-{FIRST_RELEASE}: how it was chosen and its test score\n\n"
+    "> Rebuilt from the candidates this release was chosen from (Week 3), so the served model stays\n"
+    "> exactly reproducible. The Week 4 comparison of every model is in [metrics.md](metrics.md)."
+)
 
 
 def _choice_text(result: TrainingResult, chosen_val: Scores, best_real: float) -> str:
     if result.cv is None:
-        return (f"**Chosen: {result.chosen.label}** (validation PR-AUC {chosen_val.pr_auc:.3f}).\n\n"
-                f"Rule, fixed before training: highest validation PR-AUC; any model within {TIE_MARGIN} of the best\n"
-                f"(here {best_real:.3f}) counts as tied, and among tied models the simplest wins.")
+        return (
+            f"**Chosen: {result.chosen.label}** (validation PR-AUC {chosen_val.pr_auc:.3f}).\n\n"
+            f"Rule, fixed before training: highest validation PR-AUC; any model within {TIE_MARGIN} of the best\n"
+            f"(here {best_real:.3f}) counts as tied, and among tied models the simplest wins."
+        )
     real = [c for c in result.validation if c.family != "floor" and c in result.cv]
     rows = "\n".join(
         f"| {'**' + c.label + '**' if c == result.chosen else c.label} | {np.mean(result.cv[c]):.3f} ± "
         f"{np.std(result.cv[c], ddof=1):.3f} | {'yes' if np.mean(result.cv[c]) >= result.cv_bar else ''} "
         f"| {result.validation[c].pr_auc:.3f} |"
-        for c in sorted(real, key=lambda c: (c.complexity, c.label)))
+        for c in sorted(real, key=lambda c: (c.complexity, c.label))
+    )
     folds = result.cv[result.chosen]
     mean, sd = float(np.mean(folds)), float(np.std(folds, ddof=1))
     confirmed = confirmed_by_validation(folds, chosen_val.pr_auc)
@@ -504,7 +562,7 @@ too noisy to separate close models (see docs/REQUIREMENTS.md, "Lessons").
 
 Confirmation check on validation, fixed with the rule: the chosen model's validation PR-AUC should lie
 within its CV mean ± {CONFIRMATION_SDS} fold SDs ({mean - CONFIRMATION_SDS * sd:.3f} to {mean + CONFIRMATION_SDS * sd:.3f}).
-Result: {chosen_val.pr_auc:.3f}, **{'confirmed' if confirmed else 'NOT confirmed: investigate before the final evaluation'}**."""
+Result: {chosen_val.pr_auc:.3f}, **{"confirmed" if confirmed else "NOT confirmed: investigate before the final evaluation"}**."""
 
 
 def build_report(result: TrainingResult, title: str = COMPARISON_TITLE) -> str:
@@ -518,20 +576,29 @@ def build_report(result: TrainingResult, title: str = COMPARISON_TITLE) -> str:
     best_real = max((s.pr_auc for c, s in result.validation.items() if c.family != "floor"))
     chosen_val = result.validation[result.chosen]
     imp = result.improvement
-    fit_rows = "\n".join(_fit_row(c, result) for c in sorted(result.validation, key=lambda c: (c.complexity, c.label))
-                         if c.family != "floor")
-    warned = [c for c in result.validation if c.family != "floor" and overfit_warning(result.train[c], result.validation[c])]
+    fit_rows = "\n".join(
+        _fit_row(c, result)
+        for c in sorted(result.validation, key=lambda c: (c.complexity, c.label))
+        if c.family != "floor"
+    )
+    warned = [
+        c for c in result.validation if c.family != "floor" and overfit_warning(result.train[c], result.validation[c])
+    ]
     warned_forests = [c for c in warned if c in result.out_of_bag]
     simplicity = " < ".join(f"`{n}`" for n in SIMPLICITY_ORDER)
     engineered_sentence = (
         "The engineered features (log lead time, no-show rate, has-history, reminder × lead time) helped the "
         "logistic regression capture the curve, habit and interaction found in the EDA."
-        if imp is None or imp.low > 0 else
-        "The engineered features did not produce a clear gain over the raw baseline on test; see section 5."
+        if imp is None or imp.low > 0
+        else "The engineered features did not produce a clear gain over the raw baseline on test; see section 5."
     )
-    threshold_test_row, test_sections = _test_sections(result) if imp else (
-        "| test | not scored yet | | | | |",
-        NOT_SCORED,
+    threshold_test_row, test_sections = (
+        _test_sections(result)
+        if imp
+        else (
+            "| test | not scored yet | | | | |",
+            NOT_SCORED,
+        )
     )
 
     return f"""# {title}
@@ -542,7 +609,8 @@ def build_report(result: TrainingResult, title: str = COMPARISON_TITLE) -> str:
 | | |
 |---|---|
 | Dataset SHA-256 | `{result.data_sha256}` |
-| Split (patient-grouped) | train {result.split_sizes['train']:,} · validation {result.split_sizes['validation']:,} · test {result.split_sizes['test']:,} rows |
+| Split (patient-grouped) | train {result.split_sizes["train"]:,} · validation {
+        result.split_sizes["validation"]:,} · test {result.split_sizes["test"]:,} rows |
 | Seed | {config.SEED} (data, split and every model) |
 | Main metric | PR-AUC: the class of interest (no-show) is the 16% minority, so accuracy would mislead |
 
@@ -558,7 +626,8 @@ How to read the columns:
 
 {HEADER}
 {val_rows}
-| *oracle ceiling (true probability)* | {oracle_val.pr_auc:.3f} | {oracle_val.roc_auc:.3f} | {oracle_val.brier:.4f} | {oracle_val.mean_prediction:.3f} | 100% |
+| *oracle ceiling (true probability)* | {oracle_val.pr_auc:.3f} | {oracle_val.roc_auc:.3f} | {oracle_val.brier:.4f} | {
+        oracle_val.mean_prediction:.3f} | 100% |
 
 ### Train versus validation (overfitting check)
 
@@ -576,10 +645,15 @@ training row is scored only by the trees that never saw it (number in brackets: 
 {fit_rows}
 
 {len(warned)} of {len([c for c in result.validation if c.family != "floor"])} models raised the warning{
-"" if not warned else f" ({len(warned_forests)} of them random forests)"}. {
-"For the forests, the out-of-bag score stays close to the validation score, so their training score overstates them, as expected; validation decides." if warned_forests and all(abs(result.out_of_bag[c].pr_auc - result.validation[c].pr_auc) < OVERFIT_GAP for c in warned_forests)
-else "See the table for which models and by how much; validation decides." if warned else
-"No model's training score runs far ahead of its validation score."}
+        "" if not warned else f" ({len(warned_forests)} of them random forests)"
+    }. {
+        "For the forests, the out-of-bag score stays close to the validation score, so their training score overstates them, as expected; validation decides."
+        if warned_forests
+        and all(abs(result.out_of_bag[c].pr_auc - result.validation[c].pr_auc) < OVERFIT_GAP for c in warned_forests)
+        else "See the table for which models and by how much; validation decides."
+        if warned
+        else "No model's training score runs far ahead of its validation score."
+    }
 
 ## 2. Choice
 
@@ -602,7 +676,8 @@ chosen to maximise F1 on validation. With 16% positives it is far below 0.5.
 
 | | threshold | precision | recall | F1 | appointments flagged |
 |---|---|---|---|---|---|
-| validation (where it was chosen) | {t.value:.4f} | {t.precision:.3f} | {t.recall:.3f} | {t.f1:.3f} | {100 * t.flagged_share:.1f}% |
+| validation (where it was chosen) | {t.value:.4f} | {t.precision:.3f} | {t.recall:.3f} | {t.f1:.3f} | {
+        100 * t.flagged_share:.1f}% |
 {threshold_test_row}
 
 {test_sections}

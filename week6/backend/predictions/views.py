@@ -85,14 +85,18 @@ def load_cluster_view() -> tuple[dict, str]:
 def method_comparison(results: dict) -> list[dict]:
     """K-Means vs Ward side by side, read from the committed Step 7 results (clusters.json)."""
     real, control = results["real"], results["control"]
-    return [{"method": name,
-             "real_structure_found": real["methods"][name]["structure_found"],
-             "real_silhouette": real["methods"][name]["silhouette"],
-             "real_baseline_bar": real["methods"][name]["baseline_bar"],
-             "real_chosen_k": real["chosen_k"][name],
-             "control_chosen_k": control["chosen_k"][name],
-             "control_ari": control["methods"][name]["ari_at_chosen_k"]}
-            for name in real["methods"]]
+    return [
+        {
+            "method": name,
+            "real_structure_found": real["methods"][name]["structure_found"],
+            "real_silhouette": real["methods"][name]["silhouette"],
+            "real_baseline_bar": real["methods"][name]["baseline_bar"],
+            "real_chosen_k": real["chosen_k"][name],
+            "control_chosen_k": control["chosen_k"][name],
+            "control_ari": control["methods"][name]["ari_at_chosen_k"],
+        }
+        for name in real["methods"]
+    ]
 
 
 def _cluster_view() -> tuple[dict, str]:
@@ -122,9 +126,16 @@ class AdminOnlyAPIView(APIView):
 
 
 EXAMPLE_INPUT = {
-    "lead_time_days": 14, "appointment_weekday": "tuesday", "appointment_hour": 10, "age_band": "35-44",
-    "visit_type": "in_person", "booking_channel": "web", "reminder_sent": True,
-    "prior_appointments": 4, "prior_no_shows": 0, "distance_km": 6.5,
+    "lead_time_days": 14,
+    "appointment_weekday": "tuesday",
+    "appointment_hour": 10,
+    "age_band": "35-44",
+    "visit_type": "in_person",
+    "booking_channel": "web",
+    "reminder_sent": True,
+    "prior_appointments": 4,
+    "prior_no_shows": 0,
+    "distance_km": 6.5,
 }
 
 
@@ -135,8 +146,10 @@ class NoShowPredictionView(AdminOnlyAPIView):
 
     @extend_schema(
         summary="Estimate whether a fictional appointment may be missed",
-        description=("Educational, synthetic. The caller supplies the appointment history counts; the API "
-                     "does not look them up. Returns a probability and a plain-language reminder suggestion."),
+        description=(
+            "Educational, synthetic. The caller supplies the appointment history counts; the API "
+            "does not look them up. Returns a probability and a plain-language reminder suggestion."
+        ),
         request=NoShowInputSerializer,
         responses={
             200: PredictionResponseSerializer,
@@ -155,7 +168,9 @@ class NoShowPredictionView(AdminOnlyAPIView):
             log_invalid("api")
             serializer.is_valid(raise_exception=True)
         try:
-            model, prediction = predict_logged(serializer.validated_data, "api", loader=lambda: get_model())  # Week 5 Step 11: logged
+            model, prediction = predict_logged(
+                serializer.validated_data, "api", loader=lambda: get_model()
+            )  # Week 5 Step 11: logged
         except ModelUnavailable as exc:
             logger.error("no-show model unavailable: %s", exc.reason)
             raise ModelUnavailableError() from None
@@ -165,27 +180,34 @@ class NoShowPredictionView(AdminOnlyAPIView):
 
 
 class NoShowModelView(AdminOnlyAPIView):
-    @extend_schema(summary="Model card for the served no-show model",
-                   responses={200: OpenApiResponse(description="Model card"), 503: OpenApiResponse(description="Model unavailable")})
+    @extend_schema(
+        summary="Model card for the served no-show model",
+        responses={
+            200: OpenApiResponse(description="Model card"),
+            503: OpenApiResponse(description="Model unavailable"),
+        },
+    )
     def get(self, request):
         model = _model()
         meta = model.metadata
-        return Response({
-            "model_version": model.version,
-            "task": meta["task"],
-            "estimator": meta["estimator"],
-            "disclaimer": meta["disclaimer"],
-            "inputs": meta["features"],
-            "inputs_note": "The caller supplies the appointment history counts; the API does not look them up.",
-            "decision": meta["decision"],
-            "metrics": meta["metrics"],
-            "training_data": meta["training_data"],
-            "seed": meta["seed"],
-            "libraries": meta["libraries"],
-            "artifact_sha256": meta["artifact_sha256"],
-            # Week 6: preprocessing lives in the same pipeline file, so it is versioned and SHA-pinned with the model.
-            "preprocessing": preprocessing_steps(model.pipeline),
-        })
+        return Response(
+            {
+                "model_version": model.version,
+                "task": meta["task"],
+                "estimator": meta["estimator"],
+                "disclaimer": meta["disclaimer"],
+                "inputs": meta["features"],
+                "inputs_note": "The caller supplies the appointment history counts; the API does not look them up.",
+                "decision": meta["decision"],
+                "metrics": meta["metrics"],
+                "training_data": meta["training_data"],
+                "seed": meta["seed"],
+                "libraries": meta["libraries"],
+                "artifact_sha256": meta["artifact_sha256"],
+                # Week 6: preprocessing lives in the same pipeline file, so it is versioned and SHA-pinned with the model.
+                "preprocessing": preprocessing_steps(model.pipeline),
+            }
+        )
 
 
 def preprocessing_steps(pipeline) -> list[dict]:
@@ -194,8 +216,10 @@ def preprocessing_steps(pipeline) -> list[dict]:
     for name, step in getattr(pipeline, "steps", []):
         row = {"step": name, "class": type(step).__name__}
         if hasattr(step, "transformers"):
-            row["transformers"] = [{"name": n, "class": type(t).__name__, "columns": list(c) if not isinstance(c, str) else c}
-                                   for n, t, c in step.transformers]
+            row["transformers"] = [
+                {"name": n, "class": type(t).__name__, "columns": list(c) if not isinstance(c, str) else c}
+                for n, t, c in step.transformers
+            ]
         steps.append(row)
     return steps
 
@@ -210,16 +234,21 @@ class ClustersView(AdminOnlyAPIView):
 
     @extend_schema(
         summary="Exploratory clusters: verdict on real data, PCA picture and descriptions on control data",
-        description=("Educational, synthetic. Reads committed results; no clustering runs during a request. "
-                     "Clusters describe booking patterns, not categories of people, and are never a medical "
-                     "or personal assessment."),
-        responses={200: OpenApiResponse(description="Cluster view"), 401: OpenApiResponse(description="Not signed in as admin"),
-                   403: OpenApiResponse(description="Not an admin"), 429: OpenApiResponse(description="Rate limit exceeded"),
-                   503: OpenApiResponse(description="Cluster results unavailable")},
+        description=(
+            "Educational, synthetic. Reads committed results; no clustering runs during a request. "
+            "Clusters describe booking patterns, not categories of people, and are never a medical "
+            "or personal assessment."
+        ),
+        responses={
+            200: OpenApiResponse(description="Cluster view"),
+            401: OpenApiResponse(description="Not signed in as admin"),
+            403: OpenApiResponse(description="Not an admin"),
+            429: OpenApiResponse(description="Rate limit exceeded"),
+            503: OpenApiResponse(description="Cluster results unavailable"),
+        },
     )
     def get(self, request):
         view, digest = _cluster_view()
         # Audit: who looked, and which results they saw.
         record_event(request, AuditEvent.Action.ADMIN_CLUSTERS_VIEWED, detail=f"cluster_view:{digest[:12]}")
         return Response({"results_version": digest[:12], "results_sha256": digest, **view})
-

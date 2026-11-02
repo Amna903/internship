@@ -9,8 +9,14 @@ from urllib.parse import urlparse
 
 from django.core.exceptions import ImproperlyConfigured
 
-for key, value in {"DJANGO_DEBUG": "false", "COOKIE_SECURE": "true", "SECURE_SSL_REDIRECT": "true",
-                   "BEHIND_TLS_PROXY": "true", "SECURE_HSTS_SECONDS": "86400", "ENABLE_API_DOCS": "false"}.items():
+for key, value in {
+    "DJANGO_DEBUG": "false",
+    "COOKIE_SECURE": "true",
+    "SECURE_SSL_REDIRECT": "true",
+    "BEHIND_TLS_PROXY": "true",
+    "SECURE_HSTS_SECONDS": "86400",
+    "ENABLE_API_DOCS": "false",
+}.items():
     os.environ.setdefault(key, value)
 
 from .settings import *  # noqa: E402,F401,F403

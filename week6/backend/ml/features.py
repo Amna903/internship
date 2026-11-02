@@ -27,7 +27,9 @@ def engineer(X: pd.DataFrame) -> pd.DataFrame:
         has_history, out["prior_no_shows"].astype(float) / appointments.where(has_history, 1.0), 0.0
     )
     # EDA §6.2, the interaction: a reminder matters more the further ahead the appointment is.
-    out["reminder_x_lead"] = out["reminder_sent"].astype(float) * np.minimum(lead, REMINDER_FULL_EFFECT_DAYS) / REMINDER_FULL_EFFECT_DAYS
+    out["reminder_x_lead"] = (
+        out["reminder_sent"].astype(float) * np.minimum(lead, REMINDER_FULL_EFFECT_DAYS) / REMINDER_FULL_EFFECT_DAYS
+    )
     # Always the same column order, so feature names match what the pipeline was fitted on.
     return out[list(X.columns) + ENGINEERED_NUMERIC]
 

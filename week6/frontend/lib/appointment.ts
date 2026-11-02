@@ -62,12 +62,15 @@ export function isDraft(v: unknown): v is Draft {
   if (typeof v !== "object" || v === null) return false;
   const d = v as Record<string, unknown>;
   return (
-    Number.isInteger(d.step) && (d.step as number) >= 0 && (d.step as number) < STEPS.length &&
+    Number.isInteger(d.step) &&
+    (d.step as number) >= 0 &&
+    (d.step as number) < STEPS.length &&
     (d.visitType === "" || (VISIT_TYPES as readonly unknown[]).includes(d.visitType)) &&
     (d.reason === "" || (typeof d.reason === "string" && d.reason in REASONS)) &&
     (d.day === "" || (DAYS as readonly unknown[]).includes(d.day)) &&
     ["note", "time", "fullName", "email", "phone"].every((k) => typeof d[k] === "string") &&
-    typeof d.contactMethod === "string" && d.contactMethod in CONTACT_METHODS &&
+    typeof d.contactMethod === "string" &&
+    d.contactMethod in CONTACT_METHODS &&
     typeof d.acknowledged === "boolean"
   );
 }
@@ -90,12 +93,14 @@ export function validateStep(step: number, d: Draft, p: Professional): Errors {
       if (!d.day) e.day = "Choose a day.";
       else if (!p.availability[d.day]?.length) e.day = "This professional isn't available that day.";
       if (!d.time) e.time = "Choose a time.";
-      else if (d.day && !p.availability[d.day]?.includes(d.time)) e.time = "That time isn't available on the chosen day.";
+      else if (d.day && !p.availability[d.day]?.includes(d.time))
+        e.time = "That time isn't available on the chosen day.";
       break;
     case "details":
       if (d.fullName.trim().length < 2) e.fullName = "Enter your name (at least 2 characters).";
       if (!EMAIL.test(d.email.trim())) e.email = "Enter a valid email address, like name@example.com.";
-      if (d.contactMethod === "phone" && !PHONE.test(d.phone.trim())) e.phone = "Enter a phone number so we can call you.";
+      if (d.contactMethod === "phone" && !PHONE.test(d.phone.trim()))
+        e.phone = "Enter a phone number so we can call you.";
       else if (d.phone.trim() && !PHONE.test(d.phone.trim())) e.phone = "That phone number doesn't look right.";
       break;
     case "review":

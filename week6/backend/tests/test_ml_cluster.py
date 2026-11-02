@@ -38,6 +38,7 @@ def committed():
 
 # ---- Positive control ----
 
+
 def test_control_is_seeded_and_separate(control, df):
     again = cluster_control.generate_control()
     pd.testing.assert_frame_equal(control[0], again[0])
@@ -47,7 +48,9 @@ def test_control_is_seeded_and_separate(control, df):
 
 
 def test_control_never_touches_the_main_generator():
-    assert "data import" not in inspect.getsource(cluster_control) and "generate(" not in inspect.getsource(cluster_control)
+    assert "data import" not in inspect.getsource(cluster_control) and "generate(" not in inspect.getsource(
+        cluster_control
+    )
 
 
 def test_planted_labels_are_never_clustering_inputs(control, monkeypatch):
@@ -70,6 +73,7 @@ def test_appointment_count_does_not_depend_on_the_habit(control):
 
 
 # ---- Reshuffle baseline keeps what it should ----
+
 
 @pytest.fixture(scope="module")
 def reshuffled(appointments):
@@ -103,20 +107,37 @@ def test_reshuffle_destroys_planted_habits(control):
 
 # ---- Rules ----
 
-@pytest.mark.parametrize("silhouettes, expected", [({2: 0.30, 3: 0.35, 4: 0.34}, 3), ({2: 0.345, 3: 0.35, 4: 0.30}, 2),
-                                                   ({2: 0.10, 3: 0.20, 4: 0.40}, 4)])
+
+@pytest.mark.parametrize(
+    "silhouettes, expected",
+    [({2: 0.30, 3: 0.35, 4: 0.34}, 3), ({2: 0.345, 3: 0.35, 4: 0.30}, 2), ({2: 0.10, 3: 0.20, 4: 0.40}, 4)],
+)
 def test_k_rule_best_silhouette_and_fewer_clusters_on_a_tie(silhouettes, expected):
     assert cluster.choose_k(silhouettes) == expected
 
 
-@pytest.mark.parametrize("ari, word", [(0.95, "recovered well"), (0.8, "recovered well"), (0.52, "partially recovered"),
-                                       (0.3, "weakly recovered"), (0.05, "not recovered")])
+@pytest.mark.parametrize(
+    "ari, word",
+    [
+        (0.95, "recovered well"),
+        (0.8, "recovered well"),
+        (0.52, "partially recovered"),
+        (0.3, "weakly recovered"),
+        (0.05, "not recovered"),
+    ],
+)
 def test_recovery_words(ari, word):
     assert cluster.recovery_word(ari) == word
 
 
-@pytest.mark.parametrize("ari, note", [(0.52, "0.52 sits just above the 0.5 threshold, so the 'partially recovered' label is borderline"),
-                                       (0.47, "0.47 sits just below the 0.5 threshold"), (0.65, "")])
+@pytest.mark.parametrize(
+    "ari, note",
+    [
+        (0.52, "0.52 sits just above the 0.5 threshold, so the 'partially recovered' label is borderline"),
+        (0.47, "0.47 sits just below the 0.5 threshold"),
+        (0.65, ""),
+    ],
+)
 def test_borderline_labels_are_flagged(ari, note):
     assert (note in cluster.borderline_note(ari)) if note else cluster.borderline_note(ari) == ""
 
@@ -141,11 +162,14 @@ def test_false_pattern_check_names_appointment_count_when_it_drives_the_split(df
 
 # ---- The committed result ----
 
+
 def test_real_verdicts_follow_the_rule(committed):
     for m in cluster.METHODS:
         v = committed["real"]["methods"][m]
         assert v["structure_found"] == (v["silhouette"] > v["baseline_bar"])
-        assert v["baseline_bar"] == pytest.approx(np.percentile(committed["real"]["baseline"][m], cluster.BASELINE_PERCENTILE))
+        assert v["baseline_bar"] == pytest.approx(
+            np.percentile(committed["real"]["baseline"][m], cluster.BASELINE_PERCENTILE)
+        )
         assert len(committed["real"]["baseline"][m]) == cluster.BASELINE_RUNS
 
 
@@ -174,6 +198,7 @@ def test_committed_report_matches_the_committed_result(committed):
 
 # ---- Reproducibility check for a rebuilt clustering (by what each number is used for) ----
 
+
 @pytest.fixture(scope="module")
 def raw():
     return json.loads(cluster.RESULT.read_text())
@@ -197,12 +222,20 @@ def test_a_shift_across_the_whole_baseline_fails_through_the_median(raw):
     assert not ok and "median" in reason
 
 
-@pytest.mark.parametrize("change, expected", [
-    (lambda r: r["real"]["methods"]["k-means"].update(structure_found=True), "verdict"),
-    (lambda r: r["control"]["chosen_k"].update({"k-means": 4}), "chosen k"),
-    (lambda r: r["real"]["methods"]["k-means"].update(baseline_bar=r["real"]["methods"]["k-means"]["baseline_bar"] + 0.003), "bar"),
-    (lambda r: r["control"]["methods"]["k-means"].update(ari_at_chosen_k=0.49), "control"),
-])
+@pytest.mark.parametrize(
+    "change, expected",
+    [
+        (lambda r: r["real"]["methods"]["k-means"].update(structure_found=True), "verdict"),
+        (lambda r: r["control"]["chosen_k"].update({"k-means": 4}), "chosen k"),
+        (
+            lambda r: r["real"]["methods"]["k-means"].update(
+                baseline_bar=r["real"]["methods"]["k-means"]["baseline_bar"] + 0.003
+            ),
+            "bar",
+        ),
+        (lambda r: r["control"]["methods"]["k-means"].update(ari_at_chosen_k=0.49), "control"),
+    ],
+)
 def test_decisions_and_the_numbers_they_read_are_checked_strictly(raw, change, expected):
     rebuilt = copy.deepcopy(raw)
     change(rebuilt)
@@ -212,4 +245,3 @@ def test_decisions_and_the_numbers_they_read_are_checked_strictly(raw, change, e
 
 def test_report_records_the_ward_tie_fragility(committed):
     assert "Ward's tree can differ between machines" in cluster.build_report(committed)
-

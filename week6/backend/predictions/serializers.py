@@ -27,8 +27,10 @@ class StrictIntegerField(serializers.IntegerField):
 
 
 class StrictNumberField(serializers.FloatField):
-    default_error_messages = {"strict": "Must be a number (JSON number), not {kind}.",
-                              "finite": "Must be a finite number."}
+    default_error_messages = {
+        "strict": "Must be a number (JSON number), not {kind}.",
+        "finite": "Must be a finite number.",
+    }
 
     def to_internal_value(self, data):
         if isinstance(data, bool) or not isinstance(data, (int, float)):

@@ -61,7 +61,9 @@ class History:
 
     def turns(self) -> list[Turn]:
         """The history the prompt may see: the last turns, oldest dropped first to fit HISTORY_TOKENS."""
-        recent = [Turn(q, a) for q, a in zip(self.questions[-len(self.answers):] if self.answers else (), self.answers)]
+        recent = [
+            Turn(q, a) for q, a in zip(self.questions[-len(self.answers) :] if self.answers else (), self.answers)
+        ]
         while recent and sum(turn_tokens(t) for t in recent) > HISTORY_TOKENS:
             recent.pop(0)
         return recent
@@ -81,9 +83,13 @@ class History:
             raise ConversationLimit("tokens")
 
     def after(self, question: str, answer: str, tokens: int, medical: bool) -> "History":
-        return replace(self, questions=(*self.questions, question),
-                       answers=(*self.answers, answer)[-MAX_TURNS_KEPT:], tokens_used=self.tokens_used + tokens,
-                       medical=self.medical or medical)
+        return replace(
+            self,
+            questions=(*self.questions, question),
+            answers=(*self.answers, answer)[-MAX_TURNS_KEPT:],
+            tokens_used=self.tokens_used + tokens,
+            medical=self.medical or medical,
+        )
 
 
 def turn_tokens(t: Turn) -> int:
@@ -109,10 +115,18 @@ def load(blob, user_id: int) -> History:
         p = signing.loads(blob, salt=SALT, max_age=MAX_AGE_SECONDS)
     except signing.BadSignature:  # also covers SignatureExpired
         raise HistoryInvalid() from None
-    ok = (isinstance(p, dict) and set(p) == {"u", "q", "a", "t", "m"} and p["u"] == user_id
-          and isinstance(p["q"], list) and all(isinstance(x, str) for x in p["q"])
-          and isinstance(p["a"], list) and all(isinstance(x, str) for x in p["a"])
-          and len(p["a"]) <= min(MAX_TURNS_KEPT, len(p["q"])) and isinstance(p["t"], int) and isinstance(p["m"], bool))
+    ok = (
+        isinstance(p, dict)
+        and set(p) == {"u", "q", "a", "t", "m"}
+        and p["u"] == user_id
+        and isinstance(p["q"], list)
+        and all(isinstance(x, str) for x in p["q"])
+        and isinstance(p["a"], list)
+        and all(isinstance(x, str) for x in p["a"])
+        and len(p["a"]) <= min(MAX_TURNS_KEPT, len(p["q"]))
+        and isinstance(p["t"], int)
+        and isinstance(p["m"], bool)
+    )
     if not ok:
         raise HistoryInvalid()
     return History(user_id=user_id, questions=tuple(p["q"]), answers=tuple(p["a"]), tokens_used=p["t"], medical=p["m"])

@@ -55,11 +55,17 @@ def build_preprocessor(engineered: bool) -> Pipeline:
     numeric = config.NUMERIC_FEATURES + (ENGINEERED_NUMERIC if engineered else [])
     columns = ColumnTransformer(
         [
-            ("numeric", Pipeline([
-                # add_indicator=True adds a distance_missing column for features with gaps in training.
-                ("impute", SimpleImputer(strategy="median", add_indicator=True)),
-                ("scale", StandardScaler()),
-            ]), numeric),
+            (
+                "numeric",
+                Pipeline(
+                    [
+                        # add_indicator=True adds a distance_missing column for features with gaps in training.
+                        ("impute", SimpleImputer(strategy="median", add_indicator=True)),
+                        ("scale", StandardScaler()),
+                    ]
+                ),
+                numeric,
+            ),
             ("categorical", OneHotEncoder(handle_unknown="ignore", sparse_output=False), config.CATEGORICAL_FEATURES),
             ("boolean", FunctionTransformer(_as_float, feature_names_out="one-to-one"), config.BOOLEAN_FEATURES),
         ],

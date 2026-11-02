@@ -19,8 +19,14 @@ export function AdminTabs() {
   return (
     <nav className="admin-tabs" aria-label="Machine learning tools">
       {TABS.map((t) => (
-        <Link key={t.href} href={t.href} className={path === t.href ? "active" : ""}
-              aria-current={path === t.href ? "page" : undefined}>{t.label}</Link>
+        <Link
+          key={t.href}
+          href={t.href}
+          className={path === t.href ? "active" : ""}
+          aria-current={path === t.href ? "page" : undefined}
+        >
+          {t.label}
+        </Link>
       ))}
     </nav>
   );
@@ -31,18 +37,29 @@ export function useAdminNav() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   useEffect(() => {
-    adminApi.me().then((r) => setEmail(r.user.email)).catch(() => router.replace("/admin/login"));
+    adminApi
+      .me()
+      .then((r) => setEmail(r.user.email))
+      .catch(() => router.replace("/admin/login"));
   }, [router]);
 
   async function logout() {
-    try { await adminApi.logout(); } finally { router.push("/admin/login"); }
+    try {
+      await adminApi.logout();
+    } finally {
+      router.push("/admin/login");
+    }
   }
 
   return (
     <>
-      <Link className="btn ghost small" href="/admin">Member profiles</Link>
+      <Link className="btn ghost small" href="/admin">
+        Member profiles
+      </Link>
       <span className="muted small">{email}</span>
-      <button className="btn ghost small" onClick={logout}>Sign out</button>
+      <button className="btn ghost small" onClick={logout}>
+        Sign out
+      </button>
     </>
   );
 }

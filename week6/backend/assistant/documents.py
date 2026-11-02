@@ -37,23 +37,36 @@ class DocumentError(ValueError):
 
 def _duplicate_anywhere(sha256: str) -> bool:
     """The same text is already live or waiting somewhere (retired documents and old editions don't count)."""
-    return DocumentVersion.objects.filter(sha256=sha256, status__in=[VStatus.PENDING, VStatus.CURRENT]).exclude(
-        document__status=Status.RETIRED).exists()
+    return (
+        DocumentVersion.objects.filter(sha256=sha256, status__in=[VStatus.PENDING, VStatus.CURRENT])
+        .exclude(document__status=Status.RETIRED)
+        .exists()
+    )
 
 
-def create_document(filename: str, content: str, sha256: str, source: str, uploaded_by, policy_area: str = "other",
-                    effective_date=None) -> PolicyDocument:
+def create_document(
+    filename: str, content: str, sha256: str, source: str, uploaded_by, policy_area: str = "other", effective_date=None
+) -> PolicyDocument:
     if _duplicate_anywhere(sha256):
         raise DocumentError("A document with exactly this content already exists.", "duplicate_document")
     with transaction.atomic():
-        document = PolicyDocument.objects.create(filename=filename, policy_area=policy_area, source=source,
-                                                 uploaded_by=uploaded_by)
-        DocumentVersion.objects.create(document=document, number=1, content=content, sha256=sha256,
-                                       effective_date=effective_date, uploaded_by=uploaded_by)
+        document = PolicyDocument.objects.create(
+            filename=filename, policy_area=policy_area, source=source, uploaded_by=uploaded_by
+        )
+        DocumentVersion.objects.create(
+            document=document,
+            number=1,
+            content=content,
+            sha256=sha256,
+            effective_date=effective_date,
+            uploaded_by=uploaded_by,
+        )
     return document
 
 
-def add_version(document: PolicyDocument, content: str, sha256: str, uploaded_by, effective_date=None) -> DocumentVersion:
+def add_version(
+    document: PolicyDocument, content: str, sha256: str, uploaded_by, effective_date=None
+) -> DocumentVersion:
     with transaction.atomic():
         document = PolicyDocument.objects.select_for_update().get(pk=document.pk)
         if document.versions.filter(status=VStatus.PENDING).exists():
@@ -64,21 +77,38 @@ def add_version(document: PolicyDocument, content: str, sha256: str, uploaded_by
         if _duplicate_anywhere(sha256):
             raise DocumentError("A document with exactly this content already exists.", "duplicate_document")
         number = (document.versions.order_by("-number").values_list("number", flat=True).first() or 0) + 1
-        return DocumentVersion.objects.create(document=document, number=number, content=content, sha256=sha256,
-                                              effective_date=effective_date, uploaded_by=uploaded_by)
+        return DocumentVersion.objects.create(
+            document=document,
+            number=number,
+            content=content,
+            sha256=sha256,
+            effective_date=effective_date,
+            uploaded_by=uploaded_by,
+        )
 
 
-def _embed(version: DocumentVersion, embedder: Embedder, chunk_tokens: int | None = None) -> tuple[list[str], np.ndarray]:
+def _embed(
+    version: DocumentVersion, embedder: Embedder, chunk_tokens: int | None = None
+) -> tuple[list[str], np.ndarray]:
     texts = chunk(version.content, max_tokens=chunk_tokens) if chunk_tokens else chunk(version.content)
     return texts, (embedder.embed(texts) if texts else np.zeros((0, 0), dtype=np.float32))
 
 
 def _write_chunks(version: DocumentVersion, texts: list[str], vectors: np.ndarray, embedder: Embedder) -> None:
     version.chunks.filter(embedding_model=embedder.identity).delete()
-    Chunk.objects.bulk_create([
-        Chunk(document_id=version.document_id, version=version, position=i, text=t,
-              embedding=v.astype(np.float32).tobytes(), embedding_model=embedder.identity)
-        for i, (t, v) in enumerate(zip(texts, vectors))])
+    Chunk.objects.bulk_create(
+        [
+            Chunk(
+                document_id=version.document_id,
+                version=version,
+                position=i,
+                text=t,
+                embedding=v.astype(np.float32).tobytes(),
+                embedding_model=embedder.identity,
+            )
+            for i, (t, v) in enumerate(zip(texts, vectors))
+        ]
+    )
 
 
 @dataclass
@@ -109,8 +139,12 @@ def approve_version(version: DocumentVersion, admin, embedder: Embedder, chunk_t
         document.current_version, document.status = version, Status.APPROVED
         document.approved_by, document.approved_at = admin, now
         document.retired_by, document.retired_at = None, None
-        document.save(update_fields=["current_version", "status", "approved_by", "approved_at", "retired_by", "retired_at"])
-    return Approval(version, previous.number if previous is not None and previous.pk != version.pk else None, len(texts))
+        document.save(
+            update_fields=["current_version", "status", "approved_by", "approved_at", "retired_by", "retired_at"]
+        )
+    return Approval(
+        version, previous.number if previous is not None and previous.pk != version.pk else None, len(texts)
+    )
 
 
 def pending_version(document: PolicyDocument) -> DocumentVersion | None:
@@ -148,7 +182,9 @@ def retire(document: PolicyDocument, admin) -> PolicyDocument:
 
 
 def searchable_versions():
-    return DocumentVersion.objects.filter(status=VStatus.CURRENT, document__status=Status.APPROVED).select_related("document")
+    return DocumentVersion.objects.filter(status=VStatus.CURRENT, document__status=Status.APPROVED).select_related(
+        "document"
+    )
 
 
 def reindex_all(embedder: Embedder, chunk_tokens: int | None = None) -> dict:
@@ -167,10 +203,16 @@ def reindex_all(embedder: Embedder, chunk_tokens: int | None = None) -> dict:
 
 # ---------------------------------------------------------------- corpus snapshot
 
+
 def corpus_snapshot() -> list[dict]:
     """The exact edition of every searchable document, sorted by filename."""
-    return sorted(({"filename": v.document.filename, "document_id": v.document_id, "version": v.number,
-                    "sha256": v.sha256} for v in searchable_versions()), key=lambda r: (r["filename"], r["document_id"]))
+    return sorted(
+        (
+            {"filename": v.document.filename, "document_id": v.document_id, "version": v.number, "sha256": v.sha256}
+            for v in searchable_versions()
+        ),
+        key=lambda r: (r["filename"], r["document_id"]),
+    )
 
 
 class CorpusMismatch(RuntimeError):
@@ -190,9 +232,14 @@ def check_corpus(expected: dict[str, tuple[int, str]]) -> list[dict]:
     for name, (v, sha) in sorted(expected.items()):
         found = actual.get(name)
         if found and found != [(v, sha)]:
-            problems.append(f"changed: {name} expected v{v} ({sha[:12]}), found " +
-                            ", ".join(f"v{fv} ({fs[:12]})" for fv, fs in found))
+            problems.append(
+                f"changed: {name} expected v{v} ({sha[:12]}), found "
+                + ", ".join(f"v{fv} ({fs[:12]})" for fv, fs in found)
+            )
     if problems:
-        raise CorpusMismatch("The searchable documents differ from the corpus this evaluation set was frozen against: "
-                             + "; ".join(problems) + ". Restore that corpus, or freeze a new set with a dated decision.")
+        raise CorpusMismatch(
+            "The searchable documents differ from the corpus this evaluation set was frozen against: "
+            + "; ".join(problems)
+            + ". Restore that corpus, or freeze a new set with a dated decision."
+        )
     return snapshot

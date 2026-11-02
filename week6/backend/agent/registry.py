@@ -35,8 +35,16 @@ from audit.services import record_event
 
 logger = logging.getLogger(__name__)
 
-CODES = ("invalid_input", "not_allowed", "unavailable", "timeout", "output_too_large", "refused", "limit_reached",
-         "slot_taken")
+CODES = (
+    "invalid_input",
+    "not_allowed",
+    "unavailable",
+    "timeout",
+    "output_too_large",
+    "refused",
+    "limit_reached",
+    "slot_taken",
+)
 MESSAGES = {
     "invalid_input": "The tool arguments are not valid.",
     "not_allowed": "You are not allowed to use this tool.",
@@ -100,8 +108,15 @@ class ToolResult:
     def public(self) -> dict:
         if self.ok:
             return {"tool": self.tool, "ok": True, "output": self.output}
-        return {"tool": self.tool, "ok": False, "error": {"code": self.code, "message": self.message,
-                                                          **({"fields": list(self.fields)} if self.fields else {})}}
+        return {
+            "tool": self.tool,
+            "ok": False,
+            "error": {
+                "code": self.code,
+                "message": self.message,
+                **({"fields": list(self.fields)} if self.fields else {}),
+            },
+        }
 
 
 REGISTRY: dict[str, Tool] = {}
@@ -114,13 +129,23 @@ def register(tool: Tool) -> Tool:
 
 
 def allowed(tool: Tool, user) -> bool:
-    return bool(user is not None and getattr(user, "is_authenticated", False) and getattr(user, "is_active", False)
-                and getattr(user, "role", None) in tool.roles)
+    return bool(
+        user is not None
+        and getattr(user, "is_authenticated", False)
+        and getattr(user, "is_active", False)
+        and getattr(user, "role", None) in tool.roles
+    )
 
 
 def _fail(tool: str, code: str, started: float, fields: tuple = ()) -> ToolResult:
-    return ToolResult(tool=tool, ok=False, code=code, message=MESSAGES[code], fields=fields,
-                      seconds=round(time.perf_counter() - started, 3))
+    return ToolResult(
+        tool=tool,
+        ok=False,
+        code=code,
+        message=MESSAGES[code],
+        fields=fields,
+        seconds=round(time.perf_counter() - started, 3),
+    )
 
 
 def run_tool(name: str, args, ctx: ToolContext) -> ToolResult:
@@ -161,5 +186,8 @@ def _run(tool: Tool, args, ctx: ToolContext, started: float) -> ToolResult:
 def _audit(ctx: ToolContext, name: str, result: ToolResult) -> None:
     if ctx.user is None or not getattr(ctx.user, "is_authenticated", False):
         return  # nothing to attribute it to; the caller never got past authentication
-    record_event(SimpleNamespace(user=ctx.user, request_id=ctx.request_id), AuditEvent.Action.AGENT_TOOL_CALLED,
-                 detail=f"{name}:{'ok' if result.ok else result.code}"[:64])
+    record_event(
+        SimpleNamespace(user=ctx.user, request_id=ctx.request_id),
+        AuditEvent.Action.AGENT_TOOL_CALLED,
+        detail=f"{name}:{'ok' if result.ok else result.code}"[:64],
+    )

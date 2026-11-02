@@ -17,6 +17,7 @@ def df():
 
 # ---- Reproducibility (feeds acceptance check A1: training must reproduce the model) ----
 
+
 def test_same_seed_gives_identical_data(df):
     assert dataset_hash(generate()) == dataset_hash(df)
 
@@ -26,6 +27,7 @@ def test_different_seed_gives_different_data(df):
 
 
 # ---- Schema and value ranges ----
+
 
 def test_schema_is_exactly_ids_features_oracle_and_label(df):
     assert set(df.columns) == set(config.ID_COLUMNS + config.FEATURES + [config.ORACLE, config.LABEL])
@@ -60,6 +62,7 @@ def test_history_grows_in_time_order_within_a_patient(df):
 
 # ---- Planted properties the brief asks us to handle and document ----
 
+
 def test_class_imbalance_is_in_the_documented_band(df):
     assert 0.14 <= df[config.LABEL].mean() <= 0.19  # minority class: accuracy would mislead
 
@@ -77,6 +80,7 @@ def test_age_bias_is_present(df):
 def test_reminder_helps_more_for_appointments_booked_far_ahead(df):
     def reminder_gain(rows):
         return rows[~rows["reminder_sent"]][config.LABEL].mean() - rows[rows["reminder_sent"]][config.LABEL].mean()
+
     assert reminder_gain(df[df["lead_time_days"] >= 30]) > 3 * reminder_gain(df[df["lead_time_days"] <= 2])
 
 
@@ -89,6 +93,7 @@ def test_true_probability_is_calibrated_against_the_labels(df):
 
 
 # ---- Leakage guards ----
+
 
 def test_ids_label_and_oracle_are_never_features():
     forbidden = set(config.ID_COLUMNS) | {config.LABEL, config.ORACLE}

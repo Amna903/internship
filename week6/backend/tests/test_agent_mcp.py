@@ -32,9 +32,11 @@ BACKEND = Path(__file__).resolve().parents[1]
 def with_client(token, body):
     """Driven through async_to_sync, so the server's thread-sensitive ORM work runs on this test's thread and
     sees its transaction (asgiref's documented behaviour); the server code is unchanged."""
+
     async def main():
         async with Client(mcp_server.build_server(token)) as client:
             return await body(client)
+
     return async_to_sync(main)()
 
 
@@ -54,11 +56,17 @@ def token(admin):
 
 # ---------------- tools ----------------
 
+
 @pytest.mark.django_db
 class TestTools:
     def test_lists_exactly_the_four_read_tools_with_registry_schemas(self, token):
         tools = with_client(token, lambda c: c.list_tools()).tools
-        assert sorted(t.name for t in tools) == ["check_availability", "cluster_summaries", "predict_no_show", "search_policies"]
+        assert sorted(t.name for t in tools) == [
+            "check_availability",
+            "cluster_summaries",
+            "predict_no_show",
+            "search_policies",
+        ]
         for t in tools:
             assert t.input_schema == REGISTRY[t.name].input_schema and t.output_schema == REGISTRY[t.name].output_schema
 
@@ -73,8 +81,11 @@ class TestTools:
         assert not r.is_error and r.structured_content["fictional"] is True
 
     def test_the_write_tool_is_not_exposed(self, token):
-        r = call(token, "book_mock_appointment", {"visit_type": "telehealth", "date": "2026-12-01", "time": "09:00",
-                                                  "clinician": "Clinician B"})
+        r = call(
+            token,
+            "book_mock_appointment",
+            {"visit_type": "telehealth", "date": "2026-12-01", "time": "09:00", "clinician": "Clinician B"},
+        )
         assert error(r)["code"] == "invalid_input"
 
     @pytest.mark.parametrize("args", [{"dataset": "everything"}, {"user": "admin2"}, {"role": "admin"}])
@@ -87,15 +98,26 @@ class TestTools:
 
         def broken():
             raise ModelUnavailable("SHA-256 mismatch at /secret/path")
+
         monkeypatch.setattr(read_tools, "get_model", broken)
-        args = {"lead_time_days": 5, "appointment_weekday": "monday", "appointment_hour": 10, "age_band": "35-44",
-                "visit_type": "in_person", "booking_channel": "web", "reminder_sent": True, "prior_appointments": 4,
-                "prior_no_shows": 0, "distance_km": 6.5}
+        args = {
+            "lead_time_days": 5,
+            "appointment_weekday": "monday",
+            "appointment_hour": 10,
+            "age_band": "35-44",
+            "visit_type": "in_person",
+            "booking_channel": "web",
+            "reminder_sent": True,
+            "prior_appointments": 4,
+            "prior_no_shows": 0,
+            "distance_km": 6.5,
+        }
         r = call(token, "predict_no_show", args)
         assert error(r)["code"] == "unavailable" and "secret" not in r.content[0].text
 
 
 # ---------------- tokens ----------------
+
 
 @pytest.mark.django_db
 class TestTokens:
@@ -137,19 +159,22 @@ class TestTokens:
 
 # ---------------- rate limit ----------------
 
+
 @pytest.mark.django_db
 class TestRateLimit:
     def test_calls_over_the_limit_are_refused_and_the_tool_does_not_run(self, admin, token):
         async def many(client):
             return [await client.call_tool("cluster_summaries", {}) for _ in range(CALLS_PER_MINUTE + 2)]
+
         results = with_client(token, many)
         assert [r.is_error for r in results].count(False) == CALLS_PER_MINUTE
         assert error(results[-1])["code"] == "rate_limited"
         assert AuditEvent.objects.filter(action="agent.tool_called").count() == CALLS_PER_MINUTE
 
     def test_the_limit_is_per_token(self, admin, token):
-        McpTokenUse.objects.create(token=McpToken.objects.get(), minute=timezone.now().replace(second=0, microsecond=0),
-                                   calls=CALLS_PER_MINUTE)
+        McpTokenUse.objects.create(
+            token=McpToken.objects.get(), minute=timezone.now().replace(second=0, microsecond=0), calls=CALLS_PER_MINUTE
+        )
         assert error(call(token, "cluster_summaries"))["code"] == "rate_limited"
         other = issue(admin)[0]
         assert not call(other, "cluster_summaries").is_error
@@ -166,13 +191,19 @@ class TestRateLimit:
 
 # ---------------- audit and commands ----------------
 
+
 @pytest.mark.django_db
 def test_audit_marks_mcp_calls_and_token_events_with_ids_only(admin):
     token, row = issue(admin)
     call(token, "cluster_summaries")
     revoke(row.id)
     actions = list(AuditEvent.objects.order_by("id").values_list("action", "detail", "request_id"))
-    assert [a for a, _, _ in actions] == ["mcp.token_issued", "mcp.token_first_used", "agent.tool_called", "mcp.token_revoked"]
+    assert [a for a, _, _ in actions] == [
+        "mcp.token_issued",
+        "mcp.token_first_used",
+        "agent.tool_called",
+        "mcp.token_revoked",
+    ]
     assert all(rid == f"mcp:{row.id}" for _, _, rid in actions)
     assert token not in json.dumps(actions)
 
@@ -191,6 +222,7 @@ def test_commands_issue_once_and_revoke(admin, capsys):
 @pytest.mark.django_db
 def test_commands_refuse_members_and_unknown_ids(user):
     from django.core.management.base import CommandError
+
     with pytest.raises(CommandError):
         call_command("create_mcp_token", admin=user.email)
     with pytest.raises(CommandError):
@@ -199,20 +231,31 @@ def test_commands_refuse_members_and_unknown_ids(user):
 
 # ---------------- a real stdio server process ----------------
 
+
 def test_a_real_stdio_server_lists_and_calls_tools(tmp_path):
-    env = {**os.environ, "DJANGO_SETTINGS_MODULE": "config.settings_test", "DATABASE_URL": f"sqlite:///{tmp_path / 'mcp.sqlite3'}"}
-    run = lambda *args: subprocess.run([sys.executable, "manage.py", *args], cwd=BACKEND, env=env, check=True,
-                                       capture_output=True, text=True)
+    env = {
+        **os.environ,
+        "DJANGO_SETTINGS_MODULE": "config.settings_test",
+        "DATABASE_URL": f"sqlite:///{tmp_path / 'mcp.sqlite3'}",
+    }
+    run = lambda *args: subprocess.run(
+        [sys.executable, "manage.py", *args], cwd=BACKEND, env=env, check=True, capture_output=True, text=True
+    )
     run("migrate", "-v0")
     run("shell", "-c", f"from accounts.models import User; User.objects.create_admin('mcp@example.test', '{PASSWORD}')")
     token = run("create_mcp_token", "--admin", "mcp@example.test", "--hours", "1").stdout.strip().splitlines()[-1]
-    params = StdioServerParameters(command=sys.executable, args=["manage.py", "run_mcp_server"], cwd=str(BACKEND),
-                                   env={**env, mcp_server.TOKEN_ENV: token})
+    params = StdioServerParameters(
+        command=sys.executable,
+        args=["manage.py", "run_mcp_server"],
+        cwd=str(BACKEND),
+        env={**env, mcp_server.TOKEN_ENV: token},
+    )
 
     async def main():
         async with Client(params) as client:
             tools = (await client.list_tools()).tools
             result = await client.call_tool("cluster_summaries", {"dataset": "control"})
             return tools, result
+
     tools, result = anyio.run(main)
     assert len(tools) == 4 and not result.is_error and result.structured_content["control"]["k"] >= 2

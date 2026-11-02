@@ -22,9 +22,7 @@ class HealthProfileSerializer(serializers.ModelSerializer):
     """
 
     email = serializers.EmailField(source="user.email", read_only=True)
-    wellness_goals = serializers.ListField(
-        child=serializers.CharField(max_length=100), max_length=10, required=False
-    )
+    wellness_goals = serializers.ListField(child=serializers.CharField(max_length=100), max_length=10, required=False)
     allergies = serializers.ListField(child=serializers.CharField(max_length=100), max_length=20, required=False)
     emergency_contact_phone = serializers.CharField(
         max_length=30, required=False, allow_blank=True, validators=[PHONE_VALIDATOR]
@@ -67,9 +65,7 @@ class HealthProfileSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs.get("date_of_birth") and attrs.get("age_range"):
-            raise serializers.ValidationError(
-                {"age_range": "Provide either date_of_birth or age_range, not both."}
-            )
+            raise serializers.ValidationError({"age_range": "Provide either date_of_birth or age_range, not both."})
         return attrs
 
     def update(self, instance, validated_data):
@@ -87,8 +83,15 @@ class AdminProfileListSerializer(serializers.ModelSerializer):
     class Meta:
         model = HealthProfile
         fields = [
-            "id", "user_id", "email", "full_name", "age_range", "contact_preference", "status",
-            "completion_status", "created_at",
+            "id",
+            "user_id",
+            "email",
+            "full_name",
+            "age_range",
+            "contact_preference",
+            "status",
+            "completion_status",
+            "created_at",
         ]
         read_only_fields = fields
 
@@ -100,5 +103,12 @@ class AdminProfileDetailSerializer(HealthProfileSerializer):
     last_login = serializers.DateTimeField(source="user.last_login", read_only=True)
 
     class Meta(HealthProfileSerializer.Meta):
-        fields = ["id", "user_id", *HealthProfileSerializer.Meta.fields, "deactivated_at", "account_active", "last_login"]
+        fields = [
+            "id",
+            "user_id",
+            *HealthProfileSerializer.Meta.fields,
+            "deactivated_at",
+            "account_active",
+            "last_login",
+        ]
         read_only_fields = fields

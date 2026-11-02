@@ -8,8 +8,20 @@ import { FormField } from "@/components/ui/FormField";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ModelCard, predictionApi } from "@/lib/api";
 import {
-  buildRequest, DEFAULT_FORM, describe, ErrorView, errorView, FieldName, FormState, LABELS, optionText,
-  percent, PredictionResponse, PRESETS, presetToForm, SCHEMA,
+  buildRequest,
+  DEFAULT_FORM,
+  describe,
+  ErrorView,
+  errorView,
+  FieldName,
+  FormState,
+  LABELS,
+  optionText,
+  percent,
+  PredictionResponse,
+  PRESETS,
+  presetToForm,
+  SCHEMA,
 } from "@/lib/prediction";
 
 const HINTS: Partial<Record<FieldName, string>> = {
@@ -31,7 +43,10 @@ export default function NoShowEstimatePage() {
   const latest = useRef(0);
 
   useEffect(() => {
-    predictionApi.model().then(setCard).catch(() => setCard("unavailable"));
+    predictionApi
+      .model()
+      .then(setCard)
+      .catch(() => setCard("unavailable"));
   }, [router]);
 
   function change(next: FormState) {
@@ -49,16 +64,26 @@ export default function NoShowEstimatePage() {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     const { payload, errors } = buildRequest(form);
-    if (!payload) { setFieldErrors(errors); setFailure(null); setResult(null); return; }
+    if (!payload) {
+      setFieldErrors(errors);
+      setFailure(null);
+      setResult(null);
+      return;
+    }
     const ticket = ++latest.current;
-    setBusy(true); setFailure(null); setFieldErrors({});
+    setBusy(true);
+    setFailure(null);
+    setFieldErrors({});
     try {
       const response = await predictionApi.predict(payload);
       if (ticket === latest.current) setResult(response);
     } catch (err) {
       if (ticket !== latest.current) return;
       const view = errorView(err);
-      if (view.kind === "signed_out") { router.replace("/admin/login"); return; }
+      if (view.kind === "signed_out") {
+        router.replace("/admin/login");
+        return;
+      }
       if (view.kind === "fields") setFieldErrors(view.fields);
       setFailure(view);
     } finally {
@@ -69,13 +94,28 @@ export default function NoShowEstimatePage() {
   const control = (name: FieldName) => {
     const spec = SCHEMA[name];
     return (
-      <FormField key={name} id={name} label={LABELS[name]} hint={HINTS[name]} error={fieldErrors[name]}
-                 required={!(spec.type === "number" && spec.nullable)} kind={spec.type === "boolean" ? "group" : "single"}>
+      <FormField
+        key={name}
+        id={name}
+        label={LABELS[name]}
+        hint={HINTS[name]}
+        error={fieldErrors[name]}
+        required={!(spec.type === "number" && spec.nullable)}
+        kind={spec.type === "boolean" ? "group" : "single"}
+      >
         {(props) => {
           if (spec.type === "category") {
             return (
-              <select {...props} value={form[name as Exclude<FieldName, "reminder_sent">]} onChange={(e) => set(name, e.target.value)}>
-                {spec.values.map((v) => <option key={v} value={v}>{optionText(v)}</option>)}
+              <select
+                {...props}
+                value={form[name as Exclude<FieldName, "reminder_sent">]}
+                onChange={(e) => set(name, e.target.value)}
+              >
+                {spec.values.map((v) => (
+                  <option key={v} value={v}>
+                    {optionText(v)}
+                  </option>
+                ))}
               </select>
             );
           }
@@ -84,7 +124,12 @@ export default function NoShowEstimatePage() {
               <div className="choice-row" role="radiogroup">
                 {[true, false].map((v) => (
                   <label key={String(v)} className="choice">
-                    <input type="radio" name={props.name} checked={form.reminder_sent === v} onChange={() => set(name, v)} />
+                    <input
+                      type="radio"
+                      name={props.name}
+                      checked={form.reminder_sent === v}
+                      onChange={() => set(name, v)}
+                    />
                     {v ? "Yes" : "No"}
                   </label>
                 ))}
@@ -92,9 +137,16 @@ export default function NoShowEstimatePage() {
             );
           }
           return (
-            <input {...props} type="number" inputMode={spec.type === "integer" ? "numeric" : "decimal"}
-                   min={spec.min} max={spec.max} step={spec.type === "integer" ? 1 : 0.1}
-                   value={form[name as Exclude<FieldName, "reminder_sent">]} onChange={(e) => set(name, e.target.value)} />
+            <input
+              {...props}
+              type="number"
+              inputMode={spec.type === "integer" ? "numeric" : "decimal"}
+              min={spec.min}
+              max={spec.max}
+              step={spec.type === "integer" ? 1 : 0.1}
+              value={form[name as Exclude<FieldName, "reminder_sent">]}
+              onChange={(e) => set(name, e.target.value)}
+            />
           );
         }}
       </FormField>
@@ -105,8 +157,11 @@ export default function NoShowEstimatePage() {
 
   return (
     <Shell nav={nav}>
-      <PageHeader eyebrow="Admin console · educational prototype" title="Appointment no-show estimate"
-                  lead="Estimate whether a fictional appointment may be missed, to decide on an extra reminder. Synthetic data only." />
+      <PageHeader
+        eyebrow="Admin console · educational prototype"
+        title="Appointment no-show estimate"
+        lead="Estimate whether a fictional appointment may be missed, to decide on an extra reminder. Synthetic data only."
+      />
       <AdminTabs />
 
       <div className="estimate-layout">
@@ -117,22 +172,51 @@ export default function NoShowEstimatePage() {
           <div className="preset-row" aria-label="Fill example">
             <span className="muted small">Fill example:</span>
             {PRESETS.map((preset) => (
-              <button key={preset.id} type="button" className="btn ghost small" onClick={() => change(presetToForm(preset.values))}>
+              <button
+                key={preset.id}
+                type="button"
+                className="btn ghost small"
+                onClick={() => change(presetToForm(preset.values))}
+              >
                 {preset.label}
               </button>
             ))}
           </div>
 
           <h2 className="form-section">Appointment</h2>
-          <div className="grid">{(["lead_time_days", "appointment_weekday", "appointment_hour", "visit_type", "booking_channel", "reminder_sent"] as FieldName[]).map(control)}</div>
+          <div className="grid">
+            {(
+              [
+                "lead_time_days",
+                "appointment_weekday",
+                "appointment_hour",
+                "visit_type",
+                "booking_channel",
+                "reminder_sent",
+              ] as FieldName[]
+            ).map(control)}
+          </div>
           <h2 className="form-section">Person and history</h2>
-          <div className="grid">{(["age_band", "distance_km", "prior_appointments", "prior_no_shows"] as FieldName[]).map(control)}</div>
+          <div className="grid">
+            {(["age_band", "distance_km", "prior_appointments", "prior_no_shows"] as FieldName[]).map(control)}
+          </div>
 
-          {failure && <div className={`alert ${failure.kind === "unavailable" || failure.kind === "throttled" ? "warn" : "error"}`} role="alert">{failure.message}</div>}
+          {failure && (
+            <div
+              className={`alert ${failure.kind === "unavailable" || failure.kind === "throttled" ? "warn" : "error"}`}
+              role="alert"
+            >
+              {failure.message}
+            </div>
+          )}
 
           <div className="form-actions">
-            <button type="submit" className="btn" disabled={busy}>{busy ? "Estimating…" : "Estimate"}</button>
-            <button type="button" className="btn ghost" onClick={() => change(DEFAULT_FORM)} disabled={busy}>Reset</button>
+            <button type="submit" className="btn" disabled={busy}>
+              {busy ? "Estimating…" : "Estimate"}
+            </button>
+            <button type="button" className="btn ghost" onClick={() => change(DEFAULT_FORM)} disabled={busy}>
+              Reset
+            </button>
           </div>
         </form>
 
@@ -145,11 +229,15 @@ export default function NoShowEstimatePage() {
                 <p className="chance">{text.chance}</p>
                 <p className="muted small">{text.comparison}</p>
                 <p className="small">{text.meaning}</p>
-                <p className="disclaimer small" data-testid="disclaimer">{text.disclaimer}</p>
+                <p className="disclaimer small" data-testid="disclaimer">
+                  {text.disclaimer}
+                </p>
                 <p className="muted small mono">{text.version}</p>
               </>
             ) : (
-              <p className="muted">{busy ? "Estimating…" : "Fill in the form (or pick an example) and press Estimate."}</p>
+              <p className="muted">
+                {busy ? "Estimating…" : "Fill in the form (or pick an example) and press Estimate."}
+              </p>
             )}
           </div>
 
@@ -159,17 +247,21 @@ export default function NoShowEstimatePage() {
             {card === "unavailable" && <p className="muted small">Model details are unavailable right now.</p>}
             {card && card !== "unavailable" && (
               <dl className="small">
-                <dt>Version</dt><dd className="mono">{card.model_version}</dd>
-                <dt>Model</dt><dd>{card.estimator}</dd>
+                <dt>Version</dt>
+                <dd className="mono">{card.model_version}</dd>
+                <dt>Model</dt>
+                <dd>{card.estimator}</dd>
                 <dt>Test scores (synthetic data)</dt>
-                <dd>PR-AUC {card.metrics.test.pr_auc.toFixed(3)} · ROC-AUC {card.metrics.test.roc_auc.toFixed(3)}</dd>
-                <dt>Extra reminder from</dt><dd>{percent(card.decision.threshold)}</dd>
-                <dt>Inputs</dt><dd>{card.inputs_note}</dd>
+                <dd>
+                  PR-AUC {card.metrics.test.pr_auc.toFixed(3)} · ROC-AUC {card.metrics.test.roc_auc.toFixed(3)}
+                </dd>
+                <dt>Extra reminder from</dt>
+                <dd>{percent(card.decision.threshold)}</dd>
+                <dt>Inputs</dt>
+                <dd>{card.inputs_note}</dd>
               </dl>
             )}
-            {card && card !== "unavailable" && (
-              <p className="disclaimer small">{card.disclaimer}</p>
-            )}
+            {card && card !== "unavailable" && <p className="disclaimer small">{card.disclaimer}</p>}
           </details>
         </section>
       </div>

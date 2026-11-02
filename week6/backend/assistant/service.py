@@ -22,10 +22,14 @@ logger = logging.getLogger(__name__)
 
 MAX_QUESTION_CHARS = 500
 MAX_RETRIES = 1  # Week 5 Step 5: bounded, and only for invalid output
-RETRY_NOTE = ("Your previous reply did not match the required JSON format. Reply again with JSON only, "
-              "matching the given schema: answer, citations, refused.")
-REFUSAL_MESSAGE = ("This assistant only answers questions about the fictional clinic's policies. It can't give "
-                   "medical advice; please contact a qualified professional.")
+RETRY_NOTE = (
+    "Your previous reply did not match the required JSON format. Reply again with JSON only, "
+    "matching the given schema: answer, citations, refused."
+)
+REFUSAL_MESSAGE = (
+    "This assistant only answers questions about the fictional clinic's policies. It can't give "
+    "medical advice; please contact a qualified professional."
+)
 
 
 class QuestionInvalid(ValueError):
@@ -59,9 +63,14 @@ def clean_question(question) -> str:
     return " ".join(question.split())
 
 
-def ask(question: str, ranked: list[Passage], llm: LLMClient,
-        groundedness_threshold: float = GROUNDEDNESS_THRESHOLD, seed: int | None = None,
-        history=()) -> AssistantResult:
+def ask(
+    question: str,
+    ranked: list[Passage],
+    llm: LLMClient,
+    groundedness_threshold: float = GROUNDEDNESS_THRESHOLD,
+    seed: int | None = None,
+    history=(),
+) -> AssistantResult:
     """`history`: earlier turns for the prompt (assistant/history.py); empty gives the Week 4 prompt exactly.
 
     Bounded retry (Week 5 Step 5): if the reply breaks the schema (or was cut off, which breaks it too), the
@@ -71,11 +80,22 @@ def ask(question: str, ranked: list[Passage], llm: LLMClient,
     question, redactions = redact(clean_question(question))
     if is_medical_advice_request(question):
         # Refused before any model call: nothing about a medical question reaches the model.
-        return AssistantResult(status="refused", answer=REFUSAL_MESSAGE, redactions=redactions,
-                               reason="server medical-advice check", model=llm.model)
+        return AssistantResult(
+            status="refused",
+            answer=REFUSAL_MESSAGE,
+            redactions=redactions,
+            reason="server medical-advice check",
+            model=llm.model,
+        )
     prompt = build_prompt(question, ranked, cfg["CONTEXT_TOKENS"], cfg["MAX_OUTPUT_TOKENS"], history=history)
-    base = {"passages_used": prompt.included, "passages_dropped": prompt.dropped, "redactions": redactions,
-            "model": llm.model, "model_called": True, "budget": prompt.budget}
+    base = {
+        "passages_used": prompt.included,
+        "passages_dropped": prompt.dropped,
+        "redactions": redactions,
+        "model": llm.model,
+        "model_called": True,
+        "budget": prompt.budget,
+    }
     retry_seed = (cfg["SEED"] if seed is None else seed) + 1
     prompt_tokens = output_tokens = retries = 0
     messages = prompt.messages
@@ -84,12 +104,22 @@ def ask(question: str, ranked: list[Passage], llm: LLMClient,
             reply = llm.chat(messages, ANSWER_SCHEMA, seed=retry_seed if retries else seed)
         except LLMTimeout as exc:
             logger.warning("assistant: model timeout (%s)", exc.reason)
-            return AssistantResult(status="timeout", reason="timeout", retries=retries,
-                                   usage=cost_report(prompt_tokens, output_tokens) if retries else None, **base)
+            return AssistantResult(
+                status="timeout",
+                reason="timeout",
+                retries=retries,
+                usage=cost_report(prompt_tokens, output_tokens) if retries else None,
+                **base,
+            )
         except LLMUnavailable as exc:
             logger.error("assistant: model unavailable (%s)", exc.reason)
-            return AssistantResult(status="unavailable", reason="unavailable", retries=retries,
-                                   usage=cost_report(prompt_tokens, output_tokens) if retries else None, **base)
+            return AssistantResult(
+                status="unavailable",
+                reason="unavailable",
+                retries=retries,
+                usage=cost_report(prompt_tokens, output_tokens) if retries else None,
+                **base,
+            )
         prompt_tokens, output_tokens = prompt_tokens + reply.prompt_tokens, output_tokens + reply.output_tokens
         try:
             parsed = parse_reply(reply.text)
@@ -97,8 +127,13 @@ def ask(question: str, ranked: list[Passage], llm: LLMClient,
         except InvalidAnswer as exc:
             logger.warning("assistant: invalid model output (%s), attempt %d", exc.reason, retries + 1)
             if retries >= MAX_RETRIES:
-                return AssistantResult(status="invalid_output", reason=exc.reason, retries=retries,
-                                       usage=cost_report(prompt_tokens, output_tokens), **base)
+                return AssistantResult(
+                    status="invalid_output",
+                    reason=exc.reason,
+                    retries=retries,
+                    usage=cost_report(prompt_tokens, output_tokens),
+                    **base,
+                )
             retries += 1
             messages = prompt.messages + [{"role": "user", "content": RETRY_NOTE}]
     usage = cost_report(prompt_tokens, output_tokens)
@@ -107,6 +142,14 @@ def ask(question: str, ranked: list[Passage], llm: LLMClient,
     if verdict.rejected_citations:
         logger.info("assistant: %d citation(s) rejected", verdict.rejected_citations)
     answer = {"answered": parsed.answer, "refused": REFUSAL_MESSAGE}.get(verdict.status, "")
-    return AssistantResult(status=verdict.status, answer=answer, citations=verdict.verified, usage=usage,
-                           rejected_citations=verdict.rejected_citations, groundedness=verdict.groundedness,
-                           reason=verdict.reason, retries=retries, **base)
+    return AssistantResult(
+        status=verdict.status,
+        answer=answer,
+        citations=verdict.verified,
+        usage=usage,
+        rejected_citations=verdict.rejected_citations,
+        groundedness=verdict.groundedness,
+        reason=verdict.reason,
+        retries=retries,
+        **base,
+    )

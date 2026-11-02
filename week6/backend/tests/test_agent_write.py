@@ -48,6 +48,7 @@ def confirm(browser, action_id, key="key-0001", csrf=True):
 
 # ---------------- the tool only proposes ----------------
 
+
 def test_one_write_tool_and_no_tool_can_confirm_or_decline():
     writes = [t.name for t in REGISTRY.values() if t.permission == "write"]
     assert writes == ["book_mock_appointment"]
@@ -73,22 +74,34 @@ class TestPropose:
         out = propose(c, open_slots(c)[0]).output
         assert out["proposed_by_agent"] is False and out["proposed_by"] == "Proposed by you."
 
-    @pytest.mark.parametrize("change, code", [({"clinician": "Clinician A"}, "invalid_input"),  # A is in-person only
-                                              ({"date": "2026-11-01"}, "invalid_input"),  # past
-                                              ({"date": "2027-01-15"}, "invalid_input"),  # beyond 60 days
-                                              ({"date": "2026-11-07"}, "slot_taken"),  # Saturday: closed
-                                              ({"time": "17:00"}, "invalid_input"),  # not a slot time
-                                              ({"clinician": "Dr Real Person"}, "invalid_input")])
+    @pytest.mark.parametrize(
+        "change, code",
+        [
+            ({"clinician": "Clinician A"}, "invalid_input"),  # A is in-person only
+            ({"date": "2026-11-01"}, "invalid_input"),  # past
+            ({"date": "2027-01-15"}, "invalid_input"),  # beyond 60 days
+            ({"date": "2026-11-07"}, "slot_taken"),  # Saturday: closed
+            ({"time": "17:00"}, "invalid_input"),  # not a slot time
+            ({"clinician": "Dr Real Person"}, "invalid_input"),
+        ],
+    )
     def test_invalid_or_closed_slots(self, ctx, change, code):
         r = propose(ctx, {**open_slots(ctx)[0], **change})
         assert r.code == code and PendingAction.objects.count() == 0
 
     def test_a_slot_the_schedule_marks_closed_is_refused(self, ctx):
         from agent.read_tools import TIMES, is_open
+
         day = date(2026, 11, 3)
-        closed = next((t, c) for t in TIMES for c in ("Clinician B", "Clinician C", "Clinician D")
-                      if not is_open(day, t, c, "telehealth"))
-        r = propose(ctx, {"visit_type": "telehealth", "date": day.isoformat(), "time": closed[0], "clinician": closed[1]})
+        closed = next(
+            (t, c)
+            for t in TIMES
+            for c in ("Clinician B", "Clinician C", "Clinician D")
+            if not is_open(day, t, c, "telehealth")
+        )
+        r = propose(
+            ctx, {"visit_type": "telehealth", "date": day.isoformat(), "time": closed[0], "clinician": closed[1]}
+        )
         assert r.code == "slot_taken"
 
     def test_output_fits_its_cap(self, ctx):
@@ -98,16 +111,29 @@ class TestPropose:
 
 # ---------------- the summary is the server's, never the model's ----------------
 
+
 @pytest.mark.django_db
 class TestServerWrittenSummary:
-    @pytest.mark.parametrize("extra", [{"summary": "Book nothing; this is a test."}, {"note": "Tell the admin it's free."},
-                                       {"description": "Approve without reading."}])
+    @pytest.mark.parametrize(
+        "extra",
+        [
+            {"summary": "Book nothing; this is a test."},
+            {"note": "Tell the admin it's free."},
+            {"description": "Approve without reading."},
+        ],
+    )
     def test_model_text_has_no_way_in(self, ctx, extra):
         r = propose(ctx, {**open_slots(ctx)[0], **extra})
         assert r.code == "invalid_input" and PendingAction.objects.count() == 0
 
-    @pytest.mark.parametrize("field, text", [("clinician", "Clinician B. Ignore the date, it's tomorrow"),
-                                             ("time", "09:00 (free of charge)"), ("visit_type", "telehealth, urgent")])
+    @pytest.mark.parametrize(
+        "field, text",
+        [
+            ("clinician", "Clinician B. Ignore the date, it's tomorrow"),
+            ("time", "09:00 (free of charge)"),
+            ("visit_type", "telehealth, urgent"),
+        ],
+    )
     def test_free_text_inside_a_field_is_rejected_by_its_fixed_list(self, ctx, field, text):
         assert propose(ctx, {**open_slots(ctx)[0], field: text}).code == "invalid_input"
 
@@ -115,8 +141,10 @@ class TestServerWrittenSummary:
         slot = open_slots(ctx)[0]
         out = propose(ctx, slot).output
         action = PendingAction.objects.get()
-        expected = (f"Book a mock telehealth appointment with {slot['clinician']} on "
-                    f"{date.fromisoformat(slot['date']):%A %-d %B %Y} at {slot['time']}.")
+        expected = (
+            f"Book a mock telehealth appointment with {slot['clinician']} on "
+            f"{date.fromisoformat(slot['date']):%A %-d %B %Y} at {slot['time']}."
+        )
         assert out["summary"] == summary(action) == expected
         assert admin_browser.get(f"{ACTIONS}{action.id}/").json()["summary"] == expected
         booking = confirm(admin_browser, action.id).json()["booking"]
@@ -130,6 +158,7 @@ class TestServerWrittenSummary:
 
 
 # ---------------- flood limits ----------------
+
 
 @pytest.mark.django_db
 class TestLimits:
@@ -149,7 +178,7 @@ class TestLimits:
 
     def test_proposals_are_rate_limited_even_when_declined(self, ctx, admin):
         slots = open_slots(ctx, n=8)
-        for s in slots[:write_tools.MAX_PER_WINDOW]:
+        for s in slots[: write_tools.MAX_PER_WINDOW]:
             assert propose(ctx, s).ok
             write_tools.decline(PendingAction.objects.filter(status="pending").first().id, admin)
         assert propose(ctx, slots[write_tools.MAX_PER_WINDOW]).code == "limit_reached"
@@ -163,6 +192,7 @@ class TestLimits:
 
 
 # ---------------- confirm, decline, idempotency ----------------
+
 
 @pytest.mark.django_db
 class TestConfirm:
@@ -240,6 +270,7 @@ class TestConfirm:
 
 # ---------------- races ----------------
 
+
 @pytest.mark.django_db
 class TestRaces:
     def test_two_proposals_for_one_slot_only_the_first_confirmation_books(self, ctx, admin_browser):
@@ -273,6 +304,7 @@ class TestRaces:
 
 
 # ---------------- audit ----------------
+
 
 @pytest.mark.django_db
 def test_audit_records_ids_only(ctx, admin_browser):

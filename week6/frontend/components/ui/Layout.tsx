@@ -16,15 +16,29 @@ type LayoutProps = {
 export function Layout({ children, actions }: LayoutProps) {
   return (
     <div className="shell">
-      <a href="#main" className="skip-link">Skip to content</a>
+      <a href="#main" className="skip-link">
+        Skip to content
+      </a>
       <header className="topbar">
-        <Link href="/" className="brand"><BrandMark /><span className="wordmark">Health<span>Profile</span></span></Link>
+        <Link href="/" className="brand">
+          <BrandMark />
+          <span className="wordmark">
+            Health<span>Profile</span>
+          </span>
+        </Link>
         <SiteNav />
         {actions && <div className="actions">{actions}</div>}
       </header>
-      <main id="main" tabIndex={-1}>{children}</main>
+      <main id="main" tabIndex={-1}>
+        {children}
+      </main>
       <footer className="footer muted small">
-        <span className="brand"><BrandMark /><span className="wordmark">Health<span>Profile</span></span></span>
+        <span className="brand">
+          <BrandMark />
+          <span className="wordmark">
+            Health<span>Profile</span>
+          </span>
+        </span>
         <p>{DISCLAIMER}</p>
       </footer>
     </div>

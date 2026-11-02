@@ -20,9 +20,13 @@ export default async function RequestPage({ params }: Props) {
   if (!p) notFound();
   return (
     <Layout>
-      <p className="small"><Link href={`/professionals/${p.id}`}>← Back to {p.name}</Link></p>
+      <p className="small">
+        <Link href={`/professionals/${p.id}`}>← Back to {p.name}</Link>
+      </p>
       <h1>Request an appointment</h1>
-      <p className="muted">With {p.name}, {p.title}. This is a request form only: no appointment is booked.</p>
+      <p className="muted">
+        With {p.name}, {p.title}. This is a request form only: no appointment is booked.
+      </p>
       <AppointmentRequestForm professional={p} />
     </Layout>
   );

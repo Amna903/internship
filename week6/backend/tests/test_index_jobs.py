@@ -48,8 +48,10 @@ def use(monkeypatch, embedder):
 def pending(db, admin):
     """A new document whose v1 is pending (nothing searchable yet)."""
     import hashlib
-    document = create_document("refunds.md", OLD, hashlib.sha256(OLD.encode()).hexdigest(), "upload", admin,
-                               policy_area="billing")
+
+    document = create_document(
+        "refunds.md", OLD, hashlib.sha256(OLD.encode()).hexdigest(), "upload", admin, policy_area="billing"
+    )
     return document.versions.get()
 
 
@@ -59,13 +61,17 @@ def new_job(version, admin, **fields):
 
 # ---------------- states and retries ----------------
 
+
 @pytest.mark.django_db
 class TestStates:
     def test_a_job_goes_queued_running_succeeded_and_indexes_the_version(self, admin_browser, pending, monkeypatch):
         seen = []
         real = jobs._finish
-        monkeypatch.setattr(jobs, "_finish", lambda job, *a, **k: (seen.append(IndexJob.objects.get(pk=job.pk).status),
-                                                                    real(job, *a, **k)))
+        monkeypatch.setattr(
+            jobs,
+            "_finish",
+            lambda job, *a, **k: (seen.append(IndexJob.objects.get(pk=job.pk).status), real(job, *a, **k)),
+        )
         body = post(admin_browser, f"{DOCS}{pending.document_id}/approve/").json()
         job = IndexJob.objects.get()
         assert seen == ["running"] and job.status == "succeeded" and job.attempts == 1 and job.chunks >= 1
@@ -129,6 +135,7 @@ class TestStates:
 
 # ---------------- safe to repeat ----------------
 
+
 @pytest.mark.django_db
 class TestRepeats:
     def test_a_duplicate_delivery_does_nothing(self, admin, pending, monkeypatch):
@@ -173,6 +180,7 @@ class TestRepeats:
 
 # ---------------- authorisation, queue, task settings ----------------
 
+
 @pytest.mark.django_db
 class TestGuards:
     def test_the_worker_rechecks_that_the_requester_is_still_an_active_admin(self, admin, pending, monkeypatch):
@@ -193,6 +201,7 @@ class TestGuards:
     def test_a_down_queue_is_a_503_and_changes_nothing(self, admin_browser, pending, monkeypatch):
         def down(*a, **k):
             raise OperationalError("Error 61 connecting to localhost:6379")
+
         monkeypatch.setattr(index_version, "apply_async", down)
         r = post(admin_browser, f"{DOCS}{pending.document_id}/approve/")
         assert r.status_code == 503 and r.json()["error"]["code"] == "queue_unavailable" and "6379" not in r.text
@@ -207,6 +216,7 @@ class TestGuards:
     def test_the_flaky_test_embedder_is_refused_outside_the_fake_provider(self, settings):
         settings.ASSISTANT = {**settings.ASSISTANT, "EMBEDDER": "flaky", "PROVIDER": "ollama"}
         from django.core.exceptions import ImproperlyConfigured
+
         with pytest.raises(ImproperlyConfigured):
             get_embedder()
         settings.ASSISTANT = {**settings.ASSISTANT, "PROVIDER": "fake"}
@@ -215,19 +225,26 @@ class TestGuards:
 
 # ---------------- audit and the job API ----------------
 
+
 @pytest.mark.django_db
 class TestAuditAndApi:
     def test_audit_has_queued_approved_and_failed_with_ids_only(self, admin_browser, pending, monkeypatch):
         post(admin_browser, f"{DOCS}{pending.document_id}/approve/")
         job = IndexJob.objects.get()
         rows = list(AuditEvent.objects.order_by("id").values_list("action", "detail", "actor_id"))
-        assert ("admin.index_job_queued", f"job:{job.id}:document:{pending.document_id}:v1", job.requested_by_id) in rows
+        assert (
+            "admin.index_job_queued",
+            f"job:{job.id}:document:{pending.document_id}:v1",
+            job.requested_by_id,
+        ) in rows
         assert ("admin.document_approved", f"document:{pending.document_id}", job.requested_by_id) in rows
         doc2 = upload(admin_browser, DOCS, "other.md", NEW).json()["id"]
         use(monkeypatch, Scripted(*[LLMUnavailable("down")] * 3))
         post(admin_browser, f"{DOCS}{doc2}/approve/")
         failed = IndexJob.objects.get(version__document_id=doc2)
-        assert AuditEvent.objects.filter(action="admin.index_job_failed", detail=f"job:{failed.id}:unavailable").exists()
+        assert AuditEvent.objects.filter(
+            action="admin.index_job_failed", detail=f"job:{failed.id}:unavailable"
+        ).exists()
         assert not any("refund" in (d or "").lower() for _, d, _ in rows)
 
     def test_the_job_api_lists_filters_and_shows_one_job(self, admin_browser, admin, pending):
@@ -253,7 +270,10 @@ class TestAuditAndApi:
 @pytest.mark.django_db
 def test_job_polling_has_its_own_rate_limit_and_does_not_use_the_question_budget(admin_browser, pending):
     from assistant.views import IndexJobsView, IndexJobView
+
     assert IndexJobView.throttle_scope == IndexJobsView.throttle_scope == "jobs"
     post(admin_browser, f"{DOCS}{pending.document_id}/approve/")
     job = IndexJob.objects.get()
-    assert all(admin_browser.get(f"{JOBS}{job.id}/").status_code == 200 for _ in range(15))  # above the 10/min question limit
+    assert all(
+        admin_browser.get(f"{JOBS}{job.id}/").status_code == 200 for _ in range(15)
+    )  # above the 10/min question limit

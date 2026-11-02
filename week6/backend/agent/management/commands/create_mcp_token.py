@@ -24,5 +24,7 @@ class Command(BaseCommand):
             raise CommandError("No active admin with that email.") from None
         except ValueError as exc:
             raise CommandError(str(exc)) from None
-        self.stdout.write(f"Token id: {row.id}\nExpires: {row.expires_at:%Y-%m-%d %H:%M %Z}\n"
-                          f"Token (shown once; set it as HEALTHPROFILE_MCP_TOKEN in the MCP client's server config):\n{token}")
+        self.stdout.write(
+            f"Token id: {row.id}\nExpires: {row.expires_at:%Y-%m-%d %H:%M %Z}\n"
+            f"Token (shown once; set it as HEALTHPROFILE_MCP_TOKEN in the MCP client's server config):\n{token}"
+        )

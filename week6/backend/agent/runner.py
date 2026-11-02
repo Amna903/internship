@@ -67,18 +67,39 @@ DECISION_SCHEMA = {
         "args": {"type": "object"},
         "kind": {"type": "string", "enum": ["answer", "clarify", "decline"]},
         "answer": {"type": "string"},
-        "citations": {"type": "array", "items": {"type": "object", "properties": {
-            "passage_id": {"type": "string"}, "quote": {"type": "string"}}, "required": ["passage_id", "quote"]}},
+        "citations": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {"passage_id": {"type": "string"}, "quote": {"type": "string"}},
+                "required": ["passage_id", "quote"],
+            },
+        },
     },
     "required": ["action"],
 }
-SERVER_DECISION = {**DECISION_SCHEMA, "additionalProperties": False, "properties": {
-    **DECISION_SCHEMA["properties"],
-    "tool": {"type": "string", "maxLength": 40},
-    "answer": {"type": "string", "maxLength": MAX_TEXT_CHARS},
-    "citations": {"type": "array", "maxItems": 4, "items": {"type": "object", "additionalProperties": False,
-                  "required": ["passage_id", "quote"], "properties": {"passage_id": {"type": "string", "maxLength": 80},
-                                                                      "quote": {"type": "string", "maxLength": 300}}}}}}
+SERVER_DECISION = {
+    **DECISION_SCHEMA,
+    "additionalProperties": False,
+    "properties": {
+        **DECISION_SCHEMA["properties"],
+        "tool": {"type": "string", "maxLength": 40},
+        "answer": {"type": "string", "maxLength": MAX_TEXT_CHARS},
+        "citations": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["passage_id", "quote"],
+                "properties": {
+                    "passage_id": {"type": "string", "maxLength": 80},
+                    "quote": {"type": "string", "maxLength": 300},
+                },
+            },
+        },
+    },
+}
 
 SYSTEM = """You are an educational assistant for a FICTIONAL clinic's admin team. You help by calling tools.
 Today is {today}.
@@ -144,12 +165,24 @@ def agent_schema(tool: str) -> dict:
 def decision_schema(tools: list[str]) -> dict:
     """Round 2, rule 3: each offered tool's own argument schema goes with the decision, so the model's
     structured output is typed per tool (sent to Ollama; the server validates again)."""
-    finish_ = {"type": "object", "properties": {k: DECISION_SCHEMA["properties"][k] for k in ("action", "kind", "answer", "citations")},
-               "required": ["action", "kind", "answer"]}
+    finish_ = {
+        "type": "object",
+        "properties": {k: DECISION_SCHEMA["properties"][k] for k in ("action", "kind", "answer", "citations")},
+        "required": ["action", "kind", "answer"],
+    }
     finish_["properties"]["action"] = {"type": "string", "enum": ["finish"]}
-    calls = [{"type": "object", "properties": {"action": {"type": "string", "enum": ["call_tool"]},
-                                                "tool": {"type": "string", "enum": [t]}, "args": agent_schema(t)},
-              "required": ["action", "tool", "args"]} for t in tools]
+    calls = [
+        {
+            "type": "object",
+            "properties": {
+                "action": {"type": "string", "enum": ["call_tool"]},
+                "tool": {"type": "string", "enum": [t]},
+                "args": agent_schema(t),
+            },
+            "required": ["action", "tool", "args"],
+        }
+        for t in tools
+    ]
     return {"anyOf": [finish_, *calls]}
 
 
@@ -160,7 +193,11 @@ def coerce(args: dict, schema: dict) -> dict:
     for key, value in args.items():
         kind = schema.get("properties", {}).get(key, {}).get("type")
         kinds = kind if isinstance(kind, list) else [kind]
-        if isinstance(value, str) and ("integer" in kinds or "number" in kinds) and re.fullmatch(r"-?\d+", value.strip()):
+        if (
+            isinstance(value, str)
+            and ("integer" in kinds or "number" in kinds)
+            and re.fullmatch(r"-?\d+", value.strip())
+        ):
             out[key] = int(value.strip())
         elif isinstance(value, str) and "boolean" in kinds and value.strip().lower() in ("true", "false"):
             out[key] = value.strip().lower() == "true"
@@ -193,12 +230,16 @@ def date_problem(args: dict, dates: Resolution) -> str | None:
 
 
 def system_prompt(tools: list[str], today: date) -> str:
-    specs = "\n".join(json.dumps({**REGISTRY[n].spec(), "input_schema": agent_schema(n)}, ensure_ascii=False)
-                       for n in tools)
-    booking_rule = (" book_mock_appointment only proposes a booking; the admin confirms it outside this chat."
-                    " To book, first call check_availability, then book one of the slots it returned, copying its"
-                    " date, time and clinician exactly."
-                    if WRITE_TOOL in tools else "")  # dev round 2: the agent booked without checking first  # never name a tool that isn't offered
+    specs = "\n".join(
+        json.dumps({**REGISTRY[n].spec(), "input_schema": agent_schema(n)}, ensure_ascii=False) for n in tools
+    )
+    booking_rule = (
+        " book_mock_appointment only proposes a booking; the admin confirms it outside this chat."
+        " To book, first call check_availability, then book one of the slots it returned, copying its"
+        " date, time and clinician exactly."
+        if WRITE_TOOL in tools
+        else ""
+    )  # dev round 2: the agent booked without checking first  # never name a tool that isn't offered
     return SYSTEM.format(today=f"{today:%A %-d %B %Y} ({today.isoformat()})", tools=specs, booking_rule=booking_rule)
 
 
@@ -211,8 +252,12 @@ def trace_args(tool: str | None, args) -> dict | str:
     out = {}
     for key, value in list(args.items())[:12]:
         spec = props.get(key) or {}
-        fixed = "enum" in spec or "pattern" in spec or spec.get("type") in ("integer", "number", "boolean") \
+        fixed = (
+            "enum" in spec
+            or "pattern" in spec
+            or spec.get("type") in ("integer", "number", "boolean")
             or isinstance(spec.get("type"), list)
+        )
         if fixed and (not isinstance(value, str) or len(value) <= 20):
             out[str(key)[:40]] = value
         else:
@@ -230,8 +275,15 @@ class _Stop(Exception):
         self.status, self.reason = status, reason
 
 
-def run_agent(message, ctx: ToolContext, llm: LLMClient, seed: int | None = None, groundedness_threshold: float = 0.61,
-              tool_runner: Callable = run_tool, now: Callable[[], float] = time.monotonic) -> AgentResult:
+def run_agent(
+    message,
+    ctx: ToolContext,
+    llm: LLMClient,
+    seed: int | None = None,
+    groundedness_threshold: float = 0.61,
+    tool_runner: Callable = run_tool,
+    now: Callable[[], float] = time.monotonic,
+) -> AgentResult:
     """`tool_runner` and `now` are injectable for the evaluation's fault injection and the slow-model test."""
     started = now()
     cleaned, redactions = redact(clean_question(message))
@@ -243,8 +295,13 @@ def run_agent(message, ctx: ToolContext, llm: LLMClient, seed: int | None = None
     dates = resolve(cleaned, ctx.today())
     res.dates = {"resolved": dates.dates, "unresolved": dates.unresolved}
     schema = decision_schema(res.offered)
-    messages = [{"role": "system", "content": system_prompt(res.offered, ctx.today())},
-                {"role": "user", "content": f"Request:\n{cleaned}" + (f"\n\n{dates.prompt_lines()}" if dates.mentioned else "")}]
+    messages = [
+        {"role": "system", "content": system_prompt(res.offered, ctx.today())},
+        {
+            "role": "user",
+            "content": f"Request:\n{cleaned}" + (f"\n\n{dates.prompt_lines()}" if dates.mentioned else ""),
+        },
+    ]
     passages: dict[str, Passage] = {}
     failures: dict[str, int] = {}
     last_failed_call = None
@@ -267,32 +324,53 @@ def run_agent(message, ctx: ToolContext, llm: LLMClient, seed: int | None = None
             tool, args = decision.get("tool", ""), decision.get("args", {})
             if tool in REGISTRY and isinstance(args, dict):
                 args = coerce(args, agent_schema(tool))  # the trace and the tool see what is actually executed
-            step = {"n": len(res.steps) + 1, "state": "execute", "tool": tool if tool in REGISTRY else "[unknown]",
-                    "args": trace_args(tool, args)}
+            step = {
+                "n": len(res.steps) + 1,
+                "state": "execute",
+                "tool": tool if tool in REGISTRY else "[unknown]",
+                "args": trace_args(tool, args),
+            }
             if res.tool_calls >= MAX_TOOL_CALLS:
                 raise _Stop("stopped", "steps")
             res.tool_calls += 1
             t0 = now()
             if tool not in res.offered:
-                result = ToolResult(tool=str(tool)[:40], ok=False, code="invalid_input",
-                                    message="That tool is not available for this request.")
+                result = ToolResult(
+                    tool=str(tool)[:40],
+                    ok=False,
+                    code="invalid_input",
+                    message="That tool is not available for this request.",
+                )
             elif tool == WRITE_TOOL and proposals >= MAX_PROPOSALS:
-                result = ToolResult(tool=tool, ok=False, code="limit_reached",
-                                    message="Only one booking proposal is allowed per request.")
+                result = ToolResult(
+                    tool=tool,
+                    ok=False,
+                    code="limit_reached",
+                    message="Only one booking proposal is allowed per request.",
+                )
             elif extra := sorted(map(str, set(args) - set(agent_schema(tool)["properties"])))[:5]:
-                result = ToolResult(tool=tool, ok=False, code="invalid_input",
-                                    message=f"Unexpected arguments: {', '.join(extra)}.")
-            elif (problem := date_problem(args, dates)):
+                result = ToolResult(
+                    tool=tool, ok=False, code="invalid_input", message=f"Unexpected arguments: {', '.join(extra)}."
+                )
+            elif problem := date_problem(args, dates):
                 result = ToolResult(tool=tool, ok=False, code="invalid_input", message=problem)
             elif tool == "predict_no_show" and (unstated := missing_fields(args, cleaned)):
                 # input-check rule 1: no estimate from inputs the user didn't give
-                result = ToolResult(tool=tool, ok=False, code="invalid_input",
-                                    message="The user did not give: " + ", ".join(unstated)
-                                    + ". Finish with kind \"clarify\" and ask for them; never guess.")
+                result = ToolResult(
+                    tool=tool,
+                    ok=False,
+                    code="invalid_input",
+                    message="The user did not give: "
+                    + ", ".join(unstated)
+                    + '. Finish with kind "clarify" and ask for them; never guess.',
+                )
             else:
                 result = tool_runner(tool, args, ctx)
-            step |= {"code": "ok" if result.ok else result.code, "seconds": round(now() - t0, 3),
-                     "output_chars": len(json.dumps(result.output)) if result.ok else 0}
+            step |= {
+                "code": "ok" if result.ok else result.code,
+                "seconds": round(now() - t0, 3),
+                "output_chars": len(json.dumps(result.output)) if result.ok else 0,
+            }
             res.steps.append(step)
             if result.ok:
                 _observe_ok(tool, result, res, passages)
@@ -306,10 +384,24 @@ def run_agent(message, ctx: ToolContext, llm: LLMClient, seed: int | None = None
                     raise _Stop("failed", "tool_failed")
                 last_failed_call = this_call
                 body = json.dumps(result.public()["error"])
-            messages.append({"role": "user", "content": OBSERVATION.format(tool=step["tool"], ok=str(result.ok).lower(),
-                                                                           body=body.replace("</tool_result>", "</ tool_result>"))})
+            messages.append(
+                {
+                    "role": "user",
+                    "content": OBSERVATION.format(
+                        tool=step["tool"],
+                        ok=str(result.ok).lower(),
+                        body=body.replace("</tool_result>", "</ tool_result>"),
+                    ),
+                }
+            )
     except _Stop as stop:
-        res.status, res.stopped_reason, res.answer, res.kind, res.citations = stop.status, stop.reason, CALM[stop.reason], "", []
+        res.status, res.stopped_reason, res.answer, res.kind, res.citations = (
+            stop.status,
+            stop.reason,
+            CALM[stop.reason],
+            "",
+            [],
+        )
     res.seconds = round(now() - started, 3)
     return res
 
@@ -346,7 +438,9 @@ def _observe_ok(tool: str, result: ToolResult, res: AgentResult, passages: dict)
             passages[p["passage_id"]] = Passage(p["passage_id"], p["document"], p["text"], version=p["version"])
         return  # passage text is shown only through a verified, cited answer
     if tool == WRITE_TOOL:
-        res.pending_action = {k: out[k] for k in ("action_id", "summary", "proposed_by_agent", "proposed_by", "expires_at")}
+        res.pending_action = {
+            k: out[k] for k in ("action_id", "summary", "proposed_by_agent", "proposed_by", "expires_at")
+        }
     res.results.append({"tool": tool, "output": out})
 
 
@@ -360,12 +454,18 @@ def _finish(d: dict, question: str, passages: dict, res: AgentResult, threshold:
     res.kind = kind
     if kind in ("clarify", "decline"):
         ok = text and len(text) <= 400 and _numbers_only_from(text, question)
-        res.answer = text if ok else ("I need a few more details to do that." if kind == "clarify"
-                                      else "I can't help with that request.")
+        res.answer = (
+            text
+            if ok
+            else ("I need a few more details to do that." if kind == "clarify" else "I can't help with that request.")
+        )
         return
     if passages:
-        reply = ModelReply(answer=text, citations=tuple(Citation(c["passage_id"], c["quote"]) for c in d.get("citations", [])),
-                           refused=False)
+        reply = ModelReply(
+            answer=text,
+            citations=tuple(Citation(c["passage_id"], c["quote"]) for c in d.get("citations", [])),
+            refused=False,
+        )
         verdict = decide(question, reply, list(passages.values()), threshold=threshold)
         if verdict.status == "answered":
             res.answer, res.citations = text, verdict.verified

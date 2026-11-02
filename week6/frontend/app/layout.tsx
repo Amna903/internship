@@ -4,7 +4,13 @@ import "./globals.css";
 
 // Self-hosted at build time by next/font (no request to Google from the browser).
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
-const serif = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["italic"], variable: "--font-display-serif", display: "swap" });
+const serif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["italic"],
+  variable: "--font-display-serif",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: { default: "HealthProfile", template: "%s · HealthProfile" },

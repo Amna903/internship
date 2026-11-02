@@ -26,7 +26,10 @@ class AuditEvent(models.Model):
         ADMIN_DOCUMENT_APPROVED = "admin.document_approved", "Admin approved a policy document"
         ADMIN_DOCUMENTS_REINDEXED = "admin.documents_reindexed", "Admin re-indexed the policy documents"
         ADMIN_ASSISTANT_ASKED = "admin.assistant_asked", "Admin asked the policy assistant"
-        ADMIN_DOCUMENT_VERSION_UPLOADED = "admin.document_version_uploaded", "Admin uploaded a new document version (pending)"
+        ADMIN_DOCUMENT_VERSION_UPLOADED = (
+            "admin.document_version_uploaded",
+            "Admin uploaded a new document version (pending)",
+        )
         ADMIN_DOCUMENT_VERSION_REJECTED = "admin.document_version_rejected", "Admin rejected a pending document version"
         ADMIN_DOCUMENT_RETIRED = "admin.document_retired", "Admin retired a policy document"
         AGENT_TOOL_CALLED = "agent.tool_called", "An agent tool was called (tool name and outcome only)"
@@ -47,7 +50,11 @@ class AuditEvent(models.Model):
     # profile never rewrites an audit row (a SET NULL cascade would be an UPDATE, which the database
     # triggers below forbid). The ids stay; the API reports a deleted subject as a deletion marker.
     actor = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, db_constraint=False, null=True, related_name="+",
+        settings.AUTH_USER_MODEL,
+        on_delete=models.DO_NOTHING,
+        db_constraint=False,
+        null=True,
+        related_name="+",
     )
     # "anonymous" is only used for failed sign-ins, where nobody is authenticated.
     actor_role = models.CharField(max_length=10)
@@ -55,8 +62,13 @@ class AuditEvent(models.Model):
     # db_index=False: the composite (profile, -created_at) index below already starts with profile_id,
     # so Django's default single-column FK index would be pure write overhead (measured: unused).
     profile = models.ForeignKey(
-        "profiles.HealthProfile", on_delete=models.DO_NOTHING, db_constraint=False, null=True, blank=True,
-        related_name="+", db_index=False,
+        "profiles.HealthProfile",
+        on_delete=models.DO_NOTHING,
+        db_constraint=False,
+        null=True,
+        blank=True,
+        related_name="+",
+        db_index=False,
     )
     changed_fields = models.JSONField(default=list, blank=True)  # field *names* only
     # A short non-sensitive label, e.g. the model version behind a prediction. Never input values.
@@ -74,7 +86,9 @@ class AuditEvent(models.Model):
             models.Index(fields=["action", "-created_at"], name="audit_action_created_idx"),
         ]
         constraints = [
-            models.CheckConstraint(condition=Q(actor_role__in=["user", "admin", "anonymous"]), name="audit_actor_role_valid"),
+            models.CheckConstraint(
+                condition=Q(actor_role__in=["user", "admin", "anonymous"]), name="audit_actor_role_valid"
+            ),
         ]
 
     # These two guards give a clear error in application code. They are NOT what makes the log

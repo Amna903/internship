@@ -14,8 +14,25 @@ from dataclasses import dataclass, field
 from datetime import date, timedelta
 
 WEEKDAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-MONTHS = {m: i + 1 for i, m in enumerate(["january", "february", "march", "april", "may", "june", "july", "august",
-                                           "september", "october", "november", "december"])}
+MONTHS = {
+    m: i + 1
+    for i, m in enumerate(
+        [
+            "january",
+            "february",
+            "march",
+            "april",
+            "may",
+            "june",
+            "july",
+            "august",
+            "september",
+            "october",
+            "november",
+            "december",
+        ]
+    )
+}
 MONTHS |= {m[:3]: n for m, n in list(MONTHS.items())} | {"sept": 9}
 MONTH = r"(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sept|sep|oct|nov|dec)"
 DAY = r"(\d{1,2})(?:st|nd|rd|th)?"
@@ -46,14 +63,15 @@ class Resolution:
             return ""
         lines = ["Dates in this request, resolved by the server (use exactly these; never work out dates yourself):"]
         for phrase, ds in self.dates.items():
-            lines.append(f"- \"{phrase}\" = " + ", ".join(f"{date.fromisoformat(d):%A} {d}" for d in ds))
+            lines.append(f'- "{phrase}" = ' + ", ".join(f"{date.fromisoformat(d):%A} {d}" for d in ds))
         for phrase in self.unresolved:
-            lines.append(f"- \"{phrase}\" has passed or is not a real date: ask the user for a valid date; do not book.")
+            lines.append(f'- "{phrase}" has passed or is not a real date: ask the user for a valid date; do not book.')
         return "\n".join(lines)
 
 
 def is_schedule_day(weekday: int) -> bool:
     from .read_tools import OPEN_WEEKDAYS  # the same days check_availability opens
+
     return weekday in OPEN_WEEKDAYS
 
 
@@ -68,7 +86,7 @@ def resolve(message: str, today: date) -> Resolution:
         for m in pattern.finditer(message):
             if not free(m):
                 continue
-            if kind == "weekday" and re.search(r"\b(a|an|every|each)\s+$", message[:m.start()], re.I):
+            if kind == "weekday" and re.search(r"\b(a|an|every|each)\s+$", message[: m.start()], re.I):
                 continue  # "on a Wednesday at 9" describes a kind of day, not a date
             taken.append((m.start(), m.end()))
             phrase = m.group(0).strip()

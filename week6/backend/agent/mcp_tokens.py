@@ -39,7 +39,9 @@ def issue(user, hours: int = DEFAULT_HOURS) -> tuple[str, McpToken]:
     if not 1 <= hours <= MAX_HOURS:
         raise ValueError(f"hours must be between 1 and {MAX_HOURS}")
     token = PREFIX + secrets.token_urlsafe(32)
-    row = McpToken.objects.create(user=user, token_sha256=digest(token), expires_at=timezone.now() + timedelta(hours=hours))
+    row = McpToken.objects.create(
+        user=user, token_sha256=digest(token), expires_at=timezone.now() + timedelta(hours=hours)
+    )
     _audit(user, AuditEvent.Action.MCP_TOKEN_ISSUED, row)
     return token, row
 

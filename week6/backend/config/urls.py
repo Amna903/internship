@@ -8,7 +8,6 @@ handler404 = "config.exceptions.not_found"
 handler500 = "config.exceptions.server_error"
 
 
-
 urlpatterns = [
     path("health/", health, name="liveness"),
     path("ready/", ready, name="readiness"),

@@ -17,7 +17,8 @@ from .serializers import HealthProfileSerializer
 
 # Fields whose changes are audited (by name only, never by value).
 TRACKED_FIELDS = [
-    name for name in HealthProfileSerializer.Meta.fields
+    name
+    for name in HealthProfileSerializer.Meta.fields
     if name not in HealthProfileSerializer.Meta.read_only_fields and name != "email"
 ]
 

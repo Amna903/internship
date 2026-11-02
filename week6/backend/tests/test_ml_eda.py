@@ -34,9 +34,17 @@ def test_report_states_the_real_numbers(df, report):
 
 
 def test_report_covers_every_required_section(report):
-    for heading in ["Class balance", "Missing values", "Numeric features", "Categorical features",
-                    "Each feature against the no-show rate", "Relationships between numeric features",
-                    "Leakage and split readiness", "Bias: age", "Decisions this analysis supports"]:
+    for heading in [
+        "Class balance",
+        "Missing values",
+        "Numeric features",
+        "Categorical features",
+        "Each feature against the no-show rate",
+        "Relationships between numeric features",
+        "Leakage and split readiness",
+        "Bias: age",
+        "Decisions this analysis supports",
+    ]:
         assert heading in report
 
 

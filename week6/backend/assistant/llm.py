@@ -56,8 +56,16 @@ class LLMClient:
 
 
 class OllamaClient(LLMClient):
-    def __init__(self, base_url: str, model: str, temperature: float, max_output_tokens: int, context_tokens: int,
-                 timeout_seconds: float, seed: int = 42):
+    def __init__(
+        self,
+        base_url: str,
+        model: str,
+        temperature: float,
+        max_output_tokens: int,
+        context_tokens: int,
+        timeout_seconds: float,
+        seed: int = 42,
+    ):
         self.base_url = base_url.rstrip("/")
         self.model = model
         self.temperature = temperature
@@ -70,8 +78,12 @@ class OllamaClient(LLMClient):
         self.seed = seed
 
     def _post(self, path: str, payload: dict) -> dict:
-        request = urllib.request.Request(f"{self.base_url}{path}", data=json.dumps(payload).encode(),
-                                         headers={"Content-Type": "application/json"}, method="POST")
+        request = urllib.request.Request(
+            f"{self.base_url}{path}",
+            data=json.dumps(payload).encode(),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
         try:
             with urllib.request.urlopen(request, timeout=self.timeout_seconds) as response:
                 return json.loads(response.read())
@@ -88,26 +100,41 @@ class OllamaClient(LLMClient):
 
     def chat(self, messages: list[dict], json_schema: dict, seed: int | None = None) -> LLMReply:
         started = time.monotonic()
-        body = self._post("/api/chat", {
-            "model": self.model, "messages": messages, "stream": False,
-            # Ollama's structured-output option: the reply is constrained to this JSON schema. The server
-            # still validates it (assistant/schema.py), because a constrained reply can be empty or cut off.
-            "format": json_schema,
-            "options": {"temperature": self.temperature, "num_predict": self.max_output_tokens,
-                        "num_ctx": self.context_tokens, "seed": self.seed if seed is None else seed},
-        })
+        body = self._post(
+            "/api/chat",
+            {
+                "model": self.model,
+                "messages": messages,
+                "stream": False,
+                # Ollama's structured-output option: the reply is constrained to this JSON schema. The server
+                # still validates it (assistant/schema.py), because a constrained reply can be empty or cut off.
+                "format": json_schema,
+                "options": {
+                    "temperature": self.temperature,
+                    "num_predict": self.max_output_tokens,
+                    "num_ctx": self.context_tokens,
+                    "seed": self.seed if seed is None else seed,
+                },
+            },
+        )
         try:
             text = body["message"]["content"]
         except (KeyError, TypeError) as exc:
             raise LLMUnavailable("model server response has no message content") from exc
-        return LLMReply(text=text, model=self.model, prompt_tokens=int(body.get("prompt_eval_count") or 0),
-                        output_tokens=int(body.get("eval_count") or 0), seconds=time.monotonic() - started)
+        return LLMReply(
+            text=text,
+            model=self.model,
+            prompt_tokens=int(body.get("prompt_eval_count") or 0),
+            output_tokens=int(body.get("eval_count") or 0),
+            seconds=time.monotonic() - started,
+        )
 
     def warm_up(self) -> float:
         """Load the model into memory with a one-token call; returns the seconds it took."""
         started = time.monotonic()
-        self._post("/api/generate", {"model": self.model, "prompt": "ok", "stream": False,
-                                     "options": {"num_predict": 1}})
+        self._post(
+            "/api/generate", {"model": self.model, "prompt": "ok", "stream": False, "options": {"num_predict": 1}}
+        )
         return time.monotonic() - started
 
 
@@ -128,8 +155,9 @@ class FakeLLM(LLMClient):
         if isinstance(reply, Exception):
             raise reply
         prompt_chars = sum(len(m["content"]) for m in messages)
-        return LLMReply(text=reply, model=self.model, prompt_tokens=prompt_chars // 4,
-                        output_tokens=len(reply) // 4, seconds=0.0)
+        return LLMReply(
+            text=reply, model=self.model, prompt_tokens=prompt_chars // 4, output_tokens=len(reply) // 4, seconds=0.0
+        )
 
 
 def get_llm() -> LLMClient:
@@ -137,6 +165,12 @@ def get_llm() -> LLMClient:
     cfg = settings.ASSISTANT
     if cfg["PROVIDER"] == "fake":
         return FakeLLM()
-    return OllamaClient(base_url=cfg["OLLAMA_URL"], model=cfg["MODEL"], temperature=cfg["TEMPERATURE"],
-                        max_output_tokens=cfg["MAX_OUTPUT_TOKENS"], context_tokens=cfg["CONTEXT_TOKENS"],
-                        timeout_seconds=cfg["TIMEOUT_SECONDS"], seed=cfg["SEED"])
+    return OllamaClient(
+        base_url=cfg["OLLAMA_URL"],
+        model=cfg["MODEL"],
+        temperature=cfg["TEMPERATURE"],
+        max_output_tokens=cfg["MAX_OUTPUT_TOKENS"],
+        context_tokens=cfg["CONTEXT_TOKENS"],
+        timeout_seconds=cfg["TIMEOUT_SECONDS"],
+        seed=cfg["SEED"],
+    )

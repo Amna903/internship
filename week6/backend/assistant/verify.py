@@ -36,21 +36,46 @@ from .schema import ModelReply
 
 GROUNDEDNESS_THRESHOLD = 0.6  # PROVISIONAL: to be set on the dev question set in Step 11
 
-NOT_AN_ANSWER = {"", "insufficient information", "insufficient_information", "i don't know", "i do not know",
-                 "unknown", "not known", "no information", "not enough information", "n/a", "none"}
+NOT_AN_ANSWER = {
+    "",
+    "insufficient information",
+    "insufficient_information",
+    "i don't know",
+    "i do not know",
+    "unknown",
+    "not known",
+    "no information",
+    "not enough information",
+    "n/a",
+    "none",
+}
 
-STOPWORDS = set("""a an the and or but if then than of to in on at by for from with without into onto about as is are
+STOPWORDS = set(
+    """a an the and or but if then than of to in on at by for from with without into onto about as is are
 was were be been being do does did can could may might must should would will shall it its this that these those
 there here you your yours we our us they them their i me my he she his her not no yes so such any all each per via
-up down out over under again only also just very more most less least before after within""".split())
+up down out over under again only also just very more most less least before after within""".split()
+)
 
 # Server-side medical-advice check (defence in depth next to the model's own `refused` flag). It looks for
 # requests for personal medical guidance, not for clinic words like "appointment" or "telehealth".
-MEDICAL_ADVICE = [re.compile(p, re.I) for p in [
-    r"\bdiagnos\w*", r"\bsymptom\w*", r"\bdos(e|age|ing)\b", r"\bprescri\w*", r"\bmedicat\w*", r"\bmedicine\w*",
-    r"\btreat(ment|ing)?\b", r"\b(antibiotic|ibuprofen|paracetamol|insulin)\w*", r"\bis (it|this) serious\b",
-    r"\bshould i (take|stop|start|see a doctor)\b", r"\b(pain|fever|rash|bleeding|chest)\b", r"\bside effects?\b",
-]]
+MEDICAL_ADVICE = [
+    re.compile(p, re.I)
+    for p in [
+        r"\bdiagnos\w*",
+        r"\bsymptom\w*",
+        r"\bdos(e|age|ing)\b",
+        r"\bprescri\w*",
+        r"\bmedicat\w*",
+        r"\bmedicine\w*",
+        r"\btreat(ment|ing)?\b",
+        r"\b(antibiotic|ibuprofen|paracetamol|insulin)\w*",
+        r"\bis (it|this) serious\b",
+        r"\bshould i (take|stop|start|see a doctor)\b",
+        r"\b(pain|fever|rash|bleeding|chest)\b",
+        r"\bside effects?\b",
+    ]
+]
 
 
 def normalise(text: str) -> str:
@@ -104,7 +129,7 @@ LEAK_WORDS = 6
 
 def _shingles(text: str, n: int) -> set[tuple[str, ...]]:
     words = re.findall(r"[a-z0-9']+", text.lower())
-    return {tuple(words[i:i + n]) for i in range(len(words) - n + 1)}
+    return {tuple(words[i : i + n]) for i in range(len(words) - n + 1)}
 
 
 SYSTEM_PROMPT_SHINGLES = _shingles(SYSTEM_PROMPT, LEAK_WORDS)
@@ -140,8 +165,13 @@ class Verdict:
     reason: str = ""  # for logs and evaluation, never shown as an error detail
 
 
-def decide(question: str, reply: ModelReply | None, given: list[Passage],
-           threshold: float = GROUNDEDNESS_THRESHOLD, check_polarity: bool = True) -> Verdict:
+def decide(
+    question: str,
+    reply: ModelReply | None,
+    given: list[Passage],
+    threshold: float = GROUNDEDNESS_THRESHOLD,
+    check_polarity: bool = True,
+) -> Verdict:
     if is_medical_advice_request(question):
         return Verdict(status="refused", reason="server medical-advice check")
     if reply is None:
@@ -160,20 +190,43 @@ def decide(question: str, reply: ModelReply | None, given: list[Passage],
         else:
             rejected += 1
     if not verified:
-        return Verdict(status="insufficient_information", rejected_citations=rejected,
-                       reason="no verified citation" if reply.citations else "no citation")
+        return Verdict(
+            status="insufficient_information",
+            rejected_citations=rejected,
+            reason="no verified citation" if reply.citations else "no citation",
+        )
     quotes = [v["quote"] for v in verified]
     score = groundedness(reply.answer, quotes)
     if len(key_terms(reply.answer)) < MIN_KEY_TERMS:
-        return Verdict(status="insufficient_information", verified=verified, rejected_citations=rejected,
-                       groundedness=score, reason="answer too short to verify")
+        return Verdict(
+            status="insufficient_information",
+            verified=verified,
+            rejected_citations=rejected,
+            groundedness=score,
+            reason="answer too short to verify",
+        )
     if not numbers_supported(reply.answer, quotes):
-        return Verdict(status="insufficient_information", verified=verified, rejected_citations=rejected,
-                       groundedness=score, reason="a number in the answer is not in its quotes")
+        return Verdict(
+            status="insufficient_information",
+            verified=verified,
+            rejected_citations=rejected,
+            groundedness=score,
+            reason="a number in the answer is not in its quotes",
+        )
     if check_polarity and not polarity_matches(reply.answer, quotes):
-        return Verdict(status="insufficient_information", verified=verified, rejected_citations=rejected,
-                       groundedness=score, reason="polarity mismatch")
+        return Verdict(
+            status="insufficient_information",
+            verified=verified,
+            rejected_citations=rejected,
+            groundedness=score,
+            reason="polarity mismatch",
+        )
     if score < threshold:
-        return Verdict(status="insufficient_information", verified=verified, rejected_citations=rejected,
-                       groundedness=score, reason="answer not grounded in its quotes")
+        return Verdict(
+            status="insufficient_information",
+            verified=verified,
+            rejected_citations=rejected,
+            groundedness=score,
+            reason="answer not grounded in its quotes",
+        )
     return Verdict(status="answered", verified=verified, rejected_citations=rejected, groundedness=score)

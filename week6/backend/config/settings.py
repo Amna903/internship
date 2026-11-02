@@ -71,9 +71,7 @@ DEBUG = env_bool("DJANGO_DEBUG", False)
 
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "")
 if not SECRET_KEY:
-    raise ImproperlyConfigured(
-        "DJANGO_SECRET_KEY is not set. Run `python scripts/init_env.py` to create a .env file."
-    )
+    raise ImproperlyConfigured("DJANGO_SECRET_KEY is not set. Run `python scripts/init_env.py` to create a .env file.")
 
 # JWTs are signed with their own key so that a leak of one key does not compromise the other mechanism.
 # Local DEBUG runs may fall back to SECRET_KEY; production must set a separate key explicitly.
@@ -174,7 +172,9 @@ if COOKIE_SAMESITE not in {"Lax", "Strict"}:
     # "None" would send auth cookies on cross-site requests; this app is same-origin by design.
     CONFIG_ERRORS.append(f"COOKIE_SAMESITE must be Lax or Strict, got {COOKIE_SAMESITE!r}.")
 if not DEBUG and not COOKIE_SECURE:
-    CONFIG_ERRORS.append("COOKIE_SECURE cannot be false when DJANGO_DEBUG is off (auth cookies would travel over plain HTTP).")
+    CONFIG_ERRORS.append(
+        "COOKIE_SECURE cannot be false when DJANGO_DEBUG is off (auth cookies would travel over plain HTTP)."
+    )
 
 SESSION_COOKIE_NAME = "hp_admin_session"
 SESSION_COOKIE_AGE = env_int("ADMIN_SESSION_MINUTES", 30) * 60  # idle timeout (sliding, see below)
@@ -325,4 +325,3 @@ INDEX_JOB = {
     "SOFT_TIME_LIMIT": 120,
     "TIME_LIMIT": 150,
 }
-

@@ -14,8 +14,10 @@ import re
 from collections import Counter
 
 K1, B = 1.2, 0.75
-STOP = frozenset("""a an and are as at be by can do does for from has have how i if in is it its me my of on or
-our so that the their them then there these this to was we what when where which who will with you your""".split())
+STOP = frozenset(
+    """a an and are as at be by can do does for from has have how i if in is it its me my of on or
+our so that the their them then there these this to was we what when where which who will with you your""".split()
+)
 
 
 def tokens(text: str) -> list[str]:

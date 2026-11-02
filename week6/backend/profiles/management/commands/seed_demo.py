@@ -17,25 +17,85 @@ from profiles.models import HealthProfile
 
 # (name, email-local-part, date_of_birth | None, age_range, contact, goals, allergies, ec name, ec phone, relation, notes)
 DEMO_USERS = [
-    ("Amina Rahman", "amina.rahman", date(1994, 3, 14), "", "email",
-     ["Walk 8,000 steps daily", "Sleep 7+ hours"], ["Pollen"],
-     "Tariq Rahman", "+1 555 010 0101", "Brother", "Desk job, trying to move more."),
-    ("Daniel Okafor", "daniel.okafor", None, "35-44", "sms",
-     ["Reduce sugar intake", "Run a 10k"], [],
-     "Ngozi Okafor", "+1 555 010 0102", "Spouse", "Weekend cyclist."),
-    ("Sofia Marin", "sofia.marin", date(1988, 11, 2), "", "phone",
-     ["Build a stretching routine"], ["Peanuts", "Latex"],
-     "Elena Marin", "+1 555 010 0103", "Mother", ""),
-    ("Hiroshi Tanaka", "hiroshi.tanaka", None, "55-64", "email",
-     ["Improve balance", "Join a walking group"], [],
-     "Yuki Tanaka", "+1 555 010 0104", "Daughter", "Prefers morning activity."),
-    ("Lena Fischer", "lena.fischer", date(2001, 6, 21), "", "none",
-     ["Try meal prepping", "Drink more water"], ["Shellfish"],
-     "Jonas Fischer", "+1 555 010 0105", "Friend", "Student, irregular schedule."),
+    (
+        "Amina Rahman",
+        "amina.rahman",
+        date(1994, 3, 14),
+        "",
+        "email",
+        ["Walk 8,000 steps daily", "Sleep 7+ hours"],
+        ["Pollen"],
+        "Tariq Rahman",
+        "+1 555 010 0101",
+        "Brother",
+        "Desk job, trying to move more.",
+    ),
+    (
+        "Daniel Okafor",
+        "daniel.okafor",
+        None,
+        "35-44",
+        "sms",
+        ["Reduce sugar intake", "Run a 10k"],
+        [],
+        "Ngozi Okafor",
+        "+1 555 010 0102",
+        "Spouse",
+        "Weekend cyclist.",
+    ),
+    (
+        "Sofia Marin",
+        "sofia.marin",
+        date(1988, 11, 2),
+        "",
+        "phone",
+        ["Build a stretching routine"],
+        ["Peanuts", "Latex"],
+        "Elena Marin",
+        "+1 555 010 0103",
+        "Mother",
+        "",
+    ),
+    (
+        "Hiroshi Tanaka",
+        "hiroshi.tanaka",
+        None,
+        "55-64",
+        "email",
+        ["Improve balance", "Join a walking group"],
+        [],
+        "Yuki Tanaka",
+        "+1 555 010 0104",
+        "Daughter",
+        "Prefers morning activity.",
+    ),
+    (
+        "Lena Fischer",
+        "lena.fischer",
+        date(2001, 6, 21),
+        "",
+        "none",
+        ["Try meal prepping", "Drink more water"],
+        ["Shellfish"],
+        "Jonas Fischer",
+        "+1 555 010 0105",
+        "Friend",
+        "Student, irregular schedule.",
+    ),
     # Deliberately left without an emergency contact so the demo has an incomplete profile.
-    ("Carlos Mendez", "carlos.mendez", None, "25-34", "email",
-     ["Lower stress", "Meditate 10 min/day"], [],
-     "", "", "", ""),
+    (
+        "Carlos Mendez",
+        "carlos.mendez",
+        None,
+        "25-34",
+        "email",
+        ["Lower stress", "Meditate 10 min/day"],
+        [],
+        "",
+        "",
+        "",
+        "",
+    ),
 ]
 
 _FIRST = ["Alex", "Bina", "Chen", "Dara", "Eli", "Farah", "Gus", "Hana", "Ivan", "Jia", "Kofi", "Lia", "Mo", "Nia"]
@@ -47,9 +107,13 @@ class Command(BaseCommand):
     help = "Create the demo admin, at least 5 synthetic users with profiles, and optional bulk filler rows."
 
     def add_arguments(self, parser):
-        parser.add_argument("--bulk", type=int, default=0, help="Also create N synthetic filler users (for EXPLAIN demos).")
         parser.add_argument(
-            "--bulk-audit", type=int, default=0,
+            "--bulk", type=int, default=0, help="Also create N synthetic filler users (for EXPLAIN demos)."
+        )
+        parser.add_argument(
+            "--bulk-audit",
+            type=int,
+            default=0,
             help="Also create N synthetic audit events spread over the bulk profiles (for EXPLAIN demos).",
         )
 
@@ -73,9 +137,17 @@ class Command(BaseCommand):
                     continue
                 user = User.objects.create_user(email, user_pw)
                 HealthProfile.objects.create(
-                    user=user, full_name=name, date_of_birth=dob, age_range=age, contact_preference=contact,
-                    wellness_goals=goals, allergies=allergies, emergency_contact_name=ec_name,
-                    emergency_contact_phone=ec_phone, emergency_contact_relationship=ec_rel, lifestyle_notes=notes,
+                    user=user,
+                    full_name=name,
+                    date_of_birth=dob,
+                    age_range=age,
+                    contact_preference=contact,
+                    wellness_goals=goals,
+                    allergies=allergies,
+                    emergency_contact_name=ec_name,
+                    emergency_contact_phone=ec_phone,
+                    emergency_contact_relationship=ec_rel,
+                    lifestyle_notes=notes,
                 )
                 created += 1
             if created and not os.environ.get("SEED_USER_PASSWORD"):
@@ -145,14 +217,16 @@ class Command(BaseCommand):
         for _ in range(count):
             profile_id, owner_id = rng.choice(profiles)
             by_admin = admin is not None and rng.random() < 0.3
-            events.append(AuditEvent(
-                actor_id=admin.id if by_admin else owner_id,
-                actor_role="admin" if by_admin else "user",
-                action=AuditEvent.Action.ADMIN_PROFILE_VIEWED if by_admin else AuditEvent.Action.PROFILE_UPDATED,
-                profile_id=profile_id,
-                changed_fields=[] if by_admin else ["lifestyle_notes"],
-                created_at=now - timedelta(seconds=rng.randint(0, 60 * 24 * 3600)),
-            ))
+            events.append(
+                AuditEvent(
+                    actor_id=admin.id if by_admin else owner_id,
+                    actor_role="admin" if by_admin else "user",
+                    action=AuditEvent.Action.ADMIN_PROFILE_VIEWED if by_admin else AuditEvent.Action.PROFILE_UPDATED,
+                    profile_id=profile_id,
+                    changed_fields=[] if by_admin else ["lifestyle_notes"],
+                    created_at=now - timedelta(seconds=rng.randint(0, 60 * 24 * 3600)),
+                )
+            )
         created_at = AuditEvent._meta.get_field("created_at")
         created_at.auto_now_add = False
         try:

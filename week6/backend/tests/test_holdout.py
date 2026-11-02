@@ -35,6 +35,7 @@ def test_no_patient_or_appointment_id_can_collide_with_the_main_dataset(reserved
 def test_holdout_is_exactly_the_reserved_data(reserved):
     """Pinned fingerprint: a changed generator, seed or size fails here instead of silently drifting."""
     from ml.data import dataset_hash
+
     assert dataset_hash(reserved) == holdout.HOLDOUT_SHA256
     assert reserved["patient_id"].nunique() == holdout.N_PATIENTS
 
@@ -51,9 +52,16 @@ def test_only_the_holdout_module_may_load_it():
     assert offenders == []
 
 
-@pytest.mark.parametrize("source, loads", [("from . import holdout", True), ("from .holdout import load_holdout", True),
-                                           ("import ml.holdout", True), ("df = load_holdout()", True),
-                                           ('"""the holdout is reserved"""', False)])
+@pytest.mark.parametrize(
+    "source, loads",
+    [
+        ("from . import holdout", True),
+        ("from .holdout import load_holdout", True),
+        ("import ml.holdout", True),
+        ("df = load_holdout()", True),
+        ('"""the holdout is reserved"""', False),
+    ],
+)
 def test_the_guard_catches_imports_and_calls_but_not_mentions(source, loads):
     assert bool(LOADS_HOLDOUT.search(source)) is loads
 

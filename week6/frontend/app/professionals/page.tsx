@@ -39,14 +39,21 @@ export default async function ProfessionalsPage({ searchParams }: Props) {
 
       {results.length > 0 ? (
         <ul className="pro-grid" aria-label="Results">
-          {results.map((p) => <li key={p.id}><ProfessionalCard professional={p} /></li>)}
+          {results.map((p) => (
+            <li key={p.id}>
+              <ProfessionalCard professional={p} />
+            </li>
+          ))}
         </ul>
       ) : (
         <Card className="empty" title="No professionals match these filters">
           <p className="muted">
-            {activeFilterCount(filters) > 1 ? "Try removing one of the filters" : "Try a different search"}, or start again.
+            {activeFilterCount(filters) > 1 ? "Try removing one of the filters" : "Try a different search"}, or start
+            again.
           </p>
-          <Link className="btn ghost" href="/professionals">Clear all filters</Link>
+          <Link className="btn ghost" href="/professionals">
+            Clear all filters
+          </Link>
         </Card>
       )}
     </Layout>

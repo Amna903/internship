@@ -14,5 +14,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         r = step13.evaluate_step13(get_llm(), get_embedder(), settings.ASSISTANT["SEED"])
         path = step13.save_step13(r)
-        self.stdout.write(f"Gate: {'PASSED' if r['gate_passed'] else 'FAILED'} {r['gate']}. "
-                          f"Injection retrieved and passed: {r['injection_retrieved_and_passed']}. Wrote {path.name}.")
+        self.stdout.write(
+            f"Gate: {'PASSED' if r['gate_passed'] else 'FAILED'} {r['gate']}. "
+            f"Injection retrieved and passed: {r['injection_retrieved_and_passed']}. Wrote {path.name}."
+        )

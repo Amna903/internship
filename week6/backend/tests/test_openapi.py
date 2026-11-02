@@ -32,8 +32,11 @@ def test_operation_ids_are_unique(schema):
 @pytest.mark.django_db
 def test_predict_alias_matches_the_original_path(admin_browser):
     from config.openapi import PREDICT_IN
+
     a = admin_browser.client.post("/api/v1/predict/", PREDICT_IN, format="json", **admin_browser._csrf_headers()).json()
-    b = admin_browser.client.post("/api/v1/predictions/no-show/", PREDICT_IN, format="json", **admin_browser._csrf_headers()).json()
+    b = admin_browser.client.post(
+        "/api/v1/predictions/no-show/", PREDICT_IN, format="json", **admin_browser._csrf_headers()
+    ).json()
     assert a == b and a["model_version"] == "no-show-1.0.0"
 
 

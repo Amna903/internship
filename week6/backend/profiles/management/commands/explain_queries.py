@@ -13,16 +13,19 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         queries = {
-            "1. Login lookup by email  (unique index on accounts_user.email)":
-                User.objects.filter(email="amina.rahman@example.test"),
-            "2. Admin list: status filter + newest first  (composite index hp_status_created_idx)":
-                HealthProfile.objects.filter(status="active").order_by("-created_at")[:10],
-            "3. Admin list sorted by name  (index hp_full_name_idx)":
-                HealthProfile.objects.order_by("full_name")[:10],
-            "4. Incomplete profiles, newest first  (composite index hp_completion_created_idx)":
-                HealthProfile.objects.filter(completion_status="incomplete").order_by("-created_at")[:10],
-            "5. Audit history of one profile  (composite index audit_profile_created_idx)":
-                AuditEvent.objects.filter(profile_id=1).order_by("-created_at")[:20],
+            "1. Login lookup by email  (unique index on accounts_user.email)": User.objects.filter(
+                email="amina.rahman@example.test"
+            ),
+            "2. Admin list: status filter + newest first  (composite index hp_status_created_idx)": HealthProfile.objects.filter(
+                status="active"
+            ).order_by("-created_at")[:10],
+            "3. Admin list sorted by name  (index hp_full_name_idx)": HealthProfile.objects.order_by("full_name")[:10],
+            "4. Incomplete profiles, newest first  (composite index hp_completion_created_idx)": HealthProfile.objects.filter(
+                completion_status="incomplete"
+            ).order_by("-created_at")[:10],
+            "5. Audit history of one profile  (composite index audit_profile_created_idx)": AuditEvent.objects.filter(
+                profile_id=1
+            ).order_by("-created_at")[:20],
         }
         self.stdout.write(f"Database: {connection.vendor} | profiles: {HealthProfile.objects.count()}\n")
         with transaction.atomic():

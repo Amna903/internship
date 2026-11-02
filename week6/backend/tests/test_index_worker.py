@@ -42,8 +42,10 @@ def redis_up() -> bool:
 if not redis_up():
     if os.environ.get("REQUIRE_REDIS") == "1":
         pytest.fail(f"REQUIRE_REDIS=1 but Redis is not reachable at {REDIS_URL}", pytrace=False)
-    pytest.skip("Redis is not running (brew services start redis); CI runs this test with REQUIRE_REDIS=1",
-                allow_module_level=True)
+    pytest.skip(
+        "Redis is not running (brew services start redis); CI runs this test with REQUIRE_REDIS=1",
+        allow_module_level=True,
+    )
 
 SETUP = """
 import hashlib
@@ -67,36 +69,73 @@ print(job.id)
 @pytest.fixture
 def deployment(tmp_path):
     from .conftest import PASSWORD
+
     db = tmp_path / "jobs.sqlite3"
-    env = {**os.environ, "DJANGO_SETTINGS_MODULE": "config.settings_test", "DATABASE_URL": f"sqlite:///{db}",
-           "CELERY_TASK_ALWAYS_EAGER": "false", "CELERY_BROKER_URL": REDIS_URL,
-           "CELERY_QUEUE": f"test-{uuid.uuid4().hex[:12]}", "INDEX_JOB_BACKOFF": "1,1", "ASSISTANT_EMBEDDER": "flaky"}
+    env = {
+        **os.environ,
+        "DJANGO_SETTINGS_MODULE": "config.settings_test",
+        "DATABASE_URL": f"sqlite:///{db}",
+        "CELERY_TASK_ALWAYS_EAGER": "false",
+        "CELERY_BROKER_URL": REDIS_URL,
+        "CELERY_QUEUE": f"test-{uuid.uuid4().hex[:12]}",
+        "INDEX_JOB_BACKOFF": "1,1",
+        "ASSISTANT_EMBEDDER": "flaky",
+    }
 
     def manage(*args):
-        return subprocess.run([sys.executable, "manage.py", *args], cwd=BACKEND, env=env, check=True,
-                              capture_output=True, text=True, timeout=120).stdout
+        return subprocess.run(
+            [sys.executable, "manage.py", *args],
+            cwd=BACKEND,
+            env=env,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=120,
+        ).stdout
 
     def queue(name):
         return int(manage("shell", "-c", QUEUE.format(name=name)).strip().splitlines()[-1])
 
     def state(job_id):
         with sqlite3.connect(db) as conn:
-            return conn.execute("SELECT status, attempts, error_code FROM assistant_indexjob WHERE id = ?",
-                                (job_id,)).fetchone()
+            return conn.execute(
+                "SELECT status, attempts, error_code FROM assistant_indexjob WHERE id = ?", (job_id,)
+            ).fetchone()
 
     def version_status(name):
         with sqlite3.connect(db) as conn:
-            return conn.execute("SELECT v.status FROM assistant_documentversion v JOIN assistant_policydocument d "
-                                "ON d.id = v.document_id WHERE d.filename = ?", (name,)).fetchone()[0]
+            return conn.execute(
+                "SELECT v.status FROM assistant_documentversion v JOIN assistant_policydocument d "
+                "ON d.id = v.document_id WHERE d.filename = ?",
+                (name,),
+            ).fetchone()[0]
 
     workers = []
 
     def start_worker(failures: int):
         worker = subprocess.Popen(
-            [sys.executable, "-m", "celery", "-A", "config", "worker", "--pool=solo", "-Q", env["CELERY_QUEUE"],
-             "--without-heartbeat", "--without-gossip", "--without-mingle", "-l", "warning"],
-            cwd=BACKEND, env={**env, "ASSISTANT_FLAKY_FAILURES": str(failures)},
-            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+            [
+                sys.executable,
+                "-m",
+                "celery",
+                "-A",
+                "config",
+                "worker",
+                "--pool=solo",
+                "-Q",
+                env["CELERY_QUEUE"],
+                "--without-heartbeat",
+                "--without-gossip",
+                "--without-mingle",
+                "-l",
+                "warning",
+            ],
+            cwd=BACKEND,
+            env={**env, "ASSISTANT_FLAKY_FAILURES": str(failures)},
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
         workers.append(worker)
         return worker
 
@@ -118,9 +157,18 @@ def deployment(tmp_path):
 
     manage("migrate", "-v0")
     manage("shell", "-c", SETUP.format(password=PASSWORD))
-    yield type("Deployment", (), dict(queue=staticmethod(queue), state=staticmethod(state),
-                                      version_status=staticmethod(version_status), start_worker=staticmethod(start_worker),
-                                      stop_worker=staticmethod(stop_worker), wait_for=staticmethod(wait_for)))
+    yield type(
+        "Deployment",
+        (),
+        dict(
+            queue=staticmethod(queue),
+            state=staticmethod(state),
+            version_status=staticmethod(version_status),
+            start_worker=staticmethod(start_worker),
+            stop_worker=staticmethod(stop_worker),
+            wait_for=staticmethod(wait_for),
+        ),
+    )
     for w in workers:
         if w.poll() is None:
             stop_worker(w)

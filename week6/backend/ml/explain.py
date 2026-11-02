@@ -39,10 +39,13 @@ PLANTED_STRONGEST = ["lead_time_days", "prior_no_shows", "age_band"]
 
 def importances(model, X: pd.DataFrame, y, repeats: int = REPEATS) -> dict[str, dict]:
     """Feature -> mean and sd of the PR-AUC drop over `repeats` seeded shuffles (single-threaded, exact)."""
-    result = permutation_importance(model, X, y, scoring="average_precision", n_repeats=repeats,
-                                    random_state=config.SEED, n_jobs=1)
-    return {f: {"mean": float(m), "sd": float(s)}
-            for f, m, s in zip(X.columns, result.importances_mean, result.importances_std)}
+    result = permutation_importance(
+        model, X, y, scoring="average_precision", n_repeats=repeats, random_state=config.SEED, n_jobs=1
+    )
+    return {
+        f: {"mean": float(m), "sd": float(s)}
+        for f, m, s in zip(X.columns, result.importances_mean, result.importances_std)
+    }
 
 
 def group_importance(model, X: pd.DataFrame, y, columns: list[str], repeats: int = REPEATS) -> dict:
@@ -95,12 +98,18 @@ def impurity_by_input(forest_pipeline) -> dict[str, float]:
 
 
 def profile(frame: pd.DataFrame) -> dict:
-    return {"rows": len(frame), "lead_time": frame["lead_time_days"].mean(),
-            "reminder": frame["reminder_sent"].mean(), "history": (frame["prior_appointments"] > 0).mean(),
-            "past_rate": np.where(frame["prior_appointments"] > 0,
-                                  frame["prior_no_shows"] / frame["prior_appointments"].clip(lower=1), 0).mean(),
-            "young": (frame["age_band"] == "18-24").mean(), "telehealth": (frame["visit_type"] == "telehealth").mean(),
-            "true_p": frame[config.ORACLE].mean()}
+    return {
+        "rows": len(frame),
+        "lead_time": frame["lead_time_days"].mean(),
+        "reminder": frame["reminder_sent"].mean(),
+        "history": (frame["prior_appointments"] > 0).mean(),
+        "past_rate": np.where(
+            frame["prior_appointments"] > 0, frame["prior_no_shows"] / frame["prior_appointments"].clip(lower=1), 0
+        ).mean(),
+        "young": (frame["age_band"] == "18-24").mean(),
+        "telehealth": (frame["visit_type"] == "telehealth").mean(),
+        "true_p": frame[config.ORACLE].mean(),
+    }
 
 
 def analyse(df: pd.DataFrame | None = None, repeats: int = REPEATS) -> dict:
@@ -110,25 +119,39 @@ def analyse(df: pd.DataFrame | None = None, repeats: int = REPEATS) -> dict:
     served = load()
     pipeline, threshold = served.pipeline, served.threshold
 
-    forest_candidate = train.best_of({c: None for c in GRID_CANDIDATES}, name="random_forest",
-                                     cv=train.load_cv_scores(GRID_CANDIDATES))
+    forest_candidate = train.best_of(
+        {c: None for c in GRID_CANDIDATES}, name="random_forest", cv=train.load_cv_scores(GRID_CANDIDATES)
+    )
     forest = build(forest_candidate).fit(model_input(train_rows), train_rows[config.LABEL])
 
     p_val = pipeline.predict_proba(X_val)[:, 1]
     flagged = p_val >= threshold
     y = y_val.to_numpy()
-    kinds = {"all validation": np.ones(len(y), dtype=bool), "true positives": flagged & y,
-             "false positives (attended, flagged)": flagged & ~y, "false negatives (missed, not flagged)": ~flagged & y,
-             "true negatives": ~flagged & ~y}
+    kinds = {
+        "all validation": np.ones(len(y), dtype=bool),
+        "true positives": flagged & y,
+        "false positives (attended, flagged)": flagged & ~y,
+        "false negatives (missed, not flagged)": ~flagged & y,
+        "true negatives": ~flagged & ~y,
+    }
 
     single = importances(pipeline, X_val, y_val, repeats)
     return {
-        "served": served.metadata["model"], "estimator": served.metadata["estimator"], "threshold": threshold,
-        "validation_rows": len(validation), "repeats": repeats,
+        "served": served.metadata["model"],
+        "estimator": served.metadata["estimator"],
+        "threshold": threshold,
+        "validation_rows": len(validation),
+        "repeats": repeats,
         "base_pr_auc": float(average_precision_score(y_val, p_val)),
         "single": single,
-        "groups": {name: {"columns": cols, **group_importance(pipeline, X_val, y_val, cols, repeats),
-                          "sum_of_singles": sum(single[c]["mean"] for c in cols)} for name, cols in GROUPS.items()},
+        "groups": {
+            name: {
+                "columns": cols,
+                **group_importance(pipeline, X_val, y_val, cols, repeats),
+                "sum_of_singles": sum(single[c]["mean"] for c in cols),
+            }
+            for name, cols in GROUPS.items()
+        },
         "impossible_share": impossible_share(validation, repeats),
         "forest": forest_candidate.label,
         "forest_permutation": importances(forest, X_val, y_val, repeats),
@@ -140,6 +163,7 @@ def analyse(df: pd.DataFrame | None = None, repeats: int = REPEATS) -> dict:
 
 # ---------------------------------------------------------------- report
 
+
 def _imp(i: dict) -> str:
     return f"{i['mean']:+.4f} ± {i['sd']:.4f}"
 
@@ -148,9 +172,11 @@ def _group_reading(a: dict) -> str:
     out = []
     for name, g in a["groups"].items():
         if g["mean"] > g["sum_of_singles"]:
-            out.append(f"For {name}, the group drop ({g['mean']:+.4f}) is larger than the sum of the single drops "
-                       f"({g['sum_of_singles']:+.4f}): the inputs were covering for each other, so each alone was "
-                       "understated.")
+            out.append(
+                f"For {name}, the group drop ({g['mean']:+.4f}) is larger than the sum of the single drops "
+                f"({g['sum_of_singles']:+.4f}): the inputs were covering for each other, so each alone was "
+                "understated."
+            )
         else:
             out.append(
                 f"For {name}, the opposite happened: the group drop ({g['mean']:+.4f}) is smaller than the sum of the "
@@ -159,7 +185,8 @@ def _group_reading(a: dict) -> str:
                 "importance is counted in both single drops. A smaller extra effect: shuffling prior no-shows alone "
                 f"creates impossible rows (more no-shows than appointments) in {100 * a['impossible_share']:.1f}% of "
                 "rows, which the model never saw in training. The group drop is the cleaner estimate of how much "
-                "the model relies on the patient's history.")
+                "the model relies on the patient's history."
+            )
     return " ".join(out)
 
 
@@ -170,32 +197,41 @@ def _impurity_reading(impurity: dict, perm: dict) -> str:
     total_perm = sum(max(perm[f]["mean"], 0.0) for f in inputs)
     excess = {f: impurity.get(f, 0.0) / total_impurity - max(perm[f]["mean"], 0.0) / total_perm for f in inputs}
     worst = max(excess, key=excess.get)
-    return (f"The clearest case here is `{worst}`: {impurity.get(worst, 0.0):.3f} of the impurity importance, but a "
-            f"permutation drop of only {perm[worst]['mean']:+.4f}. Permutation importance is the measure to trust "
-            "for reliance; impurity importance shows where the trees found split points.")
+    return (
+        f"The clearest case here is `{worst}`: {impurity.get(worst, 0.0):.3f} of the impurity importance, but a "
+        f"permutation drop of only {perm[worst]['mean']:+.4f}. Permutation importance is the measure to trust "
+        "for reliance; impurity importance shows where the trees found split points."
+    )
 
 
 def _compare(group: dict, everyone: dict) -> str:
     """Plain-language comparison with all appointments; every direction is computed, none assumed."""
+
     def more_or_less(key, label_more, label_less):
         return label_more if group[key] > everyone[key] else label_less
-    return (f"booked {group['lead_time']:.1f} days ahead on average (all: {everyone['lead_time']:.1f}); "
-            f"{more_or_less('reminder', 'more', 'less')} often reminded ({100 * group['reminder']:.1f}% vs "
-            f"{100 * everyone['reminder']:.1f}%); {more_or_less('young', 'more', 'less')} often aged 18–24 "
-            f"({100 * group['young']:.1f}% vs {100 * everyone['young']:.1f}%); past no-show rate "
-            f"{100 * group['past_rate']:.1f}% (all: {100 * everyone['past_rate']:.1f}%). Their true no-show "
-            f"probability averages {100 * group['true_p']:.1f}% (all: {100 * everyone['true_p']:.1f}%), so "
-            + ("the model's call was reasonable: they looked like no-shows and attended anyway."
-               if group["true_p"] > everyone["true_p"] else
-               "these no-shows were less likely than average: they looked like attenders and missed anyway."))
+
+    return (
+        f"booked {group['lead_time']:.1f} days ahead on average (all: {everyone['lead_time']:.1f}); "
+        f"{more_or_less('reminder', 'more', 'less')} often reminded ({100 * group['reminder']:.1f}% vs "
+        f"{100 * everyone['reminder']:.1f}%); {more_or_less('young', 'more', 'less')} often aged 18–24 "
+        f"({100 * group['young']:.1f}% vs {100 * everyone['young']:.1f}%); past no-show rate "
+        f"{100 * group['past_rate']:.1f}% (all: {100 * everyone['past_rate']:.1f}%). Their true no-show "
+        f"probability averages {100 * group['true_p']:.1f}% (all: {100 * everyone['true_p']:.1f}%), so "
+        + (
+            "the model's call was reasonable: they looked like no-shows and attended anyway."
+            if group["true_p"] > everyone["true_p"]
+            else "these no-shows were less likely than average: they looked like attenders and missed anyway."
+        )
+    )
 
 
 def build_report(a: dict) -> str:
     single = a["single"]
     ranked = sorted(single, key=lambda f: -single[f]["mean"])
-    single_rows = "\n".join(f"| `{f}` | {_imp(single[f])} | {'within noise' if within_noise(single[f]) else ''} |"
-                            for f in ranked)
-    top = set(ranked[:len(PLANTED_STRONGEST) + 1])
+    single_rows = "\n".join(
+        f"| `{f}` | {_imp(single[f])} | {'within noise' if within_noise(single[f]) else ''} |" for f in ranked
+    )
+    top = set(ranked[: len(PLANTED_STRONGEST) + 1])
     planted_found = [f for f in PLANTED_STRONGEST if f in top]
     group_rows = "\n".join(f"| {name} | {_imp(g)} | {g['sum_of_singles']:+.4f} |" for name, g in a["groups"].items())
 
@@ -204,7 +240,9 @@ def build_report(a: dict) -> str:
     impurity, forest_perm = a["forest_impurity"], a["forest_permutation"]
     forest_rows = "\n".join(
         f"| `{f}` | {impurity.get(f, 0.0):.3f} | {_imp(forest_perm[f]) if f in forest_perm else 'moves with its source'} |"
-        for f in config.FEATURES + ENGINEERED_NUMERIC if f in impurity or f in forest_perm)
+        for f in config.FEATURES + ENGINEERED_NUMERIC
+        if f in impurity or f in forest_perm
+    )
     continuous = ["lead_time_days", "distance_km", "appointment_hour"]
     impurity_share = sum(impurity.get(f, 0.0) for f in continuous)
 
@@ -212,21 +250,22 @@ def build_report(a: dict) -> str:
     profile_rows = "\n".join(
         f"| {k} | {v['rows']:,} | {v['lead_time']:.1f} | {100 * v['reminder']:.1f}% | {100 * v['history']:.1f}% | "
         f"{100 * v['past_rate']:.1f}% | {100 * v['young']:.1f}% | {100 * v['telehealth']:.1f}% | {100 * v['true_p']:.1f}% |"
-        for k, v in p.items())
+        for k, v in p.items()
+    )
     s = a["sources"]
     fp, fn = p["false positives (attended, flagged)"], p["false negatives (missed, not flagged)"]
 
     return f"""# Explaining the models: importance and mistakes
 
 > Synthetic, educational data. Generated by `python -m ml.explain`; do not edit by hand. Explanation only:
-> nothing here changes a model, and the test set is not used. Everything is on the {a['validation_rows']:,}
+> nothing here changes a model, and the test set is not used. Everything is on the {a["validation_rows"]:,}
 > validation rows. Importance measures what a model relies on, not what causes no-shows.
 
-Served model: `{a['served']}` ({a['estimator']}), validation PR-AUC {a['base_pr_auc']:.3f}.
+Served model: `{a["served"]}` ({a["estimator"]}), validation PR-AUC {a["base_pr_auc"]:.3f}.
 
 ## 1. Permutation importance of the served model
 
-Each input is shuffled {a['repeats']} times (seed {config.SEED}); the column shows how much validation PR-AUC drops
+Each input is shuffled {a["repeats"]} times (seed {config.SEED}); the column shows how much validation PR-AUC drops
 (mean ± sd over the shuffles). Engineered features (log lead time, past no-show rate, reminder × lead
 time) are computed from their input inside the pipeline, so they move with it. "Within noise": two
 standard deviations reach zero, so there is no evidence the model relies on that input.
@@ -237,7 +276,7 @@ standard deviations reach zero, so there is no evidence the model relies on that
 
 The generator weights lead time, the no-show habit (visible only through prior no-shows) and age band
 most. Of these, {len(planted_found)} of {len(PLANTED_STRONGEST)} rank in the top {len(PLANTED_STRONGEST) + 1}:
-{', '.join(f'`{f}`' for f in planted_found) or 'none'}.
+{", ".join(f"`{f}`" for f in planted_found) or "none"}.
 
 `age_band` appears here because age is a planted driver of no-shows in this synthetic data. Relying on it
 makes the model flag younger patients more often, including some who would attend; that cost is measured
@@ -258,7 +297,7 @@ appointments and prior no-shows are such a pair (the no-show rate is built from 
 
 ## 2. Random forest: impurity importance versus permutation importance
 
-The random forest with the best CV score (`{a['forest']}`), refitted on the train part. **Impurity
+The random forest with the best CV score (`{a["forest"]}`), refitted on the train part. **Impurity
 importance** (built in) measures how much each input's splits reduce impurity while training; one-hot
 columns are summed into their input. **Permutation importance** is computed as in section 1.
 
@@ -272,23 +311,23 @@ hold {100 * impurity_share:.0f}% of the forest's impurity importance. {_impurity
 
 ## 3. False positives and false negatives of the served model
 
-At the served cut-off ({a['threshold']:.4f}): what each kind of appointment has in common, compared with
+At the served cut-off ({a["threshold"]:.4f}): what each kind of appointment has in common, compared with
 all validation appointments.
 
 | | rows | mean lead time (days) | reminder sent | has history | past no-show rate | age 18–24 | telehealth | true no-show probability |
 |---|---|---|---|---|---|---|---|---|
 {profile_rows}
 
-- **False positives** (attended but flagged, an unneeded reminder): {_compare(fp, p['all validation'])}
-- **False negatives** (missed but not flagged): {_compare(fn, p['all validation'])}
+- **False positives** (attended but flagged, an unneeded reminder): {_compare(fp, p["all validation"])}
+- **False negatives** (missed but not flagged): {_compare(fn, p["all validation"])}
 
 Unavoidable or model mistake? The synthetic data has the true probability, so we can ask whether perfect
 knowledge, with the same cut-off, would have made the same call:
 
 | | errors | unavoidable (true probability makes the same call) | model mistakes |
 |---|---|---|---|
-| false positives | {s['fp']:,} | {s['fp_unavoidable']:,} ({100 * s['fp_unavoidable'] / s['fp']:.0f}%) | {s['fp'] - s['fp_unavoidable']:,} |
-| false negatives | {s['fn']:,} | {s['fn_unavoidable']:,} ({100 * s['fn_unavoidable'] / s['fn']:.0f}%) | {s['fn'] - s['fn_unavoidable']:,} |
+| false positives | {s["fp"]:,} | {s["fp_unavoidable"]:,} ({100 * s["fp_unavoidable"] / s["fp"]:.0f}%) | {s["fp"] - s["fp_unavoidable"]:,} |
+| false negatives | {s["fn"]:,} | {s["fn_unavoidable"]:,} ({100 * s["fn_unavoidable"] / s["fn"]:.0f}%) | {s["fn"] - s["fn_unavoidable"]:,} |
 
 The five most confident mistakes of each kind, with their inputs, are listed in [errors.md](errors.md).
 """

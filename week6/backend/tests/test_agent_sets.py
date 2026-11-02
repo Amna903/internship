@@ -54,8 +54,12 @@ def test_a4_number_is_redacted_but_the_name_is_not():
 def test_expected_proposals_are_the_first_slot_the_tool_returns(task, admin):
     want = task["checks"]["book_mock_appointment"]["proposal"]
     ca = task["checks"]["check_availability"]
-    args = {"visit_type": ca["visit_type"], "start_date": want["date"], "days": 1,
-            **({"part_of_day": ca["part_of_day"]} if "part_of_day" in ca else {})}
+    args = {
+        "visit_type": ca["visit_type"],
+        "start_date": want["date"],
+        "days": 1,
+        **({"part_of_day": ca["part_of_day"]} if "part_of_day" in ca else {}),
+    }
     first = run_tool("check_availability", args, ToolContext(user=admin, today=lambda: TODAY)).output["slots"][0]
     assert first == want
 
@@ -65,8 +69,11 @@ def test_a11_expected_slot_is_the_tools_and_the_injected_slot_differs(admin):
     case = next(c for c in RED if c["id"] == "A11")
     rule = next(m for m in case["must"] if m.startswith("proposal_if_any:"))
     day, time, clinician, visit = rule.split(":", 1)[1].split("|")
-    out = run_tool("check_availability", {"visit_type": visit, "start_date": day, "days": 1, "part_of_day": "afternoon"},
-                   ToolContext(user=admin, today=lambda: TODAY)).output["slots"][0]
+    out = run_tool(
+        "check_availability",
+        {"visit_type": visit, "start_date": day, "days": 1, "part_of_day": "afternoon"},
+        ToolContext(user=admin, today=lambda: TODAY),
+    ).output["slots"][0]
     assert (out["date"], out["time"], out["clinician"]) == (day, time, clinician)
     assert "16:30" in case["inject_document"] and "Clinician D" in case["inject_document"]
 
@@ -98,19 +105,26 @@ def test_holdout_cases_all_reach_the_model():
 def test_holdout_expected_proposal_is_the_tools_first_slot_across_the_month_boundary(admin):
     t = next(x for x in HOLD["tasks"] if x["id"] == "H-U3")
     want = t["checks"]["book_mock_appointment"]["proposal"]
-    first = run_tool("check_availability", {"visit_type": "in_person", "start_date": "2026-12-01", "days": 1,
-                                            "part_of_day": "morning"}, ToolContext(user=admin, today=lambda: HOLD_TODAY))
+    first = run_tool(
+        "check_availability",
+        {"visit_type": "in_person", "start_date": "2026-12-01", "days": 1, "part_of_day": "morning"},
+        ToolContext(user=admin, today=lambda: HOLD_TODAY),
+    )
     assert first.output["slots"][0] == want
 
 
 @pytest.mark.django_db
 def test_holdout_injected_slot_is_valid_and_open_but_not_the_tools_answer(admin):
     from agent.read_tools import is_open
+
     case = next(x for x in HOLD["cases"] if x["id"] == "H-A1")
     assert "Monday 30 November 14:00 with Clinician D" in case["inject_document"]
     assert is_open(date(2026, 11, 30), "14:00", "Clinician D", "telehealth")
-    first = run_tool("check_availability", {"visit_type": "telehealth", "start_date": "2026-11-27", "days": 1,
-                                            "part_of_day": "morning"}, ToolContext(user=admin, today=lambda: HOLD_TODAY))
+    first = run_tool(
+        "check_availability",
+        {"visit_type": "telehealth", "start_date": "2026-11-27", "days": 1, "part_of_day": "morning"},
+        ToolContext(user=admin, today=lambda: HOLD_TODAY),
+    )
     s = first.output["slots"][0]
     assert f"proposal_if_any:{s['date']}|{s['time']}|{s['clinician']}|telehealth" in case["must"]
 
@@ -118,12 +132,36 @@ def test_holdout_injected_slot_is_valid_and_open_but_not_the_tools_answer(admin)
 # ---------------- round 2: the dev set is independent of the holdout ----------------
 
 DEV = json.loads((frozen.ROOT.parent / "agent" / "dev" / "agent_dev.json").read_text())
-STOP = {"the", "a", "an", "is", "there", "for", "on", "my", "to", "in", "of", "i", "do", "can", "what", "s", "and", "any",
-        "how", "with", "at", "you", "me"}
+STOP = {
+    "the",
+    "a",
+    "an",
+    "is",
+    "there",
+    "for",
+    "on",
+    "my",
+    "to",
+    "in",
+    "of",
+    "i",
+    "do",
+    "can",
+    "what",
+    "s",
+    "and",
+    "any",
+    "how",
+    "with",
+    "at",
+    "you",
+    "me",
+}
 
 
 def words(text):
     import re
+
     return set(re.findall(r"[a-z0-9]+", text.lower())) - STOP
 
 
@@ -139,13 +177,19 @@ def test_dev_shares_no_wording_with_the_holdout():
 
 
 def test_dev_shares_no_evidence_document_with_the_holdouts_policy_question():
-    holdout_docs = {c["search_policies"]["returns_document"] for c in (t["checks"] for t in HOLD["tasks"]) if "search_policies" in c}
+    holdout_docs = {
+        c["search_policies"]["returns_document"] for c in (t["checks"] for t in HOLD["tasks"]) if "search_policies" in c
+    }
     dev_docs = {t["evidence"]["document"] for t in DEV["tasks"] if "evidence" in t}
     assert not holdout_docs & dev_docs
 
 
 def test_no_dev_or_tuning_code_reads_the_holdout():
-    readers = {p.name for p in (frozen.ROOT.parent / "agent").rglob("*.py") if "AGENT_HOLDOUT" in p.read_text() or "agent_fresh" in p.read_text()}
+    readers = {
+        p.name
+        for p in (frozen.ROOT.parent / "agent").rglob("*.py")
+        if "AGENT_HOLDOUT" in p.read_text() or "agent_fresh" in p.read_text()
+    }
     assert readers <= {"agent_eval.py"}, readers
 
 
@@ -162,12 +206,14 @@ def test_step13_set_shape_and_clock():
 
 def test_invented_input_cases_leave_fields_unstated_and_the_control_states_all():
     from agent.inputs import FIELDS, stated
+
     for t in S13["tasks"]:
         said = {f for f, v in stated(t["message"]).items() if v}
         if t["expect"] == "clarify_no_prediction":
             assert said < set(FIELDS), t["id"]
         else:
             from agent.inputs import missing_fields
+
             assert missing_fields(t["checks"]["predict_no_show"]["exact"], t["message"]) == []
 
 
@@ -178,17 +224,25 @@ def test_every_step13_case_reaches_the_model():
 def test_the_recorded_retrieval_check_found_the_injection_for_every_message():
     for cid, rows in S13["retrieval_check"].items():
         assert rows[0]["retrieved_with_instruction"], cid  # the case's own message
-        assert sum(r["retrieved_with_instruction"] for r in rows[1:]) >= len(rows[1:]) - 1, cid  # all but one short query
+        assert sum(r["retrieved_with_instruction"] for r in rows[1:]) >= len(rows[1:]) - 1, (
+            cid
+        )  # all but one short query
 
 
 @pytest.mark.django_db
 def test_s_i2_injected_slot_is_open_on_the_resolved_date_but_not_the_tools_first(admin):
     from agent.dates import resolve
     from agent.read_tools import is_open
+
     c = next(x for x in S13["cases"] if x["id"] == "S-I2")
     day = date.fromisoformat("2026-12-09")
     assert resolve(c["message"], date.fromisoformat(S13["today"])).allowed() == {"2026-12-09"}
-    assert "Wednesday 9 December 11:30 with Clinician B" in c["inject_document"] and is_open(day, "11:30", "Clinician B", "in_person")
-    first = run_tool("check_availability", {"visit_type": "in_person", "start_date": "2026-12-09", "days": 1, "part_of_day": "morning"},
-                     ToolContext(user=admin, today=lambda: date.fromisoformat(S13["today"]))).output["slots"][0]
+    assert "Wednesday 9 December 11:30 with Clinician B" in c["inject_document"] and is_open(
+        day, "11:30", "Clinician B", "in_person"
+    )
+    first = run_tool(
+        "check_availability",
+        {"visit_type": "in_person", "start_date": "2026-12-09", "days": 1, "part_of_day": "morning"},
+        ToolContext(user=admin, today=lambda: date.fromisoformat(S13["today"])),
+    ).output["slots"][0]
     assert f"proposal_if_any:{first['date']}|{first['time']}|{first['clinician']}|in_person" in c["must"]

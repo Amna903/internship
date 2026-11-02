@@ -40,16 +40,21 @@ def endpoint_sql(view_class, path: str, params: dict) -> list[tuple[str, str]]:
     with CaptureQueriesContext(connection) as captured:
         view.paginate_queryset(queryset)  # COUNT(*) then the LIMIT/OFFSET page, as in list()
     labels = ["paginator COUNT", "page of rows"]
-    return [(labels[i] if i < len(labels) else f"query {i + 1}", q["sql"]) for i, q in enumerate(captured.captured_queries)]
+    return [
+        (labels[i] if i < len(labels) else f"query {i + 1}", q["sql"]) for i, q in enumerate(captured.captured_queries)
+    ]
 
 
 class Command(BaseCommand):
     help = "EXPLAIN (ANALYZE, BUFFERS) the admin endpoints' exact SQL. PostgreSQL only; synthetic data."
 
     def add_arguments(self, parser):
-        parser.add_argument("--repeat", type=int, default=5, help="Runs per query; the median execution time is reported.")
         parser.add_argument(
-            "--compare-without-index", action="store_true",
+            "--repeat", type=int, default=5, help="Runs per query; the median execution time is reported."
+        )
+        parser.add_argument(
+            "--compare-without-index",
+            action="store_true",
             help="Also run each query with its index dropped inside a transaction that is rolled back.",
         )
 
@@ -62,19 +67,43 @@ class Command(BaseCommand):
         with connection.cursor() as cursor:
             for table in TABLES:
                 cursor.execute(f"ANALYZE {table}")
-        busiest = (AuditEvent.objects.values("profile_id").annotate(n=Count("id")).order_by("-n").first() or {})
+        busiest = AuditEvent.objects.values("profile_id").annotate(n=Count("id")).order_by("-n").first() or {}
         scenarios = [
-            ("GET /api/admin/profiles/?status=active", AdminProfileListView, "/api/admin/profiles/",
-             {"status": "active"}, "hp_status_created_idx"),
-            ("GET /api/admin/profiles/?completion=incomplete", AdminProfileListView, "/api/admin/profiles/",
-             {"completion": "incomplete"}, "hp_completion_created_idx"),
-            ("GET /api/admin/profiles/?ordering=full_name", AdminProfileListView, "/api/admin/profiles/",
-             {"ordering": "full_name"}, "hp_full_name_idx"),
-            ("GET /api/admin/profiles/?search=khan  (ILIKE '%khan%': no B-tree index can serve it)",
-             AdminProfileListView, "/api/admin/profiles/", {"search": "khan"}, None),
-            (f"GET /api/admin/audit-events/?profile={busiest.get('profile_id')}  (busiest profile, {busiest.get('n')} events)",
-             AdminAuditEventListView, "/api/admin/audit-events/", {"profile": str(busiest.get("profile_id"))},
-             "audit_profile_created_idx"),
+            (
+                "GET /api/admin/profiles/?status=active",
+                AdminProfileListView,
+                "/api/admin/profiles/",
+                {"status": "active"},
+                "hp_status_created_idx",
+            ),
+            (
+                "GET /api/admin/profiles/?completion=incomplete",
+                AdminProfileListView,
+                "/api/admin/profiles/",
+                {"completion": "incomplete"},
+                "hp_completion_created_idx",
+            ),
+            (
+                "GET /api/admin/profiles/?ordering=full_name",
+                AdminProfileListView,
+                "/api/admin/profiles/",
+                {"ordering": "full_name"},
+                "hp_full_name_idx",
+            ),
+            (
+                "GET /api/admin/profiles/?search=khan  (ILIKE '%khan%': no B-tree index can serve it)",
+                AdminProfileListView,
+                "/api/admin/profiles/",
+                {"search": "khan"},
+                None,
+            ),
+            (
+                f"GET /api/admin/audit-events/?profile={busiest.get('profile_id')}  (busiest profile, {busiest.get('n')} events)",
+                AdminAuditEventListView,
+                "/api/admin/audit-events/",
+                {"profile": str(busiest.get("profile_id"))},
+                "audit_profile_created_idx",
+            ),
         ]
 
         self._header()

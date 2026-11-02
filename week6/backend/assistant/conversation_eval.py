@@ -58,8 +58,11 @@ def retrieval_case(case: dict, llm, embedder, tuned) -> dict:
     q1, q2 = _clean(t1["question"]), _clean(t2["question"])
     ids = lambda q: shipped_retrieve(q, llm, embedder, tuned).passages
     first, alone, joined = ids(q1), ids(q2), ids(empty(0).after(q1, "", 0, False).retrieval_query(q2))
-    row = {"turn1_hit": hit(t1, [p.text for p in first]) if t1["answerable"] else None,
-           "without": [p.id for p in alone], "with": [p.id for p in joined]}
+    row = {
+        "turn1_hit": hit(t1, [p.text for p in first]) if t1["answerable"] else None,
+        "without": [p.id for p in alone],
+        "with": [p.id for p in joined],
+    }
     if t2["answerable"]:
         row |= {"hit_without": hit(t2, [p.text for p in alone]), "hit_with": hit(t2, [p.text for p in joined])}
     else:
@@ -77,9 +80,16 @@ def converse(turns: list[str], llm, embedder, tuned, seed) -> list:
 
 
 def _run(r) -> dict:
-    return {"status": r.status, "answer": r.answer if r.status == "answered" else "", "reason": r.reason,
-            "cited": [c["passage_id"] for c in r.citations], "passages": r.passages_used, "retries": r.retries,
-            "history_tokens": (r.budget or {}).get("history", 0), "tokens": (r.usage or {}).get("total_tokens", 0)}
+    return {
+        "status": r.status,
+        "answer": r.answer if r.status == "answered" else "",
+        "reason": r.reason,
+        "cited": [c["passage_id"] for c in r.citations],
+        "passages": r.passages_used,
+        "retries": r.retries,
+        "history_tokens": (r.budget or {}).get("history", 0),
+        "tokens": (r.usage or {}).get("total_tokens", 0),
+    }
 
 
 def score_turn2(case: dict, r) -> dict:
@@ -142,44 +152,68 @@ def evaluate(llm: LLMClient, embedder: Embedder, base_seed: int) -> dict:
                 if case["id"] == "H3":
                     row["name_repeated"] = any("ali khan" in r.answer.lower() for r in runs if r.status == "answered")
                 rows.append(row)
-            gate[case["id"]] = {"must": case["must"], "rule": case["rule"], "author": case["author"], "runs": rows,
-                                "passed": all(not r["unsafe"] for r in rows)}
+            gate[case["id"]] = {
+                "must": case["must"],
+                "rule": case["rule"],
+                "author": case["author"],
+                "runs": rows,
+                "passed": all(not r["unsafe"] for r in rows),
+            }
         transaction.set_rollback(True)
-    return {"model": llm.model, "embedder": embedder.identity, "seeds": seeds, "settings": tuned, "corpus": snapshot,
-            "frozen_sha256": {k: frozen.WEEK5_FROZEN_SHA256[k] for k in ("eval/conversations.json", "eval/history_redteam.json")},
-            "retrieval": retrieval, "end_to_end": e2e, "gate": gate, "gate_passed": all(g["passed"] for g in gate.values()),
-            "summary": summarise(convs, retrieval, e2e)}
+    return {
+        "model": llm.model,
+        "embedder": embedder.identity,
+        "seeds": seeds,
+        "settings": tuned,
+        "corpus": snapshot,
+        "frozen_sha256": {
+            k: frozen.WEEK5_FROZEN_SHA256[k] for k in ("eval/conversations.json", "eval/history_redteam.json")
+        },
+        "retrieval": retrieval,
+        "end_to_end": e2e,
+        "gate": gate,
+        "gate_passed": all(g["passed"] for g in gate.values()),
+        "summary": summarise(convs, retrieval, e2e),
+    }
 
 
 def summarise(convs, retrieval, e2e) -> dict:
     def group(cases):
         ans = [c for c in cases if c["turns"][1]["answerable"]]
         una = [c for c in cases if not c["turns"][1]["answerable"]]
-        return {"answerable": len(ans), "unanswerable": len(una),
-                "hit_without": sum(retrieval[c["id"]]["hit_without"] for c in ans),
-                "hit_with": sum(retrieval[c["id"]]["hit_with"] for c in ans),
-                "false_without": sum(retrieval[c["id"]]["false_without"] for c in una),
-                "false_with": sum(retrieval[c["id"]]["false_with"] for c in una),
-                "key_fact_ok": sum(majority(e2e[c["id"]], "key_fact_ok") for c in ans),
-                "false_abstention": sum(majority(e2e[c["id"]], "false_abstention") for c in ans),
-                "answered_wrong": sum(majority(e2e[c["id"]], "answered_wrong") for c in ans),
-                "abstained": sum(majority(e2e[c["id"]], "abstained") for c in una)}
+        return {
+            "answerable": len(ans),
+            "unanswerable": len(una),
+            "hit_without": sum(retrieval[c["id"]]["hit_without"] for c in ans),
+            "hit_with": sum(retrieval[c["id"]]["hit_with"] for c in ans),
+            "false_without": sum(retrieval[c["id"]]["false_without"] for c in una),
+            "false_with": sum(retrieval[c["id"]]["false_with"] for c in una),
+            "key_fact_ok": sum(majority(e2e[c["id"]], "key_fact_ok") for c in ans),
+            "false_abstention": sum(majority(e2e[c["id"]], "false_abstention") for c in ans),
+            "answered_wrong": sum(majority(e2e[c["id"]], "answered_wrong") for c in ans),
+            "abstained": sum(majority(e2e[c["id"]], "abstained") for c in una),
+        }
+
     by = lambda key: {v: group([c for c in convs if c[key] == v]) for v in sorted({c[key] for c in convs})}
     return {"overall": group(convs), "by_author": by("author"), "by_category": by("category")}
 
 
 # ---------------------------------------------------------------- report
 
-HEAD = ("| | turn-2 hit without history | with history | key fact correct | false abstention | answered but wrong | "
-        "unanswerable: false retrieval without / with | declined |\n|---|---|---|---|---|---|---|---|")
+HEAD = (
+    "| | turn-2 hit without history | with history | key fact correct | false abstention | answered but wrong | "
+    "unanswerable: false retrieval without / with | declined |\n|---|---|---|---|---|---|---|---|"
+)
 
 
 def _row(name: str, g: dict) -> str:
     a, u = g["answerable"], g["unanswerable"]
     una = f"{g['false_without']} / {g['false_with']} of {u}" if u else "–"
-    return (f"| {name} | {count(g['hit_without'], a)} | {count(g['hit_with'], a)} | {count(g['key_fact_ok'], a)} | "
-            f"{count(g['false_abstention'], a)} | {count(g['answered_wrong'], a)} | {una} | "
-            f"{count(g['abstained'], u) if u else '–'} |")
+    return (
+        f"| {name} | {count(g['hit_without'], a)} | {count(g['hit_with'], a)} | {count(g['key_fact_ok'], a)} | "
+        f"{count(g['false_abstention'], a)} | {count(g['answered_wrong'], a)} | {una} | "
+        f"{count(g['abstained'], u) if u else '–'} |"
+    )
 
 
 def build_report(r: dict, convs: list[dict]) -> str:
@@ -191,14 +225,21 @@ def build_report(r: dict, convs: list[dict]) -> str:
         ret, runs = r["retrieval"][c["id"]], r["end_to_end"][c["id"]]
         if c["turns"][1]["answerable"]:
             rh = f"{'hit' if ret['hit_without'] else 'miss'} → {'hit' if ret['hit_with'] else 'miss'}"
-            verdict = ("correct" if majority(runs, "key_fact_ok") else
-                       "abstained" if majority(runs, "false_abstention") else "**wrong**")
+            verdict = (
+                "correct"
+                if majority(runs, "key_fact_ok")
+                else "abstained"
+                if majority(runs, "false_abstention")
+                else "**wrong**"
+            )
         else:
             rh = f"{'returned' if ret['false_without'] else 'nothing'} → {'returned' if ret['false_with'] else 'nothing'}"
             verdict = "declined" if majority(runs, "abstained") else "**answered**"
         answers = "; ".join(sorted({x["turn2"]["answer"][:90] for x in runs if x["turn2"]["answer"]})) or "–"
-        per.append(f"| {c['id']} | {c['author']} | {c['category']} | {'hit' if ret['turn1_hit'] else 'miss'} | {rh} | "
-                   f"{', '.join(x['turn2']['status'] for x in runs)} | {verdict} | {answers} |")
+        per.append(
+            f"| {c['id']} | {c['author']} | {c['category']} | {'hit' if ret['turn1_hit'] else 'miss'} | {rh} | "
+            f"{', '.join(x['turn2']['status'] for x in runs)} | {verdict} | {answers} |"
+        )
     gate_rows = []
     for gid, g in r["gate"].items():
         extra = ""
@@ -207,18 +248,20 @@ def build_report(r: dict, convs: list[dict]) -> str:
         if gid == "H3":
             extra = f"name repeated in {sum(x['name_repeated'] for x in g['runs'])} of {len(g['runs'])} runs (reported, not pass/fail)"
         fails = "; ".join(f"seed {x['seed']}: {', '.join(x['unsafe'])}" for x in g["runs"] if x["unsafe"]) or "–"
-        gate_rows.append(f"| {gid} | {g['author']} | {'PASS' if g['passed'] else '**FAIL**'} | "
-                         f"{', '.join(x['turns'][-1]['status'] for x in g['runs'])} | {fails} | {extra or '–'} |")
+        gate_rows.append(
+            f"| {gid} | {g['author']} | {'PASS' if g['passed'] else '**FAIL**'} | "
+            f"{', '.join(x['turns'][-1]['status'] for x in g['runs'])} | {fails} | {extra or '–'} |"
+        )
     o = s["overall"]
     return f"""# Follow-up conversations and history red-team (Step 5)
 
-> Generated by `python manage.py evaluate_conversations`; do not edit by hand. Model `{r['model']}`, seeds
-> {', '.join(map(str, r['seeds']))} (each measure by 2-of-3 majority). Frozen conversations (C1–C5 by the user) and
-> red-team (H1–H3 by the user). Shipped settings (floor {r['settings']['floor']}, top-k {r['settings']['top_k']}). **Reporting only: nothing was tuned.**
+> Generated by `python manage.py evaluate_conversations`; do not edit by hand. Model `{r["model"]}`, seeds
+> {", ".join(map(str, r["seeds"]))} (each measure by 2-of-3 majority). Frozen conversations (C1–C5 by the user) and
+> red-team (H1–H3 by the user). Shipped settings (floor {r["settings"]["floor"]}, top-k {r["settings"]["top_k"]}). **Reporting only: nothing was tuned.**
 
 **{CAVEAT}**
 
-## History red-team gate: {'PASSED' if r['gate_passed'] else '**FAILED**'}
+## History red-team gate: {"PASSED" if r["gate_passed"] else "**FAILED**"}
 
 Every live run must pass. H1, H3 and H9 are checked on both turns' answers.
 
@@ -235,7 +278,7 @@ Every live run must pass. H1, H3 and H9 are checked on both turns' answers.
 - **Accepted trade-off (user, 2026-11-02):** the medical check runs on the whole conversation, so after a medical
   turn every later question in that conversation is refused, even a benign one. The fix is a new conversation.
 
-## Follow-ups, turn 2 ({o['answerable']} answerable, {o['unanswerable']} unanswerable)
+## Follow-ups, turn 2 ({o["answerable"]} answerable, {o["unanswerable"]} unanswerable)
 
 {HEAD}
 {_row("**overall**", o)}

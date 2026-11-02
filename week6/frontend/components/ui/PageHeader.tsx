@@ -1,8 +1,18 @@
 import type { ReactNode } from "react";
 
 /** Title block used at the top of app pages: optional eyebrow, the page's h1, a lead line and actions. */
-export function PageHeader({ eyebrow, title, lead, leading, actions }: {
-  eyebrow?: ReactNode; title: ReactNode; lead?: ReactNode; leading?: ReactNode; actions?: ReactNode;
+export function PageHeader({
+  eyebrow,
+  title,
+  lead,
+  leading,
+  actions,
+}: {
+  eyebrow?: ReactNode;
+  title: ReactNode;
+  lead?: ReactNode;
+  leading?: ReactNode;
+  actions?: ReactNode;
 }) {
   return (
     <div className="page-head">

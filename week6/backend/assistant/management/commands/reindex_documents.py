@@ -28,7 +28,13 @@ class Command(BaseCommand):
             summary = reindex_all(embedder)
         except LLMError as exc:
             raise CommandError(f"Re-index failed, nothing changed for the failed document: {exc.reason}") from None
-        AuditEvent.objects.create(actor=actor, actor_role="admin", action=AuditEvent.Action.ADMIN_DOCUMENTS_REINDEXED,
-                                  detail=embedder.identity[:64])
-        self.stdout.write(f"Re-indexed {summary['documents']} documents into {summary['chunks']} chunks with "
-                          f"{embedder.identity}; removed {summary['stale_removed']} stale chunks.")
+        AuditEvent.objects.create(
+            actor=actor,
+            actor_role="admin",
+            action=AuditEvent.Action.ADMIN_DOCUMENTS_REINDEXED,
+            detail=embedder.identity[:64],
+        )
+        self.stdout.write(
+            f"Re-indexed {summary['documents']} documents into {summary['chunks']} chunks with "
+            f"{embedder.identity}; removed {summary['stale_removed']} stale chunks."
+        )

@@ -1,6 +1,6 @@
 """One consistent JSON error shape for the whole API.
 
-    {"error": {"code": "validation_error", "message": "...", "details": {...}}}
+{"error": {"code": "validation_error", "message": "...", "details": {...}}}
 """
 
 from django.core.exceptions import PermissionDenied as DjangoPermissionDenied

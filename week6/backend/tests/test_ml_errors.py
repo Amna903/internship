@@ -22,6 +22,7 @@ def analysis(df):
 
 # ---- Hand-checked building blocks ----
 
+
 def test_confusion_and_rates_on_a_tiny_example():
     y = [1, 1, 1, 0, 0, 0, 0, 0]
     flagged = [1, 1, 0, 1, 0, 0, 0, 0]
@@ -58,6 +59,7 @@ def test_error_sources_by_hand():
 
 # ---- Calibration rule: noise-aware, and never changes the shipped model ----
 
+
 def test_a_gap_within_sampling_noise_is_not_flagged():
     # 400 rows predicted at 15%: se = 1.8 pts, so a 3-point gap (z = 1.7) is noise, not miscalibration.
     y = [1] * 72 + [0] * 328  # observed 18%
@@ -81,6 +83,7 @@ def test_shipped_model_and_threshold_are_the_step_4_ones(df, analysis):
 
 # ---- Real numbers are consistent ----
 
+
 def test_confusion_adds_up_to_the_validation_rows(df, analysis):
     assert sum(analysis.val_confusion.values()) == analysis.validation_rows == len(split(df)[1])
 
@@ -97,6 +100,7 @@ def test_calibration_bins_cover_every_row(analysis):
 
 # ---- Findings are reported, not forced ----
 
+
 def test_report_states_each_direction_result_truthfully(analysis):
     report = errors.build_report(analysis)
     for d in analysis.directions:
@@ -109,6 +113,7 @@ def test_report_states_the_calibration_verdict_that_the_numbers_give(analysis):
 
 
 # ---- No decision reads test labels ----
+
 
 def test_analysis_does_not_depend_on_test_labels(df, analysis):
     _, _, test = split(df)

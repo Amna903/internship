@@ -26,8 +26,9 @@ FROZEN_SHA256 = {
 # The corpus the Week 4 development and evaluation sets were written against: exactly these six policies,
 # each as version 1 with its frozen text, and nothing else searchable. The runners check it before any case
 # runs and refuse to run against anything else (Week 5 Step 1), so results can't quietly drift.
-WEEK4_CORPUS = {name.removeprefix("policies/"): (1, sha) for name, sha in FROZEN_SHA256.items()
-                if name.startswith("policies/")}
+WEEK4_CORPUS = {
+    name.removeprefix("policies/"): (1, sha) for name, sha in FROZEN_SHA256.items() if name.startswith("policies/")
+}
 
 
 # ---------------------------------------------------------------- Week 5 (Step 2), frozen 2026-11-01
@@ -80,7 +81,9 @@ WEEK5_CORPUS = {name: (version, _pinned(file)) for name, version, file, _ in WEE
 # Step 3 round 2 (2026-11-02): the dev set expanded by 10 questions (7 of them unanswerable near-misses), so the
 # relevance gate isn't decided by 3 unanswerable questions. Dev only; the evaluation set is unchanged.
 RETRIEVAL_DEV_ROUND2 = ROOT / "dev" / "retrieval_dev_round2.json"
-WEEK5_FROZEN_SHA256["dev/retrieval_dev_round2.json"] = "ebade698ea5215491cf0205d28ef6921f0cb289beeb9a51212147fa904a9fc84"
+WEEK5_FROZEN_SHA256["dev/retrieval_dev_round2.json"] = (
+    "ebade698ea5215491cf0205d28ef6921f0cb289beeb9a51212147fa904a9fc84"
+)
 
 
 # Step 4 (2026-11-02): the generation answer key, frozen before any Step 4 run (the user reviewed U01-U08).
@@ -103,7 +106,9 @@ WEEK5_FROZEN_SHA256["eval/agent_redteam.json"] = "99f84d666ba1e06f2c6b3429eb52e1
 
 # Step 8 round 2 (2026-11-02): a fresh agent holdout, all written by the user, frozen before any round-2 code.
 # The clean measure for round 2 (the frozen agent sets above informed the fixes). Fixed clock 2026-11-26.
-AGENT_HOLDOUT = ROOT / "eval" / "agent_fresh.json"  # not "*holdout*": tests/test_holdout.py reserves that name for the ML holdout
+AGENT_HOLDOUT = (
+    ROOT / "eval" / "agent_fresh.json"
+)  # not "*holdout*": tests/test_holdout.py reserves that name for the ML holdout
 WEEK5_FROZEN_SHA256["eval/agent_fresh.json"] = "57566b070c66a2331250618cb6bcae95e778d86e3a989c7fb97c5cb6afd82284"
 
 # Step 8 input-check and injection cases (2026-11-02), frozen to run in the Step 13 acceptance run (S-U1..S-U3 by

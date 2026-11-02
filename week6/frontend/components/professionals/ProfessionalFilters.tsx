@@ -2,7 +2,15 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 import { ChipFilter, SelectFilter } from "@/components/ui/Filter";
-import { EMPTY_FILTERS, FEE_CAPS, SORTS, activeFilterCount, parseFilters, toSearchParams, type Filters } from "@/lib/filters";
+import {
+  EMPTY_FILTERS,
+  FEE_CAPS,
+  SORTS,
+  activeFilterCount,
+  parseFilters,
+  toSearchParams,
+  type Filters,
+} from "@/lib/filters";
 import { DAYS, DAY_LABELS, VISIT_LABELS, VISIT_TYPES, formatFee, locations, specialties } from "@/lib/professionals";
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -46,10 +54,24 @@ export function ProfessionalFilters() {
   const active = activeFilterCount(filters);
 
   return (
-    <form className="filters card" role="search" aria-label="Filter professionals" onSubmit={(e) => { e.preventDefault(); update({ q: query }); }}>
+    <form
+      className="filters card"
+      role="search"
+      aria-label="Filter professionals"
+      onSubmit={(e) => {
+        e.preventDefault();
+        update({ q: query });
+      }}
+    >
       <div className="filter search">
         <label htmlFor="q">Search</label>
-        <input id="q" type="search" value={query} placeholder="Name, specialty, language…" onChange={(e) => setQuery(e.target.value)} />
+        <input
+          id="q"
+          type="search"
+          value={query}
+          placeholder="Name, specialty, language…"
+          onChange={(e) => setQuery(e.target.value)}
+        />
       </div>
 
       <ChipFilter
@@ -60,32 +82,65 @@ export function ProfessionalFilters() {
       />
 
       <div className="filter-row">
-        <SelectFilter id="location" label="Location" anyLabel="Any location" value={filters.location}
+        <SelectFilter
+          id="location"
+          label="Location"
+          anyLabel="Any location"
+          value={filters.location}
           options={locations.map((l) => ({ value: l.id, label: l.name }))}
-          onChange={(v) => update({ location: v })} />
-        <SelectFilter id="visit" label="Visit type" anyLabel="Any visit type" value={filters.visit}
+          onChange={(v) => update({ location: v })}
+        />
+        <SelectFilter
+          id="visit"
+          label="Visit type"
+          anyLabel="Any visit type"
+          value={filters.visit}
           options={VISIT_TYPES.map((v) => ({ value: v, label: VISIT_LABELS[v] }))}
-          onChange={(v) => update({ visit: v as Filters["visit"] })} />
-        <SelectFilter id="day" label="Available on" anyLabel="Any day" value={filters.day}
+          onChange={(v) => update({ visit: v as Filters["visit"] })}
+        />
+        <SelectFilter
+          id="day"
+          label="Available on"
+          anyLabel="Any day"
+          value={filters.day}
           options={DAYS.map((d) => ({ value: d, label: DAY_LABELS[d] }))}
-          onChange={(v) => update({ day: v as Filters["day"] })} />
-        <SelectFilter id="maxFee" label="Max fee" anyLabel="Any fee" value={filters.maxFee ? String(filters.maxFee) : ""}
+          onChange={(v) => update({ day: v as Filters["day"] })}
+        />
+        <SelectFilter
+          id="maxFee"
+          label="Max fee"
+          anyLabel="Any fee"
+          value={filters.maxFee ? String(filters.maxFee) : ""}
           options={FEE_CAPS.map((f) => ({ value: String(f), label: `Up to ${formatFee(f)}` }))}
-          onChange={(v) => update({ maxFee: v ? Number(v) : null })} />
+          onChange={(v) => update({ maxFee: v ? Number(v) : null })}
+        />
         <div className="filter">
           <label htmlFor="sort">Sort by</label>
           <select id="sort" value={filters.sort} onChange={(e) => update({ sort: e.target.value as Filters["sort"] })}>
-            {Object.entries(SORTS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            {Object.entries(SORTS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
           </select>
         </div>
       </div>
 
       <div className="filter-actions">
-        <button type="button" className="btn ghost small" disabled={active === 0 && filters.sort === "name"}
-          onClick={() => { setQuery(""); navigate(EMPTY_FILTERS); }}>
+        <button
+          type="button"
+          className="btn ghost small"
+          disabled={active === 0 && filters.sort === "name"}
+          onClick={() => {
+            setQuery("");
+            navigate(EMPTY_FILTERS);
+          }}
+        >
           Reset filters{active ? ` (${active})` : ""}
         </button>
-        <span className="muted small" aria-hidden={!pending}>{pending ? "Updating…" : ""}</span>
+        <span className="muted small" aria-hidden={!pending}>
+          {pending ? "Updating…" : ""}
+        </span>
       </div>
     </form>
   );

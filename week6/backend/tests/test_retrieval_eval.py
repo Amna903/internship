@@ -11,9 +11,19 @@ from assistant.embeddings import FakeEmbedder
 from assistant.models import Chunk, DocumentVersion, PolicyDocument
 from assistant.retrieval_eval import Ranked, aggregate, score_case
 
-ANS = {"id": "T1", "answerable": True, "evidence": [{"document": "a.md", "version": 1, "quote": "The fee is 10 euros."}]}
-MULTI = {"id": "T2", "answerable": True, "evidence": [{"document": "a.md", "version": 1, "quote": "alpha beta"},
-                                                     {"document": "b.md", "version": 1, "quote": "gamma delta"}]}
+ANS = {
+    "id": "T1",
+    "answerable": True,
+    "evidence": [{"document": "a.md", "version": 1, "quote": "The fee is 10 euros."}],
+}
+MULTI = {
+    "id": "T2",
+    "answerable": True,
+    "evidence": [
+        {"document": "a.md", "version": 1, "quote": "alpha beta"},
+        {"document": "b.md", "version": 1, "quote": "gamma delta"},
+    ],
+}
 NONE = {"id": "T3", "answerable": False, "evidence": []}
 
 
@@ -33,8 +43,12 @@ class TestScoringByHand:
         assert r["first_rank"] is None and not r["recall@5"]
 
     def test_multi_doc_needs_every_quote_for_recall_but_one_for_a_hit(self):
-        r = score_case(MULTI, ranked("alpha beta", "x", "y", "gamma delta", docs=["a.md", "c.md", "c.md", "b.md"]),
-                       floor=0.0, top_k=2)
+        r = score_case(
+            MULTI,
+            ranked("alpha beta", "x", "y", "gamma delta", docs=["a.md", "c.md", "c.md", "b.md"]),
+            floor=0.0,
+            top_k=2,
+        )
         assert r["hit@1"] and not r["recall@3"] and r["recall@5"]
         assert not r["doc_recall@3"] and r["doc_recall@5"]
         assert r["shipped_hit"] is False  # only one of the two quotes is in the top 2
@@ -48,9 +62,11 @@ class TestScoringByHand:
         assert score_case(NONE, ranked("x", scores=[0.69]), 0.7, 2)["false_retrieval"] is False
 
     def test_aggregate(self):
-        rows = [score_case(ANS, ranked("The fee is 10 euros."), 0.0, 2),
-                score_case(ANS, ranked("no", "no", "no", "The fee is 10 euros."), 0.0, 2),
-                score_case(NONE, ranked("x", scores=[0.9]), 0.7, 2)]
+        rows = [
+            score_case(ANS, ranked("The fee is 10 euros."), 0.0, 2),
+            score_case(ANS, ranked("no", "no", "no", "The fee is 10 euros."), 0.0, 2),
+            score_case(NONE, ranked("x", scores=[0.9]), 0.7, 2),
+        ]
         agg = aggregate(rows)
         assert agg["recall@1"] == 0.5 and agg["recall@5"] == 1.0 and agg["mrr"] == pytest.approx((1 + 0.25) / 2)
         assert agg["false_retrieval_rate"] == 1.0 and (agg["answerable"], agg["unanswerable"]) == (2, 1)
@@ -59,15 +75,26 @@ class TestScoringByHand:
 @pytest.fixture
 def live(db, admin):
     from django.core.management import call_command
+
     call_command("load_policies", admin=admin.email)
 
 
 @pytest.mark.django_db
 class TestRun:
     def test_corpus_is_built_checked_and_rolled_back(self, live):
-        before = (corpus_snapshot(), Chunk.objects.count(), PolicyDocument.objects.count(), DocumentVersion.objects.count())
+        before = (
+            corpus_snapshot(),
+            Chunk.objects.count(),
+            PolicyDocument.objects.count(),
+            DocumentVersion.objects.count(),
+        )
         result = retrieval_eval.evaluate(FakeEmbedder(), retrieval_eval.load_cases(), label="test")
-        after = (corpus_snapshot(), Chunk.objects.count(), PolicyDocument.objects.count(), DocumentVersion.objects.count())
+        after = (
+            corpus_snapshot(),
+            Chunk.objects.count(),
+            PolicyDocument.objects.count(),
+            DocumentVersion.objects.count(),
+        )
         assert before == after  # the live database is untouched
         assert {r["filename"]: (r["version"], r["sha256"]) for r in result["corpus"]} == frozen.WEEK5_CORPUS
 
@@ -85,7 +112,9 @@ class TestRun:
 
     def test_no_model_is_called(self, live, monkeypatch):
         monkeypatch.setattr("assistant.llm.get_llm", lambda: pytest.fail("retrieval evaluation must not call a model"))
-        monkeypatch.setattr("assistant.llm.OllamaClient.chat", lambda *a, **k: pytest.fail("no chat call"), raising=False)
+        monkeypatch.setattr(
+            "assistant.llm.OllamaClient.chat", lambda *a, **k: pytest.fail("no chat call"), raising=False
+        )
         retrieval_eval.evaluate(FakeEmbedder(), retrieval_eval.load_cases(), label="test")
 
     def test_a_tampered_corpus_file_fails_loudly(self, live, monkeypatch):

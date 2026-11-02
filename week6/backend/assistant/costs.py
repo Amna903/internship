@@ -13,7 +13,11 @@ def cost_report(prompt_tokens: int, output_tokens: int) -> dict:
     def price(table):
         return round(prompt_tokens / 1000 * table["input"] + output_tokens / 1000 * table["output"], 6)
 
-    return {"prompt_tokens": prompt_tokens, "output_tokens": output_tokens,
-            "total_tokens": prompt_tokens + output_tokens, "cost_usd": price(LOCAL_COST_PER_1K),
-            "hosted_equivalent_usd": price(ILLUSTRATIVE_HOSTED_PER_1K),
-            "note": "Local model: no per-call cost. Hosted equivalent uses illustrative prices, not a quote."}
+    return {
+        "prompt_tokens": prompt_tokens,
+        "output_tokens": output_tokens,
+        "total_tokens": prompt_tokens + output_tokens,
+        "cost_usd": price(LOCAL_COST_PER_1K),
+        "hosted_equivalent_usd": price(ILLUSTRATIVE_HOSTED_PER_1K),
+        "note": "Local model: no per-call cost. Hosted equivalent uses illustrative prices, not a quote.",
+    }

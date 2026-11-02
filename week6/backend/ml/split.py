@@ -30,11 +30,18 @@ def split(df: pd.DataFrame, seed: int = config.SEED) -> tuple[pd.DataFrame, pd.D
 
 def summary(parts: dict[str, pd.DataFrame]) -> pd.DataFrame:
     total = sum(len(p) for p in parts.values())
-    return pd.DataFrame([
-        {"part": name, "rows": len(p), "share": round(len(p) / total, 3),
-         "patients": p["patient_id"].nunique(), "no_show_rate": round(p[config.LABEL].mean(), 4)}
-        for name, p in parts.items()
-    ]).set_index("part")
+    return pd.DataFrame(
+        [
+            {
+                "part": name,
+                "rows": len(p),
+                "share": round(len(p) / total, 3),
+                "patients": p["patient_id"].nunique(),
+                "no_show_rate": round(p[config.LABEL].mean(), 4),
+            }
+            for name, p in parts.items()
+        ]
+    ).set_index("part")
 
 
 def main():

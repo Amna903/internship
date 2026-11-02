@@ -21,6 +21,7 @@ def test_week4_case_the_challenger_did_not_win():
     import json
 
     from ml import tune
+
     result = json.loads(tune.RESULT.read_text())
     folds = {g["label"]: g["fold_scores"] for g in result["grid_cv"]}
     assert not release_rule.challenger_wins(folds["logreg_engineered (C=0.1)"], folds["logreg_raw (C=10.0)"])
@@ -31,9 +32,14 @@ def test_champion_and_challenger_must_share_folds():
         release_rule.challenger_wins([0.3] * 5, [0.3] * 3)
 
 
-@pytest.mark.parametrize("a, b, applies", [("logreg_raw", "logreg_engineered", False),
-                                           ("logreg_engineered", "random_forest", True),
-                                           ("random_forest", "gradient_boosting", False)])
+@pytest.mark.parametrize(
+    "a, b, applies",
+    [
+        ("logreg_raw", "logreg_engineered", False),
+        ("logreg_engineered", "random_forest", True),
+        ("random_forest", "gradient_boosting", False),
+    ],
+)
 def test_simplicity_only_separates_models_that_differ_in_explainability(a, b, applies):
     assert release_rule.simplicity_applies(a, b) is applies
 

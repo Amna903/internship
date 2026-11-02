@@ -19,9 +19,12 @@ from assistant.prompts import Passage
 
 from .conftest import Browser, user_login
 
-CANCEL = Passage("cancel-1", "cancellation-policy.md",
-                 "Appointments can be cancelled free of charge up to 24 hours before the start time. "
-                 "Cancellations with less notice are recorded as late cancellations.")
+CANCEL = Passage(
+    "cancel-1",
+    "cancellation-policy.md",
+    "Appointments can be cancelled free of charge up to 24 hours before the start time. "
+    "Cancellations with less notice are recorded as late cancellations.",
+)
 QUOTE = "Appointments can be cancelled free of charge up to 24 hours before the start time."
 
 
@@ -37,6 +40,7 @@ def ask(*replies, question="How late can I cancel without a charge?", passages=(
 
 # ---------------- Server-decided status ----------------
 
+
 class TestStatus:
     def test_a_verified_grounded_answer_is_answered(self):
         result, _ = ask(reply())
@@ -48,8 +52,10 @@ class TestStatus:
         assert "status" not in schema.ANSWER_SCHEMA["properties"]
         assert list(schema.ANSWER_SCHEMA["properties"]) == ["answer", "citations", "refused"]
 
-    @pytest.mark.parametrize("answer", ["", "Insufficient information.", "insufficient_information", "I don't know",
-                                        "  I DO NOT KNOW  ", "N/A"])
+    @pytest.mark.parametrize(
+        "answer",
+        ["", "Insufficient information.", "insufficient_information", "I don't know", "  I DO NOT KNOW  ", "N/A"],
+    )
     def test_empty_or_dont_know_answers_are_insufficient(self, answer):
         assert ask(reply(answer=answer))[0].status == "insufficient_information"
 
@@ -70,7 +76,9 @@ class TestStatus:
 
     def test_a_real_but_irrelevant_quote_fails_groundedness(self):
         """Genuine text from the passage, but the answer's content isn't in it."""
-        late = [{"passage_id": "cancel-1", "quote": "Cancellations with less notice are recorded as late cancellations."}]
+        late = [
+            {"passage_id": "cancel-1", "quote": "Cancellations with less notice are recorded as late cancellations."}
+        ]
         result, _ = ask(reply(answer="Parking is available at the main entrance for all visitors.", citations=late))
         assert result.status == "insufficient_information" and result.reason == "answer not grounded in its quotes"
 
@@ -86,9 +94,17 @@ class TestStatus:
 
 # ---------------- Refusals: defence in depth ----------------
 
+
 class TestRefusals:
-    @pytest.mark.parametrize("question", ["What dose of ibuprofen should I take?", "Is this rash serious?",
-                                          "Can you diagnose my symptoms?", "Should I stop my medication?"])
+    @pytest.mark.parametrize(
+        "question",
+        [
+            "What dose of ibuprofen should I take?",
+            "Is this rash serious?",
+            "Can you diagnose my symptoms?",
+            "Should I stop my medication?",
+        ],
+    )
     def test_server_check_refuses_without_calling_the_model(self, question):
         result, fake = ask(reply(), question=question)
         assert result.status == "refused" and not result.model_called and fake.seen == []
@@ -98,22 +114,36 @@ class TestRefusals:
         result, _ = ask(reply(answer="", citations=[], refused=True), question="Tell me what to do about my knee")
         assert result.status == "refused" and result.model_called
 
-    @pytest.mark.parametrize("question", ["How do I book a telehealth appointment?", "Can I reschedule by phone?",
-                                          "How long is the cancellation window?"])
+    @pytest.mark.parametrize(
+        "question",
+        [
+            "How do I book a telehealth appointment?",
+            "Can I reschedule by phone?",
+            "How long is the cancellation window?",
+        ],
+    )
     def test_ordinary_policy_questions_are_not_refused(self, question):
         assert not verify.is_medical_advice_request(question)
 
 
 # ---------------- Strict output validation ----------------
 
+
 class TestValidation:
-    @pytest.mark.parametrize("text", ["not json", "[]", json.dumps({"answer": "x", "citations": []}),
-                                      json.dumps({"answer": "x", "citations": [], "refused": False, "status": "answered"}),
-                                      json.dumps({"answer": 5, "citations": [], "refused": False}),
-                                      json.dumps({"answer": "x", "citations": [], "refused": "no"}),
-                                      json.dumps({"answer": "x", "citations": [{"passage_id": "a"}], "refused": False}),
-                                      json.dumps({"answer": "x" * 2000, "citations": [], "refused": False}),
-                                      '{"answer": "Up to 24 hours'])  # cut off at the output-token limit
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "not json",
+            "[]",
+            json.dumps({"answer": "x", "citations": []}),
+            json.dumps({"answer": "x", "citations": [], "refused": False, "status": "answered"}),
+            json.dumps({"answer": 5, "citations": [], "refused": False}),
+            json.dumps({"answer": "x", "citations": [], "refused": "no"}),
+            json.dumps({"answer": "x", "citations": [{"passage_id": "a"}], "refused": False}),
+            json.dumps({"answer": "x" * 2000, "citations": [], "refused": False}),
+            '{"answer": "Up to 24 hours',
+        ],
+    )  # cut off at the output-token limit
     def test_contract_breaches_become_invalid_output_and_are_never_shown(self, text):
         result, fake = ask(text, text)  # Week 5 Step 5: retried once, so both attempts are invalid here
         assert result.status == "invalid_output" and result.answer == "" and result.citations == []
@@ -125,6 +155,7 @@ class TestValidation:
 
 
 # ---------------- Prompt and context window ----------------
+
 
 class TestPrompt:
     def test_prompt_contains_system_rules_question_and_marked_passages_only(self):
@@ -152,10 +183,17 @@ class TestPrompt:
 
 # ---------------- No identifiers to the model ----------------
 
+
 class TestPrivacy:
-    @pytest.mark.parametrize("text, count", [("mail me at jo.smith@example.com please", 1),
-                                             ("call +44 20 7946 0958 today", 1), ("record 12345678", 1),
-                                             ("cancel 24 hours before", 0)])
+    @pytest.mark.parametrize(
+        "text, count",
+        [
+            ("mail me at jo.smith@example.com please", 1),
+            ("call +44 20 7946 0958 today", 1),
+            ("record 12345678", 1),
+            ("cancel 24 hours before", 0),
+        ],
+    )
     def test_redaction(self, text, count):
         cleaned, n = redact(text)
         assert n == count and ("[redacted]" in cleaned) == bool(count)
@@ -173,6 +211,7 @@ class TestPrivacy:
 
 # ---------------- Real client against a local fake Ollama ----------------
 
+
 class FakeOllama(BaseHTTPRequestHandler):
     behaviour = {"mode": "ok", "seen": []}
 
@@ -186,8 +225,11 @@ class FakeOllama(BaseHTTPRequestHandler):
             self.send_response(500)
             self.end_headers()
             return
-        payload = (b"not json" if mode == "garbage" else
-                   json.dumps({"message": {"content": reply()}, "prompt_eval_count": 321, "eval_count": 45}).encode())
+        payload = (
+            b"not json"
+            if mode == "garbage"
+            else json.dumps({"message": {"content": reply()}, "prompt_eval_count": 321, "eval_count": 45}).encode()
+        )
         self.send_response(200)
         self.end_headers()
         self.wfile.write(payload)
@@ -206,8 +248,14 @@ def ollama():
 
 
 def client(server, timeout=5.0):
-    return OllamaClient(base_url=f"http://127.0.0.1:{server.server_port}", model="llama3.2:3b", temperature=0.1,
-                        max_output_tokens=512, context_tokens=4096, timeout_seconds=timeout)
+    return OllamaClient(
+        base_url=f"http://127.0.0.1:{server.server_port}",
+        model="llama3.2:3b",
+        temperature=0.1,
+        max_output_tokens=512,
+        context_tokens=4096,
+        timeout_seconds=timeout,
+    )
 
 
 class TestOllamaClient:
@@ -240,13 +288,16 @@ class TestOllamaClient:
 
 
 class TestSafeErrors:
-    @pytest.mark.parametrize("error, status", [(LLMTimeout("slow"), "timeout"), (LLMUnavailable("down"), "unavailable")])
+    @pytest.mark.parametrize(
+        "error, status", [(LLMTimeout("slow"), "timeout"), (LLMUnavailable("down"), "unavailable")]
+    )
     def test_model_failures_become_safe_statuses_without_details(self, error, status):
         result, _ = ask(error)
         assert result.status == status and result.answer == "" and "slow" not in result.answer
 
 
 # ---------------- Cost reporting ----------------
+
 
 def test_cost_report_uses_server_token_counts_and_states_it_is_illustrative():
     report = cost_report(1000, 500)

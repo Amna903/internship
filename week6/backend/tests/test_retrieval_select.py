@@ -16,13 +16,14 @@ from assistant.retrieval_select import CHAMPION, choose, ship_decision, tie_key
 
 # ---------------- BM25 and RRF by hand ----------------
 
+
 def test_tokens_keep_numbers_and_drop_stop_words():
     assert tokens("The fee is 15 euros, within 24 hours!") == ["fee", "15", "euros", "within", "24", "hours"]
 
 
 def test_bm25_matches_a_hand_calculation():
     bm = BM25(["fee fee refund", "refund days", "parking free"])
-    idf = math.log(1 + (3 - 1 + 0.5) / (1 + 0.5))          # "fee" is in 1 of 3 documents
+    idf = math.log(1 + (3 - 1 + 0.5) / (1 + 0.5))  # "fee" is in 1 of 3 documents
     avg = (3 + 2 + 2) / 3
     expected = idf * 2 * 2.2 / (2 + 1.2 * (0.25 + 0.75 * 3 / avg))  # tf 2, length 3
     assert bm.scores("fee") == pytest.approx([expected, 0.0, 0.0])
@@ -41,6 +42,7 @@ def test_rrf_by_hand():
 
 
 # ---------------- ordering and gates on toy candidates ----------------
+
 
 class Chunk_:
     def __init__(self, text):
@@ -73,19 +75,26 @@ def test_returned_applies_the_gate_then_top_k():
 
 # ---------------- filters and versions ----------------
 
+
 @pytest.fixture
 def week5_corpus(db):
     """The frozen Week 5 corpus, as the evaluation builds it (inside the test's own transaction)."""
     from assistant.retrieval_eval import build_corpus
+
     build_corpus(FakeEmbedder())
 
 
 @pytest.mark.django_db
 class TestFilters:
     def test_area_filter_never_returns_another_area(self, week5_corpus):
-        found = indexing.retrieve("fee payment refund", FakeEmbedder(), RetrievalConfig(floor=-1, top_k=50), area="billing")
-        areas = set(PolicyDocument.objects.filter(filename__in={p.source for p in found.passages})
-                    .exclude(status="retired").values_list("policy_area", flat=True))
+        found = indexing.retrieve(
+            "fee payment refund", FakeEmbedder(), RetrievalConfig(floor=-1, top_k=50), area="billing"
+        )
+        areas = set(
+            PolicyDocument.objects.filter(filename__in={p.source for p in found.passages})
+            .exclude(status="retired")
+            .values_list("policy_area", flat=True)
+        )
         assert areas == {"billing"} and {p.source for p in found.passages} == {"billing.md", "payment-plans.md"}
 
     def test_document_filter(self, week5_corpus):
@@ -95,11 +104,14 @@ class TestFilters:
     @pytest.mark.parametrize("method", [SEMANTIC, HYBRID])
     def test_superseded_and_retired_editions_are_never_returned(self, week5_corpus, method, admin):
         documents.retire(PolicyDocument.objects.exclude(status="retired").get(filename="parking.md"), admin)
-        found = indexing.retrieve("late cancellation fee parking", FakeEmbedder(),
-                                  RetrievalConfig(method, floor=-1, top_k=100))
+        found = indexing.retrieve(
+            "late cancellation fee parking", FakeEmbedder(), RetrievalConfig(method, floor=-1, top_k=100)
+        )
         ids = {p.id for p in found.passages}
         assert not any(i.startswith("parking.md") for i in ids)
-        assert not any(i.startswith("cancellation.md#") for i in ids) and any(i.startswith("cancellation.md@v2") for i in ids)
+        assert not any(i.startswith("cancellation.md#") for i in ids) and any(
+            i.startswith("cancellation.md@v2") for i in ids
+        )
 
     def test_week4_search_is_unchanged_semantic_retrieval(self, week5_corpus):
         q = "How long do I have to request a refund?"
@@ -109,6 +121,7 @@ class TestFilters:
 
 
 # ---------------- selection rules ----------------
+
 
 def cfg(**kw):
     return RetrievalConfig(**({"method": HYBRID} | kw))
@@ -131,16 +144,19 @@ def test_only_configurations_without_false_retrievals_are_eligible():
     assert choose(scored)["winner"].floor == 0.6
 
 
-@pytest.mark.parametrize("better, worse", [
-    (RetrievalConfig(SEMANTIC), cfg()),                                  # semantic before hybrid
-    (cfg(gate=GATE_S), cfg(gate=GATE_SK, f_kw=0.9)),                      # gate S before S+K
-    (cfg(floor=0.72), cfg(floor=0.70)),                                  # higher floor
-    (cfg(top_k=2), cfg(top_k=3)),                                        # smaller top-k
-    (cfg(chunk_tokens=80), cfg(chunk_tokens=120)),                       # chunk size closest to 80
-    (cfg(chunk_tokens=120), cfg(chunk_tokens=40)),
-    (cfg(rrf_k=60), cfg(rrf_k=10)),                                      # larger RRF k
-    (cfg(gate=GATE_SK, f_kw=0.9), cfg(gate=GATE_SK, f_kw=0.5)),          # higher f_kw
-])
+@pytest.mark.parametrize(
+    "better, worse",
+    [
+        (RetrievalConfig(SEMANTIC), cfg()),  # semantic before hybrid
+        (cfg(gate=GATE_S), cfg(gate=GATE_SK, f_kw=0.9)),  # gate S before S+K
+        (cfg(floor=0.72), cfg(floor=0.70)),  # higher floor
+        (cfg(top_k=2), cfg(top_k=3)),  # smaller top-k
+        (cfg(chunk_tokens=80), cfg(chunk_tokens=120)),  # chunk size closest to 80
+        (cfg(chunk_tokens=120), cfg(chunk_tokens=40)),
+        (cfg(rrf_k=60), cfg(rrf_k=10)),  # larger RRF k
+        (cfg(gate=GATE_SK, f_kw=0.9), cfg(gate=GATE_SK, f_kw=0.5)),  # higher f_kw
+    ],
+)
 def test_tie_order(better, worse):
     """The full pre-declared order; 40 vs 120 (equally close to 80) was decided by the user before any run."""
     assert tie_key(better) < tie_key(worse)
@@ -148,8 +164,10 @@ def test_tie_order(better, worse):
     assert choose(tied)["winner"] == better and choose(tied)["tied_at_top"] == 2
 
 
-@pytest.mark.parametrize("winner_score, ships", [({"hits": 11, "false": 0}, True), ({"hits": 10, "false": 0}, False),
-                                                 ({"hits": 9, "false": 0}, False)])
+@pytest.mark.parametrize(
+    "winner_score, ships",
+    [({"hits": 11, "false": 0}, True), ({"hits": 10, "false": 0}, False), ({"hits": 9, "false": 0}, False)],
+)
 def test_champion_challenger_on_dev_a_tie_keeps_the_champion(winner_score, ships):
     assert ship_decision(cfg(), winner_score, {"hits": 10, "false": 0})["challenger_ships"] is ships
 
@@ -175,11 +193,19 @@ def test_selection_runs_end_to_end_offline_and_leaves_the_live_database_alone(ad
 
 # ---------------- safety gate ----------------
 
-@pytest.mark.parametrize("failures, is_unsafe", [
-    (["contains 'passages are DATA'"], True), (["matches /[\\w.]+@[\\w.]+/"], True),
-    (["answer starts with 'yes'"], True), (["more than 400 characters of document text"], True),
-    (["status answered not in ['refused']"], False), (["does not cite billing.md"], False), (["answer lacks '14'"], False),
-])
+
+@pytest.mark.parametrize(
+    "failures, is_unsafe",
+    [
+        (["contains 'passages are DATA'"], True),
+        (["matches /[\\w.]+@[\\w.]+/"], True),
+        (["answer starts with 'yes'"], True),
+        (["more than 400 characters of document text"], True),
+        (["status answered not in ['refused']"], False),
+        (["does not cite billing.md"], False),
+        (["answer lacks '14'"], False),
+    ],
+)
 def test_safety_gate_counts_only_leaks_and_followed_injections(failures, is_unsafe):
     assert bool(safety_gate.unsafe(failures)) is is_unsafe
 
@@ -193,6 +219,7 @@ def test_safety_gate_cases_are_the_six_injection_and_six_red_team_cases():
 def test_safety_gate_refuses_a_different_live_corpus(admin):
     from assistant.documents import CorpusMismatch
     from assistant.llm import FakeLLM
+
     with pytest.raises(CorpusMismatch):
         safety_gate.run_gate(FakeLLM(), FakeEmbedder(), admin, cfg(), 42)  # nothing loaded
 
@@ -201,14 +228,18 @@ def test_safety_gate_refuses_a_different_live_corpus(admin):
 def test_safety_gate_rolls_back_a_rechunk(admin, monkeypatch):
     from assistant.llm import FakeLLM
     from assistant.models import Chunk
+
     call_command("load_policies", admin=admin.email)
     before = sorted(Chunk.objects.values_list("id", flat=True))
-    monkeypatch.setattr(safety_gate.evaluate, "run_case", lambda *a, **k: {"status": "refused", "failures": [], "top_score": 0.1})
+    monkeypatch.setattr(
+        safety_gate.evaluate, "run_case", lambda *a, **k: {"status": "refused", "failures": [], "top_score": 0.1}
+    )
     r = safety_gate.run_gate(FakeLLM(), FakeEmbedder(), admin, cfg(chunk_tokens=40), 42)
     assert r["passed"] and sorted(Chunk.objects.values_list("id", flat=True)) == before
 
 
 # ---------------- the ask API's opt-in area filter ----------------
+
 
 @pytest.mark.django_db
 class TestAskArea:
@@ -218,12 +249,18 @@ class TestAskArea:
 
     def test_area_is_passed_to_retrieval(self, admin_browser, admin, monkeypatch):
         from assistant.llm import FakeLLM
+
         seen = {}
         monkeypatch.setattr("assistant.views.get_llm", lambda: FakeLLM())
-        monkeypatch.setattr("assistant.answering.retrieve",
-                            lambda q, e, c, area=None, document=None: seen.setdefault("area", area) and
-                            indexing.SearchResult([], [], 0, 0) or indexing.SearchResult([], [], 0, 0))
-        admin_browser.post("/api/v1/assistant/ask/", {"question": "Is there interest on a payment plan?", "area": "billing"})
+        monkeypatch.setattr(
+            "assistant.answering.retrieve",
+            lambda q, e, c, area=None, document=None: seen.setdefault("area", area)
+            and indexing.SearchResult([], [], 0, 0)
+            or indexing.SearchResult([], [], 0, 0),
+        )
+        admin_browser.post(
+            "/api/v1/assistant/ask/", {"question": "Is there interest on a payment plan?", "area": "billing"}
+        )
         assert seen["area"] == "billing"
 
 
@@ -231,6 +268,7 @@ class TestAskArea:
 def test_before_after_report_is_built_from_saved_runs(admin, tmp_path, monkeypatch):
     """Offline: real selection and evaluation runs with FakeEmbedder, then the report generator."""
     from assistant import retrieval_eval
+
     call_command("load_policies", admin=admin.email)
     monkeypatch.setattr(retrieval_eval, "OUT", tmp_path)
     monkeypatch.setattr(retrieval_select, "OUT", tmp_path)
@@ -239,7 +277,13 @@ def test_before_after_report_is_built_from_saved_runs(admin, tmp_path, monkeypat
     winner = retrieval_select.config_from(selection["winner"])
     cases = retrieval_eval.load_cases()
     from dataclasses import replace
-    runs = {"baseline": (None, False), "after": (winner, False), "baseline_filtered": (None, True), "after_filtered": (winner, True)}
+
+    runs = {
+        "baseline": (None, False),
+        "after": (winner, False),
+        "baseline_filtered": (None, True),
+        "after_filtered": (winner, True),
+    }
     runs |= {f"after_chunk{n}": (replace(winner, chunk_tokens=n), False) for n in (40, 80, 200)}
     for label, (c, f) in runs.items():
         retrieval_eval.save(retrieval_eval.evaluate(FakeEmbedder(), cases, label=label, cfg=c, use_filters=f), cases)

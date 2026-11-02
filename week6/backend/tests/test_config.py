@@ -28,7 +28,9 @@ def load_settings(env: dict[str, str]) -> subprocess.CompletedProcess:
     clean = {k: v for k, v in os.environ.items() if not k.startswith(("DJANGO_", "JWT_", "COOKIE_", "CSRF_"))}
     clean["HP_SKIP_DOTENV"] = "1"
     code = "import config.settings as s; print(s.ALLOWED_HOSTS, s.COOKIE_SECURE, s.COOKIE_SAMESITE)"
-    return subprocess.run([sys.executable, "-c", code], cwd=BACKEND, env={**clean, **env}, capture_output=True, text=True)
+    return subprocess.run(
+        [sys.executable, "-c", code], cwd=BACKEND, env={**clean, **env}, capture_output=True, text=True
+    )
 
 
 def without(key: str) -> dict[str, str]:
@@ -65,8 +67,12 @@ def test_production_refuses_unsafe_or_missing_config(env, message):
 
 def test_all_problems_are_reported_together():
     result = load_settings({"DJANGO_DEBUG": "false", "DJANGO_SECRET_KEY": SECRET, "COOKIE_SECURE": "false"})
-    for message in ("JWT_SIGNING_KEY is required", "DJANGO_ALLOWED_HOSTS is required",
-                    "CSRF_TRUSTED_ORIGINS is required", "COOKIE_SECURE cannot be false"):
+    for message in (
+        "JWT_SIGNING_KEY is required",
+        "DJANGO_ALLOWED_HOSTS is required",
+        "CSRF_TRUSTED_ORIGINS is required",
+        "COOKIE_SECURE cannot be false",
+    ):
         assert message in result.stderr
 
 

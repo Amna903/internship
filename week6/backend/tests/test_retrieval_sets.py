@@ -40,6 +40,7 @@ def evidence_sentence(e: dict) -> str:
 
 # ---------------- frozen ----------------
 
+
 @pytest.mark.parametrize("relative", sorted(frozen.WEEK5_FROZEN_SHA256))
 def test_week5_frozen_file_is_unchanged(relative):
     assert hashlib.sha256((ASSISTANT / relative).read_bytes()).hexdigest() == frozen.WEEK5_FROZEN_SHA256[relative]
@@ -66,6 +67,7 @@ def test_new_policies_stay_administrative():
 
 # ---------------- the evaluation set ----------------
 
+
 def test_at_least_twenty_cases_with_unique_ids():
     assert len(EVAL) >= 20 and len({c["id"] for c in EVAL}) == len(EVAL)
 
@@ -76,8 +78,15 @@ def test_user_wrote_at_least_ten_and_authors_are_marked():
 
 
 def test_every_category_is_covered():
-    assert {c["category"] for c in EVAL} == {"direct", "paraphrase", "keyword", "multi_doc", "area_hint",
-                                              "current_version", "unanswerable"}
+    assert {c["category"] for c in EVAL} == {
+        "direct",
+        "paraphrase",
+        "keyword",
+        "multi_doc",
+        "area_hint",
+        "current_version",
+        "unanswerable",
+    }
 
 
 @pytest.mark.parametrize("case", EVAL + DEV, ids=lambda c: c["id"])
@@ -114,24 +123,34 @@ def test_user_unanswerable_topics_are_absent_from_the_corpus(case):
 
 # ---------------- dev set independence ----------------
 
+
 def test_dev_and_eval_share_no_question():
     assert not {norm(c["question"]) for c in DEV} & {norm(c["question"]) for c in EVAL}
 
 
 def test_no_dev_question_shares_an_evidence_sentence_with_an_eval_question():
     eval_sentences = {evidence_sentence(e): c["id"] for c in EVAL for e in c["evidence"]}
-    shared = [(c["id"], eval_sentences[s]) for c in DEV for e in c["evidence"]
-              if (s := evidence_sentence(e)) in eval_sentences]
+    shared = [
+        (c["id"], eval_sentences[s])
+        for c in DEV
+        for e in c["evidence"]
+        if (s := evidence_sentence(e)) in eval_sentences
+    ]
     assert not shared, shared
 
 
 def test_dev_set_covers_the_categories_step3_will_tune_for():
-    assert {"keyword", "paraphrase", "multi_doc", "area_hint", "current_version", "unanswerable"} <= {c["category"] for c in DEV}
+    assert {"keyword", "paraphrase", "multi_doc", "area_hint", "current_version", "unanswerable"} <= {
+        c["category"] for c in DEV
+    }
 
 
 def test_only_the_evaluation_harness_reads_the_evaluation_file():
-    readers = {p.relative_to(ASSISTANT).as_posix() for p in ASSISTANT.rglob("*.py")
-               if "retrieval_cases" in p.read_text() or "RETRIEVAL_CASES" in p.read_text()}
+    readers = {
+        p.relative_to(ASSISTANT).as_posix()
+        for p in ASSISTANT.rglob("*.py")
+        if "retrieval_cases" in p.read_text() or "RETRIEVAL_CASES" in p.read_text()
+    }
     assert readers <= {"frozen.py", "retrieval_eval.py", "generation_eval.py"}, readers
 
 
@@ -141,11 +160,11 @@ DEV2 = load(frozen.RETRIEVAL_DEV_ROUND2)
 
 
 def test_round2_dev_is_round1_plus_ten_with_more_unanswerable_near_misses():
-    assert DEV2[:len(DEV)] == DEV and len(DEV2) == len(DEV) + 10
+    assert DEV2[: len(DEV)] == DEV and len(DEV2) == len(DEV) + 10
     assert sum(not c["answerable"] for c in DEV2) == 10 and sum(c["answerable"] for c in DEV2) == 15
 
 
-@pytest.mark.parametrize("case", DEV2[len(DEV):], ids=lambda c: c["id"])
+@pytest.mark.parametrize("case", DEV2[len(DEV) :], ids=lambda c: c["id"])
 def test_round2_additions_follow_the_hit_rule(case):
     test_labels_follow_the_hit_rule(case)
 
@@ -156,8 +175,15 @@ def test_round2_dev_shares_no_question_or_evidence_sentence_with_eval():
     assert not [c["id"] for c in DEV2 for e in c["evidence"] if evidence_sentence(e) in eval_sentences]
 
 
-@pytest.mark.parametrize("case", [c for c in DEV2[len(DEV):] if not c["answerable"]], ids=lambda c: c["id"])
+@pytest.mark.parametrize("case", [c for c in DEV2[len(DEV) :] if not c["answerable"]], ids=lambda c: c["id"])
 def test_round2_unanswerable_topics_are_absent(case):
-    term = {"E04": r"valet", "E05": r"\bprice\b|telehealth visits? costs?", "E06": r"waiting room|child",
-            "E07": r"per year", "E08": r"language", "E09": r"\bwait", "E10": r"insurance"}[case["id"]]
+    term = {
+        "E04": r"valet",
+        "E05": r"\bprice\b|telehealth visits? costs?",
+        "E06": r"waiting room|child",
+        "E07": r"per year",
+        "E08": r"language",
+        "E09": r"\bwait",
+        "E10": r"insurance",
+    }[case["id"]]
     assert not any(re.search(term, t, re.I) for t in TEXT.values())

@@ -15,8 +15,9 @@ describe("idempotency keys", () => {
 
 describe("formatStep", () => {
   it("shows state, tool, code and time", () => {
-    expect(formatStep({ n: 2, state: "execute", tool: "check_availability", code: "ok", seconds: 0.0124 }))
-      .toBe("2. execute check_availability → ok (12 ms)");
+    expect(formatStep({ n: 2, state: "execute", tool: "check_availability", code: "ok", seconds: 0.0124 })).toBe(
+      "2. execute check_availability → ok (12 ms)",
+    );
   });
   it("omits what is missing", () => {
     expect(formatStep({ n: 1, state: "respond", code: "answer" })).toBe("1. respond → answer");

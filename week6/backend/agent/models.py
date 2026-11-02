@@ -66,7 +66,9 @@ class AgentRun(models.Model):
     tokens = models.PositiveIntegerField(default=0)
     seconds = models.FloatField(default=0)
     model = models.CharField(max_length=100, blank=True)
-    pending_action = models.ForeignKey(PendingAction, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    pending_action = models.ForeignKey(
+        PendingAction, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -31,7 +31,7 @@ CHUNK_SIZES = (40, 80, 120, 200)
 RRF_KS = (10, 30, 60)
 TOP_KS = (2, 3, 4)
 FLOORS = tuple(round(0.50 + 0.02 * i, 2) for i in range(16))  # 0.50 … 0.80
-F_KWS = tuple(round(0.3 + 0.1 * i, 1) for i in range(7))     # 0.3 … 0.9
+F_KWS = tuple(round(0.3 + 0.1 * i, 1) for i in range(7))  # 0.3 … 0.9
 CHAMPION = RetrievalConfig()  # Week 4: semantic, floor 0.70, top-k 2, chunk size 80
 OUT = Path(__file__).resolve().parent / "dev"
 
@@ -54,9 +54,16 @@ def grid() -> list[RetrievalConfig]:
 
 def tie_key(cfg: RetrievalConfig):
     """Smaller is preferred: the fixed tie order from the rules."""
-    return (cfg.method != SEMANTIC, cfg.gate != GATE_S, -cfg.floor, cfg.top_k, abs(cfg.chunk_tokens - 80),
-            -cfg.chunk_tokens,  # 40 and 120 are equally close to 80: the larger wins (user decision, before any run)
-            -cfg.rrf_k if cfg.method == HYBRID else 0, -cfg.f_kw if cfg.gate == GATE_SK else 0)
+    return (
+        cfg.method != SEMANTIC,
+        cfg.gate != GATE_S,
+        -cfg.floor,
+        cfg.top_k,
+        abs(cfg.chunk_tokens - 80),
+        -cfg.chunk_tokens,  # 40 and 120 are equally close to 80: the larger wins (user decision, before any run)
+        -cfg.rrf_k if cfg.method == HYBRID else 0,
+        -cfg.f_kw if cfg.gate == GATE_SK else 0,
+    )
 
 
 def score(cfg: RetrievalConfig, dev: list[dict], cands: dict[int, dict[str, Candidates]]) -> dict:
@@ -90,8 +97,10 @@ def ship_decision(winner: RetrievalConfig | None, winner_score: dict | None, cha
     if winner == CHAMPION:
         return {"challenger_ships": False, "reason": "the dev winner is the champion itself"}
     if winner_score["hits"] > champion_score["hits"] and winner_score["false"] <= champion_score["false"]:
-        return {"challenger_ships": True, "reason": "more dev hits than the champion, no more dev false retrievals "
-                                                     "(subject to the safety gate)"}
+        return {
+            "challenger_ships": True,
+            "reason": "more dev hits than the champion, no more dev false retrievals (subject to the safety gate)",
+        }
     return {"challenger_ships": False, "reason": "it does not beat the champion on dev (a tie keeps the champion)"}
 
 
@@ -119,52 +128,83 @@ def select(embedder: Embedder) -> dict:
     for name, cfg in (("champion", CHAMPION), ("winner", winner)):
         if cfg is None:
             continue
-        per_question[name] = {case["id"]: [cands[cfg.chunk_tokens][case["id"]].chunks[i].passage_id
-                                           for i in returned(cands[cfg.chunk_tokens][case["id"]], cfg)] for case in dev}
+        per_question[name] = {
+            case["id"]: [
+                cands[cfg.chunk_tokens][case["id"]].chunks[i].passage_id
+                for i in returned(cands[cfg.chunk_tokens][case["id"]], cfg)
+            ]
+            for case in dev
+        }
     best_by_method = {}
     for m, g in ((SEMANTIC, GATE_S), (HYBRID, GATE_S), (HYBRID, GATE_SK)):
         sub = choose([(c, s) for c, s in scored if c.method == m and c.gate == g])
-        best_by_method[f"{m}, gate {g}"] = {"best_hits": sub["best_hits"], "tied_at_top": sub["tied_at_top"],
-                                            "winner": sub["winner"].as_dict() if sub["winner"] else None}
-    best_by_size = {size: choose([(c, s) for c, s in scored if c.chunk_tokens == size])["best_hits"] for size in CHUNK_SIZES}
-    return {"embedder": embedder.identity, "dev_questions": len(dev),
-            "dev_answerable": sum(c["answerable"] for c in dev), "dev_unanswerable": sum(not c["answerable"] for c in dev),
-            "dev_sha256": frozen.WEEK5_FROZEN_SHA256["dev/retrieval_dev.json"], "corpus": snapshot,
-            "configurations": len(configs), "eligible": chosen["eligible"], "tied_at_top": chosen["tied_at_top"],
-            "best_hits": chosen["best_hits"], "winner": winner.as_dict() if winner else None,
-            "winner_score": lookup.get(winner), "champion": CHAMPION.as_dict(), "champion_score": champion_score,
-            "decision": decision, "best_by_method": best_by_method, "best_by_chunk_size": best_by_size,
-            "returned": per_question}
+        best_by_method[f"{m}, gate {g}"] = {
+            "best_hits": sub["best_hits"],
+            "tied_at_top": sub["tied_at_top"],
+            "winner": sub["winner"].as_dict() if sub["winner"] else None,
+        }
+    best_by_size = {
+        size: choose([(c, s) for c, s in scored if c.chunk_tokens == size])["best_hits"] for size in CHUNK_SIZES
+    }
+    return {
+        "embedder": embedder.identity,
+        "dev_questions": len(dev),
+        "dev_answerable": sum(c["answerable"] for c in dev),
+        "dev_unanswerable": sum(not c["answerable"] for c in dev),
+        "dev_sha256": frozen.WEEK5_FROZEN_SHA256["dev/retrieval_dev.json"],
+        "corpus": snapshot,
+        "configurations": len(configs),
+        "eligible": chosen["eligible"],
+        "tied_at_top": chosen["tied_at_top"],
+        "best_hits": chosen["best_hits"],
+        "winner": winner.as_dict() if winner else None,
+        "winner_score": lookup.get(winner),
+        "champion": CHAMPION.as_dict(),
+        "champion_score": champion_score,
+        "decision": decision,
+        "best_by_method": best_by_method,
+        "best_by_chunk_size": best_by_size,
+        "returned": per_question,
+    }
 
 
 def build_report(r: dict) -> str:
     w, c = r["winner"], r["champion"]
-    fmt = lambda cfg: ("–" if cfg is None else f"{cfg['method']}, chunk {cfg['chunk_tokens']}, floor {cfg['floor']:.2f}, "
-                       f"top-k {cfg['top_k']}" + (f", RRF k {cfg['rrf_k']}, gate {cfg['gate']}" if cfg['method'] == 'hybrid' else "")
-                       + (f", f_kw {cfg['f_kw']:.1f}" if cfg['gate'] == 'S+K' else ""))
+    fmt = lambda cfg: (
+        "–"
+        if cfg is None
+        else f"{cfg['method']}, chunk {cfg['chunk_tokens']}, floor {cfg['floor']:.2f}, "
+        f"top-k {cfg['top_k']}"
+        + (f", RRF k {cfg['rrf_k']}, gate {cfg['gate']}" if cfg["method"] == "hybrid" else "")
+        + (f", f_kw {cfg['f_kw']:.1f}" if cfg["gate"] == "S+K" else "")
+    )
     a, u = r["dev_answerable"], r["dev_unanswerable"]
-    methods = "\n".join(f"| {name} | {v['best_hits']} of {a} | {v['tied_at_top']} | {fmt(v['winner'])} |"
-                        for name, v in r["best_by_method"].items())
+    methods = "\n".join(
+        f"| {name} | {v['best_hits']} of {a} | {v['tied_at_top']} | {fmt(v['winner'])} |"
+        for name, v in r["best_by_method"].items()
+    )
     sizes = "\n".join(f"| {size} | {hits} of {a} |" for size, hits in r["best_by_chunk_size"].items())
-    rows = "\n".join(f"| {q} | {', '.join(r['returned']['champion'][q]) or '–'} | {', '.join(r['returned'].get('winner', {}).get(q, [])) or '–'} |"
-                     for q in r["returned"]["champion"])
+    rows = "\n".join(
+        f"| {q} | {', '.join(r['returned']['champion'][q]) or '–'} | {', '.join(r['returned'].get('winner', {}).get(q, [])) or '–'} |"
+        for q in r["returned"]["champion"]
+    )
     return f"""# Retrieval selection on the dev set (Step 3)
 
-> Generated by `python manage.py select_retrieval`; do not edit by hand. Dev set only ({r['dev_questions']} questions:
+> Generated by `python manage.py select_retrieval`; do not edit by hand. Dev set only ({r["dev_questions"]} questions:
 > {a} answerable, {u} unanswerable); the frozen evaluation set is never read here. Rules written before any run
 > (docs/REQUIREMENTS.md, "Step 3 rules").
 
-**{r['configurations']} configurations** were tried; **{r['eligible']}** had 0 false retrievals on dev; the best had
-**{r['best_hits']} of {a}** dev hits, and **{r['tied_at_top']} configurations tied at that score**, so the fixed tie order
-decided. With {r['dev_questions']} dev questions and this many configurations, the winner is partly luck; the frozen
+**{r["configurations"]} configurations** were tried; **{r["eligible"]}** had 0 false retrievals on dev; the best had
+**{r["best_hits"]} of {a}** dev hits, and **{r["tied_at_top"]} configurations tied at that score**, so the fixed tie order
+decided. With {r["dev_questions"]} dev questions and this many configurations, the winner is partly luck; the frozen
 evaluation set is the honest check.
 
 | | setting | dev hits | dev false retrievals |
 |---|---|---|---|
-| **Winner (challenger)** | {fmt(w)} | {r['winner_score']['hits'] if w else '–'} of {a} | {r['winner_score']['false'] if w else '–'} of {u} |
-| Champion (Week 4) | {fmt(c)} | {r['champion_score']['hits']} of {a} | {r['champion_score']['false']} of {u} |
+| **Winner (challenger)** | {fmt(w)} | {r["winner_score"]["hits"] if w else "–"} of {a} | {r["winner_score"]["false"] if w else "–"} of {u} |
+| Champion (Week 4) | {fmt(c)} | {r["champion_score"]["hits"]} of {a} | {r["champion_score"]["false"]} of {u} |
 
-**Ship decision (champion/challenger, dev only): {'the challenger ships, subject to the safety gate' if r['decision']['challenger_ships'] else 'the champion stays'}**: {r['decision']['reason']}.
+**Ship decision (champion/challenger, dev only): {"the challenger ships, subject to the safety gate" if r["decision"]["challenger_ships"] else "the champion stays"}**: {r["decision"]["reason"]}.
 
 ## Best per method (0 dev false retrievals)
 

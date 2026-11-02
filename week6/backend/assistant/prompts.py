@@ -87,12 +87,14 @@ def passage_block(p: Passage) -> str:
 def history_block(turns) -> str:
     if not turns:
         return ""
-    return HISTORY_TEMPLATE.format(turns="\n".join(
-        HISTORY_TURN.format(question=t.question, answer=t.answer or "(no answer)") for t in turns))
+    return HISTORY_TEMPLATE.format(
+        turns="\n".join(HISTORY_TURN.format(question=t.question, answer=t.answer or "(no answer)") for t in turns)
+    )
 
 
-def build_prompt(question: str, ranked: list[Passage], context_tokens: int, max_output_tokens: int,
-                 history=()) -> BuiltPrompt:
+def build_prompt(
+    question: str, ranked: list[Passage], context_tokens: int, max_output_tokens: int, history=()
+) -> BuiltPrompt:
     """`history`: earlier turns (assistant/history.py), already trimmed to their own budget."""
     budget = math.floor((context_tokens - max_output_tokens) * (1 - SAFETY_MARGIN))
     earlier = history_block(history)
@@ -109,7 +111,19 @@ def build_prompt(question: str, ranked: list[Passage], context_tokens: int, max_
         else:
             dropped.append(p.id)
     user = earlier + USER_TEMPLATE.format(question=question, passages="\n\n".join(blocks) if blocks else "(none)")
-    split = {"context": context_tokens, "output_reserved": max_output_tokens, "prompt_budget": budget,
-             "system": system, "question": task, "history": fixed - system - task, "passages": used - fixed}
-    return BuiltPrompt(messages=[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": user}],
-                       included=included, dropped=dropped, approx_prompt_tokens=used, budget=split)
+    split = {
+        "context": context_tokens,
+        "output_reserved": max_output_tokens,
+        "prompt_budget": budget,
+        "system": system,
+        "question": task,
+        "history": fixed - system - task,
+        "passages": used - fixed,
+    }
+    return BuiltPrompt(
+        messages=[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": user}],
+        included=included,
+        dropped=dropped,
+        approx_prompt_tokens=used,
+        budget=split,
+    )

@@ -34,18 +34,34 @@ export function FormField({ id, label, error, hint, required, kind = "single", c
     ...(error ? { "aria-invalid": true as const } : {}),
     ...(describedBy ? { "aria-describedby": describedBy } : {}),
   };
-  const marker = required ? <span aria-hidden="true" className="req"> *</span> : null;
+  const marker = required ? (
+    <span aria-hidden="true" className="req">
+      {" "}
+      *
+    </span>
+  ) : null;
   const help = (
     <>
-      {hint && <div id={hintId} className="hint">{hint}</div>}
-      {error && <div id={errorId} className="field-error">{error}</div>}
+      {hint && (
+        <div id={hintId} className="hint">
+          {hint}
+        </div>
+      )}
+      {error && (
+        <div id={errorId} className="field-error">
+          {error}
+        </div>
+      )}
     </>
   );
 
   if (kind === "group") {
     return (
       <fieldset className="field" aria-describedby={describedBy}>
-        <legend>{label}{marker}</legend>
+        <legend>
+          {label}
+          {marker}
+        </legend>
         {children(control)}
         {help}
       </fieldset>
@@ -53,7 +69,10 @@ export function FormField({ id, label, error, hint, required, kind = "single", c
   }
   return (
     <div className="field">
-      <label htmlFor={id}>{label}{marker}</label>
+      <label htmlFor={id}>
+        {label}
+        {marker}
+      </label>
       {children(control)}
       {help}
     </div>

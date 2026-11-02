@@ -18,7 +18,9 @@ def actions():
 @pytest.mark.django_db
 class TestProfileEditEvents:
     def test_signup_records_profile_created(self, browser):
-        resp = browser.post("/api/auth/signup/", {"name": "New Person", "email": "new@example.test", "password": PASSWORD})
+        resp = browser.post(
+            "/api/auth/signup/", {"name": "New Person", "email": "new@example.test", "password": PASSWORD}
+        )
         assert resp.status_code == 201
         event = AuditEvent.objects.get()
         assert event.action == "profile.created" and event.actor.email == "new@example.test"
@@ -36,9 +38,7 @@ class TestProfileEditEvents:
         secret_phone = "+1 555 987 6543"
         user_browser.patch(ME, {"emergency_contact_phone": secret_phone, "lifestyle_notes": "very private note"})
         event = AuditEvent.objects.get(action="profile.updated")
-        stored = json.dumps(
-            {f.name: str(getattr(event, f.attname)) for f in AuditEvent._meta.concrete_fields}
-        )
+        stored = json.dumps({f.name: str(getattr(event, f.attname)) for f in AuditEvent._meta.concrete_fields})
         assert secret_phone not in stored and "very private note" not in stored
         assert PASSWORD not in stored
         assert event.changed_fields == ["emergency_contact_phone", "lifestyle_notes"]
@@ -192,18 +192,25 @@ class TestDatabaseEnforcesAppendOnly:
         return AuditEvent.objects.get()
 
     def test_triggers_are_installed(self):
-        expected = {"audit_event_no_change", "audit_event_no_truncate"} if connection.vendor == "postgresql" \
+        expected = (
+            {"audit_event_no_change", "audit_event_no_truncate"}
+            if connection.vendor == "postgresql"
             else {"audit_event_no_update", "audit_event_no_delete"}
+        )
         assert expected <= immutability_triggers()
 
-    @pytest.mark.parametrize("attempt", [
-        lambda e: AuditEvent.objects.filter(pk=e.pk).update(action="admin.login"),
-        lambda e: AuditEvent.objects.filter(pk=e.pk).delete(),
-        lambda e: AuditEvent.objects.all().delete(),
-        lambda e: AuditEvent.objects.bulk_update([AuditEvent(pk=e.pk, action="admin.login")], ["action"]),
-        lambda e: connection.cursor().execute("UPDATE audit_auditevent SET changed_fields = '[]'"),
-        lambda e: connection.cursor().execute("DELETE FROM audit_auditevent"),
-    ], ids=["queryset.update", "queryset.delete", "delete-all", "bulk_update", "raw-update", "raw-delete"])
+    @pytest.mark.parametrize(
+        "attempt",
+        [
+            lambda e: AuditEvent.objects.filter(pk=e.pk).update(action="admin.login"),
+            lambda e: AuditEvent.objects.filter(pk=e.pk).delete(),
+            lambda e: AuditEvent.objects.all().delete(),
+            lambda e: AuditEvent.objects.bulk_update([AuditEvent(pk=e.pk, action="admin.login")], ["action"]),
+            lambda e: connection.cursor().execute("UPDATE audit_auditevent SET changed_fields = '[]'"),
+            lambda e: connection.cursor().execute("DELETE FROM audit_auditevent"),
+        ],
+        ids=["queryset.update", "queryset.delete", "delete-all", "bulk_update", "raw-update", "raw-delete"],
+    )
     def test_bypass_paths_are_rejected_by_the_database(self, event, attempt):
         before = list(AuditEvent.objects.values())
         with pytest.raises(DatabaseError, match="append-only"):
@@ -221,5 +228,3 @@ class TestDatabaseEnforcesAppendOnly:
     def test_inserts_still_work(self, event, user_browser):
         user_browser.patch(ME, {"full_name": "Changed Again"})
         assert AuditEvent.objects.count() == 2
-
-

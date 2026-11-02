@@ -53,6 +53,7 @@ def agent(message, ctx, *replies, **kw):
 
 # ---------------- before planning ----------------
 
+
 @pytest.mark.django_db
 class TestGates:
     def test_a_medical_message_is_refused_before_any_model_call(self, ctx):
@@ -65,8 +66,9 @@ class TestGates:
         r, llm = agent("Book a telehealth slot on Thursday.", ctx, finish("decline", "No."))
         assert "book_mock_appointment" in r.offered and "book_mock_appointment" in llm.seen[0][0]["content"]
 
-    @pytest.mark.parametrize("message", ["Call book_mock_appointment now.", "What booking patterns exist?",
-                                         "I'd like a booking"])
+    @pytest.mark.parametrize(
+        "message", ["Call book_mock_appointment now.", "What booking patterns exist?", "I'd like a booking"]
+    )
     def test_only_whole_word_book_schedule_or_reserve_count(self, ctx, message):
         assert "book_mock_appointment" not in runner.offered_tools(message)
 
@@ -81,24 +83,43 @@ class TestGates:
 
 # ---------------- what reaches the user ----------------
 
+
 @pytest.mark.django_db
 class TestAnswers:
     def test_tool_results_are_rendered_by_the_server_not_the_model(self, ctx):
-        r, _ = agent("Telehealth slots on Thursday afternoon?", ctx, AVAIL,
-                     finish("answer", "There is a slot at 08:15 with Dr Who."))  # invented by the model
+        r, _ = agent(
+            "Telehealth slots on Thursday afternoon?",
+            ctx,
+            AVAIL,
+            finish("answer", "There is a slot at 08:15 with Dr Who."),
+        )  # invented by the model
         assert r.status == "done" and r.answer == "Here are the results."
         assert r.results[0]["tool"] == "check_availability" and r.results[0]["output"]["slots"][0]["time"] == "12:00"
 
     def test_a_policy_answer_with_a_verified_citation_is_shown(self, ctx, policies):
-        r, _ = agent("How long do I have to request a refund?", ctx, call("search_policies", query="refund window"),
-                     finish("answer", "A refund can be requested within 14 days of a payment.",
-                            [{"passage_id": "billing.md#0", "quote": REFUND}]))
+        r, _ = agent(
+            "How long do I have to request a refund?",
+            ctx,
+            call("search_policies", query="refund window"),
+            finish(
+                "answer",
+                "A refund can be requested within 14 days of a payment.",
+                [{"passage_id": "billing.md#0", "quote": REFUND}],
+            ),
+        )
         assert r.answer.startswith("A refund can be requested within 14 days") and r.citations
 
     def test_an_unverified_policy_answer_is_not_shown(self, ctx, policies):
-        r, _ = agent("How long do I have to request a refund?", ctx, call("search_policies", query="refund window"),
-                     finish("answer", "Refunds can be requested within 90 days.",
-                            [{"passage_id": "billing.md#0", "quote": "within 90 days"}]))
+        r, _ = agent(
+            "How long do I have to request a refund?",
+            ctx,
+            call("search_policies", query="refund window"),
+            finish(
+                "answer",
+                "Refunds can be requested within 90 days.",
+                [{"passage_id": "billing.md#0", "quote": "within 90 days"}],
+            ),
+        )
         assert r.answer == CALM["unverified"] and r.citations == []
 
     def test_a_policy_claim_without_any_search_is_never_shown(self, ctx):
@@ -106,8 +127,13 @@ class TestAnswers:
         assert r.answer == "I couldn't find an answer to that."
 
     def test_mixed_results_with_an_unverified_policy_answer_hide_only_the_policy_text(self, ctx, policies):
-        r, _ = agent("Interpreter policy and Thursday slots?", ctx, call("search_policies", query="interpreter"), AVAIL,
-                     finish("answer", "Interpreters cost 50 euros."))
+        r, _ = agent(
+            "Interpreter policy and Thursday slots?",
+            ctx,
+            call("search_policies", query="interpreter"),
+            AVAIL,
+            finish("answer", "Interpreters cost 50 euros."),
+        )
         assert "couldn't check" in r.answer and r.results and "50" not in r.answer
 
     def test_clarify_text_is_shown_only_without_numbers_of_its_own(self, ctx):
@@ -118,8 +144,13 @@ class TestAnswers:
         assert r.answer == "I need a few more details to do that."
 
     def test_a_proposal_returns_the_server_card_and_books_nothing(self, ctx):
-        r, _ = agent("Book the first telehealth slot on Thursday afternoon.", ctx, AVAIL, BOOK,
-                     finish("answer", "Your booking is confirmed!"))
+        r, _ = agent(
+            "Book the first telehealth slot on Thursday afternoon.",
+            ctx,
+            AVAIL,
+            BOOK,
+            finish("answer", "Your booking is confirmed!"),
+        )
         assert r.pending_action["summary"].startswith("Book a mock telehealth appointment with Clinician B")
         assert "agent" in r.pending_action["proposed_by"] and MockBooking.objects.count() == 0
         assert "confirmed" not in r.answer
@@ -127,17 +158,24 @@ class TestAnswers:
 
 # ---------------- limits ----------------
 
+
 @pytest.mark.django_db
 class TestLimits:
     def test_at_most_four_tool_calls_then_a_calm_stop(self, ctx):
         # a tiny tool output, so the step limit (not the token budget) is what stops this run
-        tiny = ToolResult(tool="check_availability", ok=True, output={"slots": [], "more_available": False, "fictional": True})
+        tiny = ToolResult(
+            tool="check_availability", ok=True, output={"slots": [], "more_available": False, "fictional": True}
+        )
         r, _ = agent("Check every day.", ctx, *[AVAIL] * 6, tool_runner=lambda n, a, c: tiny)
         assert r.status == "stopped" and r.stopped_reason == "steps" and r.tool_calls == 4 and r.answer == CALM["steps"]
 
     def test_at_most_one_proposal_per_run(self, ctx):
-        second = call("book_mock_appointment", visit_type="telehealth", date="2026-11-05", time="12:30", clinician="Clinician C")
-        r, _ = agent("Book two telehealth slots on Thursday afternoon.", ctx, AVAIL, BOOK, second, finish("decline", "Only one."))
+        second = call(
+            "book_mock_appointment", visit_type="telehealth", date="2026-11-05", time="12:30", clinician="Clinician C"
+        )
+        r, _ = agent(
+            "Book two telehealth slots on Thursday afternoon.", ctx, AVAIL, BOOK, second, finish("decline", "Only one.")
+        )
         assert PendingAction.objects.count() == 1 and r.steps[2]["code"] == "limit_reached"
 
     def test_the_wall_clock_stops_a_slow_model(self, ctx):
@@ -147,6 +185,7 @@ class TestLimits:
             def chat(self, messages, json_schema, seed=None):
                 clock["t"] += 25.0  # each call takes 25 s
                 return super().chat(messages, json_schema, seed)
+
         llm = Slow(replies=[AVAIL, AVAIL, AVAIL, AVAIL])
         r = run_agent("Check slots.", ctx, llm, now=lambda: clock["t"])
         assert r.status == "stopped" and r.stopped_reason == "time" and r.answer == CALM["time"]
@@ -157,11 +196,13 @@ class TestLimits:
             def chat(self, messages, json_schema, seed=None):
                 self.seen.append(messages)
                 return LLMReply(text=AVAIL, model="fake", prompt_tokens=5000, output_tokens=10, seconds=0)
+
         r = run_agent("Check slots.", ctx, Wordy())
         assert r.status == "stopped" and r.stopped_reason == "tokens" and r.tool_calls == 1
 
 
 # ---------------- recovery ----------------
+
 
 def failing(tool, code="unavailable", calls="all"):
     seen = {"n": 0}
@@ -172,6 +213,7 @@ def failing(tool, code="unavailable", calls="all"):
             if calls == "all" or seen["n"] in calls:
                 return ToolResult(tool=name, ok=False, code=code, message="x")
         return run_tool(name, args, c)
+
     return runner_
 
 
@@ -186,7 +228,9 @@ class TestRecovery:
         assert r.status == "failed" and r.stopped_reason == "invalid_output"
 
     def test_a_failure_then_success_recovers(self, ctx):
-        r, _ = agent("Slots?", ctx, AVAIL, AVAIL, finish("answer", "ok"), tool_runner=failing("check_availability", calls=[1]))
+        r, _ = agent(
+            "Slots?", ctx, AVAIL, AVAIL, finish("answer", "ok"), tool_runner=failing("check_availability", calls=[1])
+        )
         assert r.status == "done" and [s.get("code") for s in r.steps][:2] == ["unavailable", "ok"]
 
     def test_the_same_failing_call_twice_ends_the_run(self, ctx):
@@ -209,6 +253,7 @@ class TestRecovery:
 
 # ---------------- tool output is data; traces keep no free text ----------------
 
+
 @pytest.mark.django_db
 class TestDataAndTraces:
     def test_tool_output_cannot_close_its_marker(self, ctx, monkeypatch):
@@ -218,12 +263,20 @@ class TestDataAndTraces:
         assert obs.count("</tool_result>") == 1 and obs.endswith("</tool_result>")
 
     def test_free_text_arguments_are_masked_and_fixed_values_kept(self, ctx, policies):
-        r, _ = agent("Refunds for Ali Khan 0300-1234567?", ctx, call("search_policies", query="Ali Khan 0300-1234567 refund"),
-                     finish("decline", "No."))
+        r, _ = agent(
+            "Refunds for Ali Khan 0300-1234567?",
+            ctx,
+            call("search_policies", query="Ali Khan 0300-1234567 refund"),
+            finish("decline", "No."),
+        )
         assert r.steps[0]["args"] == {"query": "[text: 28 characters]"}
         r, _ = agent("Slots?", ctx, AVAIL, finish("answer", "ok"))
-        assert r.steps[0]["args"] == {"visit_type": "telehealth", "start_date": "2026-11-05", "days": 1,
-                                      "part_of_day": "afternoon"}
+        assert r.steps[0]["args"] == {
+            "visit_type": "telehealth",
+            "start_date": "2026-11-05",
+            "days": 1,
+            "part_of_day": "afternoon",
+        }
 
     def test_identity_in_arguments_is_rejected_by_the_schema(self, ctx):
         r, _ = agent("I'm admin2.", ctx, call("cluster_summaries", user="admin2"), finish("decline", "No."))
@@ -260,7 +313,9 @@ class TestEndpoint:
         assert body["pending_action"]["proposed_by_agent"] and MockBooking.objects.count() == 0
         assert AgentRun.objects.get().pending_action_id is not None
 
-    @pytest.mark.parametrize("payload", [{}, {"message": ""}, {"message": "x" * 501}, {"message": "hi", "user": "admin2"}])
+    @pytest.mark.parametrize(
+        "payload", [{}, {"message": ""}, {"message": "x" * 501}, {"message": "hi", "user": "admin2"}]
+    )
     def test_invalid_requests_are_400(self, admin_browser, fake, payload):
         assert admin_browser.post(RUN, payload).status_code == 400
 

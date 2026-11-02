@@ -62,12 +62,15 @@ class ModelReply:
 # The server-side check, derived from the schema sent to the model (assistant/validation.py): no extra keys,
 # every key required, and the size limits. A field must contain more than whitespace where noted.
 NON_BLANK = r"\S"
-SERVER_ANSWER_SCHEMA = strict(ANSWER_SCHEMA, {
-    "$.answer": {"maxLength": MAX_ANSWER_CHARS},
-    "$.citations": {"maxItems": MAX_CITATIONS},
-    "$.citations[].passage_id": {"pattern": NON_BLANK},
-    "$.citations[].quote": {"pattern": NON_BLANK, "maxLength": MAX_QUOTE_CHARS},
-})
+SERVER_ANSWER_SCHEMA = strict(
+    ANSWER_SCHEMA,
+    {
+        "$.answer": {"maxLength": MAX_ANSWER_CHARS},
+        "$.citations": {"maxItems": MAX_CITATIONS},
+        "$.citations[].passage_id": {"pattern": NON_BLANK},
+        "$.citations[].quote": {"pattern": NON_BLANK, "maxLength": MAX_QUOTE_CHARS},
+    },
+)
 
 
 def parse_reply(text: str) -> ModelReply:

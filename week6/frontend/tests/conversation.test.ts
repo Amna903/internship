@@ -9,9 +9,11 @@ globalThis.fetch = ((_url: string, init: RequestInit) => {
   bodies.push(JSON.parse(String(init.body)));
   return Promise.resolve(new Response(JSON.stringify({ history: "signed" }), { status: 200 }));
 }) as typeof fetch;
-beforeEach(() => { bodies = []; });
+beforeEach(() => {
+  bodies = [];
+});
 
-const result = (history: string) => ({ history } as AskResponse);
+const result = (history: string) => ({ history }) as AskResponse;
 
 test("a first question sends no history, exactly as in Week 4", async () => {
   await assistantApi.ask("How long do refunds take?");
@@ -40,7 +42,8 @@ test("invalid history and the conversation limit end the conversation; other err
 });
 
 test("the conversation module never touches browser storage", async () => {
-  const src = await import("node:fs").then((fs) => fs.readFileSync("lib/conversation.ts", "utf8")
-    + fs.readFileSync("app/admin/assistant/page.tsx", "utf8"));
+  const src = await import("node:fs").then(
+    (fs) => fs.readFileSync("lib/conversation.ts", "utf8") + fs.readFileSync("app/admin/assistant/page.tsx", "utf8"),
+  );
   expect(src.replace(/\/\/.*$/gm, "")).not.toMatch(/localStorage|sessionStorage|indexedDB/);
 });

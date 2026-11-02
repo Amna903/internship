@@ -52,7 +52,9 @@ export function SiteNav() {
                 {l.label}
                 {l.href === "/saved" && hydrated && ids.length > 0 && (
                   <>
-                    <span className="count" aria-hidden="true">{ids.length}</span>
+                    <span className="count" aria-hidden="true">
+                      {ids.length}
+                    </span>
                     <span className="visually-hidden"> ({ids.length} saved)</span>
                   </>
                 )}

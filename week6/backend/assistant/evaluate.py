@@ -58,9 +58,11 @@ NO_FLOOR = "A without floor (diagnostic)"
 RED_TEAM = EVAL_DIR / "redteam_cases.json"
 
 # Which defence decided a run, from its internal reason.
-NOT_CALLED = {"below floor": "similarity floor (model not called)",
-              "server medical-advice check": "server medical check (model not called)",
-              "index out of date": "index out of date (model not called)"}
+NOT_CALLED = {
+    "below floor": "similarity floor (model not called)",
+    "server medical-advice check": "server medical check (model not called)",
+    "index out of date": "index out of date (model not called)",
+}
 
 
 def decided_by(run: dict) -> str:
@@ -83,6 +85,7 @@ def load_cases() -> list[dict]:
 
 
 # ---------------------------------------------------------------- scoring (pure; re-checked by tests)
+
 
 def shown_text(run: dict) -> str:
     """What the model produced and the user sees (see module docstring)."""
@@ -131,6 +134,7 @@ def case_passes(runs: list[dict]) -> bool:
 
 # ---------------------------------------------------------------- running against the model
 
+
 def _prepare_upload(case: dict, admin, embedder: Embedder) -> None:
     upload = case.get("upload")
     if not upload:
@@ -148,11 +152,20 @@ def run_case(case: dict, settings: dict, seed: int, llm: LLMClient, embedder: Em
         transaction.set_rollback(True)  # the upload never outlives its run
     r = answered.result
     top = search(case["question"], embedder, top_k=1, floor=-1.0).scores
-    run = {"seed": seed, "top_score": round(top[0], 3) if top else None, "status": r.status, "reason": r.reason, "public_reason": answered.public_reason,
-           "answer": r.answer if r.status == "answered" else "", "citations": r.citations,
-           "rejected_citations": r.rejected_citations, "groundedness": r.groundedness,
-           "model_called": r.model_called, "sources": answered.sources,
-           "tokens": (r.usage or {}).get("total_tokens", 0)}
+    run = {
+        "seed": seed,
+        "top_score": round(top[0], 3) if top else None,
+        "status": r.status,
+        "reason": r.reason,
+        "public_reason": answered.public_reason,
+        "answer": r.answer if r.status == "answered" else "",
+        "citations": r.citations,
+        "rejected_citations": r.rejected_citations,
+        "groundedness": r.groundedness,
+        "model_called": r.model_called,
+        "sources": answered.sources,
+        "tokens": (r.usage or {}).get("total_tokens", 0),
+    }
     run["failures"] = run_failures(case, run)
     return run
 
@@ -168,13 +181,23 @@ def evaluate(llm: LLMClient, embedder: Embedder, admin, base_seed: int) -> dict:
 
     results = {name: run_all(cases, s) for name, s in under_test.items()}
     no_floor = under_test[SHIPPED] | {"floor": -1.0}
-    return {"model": llm.model, "embedder": embedder.identity, "seeds": seeds, "settings": under_test,
-            "frozen_eval_sha256": frozen.FROZEN_SHA256["eval/eval_cases.json"], "corpus": corpus, "results": results,
-            "diagnostics": {"no_floor": {"settings": no_floor, "results": run_all(cases, no_floor)},
-                            "red_team": {"settings": under_test[SHIPPED], "results": run_all(red_team, under_test[SHIPPED])}}}
+    return {
+        "model": llm.model,
+        "embedder": embedder.identity,
+        "seeds": seeds,
+        "settings": under_test,
+        "frozen_eval_sha256": frozen.FROZEN_SHA256["eval/eval_cases.json"],
+        "corpus": corpus,
+        "results": results,
+        "diagnostics": {
+            "no_floor": {"settings": no_floor, "results": run_all(cases, no_floor)},
+            "red_team": {"settings": under_test[SHIPPED], "results": run_all(red_team, under_test[SHIPPED])},
+        },
+    }
 
 
 # ---------------------------------------------------------------- report
+
 
 def _rate(cases: list[dict], runs: dict) -> str:
     passed = sum(case_passes(runs[c["id"]]) for c in cases)
@@ -192,9 +215,13 @@ def summary(result: dict, cases: list[dict]) -> dict:
             "rejected_citations": sum(r["rejected_citations"] for r in all_runs),
             "answered_runs": len(answered),
             "answered_runs_citing_expected": sum(
-                1 for c in cases for r in runs[c["id"]] if r["status"] == "answered"
+                1
+                for c in cases
+                for r in runs[c["id"]]
+                if r["status"] == "answered"
                 and (c.get("expected_source") or c.get("if_answered", {}).get("expected_source"))
-                in {x["passage_id"].split("#")[0].split("@")[0] for x in r["citations"]}),
+                in {x["passage_id"].split("#")[0].split("@")[0] for x in r["citations"]}
+            ),
             "tokens": sum(r["tokens"] for r in all_runs),
         }
     return out
@@ -212,8 +239,14 @@ def _defence_table(result: dict, cases: list[dict], names: list[str]) -> str:
     ids = [c["id"] for c in cases]
     counts = {n: _defence_counts(result["results"][n], ids) for n in names}
     rows = sorted({k for c in counts.values() for k in c})
-    return ("| decided by | " + " | ".join(names) + " |\n|---|" + "---|" * len(names) + "\n" +
-            "\n".join(f"| {k} | " + " | ".join(str(counts[n].get(k, 0)) for n in names) + " |" for k in rows))
+    return (
+        "| decided by | "
+        + " | ".join(names)
+        + " |\n|---|"
+        + "---|" * len(names)
+        + "\n"
+        + "\n".join(f"| {k} | " + " | ".join(str(counts[n].get(k, 0)) for n in names) + " |" for k in rows)
+    )
 
 
 def _defence_note(result: dict, cases: list[dict]) -> str:
@@ -221,26 +254,34 @@ def _defence_note(result: dict, cases: list[dict]) -> str:
     runs = result["results"][SHIPPED]
     reached = [c["id"] for c in adversarial if any(r["model_called"] for r in runs[c["id"]])]
     floor = [c["id"] for c in adversarial if all(decided_by(r).startswith("similarity floor") for r in runs[c["id"]])]
-    return (f"In the shipped setting, {len(floor)} of the {len(adversarial)} non-answerable cases were stopped by the similarity "
-            f"floor before reaching the model ({', '.join(floor) or 'none'}); {len(reached)} reached the model "
-            f"({', '.join(reached) or 'none'}). **Most adversarial cases were stopped by the similarity floor before "
-            "reaching the model; this evaluation does not test the model's injection resistance or the server checks on "
-            "those cases.** The no-floor and red-team diagnostics below do. Because top-k only acts after the floor, the "
-            "A/B comparison says little about these cases.")
+    return (
+        f"In the shipped setting, {len(floor)} of the {len(adversarial)} non-answerable cases were stopped by the similarity "
+        f"floor before reaching the model ({', '.join(floor) or 'none'}); {len(reached)} reached the model "
+        f"({', '.join(reached) or 'none'}). **Most adversarial cases were stopped by the similarity floor before "
+        "reaching the model; this evaluation does not test the model's injection resistance or the server checks on "
+        "those cases.** The no-floor and red-team diagnostics below do. Because top-k only acts after the floor, the "
+        "A/B comparison says little about these cases."
+    )
 
 
 def _findings(result: dict, cases: list[dict]) -> str:
     runs = result["results"][SHIPPED]
     floor = result["settings"][SHIPPED]["floor"]
     blocked = [c for c in cases if c["category"] == "answerable" or c.get("expected_source")]
-    lines = [f"- **{c['id']}** ({c['category']}): top retrieval score {runs[c['id']][0]['top_score']:.3f} < floor {floor:.2f}, so "
-             "a question the policies answer was stopped before the model."
-             for c in blocked if all(decided_by(r).startswith("similarity floor") for r in runs[c["id"]])]
+    lines = [
+        f"- **{c['id']}** ({c['category']}): top retrieval score {runs[c['id']][0]['top_score']:.3f} < floor {floor:.2f}, so "
+        "a question the policies answer was stopped before the model."
+        for c in blocked
+        if all(decided_by(r).startswith("similarity floor") for r in runs[c["id"]])
+    ]
     if not lines:
         return ""
-    return ("### Findings for a future dev-set round (configuration NOT changed on eval results)\n\n" + "\n".join(lines) +
-            "\n\nThe dev set had no paraphrase-style answerable questions, so the floor was set without seeing any. These "
-            "are candidates for the next dev round; the shipped floor stays as tuned.")
+    return (
+        "### Findings for a future dev-set round (configuration NOT changed on eval results)\n\n"
+        + "\n".join(lines)
+        + "\n\nThe dev set had no paraphrase-style answerable questions, so the floor was set without seeing any. These "
+        "are candidates for the next dev round; the shipped floor stays as tuned."
+    )
 
 
 def _diagnostic_rows(runs_by_case: dict, case_list: list[dict], floor: float | None) -> str:
@@ -250,9 +291,11 @@ def _diagnostic_rows(runs_by_case: dict, case_list: list[dict], floor: float | N
         top = runs[0]["top_score"]
         verdict = "**pass**" if case_passes(runs) else "**FAIL**"
         details = sorted({f for r in runs for f in r["failures"]})
-        rows.append(f"| {c['id']} | {top:.3f}{(' (clears floor)' if top >= floor else ' (below floor)') if floor is not None else ''} | "
-                    f"{', '.join(r['status'] for r in runs)} | {'; '.join(sorted({decided_by(r) for r in runs}))} | "
-                    f"{verdict} ({sum(not r['failures'] for r in runs)}/3){': ' + '; '.join(details) if details else ''} |")
+        rows.append(
+            f"| {c['id']} | {top:.3f}{(' (clears floor)' if top >= floor else ' (below floor)') if floor is not None else ''} | "
+            f"{', '.join(r['status'] for r in runs)} | {'; '.join(sorted({decided_by(r) for r in runs}))} | "
+            f"{verdict} ({sum(not r['failures'] for r in runs)}/3){': ' + '; '.join(details) if details else ''} |"
+        )
     return "\n".join(rows)
 
 
@@ -262,11 +305,11 @@ def _no_floor_section(result: dict, cases: list[dict]) -> str:
     return f"""## Diagnostic 1: the same 18 cases with the floor turned off (not a setting, not shipped)
 
 Every case reaches the model and the server checks, to see whether the second line of defence holds on its own.
-Settings: floor off, top-k {d['settings']['top_k']}, groundedness threshold {d['settings']['groundedness_threshold']:.2f}. **{passed} of {len(cases)} cases passed.**
+Settings: floor off, top-k {d["settings"]["top_k"]}, groundedness threshold {d["settings"]["groundedness_threshold"]:.2f}. **{passed} of {len(cases)} cases passed.**
 
 | case | top score | statuses of the 3 runs | decided by | result |
 |---|---|---|---|---|
-{_diagnostic_rows(d['results'], cases, floor=None)}"""
+{_diagnostic_rows(d["results"], cases, floor=None)}"""
 
 
 def _red_team_section(result: dict) -> str:
@@ -275,12 +318,12 @@ def _red_team_section(result: dict) -> str:
     passed = sum(case_passes(d["results"][c["id"]]) for c in red)
     return f"""## Diagnostic 2: red-team set, shipped settings (written by the user after the evaluation; diagnostic only)
 
-Injections wrapped inside on-topic questions so they clear the floor ({d['settings']['floor']:.2f}) and reach the deeper defences.
+Injections wrapped inside on-topic questions so they clear the floor ({d["settings"]["floor"]:.2f}) and reach the deeper defences.
 Not part of the 18 frozen cases. **{passed} of {len(red)} red-team cases passed.**
 
 | case | top score | statuses of the 3 runs | decided by | result |
 |---|---|---|---|---|
-{_diagnostic_rows(d['results'], red, floor=d['settings']['floor'])}"""
+{_diagnostic_rows(d["results"], red, floor=d["settings"]["floor"])}"""
 
 
 def build_report(result: dict, cases: list[dict]) -> str:
@@ -290,12 +333,18 @@ def build_report(result: dict, cases: list[dict]) -> str:
     groups = {}
     for c in cases:
         groups.setdefault(c["category"], []).append(c)
-    category_rows = "\n".join(f"| {cat} | {len(cs)} | " + " | ".join(_rate(cs, result["results"][n]) for n in names) + " |"
-                              for cat, cs in sorted(groups.items()))
-    by_author = {"user": [c for c in cases if c["author"] == "user"],
-                 "assistant": [c for c in cases if c["author"] != "user"]}
-    author_rows = "\n".join(f"| {who} | {len(cs)} | " + " | ".join(_rate(cs, result["results"][n]) for n in names) + " |"
-                            for who, cs in by_author.items())
+    category_rows = "\n".join(
+        f"| {cat} | {len(cs)} | " + " | ".join(_rate(cs, result["results"][n]) for n in names) + " |"
+        for cat, cs in sorted(groups.items())
+    )
+    by_author = {
+        "user": [c for c in cases if c["author"] == "user"],
+        "assistant": [c for c in cases if c["author"] != "user"],
+    }
+    author_rows = "\n".join(
+        f"| {who} | {len(cs)} | " + " | ".join(_rate(cs, result["results"][n]) for n in names) + " |"
+        for who, cs in by_author.items()
+    )
     independent = [c for c in cases if c["id"] not in LESS_INDEPENDENT]
 
     def passes(n, cid):
@@ -307,9 +356,15 @@ def build_report(result: dict, cases: list[dict]) -> str:
         for n in names:
             runs = result["results"][n][c["id"]]
             stopped = sorted({r["reason"] or "answered" for r in runs})
-            cells.append(f"{'**pass**' if case_passes(runs) else 'FAIL'} ({passes(n, c['id'])}/3) · {', '.join(r['status'] for r in runs)} · {'; '.join(stopped)}")
+            cells.append(
+                f"{'**pass**' if case_passes(runs) else 'FAIL'} ({passes(n, c['id'])}/3) · {', '.join(r['status'] for r in runs)} · {'; '.join(stopped)}"
+            )
         case_rows.append(f"| {c['id']} | {c['category']} | {c['author']} | " + " | ".join(cells) + " |")
-    disagree = [c["id"] for c in cases if case_passes(result["results"][a][c["id"]]) != case_passes(result["results"][b][c["id"]])]
+    disagree = [
+        c["id"]
+        for c in cases
+        if case_passes(result["results"][a][c["id"]]) != case_passes(result["results"][b][c["id"]])
+    ]
     unstable = sorted({c["id"] for c in cases for n in names if passes(n, c["id"]) in (1, 2)})
     failures = []
     for c in cases:
@@ -321,20 +376,28 @@ def build_report(result: dict, cases: list[dict]) -> str:
 
     return f"""# Assistant evaluation: 18 frozen cases, two settings
 
-> Generated by `python manage.py evaluate_assistant`; do not edit by hand. Model `{result['model']}`, embedder
-> `{result['embedder']}`, seeds {', '.join(map(str, result['seeds']))}, frozen cases SHA-256 `{result['frozen_eval_sha256'][:16]}…`.
+> Generated by `python manage.py evaluate_assistant`; do not edit by hand. Model `{result["model"]}`, embedder
+> `{result["embedder"]}`, seeds {", ".join(map(str, result["seeds"]))}, frozen cases SHA-256 `{
+        result["frozen_eval_sha256"][:16]
+    }…`.
 > Each case ran 3 times per setting and passes if at least 2 runs pass.
 
 ## Settings (named before any case ran)
 
 | setting | floor | top-k | groundedness threshold | role |
 |---|---|---|---|---|
-| {a} | {result['settings'][a]['floor']:.2f} | {result['settings'][a]['top_k']} | {result['settings'][a]['groundedness_threshold']:.2f} | **shipped**: tuned on the dev set |
-| {b} | {result['settings'][b]['floor']:.2f} | {result['settings'][b]['top_k']} | {result['settings'][b]['groundedness_threshold']:.2f} | comparison only (top-k tied on the dev set) |
+| {a} | {result["settings"][a]["floor"]:.2f} | {result["settings"][a]["top_k"]} | {
+        result["settings"][a]["groundedness_threshold"]:.2f} | **shipped**: tuned on the dev set |
+| {b} | {result["settings"][b]["floor"]:.2f} | {result["settings"][b]["top_k"]} | {
+        result["settings"][b]["groundedness_threshold"]:.2f} | comparison only (top-k tied on the dev set) |
 
 **The comparison is for reporting only. Setting A ships and stays.** {
-f"Setting B passed {better} more case(s) here: a finding and a candidate for a future dev-set round, not a reason to switch." if better > 0 else
-f"Setting B passed {-better} fewer case(s)." if better < 0 else "Both settings passed the same number of cases."}
+        f"Setting B passed {better} more case(s) here: a finding and a candidate for a future dev-set round, not a reason to switch."
+        if better > 0
+        else f"Setting B passed {-better} fewer case(s)."
+        if better < 0
+        else "Both settings passed the same number of cases."
+    }
 
 **With 18 cases, a difference of 1–2 cases between A and B is within noise, so don't over-interpret small gaps.**
 
@@ -342,11 +405,17 @@ f"Setting B passed {-better} fewer case(s)." if better < 0 else "Both settings p
 
 | | {a} | {b} |
 |---|---|---|
-| cases passed | **{s[a]['passed']} of {len(cases)}** | **{s[b]['passed']} of {len(cases)}** |
-| without A1 and A6 (less independent of the Step 9 design) | {_rate(independent, result['results'][a])} | {_rate(independent, result['results'][b])} |
-| verified citations / rejected citations | {s[a]['verified_citations']} / {s[a]['rejected_citations']} | {s[b]['verified_citations']} / {s[b]['rejected_citations']} |
-| answered runs citing the expected policy | {s[a]['answered_runs_citing_expected']} of {s[a]['answered_runs']} | {s[b]['answered_runs_citing_expected']} of {s[b]['answered_runs']} |
-| tokens used (all runs) | {s[a]['tokens']:,} | {s[b]['tokens']:,} |
+| cases passed | **{s[a]["passed"]} of {len(cases)}** | **{s[b]["passed"]} of {len(cases)}** |
+| without A1 and A6 (less independent of the Step 9 design) | {_rate(independent, result["results"][a])} | {
+        _rate(independent, result["results"][b])
+    } |
+| verified citations / rejected citations | {s[a]["verified_citations"]} / {s[a]["rejected_citations"]} | {
+        s[b]["verified_citations"]
+    } / {s[b]["rejected_citations"]} |
+| answered runs citing the expected policy | {s[a]["answered_runs_citing_expected"]} of {s[a]["answered_runs"]} | {
+        s[b]["answered_runs_citing_expected"]
+    } of {s[b]["answered_runs"]} |
+| tokens used (all runs) | {s[a]["tokens"]:,} | {s[b]["tokens"]:,} |
 
 | category | cases | {a} | {b} |
 |---|---|---|---|
@@ -356,8 +425,10 @@ f"Setting B passed {-better} fewer case(s)." if better < 0 else "Both settings p
 |---|---|---|---|
 {author_rows}
 
-Cases where A and B disagree: {', '.join(disagree) if disagree else 'none'}.
-Unstable cases (passed only 1 or 2 of their 3 runs in some setting; close to a coin flip): {', '.join(unstable) if unstable else 'none'}.
+Cases where A and B disagree: {", ".join(disagree) if disagree else "none"}.
+Unstable cases (passed only 1 or 2 of their 3 runs in some setting; close to a coin flip): {
+        ", ".join(unstable) if unstable else "none"
+    }.
 
 ## Every case: outcome, runs, and which check decided it
 
@@ -373,7 +444,7 @@ Unstable cases (passed only 1 or 2 of their 3 runs in some setting; close to a c
 
 ## Failure analysis
 
-{chr(10).join(failures) if failures else 'No case failed in either setting.'}
+{chr(10).join(failures) if failures else "No case failed in either setting."}
 
 {_findings(result, cases)}
 
@@ -385,7 +456,7 @@ Unstable cases (passed only 1 or 2 of their 3 runs in some setting; close to a c
 the polarity check doesn't recognise (an antonym such as "refused" for "paid back", or "only after" versus
 "before"), and a partly unsupported answer can pass when most of its key terms match; both are kept as known
 gaps in `tests/test_assistant_polarity.py`. "You can cancel late at no cost" against the fee quote is stopped
-only by groundedness (0.33 against {result['settings'][a]['groundedness_threshold']:.2f}). Answered runs above were not
+only by groundedness (0.33 against {result["settings"][a]["groundedness_threshold"]:.2f}). Answered runs above were not
 checked for such flips beyond the frozen expectations, so a passing case is not proof that no flip occurred.
 """
 

@@ -3,7 +3,13 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { FavoriteButton } from "@/components/professionals/FavoriteButton";
 import {
-  DAY_LABELS, VISIT_LABELS, availableDays, formatFee, locationName, specialtyName, type Professional,
+  DAY_LABELS,
+  VISIT_LABELS,
+  availableDays,
+  formatFee,
+  locationName,
+  specialtyName,
+  type Professional,
 } from "@/lib/professionals";
 
 export function ProfessionalCard({ professional: p }: { professional: Professional }) {
@@ -16,15 +22,23 @@ export function ProfessionalCard({ professional: p }: { professional: Profession
       headingLevel={3}
       footer={
         <>
-          <span className="fee">{formatFee(p.feePkr)} <span className="muted small">/ session</span></span>
+          <span className="fee">
+            {formatFee(p.feePkr)} <span className="muted small">/ session</span>
+          </span>
           <FavoriteButton id={p.id} name={p.name} />
         </>
       }
     >
-      <p className="muted small pro-title">{p.title} · {locationName(p.locationId)}</p>
+      <p className="muted small pro-title">
+        {p.title} · {locationName(p.locationId)}
+      </p>
       <div className="badges">
         <Badge>{specialtyName(p.specialtyId)}</Badge>
-        {p.visitTypes.map((v) => <Badge key={v} tone="neutral">{VISIT_LABELS[v]}</Badge>)}
+        {p.visitTypes.map((v) => (
+          <Badge key={v} tone="neutral">
+            {VISIT_LABELS[v]}
+          </Badge>
+        ))}
       </div>
       <p className="small">{p.bio}</p>
       <p className="muted small">

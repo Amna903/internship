@@ -104,7 +104,9 @@ class UserRefreshView(CsrfProtectedAPIView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "login"
 
-    @extend_schema(request=None, responses={200: SessionInfoSerializer, 401: OpenApiResponse(description="Not signed in")})
+    @extend_schema(
+        request=None, responses={200: SessionInfoSerializer, 401: OpenApiResponse(description="Not signed in")}
+    )
     def post(self, request):
         raw = request.COOKIES.get(settings.JWT_REFRESH_COOKIE)
         if not raw:
@@ -119,7 +121,9 @@ class UserRefreshView(CsrfProtectedAPIView):
                 old.blacklist()  # one-time use: a replayed refresh token is rejected
                 new_refresh = RefreshToken.for_user(user)
         except TokenError:
-            response = error_response("token_not_valid", "Session expired. Please sign in again.", status.HTTP_401_UNAUTHORIZED)
+            response = error_response(
+                "token_not_valid", "Session expired. Please sign in again.", status.HTTP_401_UNAUTHORIZED
+            )
             clear_auth_cookies(response)
             return response
 

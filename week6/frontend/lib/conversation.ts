@@ -4,7 +4,10 @@
 // 30 minutes; the browser only carries it back.
 import { ApiError, AskResponse } from "@/lib/api";
 
-export interface ConversationTurn { question: string; result: AskResponse }
+export interface ConversationTurn {
+  question: string;
+  result: AskResponse;
+}
 
 export interface Conversation {
   turns: ConversationTurn[];
@@ -20,7 +23,9 @@ export function afterAnswer(c: Conversation, question: string, result: AskRespon
 /** A 400 that means this conversation can't go on: start a new one (and say why). */
 export function conversationEnded(err: unknown): string | null {
   if (!(err instanceof ApiError) || err.status !== 400) return null;
-  if (err.code === "invalid_history") return "This conversation can't be continued (it may have expired). A new conversation has been started.";
-  if (err.code === "conversation_limit") return "This conversation has reached its limit. A new conversation has been started.";
+  if (err.code === "invalid_history")
+    return "This conversation can't be continued (it may have expired). A new conversation has been started.";
+  if (err.code === "conversation_limit")
+    return "This conversation has reached its limit. A new conversation has been started.";
   return null;
 }

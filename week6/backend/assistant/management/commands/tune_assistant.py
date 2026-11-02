@@ -18,6 +18,8 @@ class Command(BaseCommand):
             raise CommandError(str(exc)) from None
         tuning.save(result)
         c = result["chosen"]
-        self.stdout.write(f"floor {c['floor']:.2f}, top-k {c['top_k']}, groundedness threshold "
-                          f"{c['effective_groundedness_threshold']:.2f}; correct by top-k {c['correct_by_top_k']}; "
-                          f"incorrect answers blocked by the threshold: {c['incorrect_blocked']}")
+        self.stdout.write(
+            f"floor {c['floor']:.2f}, top-k {c['top_k']}, groundedness threshold "
+            f"{c['effective_groundedness_threshold']:.2f}; correct by top-k {c['correct_by_top_k']}; "
+            f"incorrect answers blocked by the threshold: {c['incorrect_blocked']}"
+        )

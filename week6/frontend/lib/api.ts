@@ -7,10 +7,18 @@
 import type { Payload, PredictionResponse } from "./prediction";
 
 export type Role = "user" | "admin";
-export interface UserSummary { id: number; email: string; role: Role }
+export interface UserSummary {
+  id: number;
+  email: string;
+  role: Role;
+}
 
 export type CompletionStatus = "complete" | "incomplete";
-export interface Completion { status: CompletionStatus; percent: number; missing_sections: string[] }
+export interface Completion {
+  status: CompletionStatus;
+  percent: number;
+  missing_sections: string[];
+}
 
 export interface Profile {
   email: string;
@@ -31,20 +39,49 @@ export interface Profile {
 }
 
 export interface AdminProfileRow {
-  id: number; user_id: number; email: string; full_name: string; age_range: string;
-  contact_preference: string; status: "active" | "deactivated"; completion_status: CompletionStatus; created_at: string;
+  id: number;
+  user_id: number;
+  email: string;
+  full_name: string;
+  age_range: string;
+  contact_preference: string;
+  status: "active" | "deactivated";
+  completion_status: CompletionStatus;
+  created_at: string;
 }
 export interface AuditEvent {
-  id: number; created_at: string; action: string; action_label: string; actor_email: string | null;
-  actor_role: "user" | "admin" | "anonymous"; target_email: string | null; profile_id: number | null; changed_fields: string[]; request_id: string;
+  id: number;
+  created_at: string;
+  action: string;
+  action_label: string;
+  actor_email: string | null;
+  actor_role: "user" | "admin" | "anonymous";
+  target_email: string | null;
+  profile_id: number | null;
+  changed_fields: string[];
+  request_id: string;
 }
 export interface AdminProfileDetail extends Profile {
-  id: number; user_id: number; deactivated_at: string | null; account_active: boolean; last_login: string | null;
+  id: number;
+  user_id: number;
+  deactivated_at: string | null;
+  account_active: boolean;
+  last_login: string | null;
 }
-export interface Page<T> { count: number; next: string | null; previous: string | null; results: T[] }
+export interface Page<T> {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: T[];
+}
 
 export class ApiError extends Error {
-  constructor(public status: number, public code: string, message: string, public details: Record<string, string[] | string> = {}) {
+  constructor(
+    public status: number,
+    public code: string,
+    message: string,
+    public details: Record<string, string[] | string> = {},
+  ) {
     super(message);
   }
   /** Field errors flattened to "field: message" lines for display. */
@@ -69,12 +106,23 @@ async function ensureCsrf(): Promise<string> {
   return token;
 }
 
-async function raw(method: string, path: string, body?: unknown, signal?: AbortSignal,
-                   extra: Record<string, string> = {}): Promise<Response> {
+async function raw(
+  method: string,
+  path: string,
+  body?: unknown,
+  signal?: AbortSignal,
+  extra: Record<string, string> = {},
+): Promise<Response> {
   const headers: Record<string, string> = { Accept: "application/json", ...extra };
   if (body !== undefined) headers["Content-Type"] = "application/json";
   if (method !== "GET") headers["X-CSRFToken"] = await ensureCsrf();
-  return fetch(path, { method, headers, credentials: "same-origin", signal, body: body === undefined ? undefined : JSON.stringify(body) });
+  return fetch(path, {
+    method,
+    headers,
+    credentials: "same-origin",
+    signal,
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
 }
 
 let refreshInFlight: Promise<boolean> | null = null;
@@ -83,8 +131,13 @@ let refreshInFlight: Promise<boolean> | null = null;
 export function refreshSession(): Promise<boolean> {
   if (!refreshInFlight) {
     refreshInFlight = raw("POST", "/api/auth/user/refresh/")
-      .then((r) => r.ok, () => false)
-      .finally(() => { refreshInFlight = null; });
+      .then(
+        (r) => r.ok,
+        () => false,
+      )
+      .finally(() => {
+        refreshInFlight = null;
+      });
   }
   return refreshInFlight;
 }
@@ -92,10 +145,19 @@ export function refreshSession(): Promise<boolean> {
 async function parse<T>(res: Response): Promise<T> {
   const text = await res.text();
   let data: { error?: { code?: string; message?: string; details?: Record<string, string[]> } } | null = null;
-  try { data = text ? JSON.parse(text) : null; } catch { /* non-JSON (proxy error page) */ }
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    /* non-JSON (proxy error page) */
+  }
   if (!res.ok) {
     const err = data?.error;
-    throw new ApiError(res.status, err?.code ?? "http_error", err?.message ?? `Request failed (${res.status})`, err?.details ?? {});
+    throw new ApiError(
+      res.status,
+      err?.code ?? "http_error",
+      err?.message ?? `Request failed (${res.status})`,
+      err?.details ?? {},
+    );
   }
   return data as T;
 }
@@ -121,8 +183,10 @@ export const isAbort = (err: unknown) => err instanceof DOMException && err.name
 
 // ---- standard user (JWT cookies) ----
 export const userApi = {
-  signup: (name: string, email: string, password: string) => api<{ user: UserSummary }>("POST", "/api/auth/signup/", { name, email, password }),
-  login: (email: string, password: string) => api<{ user: UserSummary }>("POST", "/api/auth/user/login/", { email, password }),
+  signup: (name: string, email: string, password: string) =>
+    api<{ user: UserSummary }>("POST", "/api/auth/signup/", { name, email, password }),
+  login: (email: string, password: string) =>
+    api<{ user: UserSummary }>("POST", "/api/auth/user/login/", { email, password }),
   logout: () => api<{ detail: string }>("POST", "/api/auth/user/logout/"),
   getProfile: () => api<Profile>("GET", "/api/profiles/me/", undefined, { refresh: true }),
   updateProfile: (patch: Partial<Profile>) => api<Profile>("PATCH", "/api/profiles/me/", patch, { refresh: true }),
@@ -132,13 +196,15 @@ export const userApi = {
 
 // ---- admin (server-side session cookie) ----
 export const adminApi = {
-  login: (email: string, password: string) => api<{ user: UserSummary }>("POST", "/api/admin/login/", { email, password }),
+  login: (email: string, password: string) =>
+    api<{ user: UserSummary }>("POST", "/api/admin/login/", { email, password }),
   logout: () => api<{ detail: string }>("POST", "/api/admin/logout/"),
   me: () => api<{ user: UserSummary }>("GET", "/api/admin/me/"),
   list: (params: Record<string, string>, signal?: AbortSignal) =>
     api<Page<AdminProfileRow>>("GET", "/api/admin/profiles/?" + new URLSearchParams(params), undefined, { signal }),
   detail: (id: string | number) => api<AdminProfileDetail>("GET", `/api/admin/profiles/${id}/`),
-  setStatus: (id: string | number, action: "activate" | "deactivate") => api<AdminProfileDetail>("POST", `/api/admin/profiles/${id}/${action}/`),
+  setStatus: (id: string | number, action: "activate" | "deactivate") =>
+    api<AdminProfileDetail>("POST", `/api/admin/profiles/${id}/${action}/`),
   auditEvents: (params: Record<string, string>, signal?: AbortSignal) =>
     api<Page<AuditEvent>>("GET", "/api/admin/audit-events/?" + new URLSearchParams(params), undefined, { signal }),
 };
@@ -171,50 +237,90 @@ export const predictionApi = {
 // ---- Week 4: clusters and the policy assistant (admin session) ----
 
 export interface ClusterSummary {
-  cluster: number; size: number; share: number; description: string;
+  cluster: number;
+  size: number;
+  share: number;
+  description: string;
   most_common_planted_habit?: { habit: string; share: number };
 }
 
 export interface MethodRow {
-  method: string; real_structure_found: boolean; real_silhouette: number; real_baseline_bar: number;
-  real_chosen_k: number; control_chosen_k: number; control_ari: number;
+  method: string;
+  real_structure_found: boolean;
+  real_silhouette: number;
+  real_baseline_bar: number;
+  real_chosen_k: number;
+  control_chosen_k: number;
+  control_ari: number;
 }
 
 export interface ClusterView {
   results_version: string;
   disclaimer: string;
   control: {
-    label: string; patients: number; k: number; pca_variance: number[]; ari: number; recovery: string;
-    clusters: ClusterSummary[]; points: { x: number; y: number; cluster: number; planted_habit: string }[];
+    label: string;
+    patients: number;
+    k: number;
+    pca_variance: number[];
+    ari: number;
+    recovery: string;
+    clusters: ClusterSummary[];
+    points: { x: number; y: number; cluster: number; planted_habit: string }[];
   };
   real: {
-    patients: number; k: number; silhouette: number; baseline_bar: number; appointments_share_of_split: number;
-    structure_found: Record<string, boolean>; misleading_clusters: ClusterSummary[];
+    patients: number;
+    k: number;
+    silhouette: number;
+    baseline_bar: number;
+    appointments_share_of_split: number;
+    structure_found: Record<string, boolean>;
+    misleading_clusters: ClusterSummary[];
   };
   methods: MethodRow[];
 }
 
 export interface AssistantStatus {
-  provider: string; model: string; embedder: string; temperature: number; data_policy: string;
+  provider: string;
+  model: string;
+  embedder: string;
+  temperature: number;
+  data_policy: string;
   limits: { question_chars: number };
 }
 
-export interface Citation { passage_id: string; quote: string; source: string }
+export interface Citation {
+  passage_id: string;
+  quote: string;
+  source: string;
+}
 
 export interface AskResponse {
   status: "answered" | "insufficient_information" | "refused";
   answer: string;
   citations: Citation[];
   reason: string | null;
-  usage: { prompt_tokens: number; output_tokens: number; total_tokens: number; cost_usd: number;
-           hosted_equivalent_usd: number; note: string } | null;
+  usage: {
+    prompt_tokens: number;
+    output_tokens: number;
+    total_tokens: number;
+    cost_usd: number;
+    hosted_equivalent_usd: number;
+    note: string;
+  } | null;
   model: string;
   model_called: boolean;
   settings: { floor: number; top_k: number; groundedness_threshold: number };
   // Week 5 Step 5: the explicit token split, retries for invalid output, and the signed conversation history
   // to send back with a follow-up (kept in React state only, never in browser storage).
-  budget: { context: number; output_reserved: number; prompt_budget: number; system: number; question: number;
-            history: number; passages: number } | null;
+  budget: {
+    context: number;
+    output_reserved: number;
+    prompt_budget: number;
+    system: number;
+    question: number;
+    history: number;
+    passages: number;
+  } | null;
   retries: number;
   history: string;
   conversation: { turn: number; max_turns: number; tokens_used: number; token_cap: number };
@@ -234,16 +340,37 @@ export const assistantApi = {
 
 // ---- Week 5: the agent, its approval cards, and the audit page (admin session) ----
 
-export interface AgentStep { n: number; state: string; tool?: string; code?: string; seconds?: number }
+export interface AgentStep {
+  n: number;
+  state: string;
+  tool?: string;
+  code?: string;
+  seconds?: number;
+}
 export interface ActionCard {
-  action_id: string; status: string; summary: string; proposed_by_agent: boolean; proposed_by: string;
-  expires_at: string; replayed?: boolean;
+  action_id: string;
+  status: string;
+  summary: string;
+  proposed_by_agent: boolean;
+  proposed_by: string;
+  expires_at: string;
+  replayed?: boolean;
   booking?: { id: number; date: string; time: string; clinician: string; visit_type: string };
 }
 export interface AgentRunResponse {
-  run_id: string; status: string; kind: string | null; answer: string | null; citations: Citation[];
-  results: { tool: string; output: Record<string, unknown> }[]; pending_action: { action_id: string } | null;
-  stopped_reason: string | null; steps: AgentStep[]; tool_calls: number; tokens: number; model: string; disclaimer: string;
+  run_id: string;
+  status: string;
+  kind: string | null;
+  answer: string | null;
+  citations: Citation[];
+  results: { tool: string; output: Record<string, unknown> }[];
+  pending_action: { action_id: string } | null;
+  stopped_reason: string | null;
+  steps: AgentStep[];
+  tool_calls: number;
+  tokens: number;
+  model: string;
+  disclaimer: string;
 }
 
 export const agentApi = {
@@ -255,21 +382,62 @@ export const agentApi = {
 };
 
 type Id = string | number | null;
-interface PassageRef { passage_id: string; document_id: number; version: number }
+interface PassageRef {
+  passage_id: string;
+  document_id: number;
+  version: number;
+}
 export interface AuditOverview {
-  agent_runs: { created_at: string; status: string; stopped_reason: string | null; pending_action_id: string | null;
-                steps: { tool?: string | null; code?: string | null }[] }[];
+  agent_runs: {
+    created_at: string;
+    status: string;
+    stopped_reason: string | null;
+    pending_action_id: string | null;
+    steps: { tool?: string | null; code?: string | null }[];
+  }[];
   approval_decisions: {
-    actions: { created_at: string; status: string; proposed_by_agent: boolean; decided_at: string | null; booking_id: Id }[];
-    document_versions: { document_id: number; version: number; status: string; decided_by: Id; decided_at: string | null }[];
+    actions: {
+      created_at: string;
+      status: string;
+      proposed_by_agent: boolean;
+      decided_at: string | null;
+      booking_id: Id;
+    }[];
+    document_versions: {
+      document_id: number;
+      version: number;
+      status: string;
+      decided_by: Id;
+      decided_at: string | null;
+    }[];
   };
   retrieval_sources: { created_at: string; status: string; sources: PassageRef[]; citations: PassageRef[] }[];
-  jobs: { id: number; document_id: number; version: number; status: string; attempts: number; max_attempts: number;
-          error_code: string | null; finished_at: string | null }[];
-  model_versions: { no_show_served: string; monitoring_baseline: string | null; llm_configured: string;
-                    embedder_configured: string; llms_on_answers: string[]; llms_on_agent_runs: string[] };
-  monitoring: { verdict: string; psi: number | null; predictions: number; failure_rate: number | null; flags: string[];
-                disclaimer: string };
+  jobs: {
+    id: number;
+    document_id: number;
+    version: number;
+    status: string;
+    attempts: number;
+    max_attempts: number;
+    error_code: string | null;
+    finished_at: string | null;
+  }[];
+  model_versions: {
+    no_show_served: string;
+    monitoring_baseline: string | null;
+    llm_configured: string;
+    embedder_configured: string;
+    llms_on_answers: string[];
+    llms_on_agent_runs: string[];
+  };
+  monitoring: {
+    verdict: string;
+    psi: number | null;
+    predictions: number;
+    failure_rate: number | null;
+    flags: string[];
+    disclaimer: string;
+  };
 }
 
 export const auditApi = {

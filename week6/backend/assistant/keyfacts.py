@@ -8,10 +8,34 @@ interest". A fact counts if any occurrence of any phrasing is not negated."""
 
 import re
 
-NUMBER_WORDS = {"zero": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8,
-                "nine": 9, "ten": 10, "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
-                "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19, "twenty": 20, "thirty": 30,
-                "forty": 40, "fifty": 50, "sixty": 60, "hundred": 100}
+NUMBER_WORDS = {
+    "zero": 0,
+    "one": 1,
+    "two": 2,
+    "three": 3,
+    "four": 4,
+    "five": 5,
+    "six": 6,
+    "seven": 7,
+    "eight": 8,
+    "nine": 9,
+    "ten": 10,
+    "eleven": 11,
+    "twelve": 12,
+    "thirteen": 13,
+    "fourteen": 14,
+    "fifteen": 15,
+    "sixteen": 16,
+    "seventeen": 17,
+    "eighteen": 18,
+    "nineteen": 19,
+    "twenty": 20,
+    "thirty": 30,
+    "forty": 40,
+    "fifty": 50,
+    "sixty": 60,
+    "hundred": 100,
+}
 MULTIPLES = {"once": "1 time", "twice": "2 times", "thrice": "3 times"}
 
 
@@ -34,7 +58,7 @@ def has_fact(answer: str, alternatives: list[str]) -> bool:
     for alt in alternatives:
         target = normalise(alt).split()
         for i in range(len(words) - len(target) + 1):
-            if words[i:i + len(target)] == target and not NEGATORS & set(words[max(0, i - WINDOW):i]):
+            if words[i : i + len(target)] == target and not NEGATORS & set(words[max(0, i - WINDOW) : i]):
                 return True
     return False
 

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { EMPTY_FILTERS, activeFilterCount, applyFilters, parseFilters, toSearchParams, type Filters } from "@/lib/filters";
+import {
+  EMPTY_FILTERS,
+  activeFilterCount,
+  applyFilters,
+  parseFilters,
+  toSearchParams,
+  type Filters,
+} from "@/lib/filters";
 import { professionals } from "@/lib/professionals";
 
 const run = (patch: Partial<Filters>) => applyFilters(professionals, { ...EMPTY_FILTERS, ...patch });
@@ -11,7 +18,14 @@ describe("parseFilters", () => {
   });
 
   it("drops unknown or malformed values instead of trusting the URL", () => {
-    const f = parseFilters({ specialty: "nutrition,astrology", location: "atlantis", visit: "teleport", day: "funday", maxFee: "-3", sort: "random" });
+    const f = parseFilters({
+      specialty: "nutrition,astrology",
+      location: "atlantis",
+      visit: "teleport",
+      day: "funday",
+      maxFee: "-3",
+      sort: "random",
+    });
     expect(f).toEqual({ ...EMPTY_FILTERS, specialties: ["nutrition"] });
   });
 
@@ -20,7 +34,15 @@ describe("parseFilters", () => {
   });
 
   it("round-trips through the query string", () => {
-    const f: Filters = { q: "urdu", specialties: ["nutrition", "fitness"], location: "lahore", visit: "video", day: "mon", maxFee: 4000, sort: "fee_asc" };
+    const f: Filters = {
+      q: "urdu",
+      specialties: ["nutrition", "fitness"],
+      location: "lahore",
+      visit: "video",
+      day: "mon",
+      maxFee: 4000,
+      sort: "fee_asc",
+    };
     expect(parseFilters(Object.fromEntries(toSearchParams(f)))).toEqual(f);
   });
 

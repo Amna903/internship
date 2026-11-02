@@ -43,8 +43,13 @@ class QueueUnavailable(RuntimeError):
 
 def _audit(job: IndexJob, action: str, detail: str) -> None:
     actor = job.requested_by
-    AuditEvent.objects.create(actor=actor, actor_role=actor.role if actor else "admin", action=action,
-                              detail=detail[:64], request_id=job.request_id)
+    AuditEvent.objects.create(
+        actor=actor,
+        actor_role=actor.role if actor else "admin",
+        action=action,
+        detail=detail[:64],
+        request_id=job.request_id,
+    )
 
 
 def _finish(job: IndexJob, status: str, code: str = "", chunks: int | None = None) -> None:
@@ -66,11 +71,17 @@ def queue_approval(version: DocumentVersion, admin, request_id: str = "") -> tup
         raise DocumentError("Only a version waiting for approval can be approved.", "not_pending")
     try:
         with transaction.atomic():
-            job = IndexJob.objects.create(version=version, requested_by=admin, request_id=(request_id or "")[:64],
-                                          max_attempts=CONFIG["MAX_ATTEMPTS"])
+            job = IndexJob.objects.create(
+                version=version,
+                requested_by=admin,
+                request_id=(request_id or "")[:64],
+                max_attempts=CONFIG["MAX_ATTEMPTS"],
+            )
     except IntegrityError:  # another request queued it a moment ago
         return IndexJob.objects.get(version=version, status__in=IndexJob.OPEN), False
-    _audit(job, AuditEvent.Action.ADMIN_INDEX_JOB_QUEUED, f"job:{job.id}:document:{version.document_id}:v{version.number}")
+    _audit(
+        job, AuditEvent.Action.ADMIN_INDEX_JOB_QUEUED, f"job:{job.id}:document:{version.document_id}:v{version.number}"
+    )
     try:
         index_version.apply_async(args=[job.id], retry=False)
     except BrokerError:
@@ -125,8 +136,14 @@ def run_job(job_id: int, embedder=None) -> int | None:
     return None
 
 
-@shared_task(bind=True, acks_late=True, reject_on_worker_lost=True, ignore_result=True,
-             soft_time_limit=CONFIG["SOFT_TIME_LIMIT"], time_limit=CONFIG["TIME_LIMIT"])
+@shared_task(
+    bind=True,
+    acks_late=True,
+    reject_on_worker_lost=True,
+    ignore_result=True,
+    soft_time_limit=CONFIG["SOFT_TIME_LIMIT"],
+    time_limit=CONFIG["TIME_LIMIT"],
+)
 def index_version(self, job_id: int) -> None:
     countdown = run_job(job_id)
     if countdown is not None:

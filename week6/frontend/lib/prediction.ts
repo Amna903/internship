@@ -19,8 +19,16 @@ export const ACTIONS = schemaDoc.actions as Record<ActionId, string>;
 export const FIELDS = Object.keys(SCHEMA) as FieldName[];
 
 export type FieldName =
-  | "lead_time_days" | "appointment_weekday" | "appointment_hour" | "age_band" | "visit_type"
-  | "booking_channel" | "reminder_sent" | "prior_appointments" | "prior_no_shows" | "distance_km";
+  | "lead_time_days"
+  | "appointment_weekday"
+  | "appointment_hour"
+  | "age_band"
+  | "visit_type"
+  | "booking_channel"
+  | "reminder_sent"
+  | "prior_appointments"
+  | "prior_no_shows"
+  | "distance_km";
 export type ActionId = "extra_reminder_suggested" | "standard_reminder";
 
 /** What the inputs hold: text for numbers (so a field can be blank while typing), a real boolean for the toggle. */
@@ -34,7 +42,11 @@ export interface Prediction {
   decision_threshold: number;
   average_no_show_rate: number;
 }
-export interface PredictionResponse { model_version: string; prediction: Prediction; disclaimer: string }
+export interface PredictionResponse {
+  model_version: string;
+  prediction: Prediction;
+  disclaimer: string;
+}
 
 export const LABELS: Record<FieldName, string> = {
   lead_time_days: "Days between booking and appointment",
@@ -50,11 +62,20 @@ export const LABELS: Record<FieldName, string> = {
 };
 
 const OPTION_TEXT: Record<string, string> = {
-  in_person: "In person", telehealth: "Telehealth", web: "Web", phone: "Phone", app: "App",
+  in_person: "In person",
+  telehealth: "Telehealth",
+  web: "Web",
+  phone: "Phone",
+  app: "App",
 };
 export const optionText = (value: string) => OPTION_TEXT[value] ?? value.charAt(0).toUpperCase() + value.slice(1);
 
-export interface Preset { id: string; label: string; expected_action: ActionId; values: Payload }
+export interface Preset {
+  id: string;
+  label: string;
+  expected_action: ActionId;
+  values: Payload;
+}
 export const PRESETS = schemaDoc.presets as Preset[];
 
 export function presetToForm(values: Payload): FormState {
@@ -75,7 +96,10 @@ export function buildRequest(form: FormState): { payload: Payload | null; errors
   const payload = {} as Payload;
   for (const name of FIELDS) {
     const spec = SCHEMA[name];
-    if (spec.type === "boolean") { payload[name] = form.reminder_sent; continue; }
+    if (spec.type === "boolean") {
+      payload[name] = form.reminder_sent;
+      continue;
+    }
     const raw = (form as Record<string, string>)[name].trim();
     if (spec.type === "category") {
       if (!spec.values.includes(raw)) errors[name] = "Choose one of the options.";
@@ -83,14 +107,26 @@ export function buildRequest(form: FormState): { payload: Payload | null; errors
       continue;
     }
     if (raw === "") {
-      if (spec.type === "number" && spec.nullable) { payload[name] = null; continue; }
+      if (spec.type === "number" && spec.nullable) {
+        payload[name] = null;
+        continue;
+      }
       errors[name] = "Required.";
       continue;
     }
     const value = Number(raw);
-    if (!Number.isFinite(value)) { errors[name] = "Enter a number."; continue; }
-    if (spec.type === "integer" && !Number.isInteger(value)) { errors[name] = "Enter a whole number."; continue; }
-    if (value < spec.min || value > spec.max) { errors[name] = `Must be between ${spec.min} and ${spec.max}.`; continue; }
+    if (!Number.isFinite(value)) {
+      errors[name] = "Enter a number.";
+      continue;
+    }
+    if (spec.type === "integer" && !Number.isInteger(value)) {
+      errors[name] = "Enter a whole number.";
+      continue;
+    }
+    if (value < spec.min || value > spec.max) {
+      errors[name] = `Must be between ${spec.min} and ${spec.max}.`;
+      continue;
+    }
     payload[name] = value;
   }
   for (const name of FIELDS) {
@@ -113,7 +149,8 @@ export function describe(response: PredictionResponse) {
   return {
     headline: p.suggested_action_label,
     chance: `${percent(p.no_show_probability)} estimated chance this appointment is missed`,
-    comparison: `Average across the synthetic training data: ${percent(p.average_no_show_rate)}. ` +
+    comparison:
+      `Average across the synthetic training data: ${percent(p.average_no_show_rate)}. ` +
       `An extra reminder is suggested from ${percent(p.decision_threshold)} upwards.`,
     meaning: "This only suggests whether to send an extra reminder. It does not describe anyone's health.",
     version: `Model ${response.model_version}`,
@@ -133,12 +170,19 @@ export function errorView(err: unknown): ErrorView {
   }
   if (err.status === 401 || err.status === 403) return { kind: "signed_out" };
   if (err.status === 400) {
-    return { kind: "fields", message: "Some values were not accepted. See the highlighted fields.", fields: err.fieldErrors };
+    return {
+      kind: "fields",
+      message: "Some values were not accepted. See the highlighted fields.",
+      fields: err.fieldErrors,
+    };
   }
   if (err.status === 413) return { kind: "too_large", message: "The request was too large." };
   if (err.status === 429) {
     const wait = Number((err.details as Record<string, unknown>).retry_after_seconds);
-    return { kind: "throttled", message: `Too many requests. Try again in ${Number.isFinite(wait) ? wait : "a few"} seconds.` };
+    return {
+      kind: "throttled",
+      message: `Too many requests. Try again in ${Number.isFinite(wait) ? wait : "a few"} seconds.`,
+    };
   }
   if (err.status === 503) {
     return { kind: "unavailable", message: "The estimate service is temporarily unavailable. Try again later." };

@@ -35,8 +35,15 @@ def read_tools() -> list[str]:
 
 
 def tool_list() -> list[types.Tool]:
-    return [types.Tool(name=name, description=REGISTRY[name].description, input_schema=REGISTRY[name].input_schema,
-                       output_schema=REGISTRY[name].output_schema) for name in read_tools()]
+    return [
+        types.Tool(
+            name=name,
+            description=REGISTRY[name].description,
+            input_schema=REGISTRY[name].input_schema,
+            output_schema=REGISTRY[name].output_schema,
+        )
+        for name in read_tools()
+    ]
 
 
 def _error(code: str, message: str) -> types.CallToolResult:
@@ -55,8 +62,14 @@ def call(token: str, name: str, arguments, embedder=None, llm=None) -> types.Cal
         return _error("invalid_input", "No such tool on this server.")
     from assistant.embeddings import get_embedder
     from assistant.llm import get_llm
-    ctx = ToolContext(user=row.user, request_id=f"mcp:{row.id}", embedder=embedder or get_embedder,
-                      llm=llm or get_llm, via_agent=False)
+
+    ctx = ToolContext(
+        user=row.user,
+        request_id=f"mcp:{row.id}",
+        embedder=embedder or get_embedder,
+        llm=llm or get_llm,
+        via_agent=False,
+    )
     result = run_tool(name, arguments if arguments is not None else {}, ctx)
     if not result.ok:
         return _error(result.code, MESSAGES[result.code])

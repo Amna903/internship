@@ -34,6 +34,7 @@ def toy():
 
 # ---- Permutation importance on planted features ----
 
+
 def test_a_useless_feature_gets_about_zero_and_a_real_one_dominates(toy):
     X, y = toy
     imp = explain.importances(LogisticRegression().fit(X, y), X, y, repeats=5)
@@ -56,6 +57,7 @@ def test_importances_are_seeded_and_reproducible(toy):
 
 # ---- Grouped shuffling ----
 
+
 def test_group_shuffle_reveals_credit_that_two_copies_hide_from_each_other(toy):
     """Two copies of the same signal cover for each other: shuffling one alone barely hurts, shuffling
     both together removes the signal. This is the 'understate' case of the caveat."""
@@ -69,8 +71,9 @@ def test_group_shuffle_reveals_credit_that_two_copies_hide_from_each_other(toy):
 
 def test_history_group_is_reported_with_the_sum_of_its_singles(analysis):
     g = analysis["groups"]["history (prior_appointments + prior_no_shows)"]
-    assert g["sum_of_singles"] == pytest.approx(analysis["single"]["prior_appointments"]["mean"]
-                                                + analysis["single"]["prior_no_shows"]["mean"])
+    assert g["sum_of_singles"] == pytest.approx(
+        analysis["single"]["prior_appointments"]["mean"] + analysis["single"]["prior_no_shows"]["mean"]
+    )
 
 
 def test_report_reading_of_the_group_matches_the_numbers(analysis):
@@ -88,22 +91,36 @@ def test_shuffling_prior_no_shows_alone_creates_rows_that_cannot_exist(df):
 
 # ---- Random forest importance ----
 
+
 def test_impurity_importance_sums_to_one_across_inputs_and_engineered_features(analysis):
     assert sum(analysis["forest_impurity"].values()) == pytest.approx(1.0)
 
 
-@pytest.mark.parametrize("encoded, source", [("age_band_18-24", "age_band"), ("missingindicator_distance_km", "distance_km"),
-                                             ("booking_channel_web", "booking_channel"), ("log_lead_time", "log_lead_time"),
-                                             ("lead_time_days", "lead_time_days")])
+@pytest.mark.parametrize(
+    "encoded, source",
+    [
+        ("age_band_18-24", "age_band"),
+        ("missingindicator_distance_km", "distance_km"),
+        ("booking_channel_web", "booking_channel"),
+        ("log_lead_time", "log_lead_time"),
+        ("lead_time_days", "lead_time_days"),
+    ],
+)
 def test_model_columns_map_to_their_input(encoded, source):
     assert explain.source_of(encoded) == source
 
 
 # ---- False positives and negatives ----
 
+
 def test_profiles_add_up_to_the_validation_rows_and_match_the_error_counts(analysis):
     p = analysis["profiles"]
-    parts = ["true positives", "false positives (attended, flagged)", "false negatives (missed, not flagged)", "true negatives"]
+    parts = [
+        "true positives",
+        "false positives (attended, flagged)",
+        "false negatives (missed, not flagged)",
+        "true negatives",
+    ]
     assert sum(p[k]["rows"] for k in parts) == p["all validation"]["rows"] == analysis["validation_rows"]
     assert p["false positives (attended, flagged)"]["rows"] == analysis["sources"]["fp"]
     assert p["false negatives (missed, not flagged)"]["rows"] == analysis["sources"]["fn"]
@@ -119,6 +136,7 @@ def test_every_direction_in_the_fp_fn_sentences_is_computed(analysis):
 
 
 # ---- Rules ----
+
 
 def test_explanation_never_uses_the_test_set(df, analysis):
     _, _, test = split(df)

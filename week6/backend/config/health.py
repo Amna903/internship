@@ -36,6 +36,7 @@ def _broker() -> bool:
 
 def _model() -> bool:
     from ml.inference import get_model
+
     return bool(get_model().version)
 
 
@@ -60,6 +61,8 @@ def ready(request):
     checks = {name: _run(fn) for name, fn in (("database", _db), ("broker", _broker), ("model", _model), ("llm", _llm))}
     gating = ("database", "broker", "model")
     ok = all(checks[n][0] == "ok" for n in gating)
-    body = {"status": "ready" if ok else "not_ready",
-            "checks": {n: {"status": s, "ms": ms, "gates_readiness": n in gating} for n, (s, ms) in checks.items()}}
+    body = {
+        "status": "ready" if ok else "not_ready",
+        "checks": {n: {"status": s, "ms": ms, "gates_readiness": n in gating} for n, (s, ms) in checks.items()},
+    }
     return JsonResponse(body, status=200 if ok else 503)

@@ -24,10 +24,13 @@ def filled(admin_browser, admin, monkeypatch):
     ctx = ToolContext(user=admin, request_id="t", embedder=None, llm=None, via_agent=False)
     run_tool("cluster_summaries", {"dataset": "real"}, ctx)
     fake = FakeLLM()
-    fake.replies.append(json.dumps({"action": "finish", "kind": "decline", "answer": "I can't help with that.", "citations": []}))
+    fake.replies.append(
+        json.dumps({"action": "finish", "kind": "decline", "answer": "I can't help with that.", "citations": []})
+    )
     monkeypatch.setattr("assistant.llm.get_llm", lambda: fake)
-    admin_browser.client.post("/api/v1/agent/run/", {"message": SECRET_MESSAGE}, format="json",
-                              **admin_browser._csrf_headers())
+    admin_browser.client.post(
+        "/api/v1/agent/run/", {"message": SECRET_MESSAGE}, format="json", **admin_browser._csrf_headers()
+    )
     return doc
 
 
@@ -37,7 +40,9 @@ class TestOverview:
         body = admin_browser.get(URL).json()
         assert body["jobs"][0]["status"] == "succeeded" and body["jobs"][0]["document_id"] == filled
         assert {(v["version"], v["status"]) for v in body["approval_decisions"]["document_versions"]} == {
-            (1, "current"), (2, "rejected")}
+            (1, "current"),
+            (2, "rejected"),
+        }
         assert body["agent_tool_calls"] and body["agent_runs"]
         assert body["model_versions"]["no_show_served"] == "no-show-1.0.0"
         assert body["model_versions"]["monitoring_baseline"] == "no-show-1.0.0"

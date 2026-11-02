@@ -44,8 +44,14 @@ def load_keys() -> dict:
 
 
 def _passage(ch) -> Passage:
-    return Passage(ch.passage_id, ch.document.filename, ch.text, version=ch.version.number,
-                   document_id=ch.document_id, sha256=ch.version.sha256)
+    return Passage(
+        ch.passage_id,
+        ch.document.filename,
+        ch.text,
+        version=ch.version.number,
+        document_id=ch.document_id,
+        sha256=ch.version.sha256,
+    )
 
 
 def oracle_context(case: dict, cand) -> list[Passage]:
@@ -96,16 +102,28 @@ def run_mode(mode: str, cases, keys, llm, embedder, tuned, seeds) -> dict:
         for seed in seeds:
             start = time.perf_counter()
             if mode == "A":
-                r = ask(case["question"], oracle_context(case, cand), llm,
-                        groundedness_threshold=tuned["groundedness_threshold"], seed=seed)
+                r = ask(
+                    case["question"],
+                    oracle_context(case, cand),
+                    llm,
+                    groundedness_threshold=tuned["groundedness_threshold"],
+                    seed=seed,
+                )
             else:
                 r = answer_question(case["question"], llm, embedder, tuned=tuned, seed=seed).result
-            run = score_run(case, keys.get(case["id"]), r.status, r.answer if r.status == "answered" else "",
-                            r.citations, texts)
-            run |= {"seed": seed, "answer": r.answer if r.status == "answered" else "", "reason": r.reason,
-                    "cited": [c["passage_id"] for c in r.citations], "rejected_citations": r.rejected_citations,
-                    "groundedness": r.groundedness, "tokens": (r.usage or {}).get("total_tokens", 0),
-                    "seconds": round(time.perf_counter() - start, 2)}
+            run = score_run(
+                case, keys.get(case["id"]), r.status, r.answer if r.status == "answered" else "", r.citations, texts
+            )
+            run |= {
+                "seed": seed,
+                "answer": r.answer if r.status == "answered" else "",
+                "reason": r.reason,
+                "cited": [c["passage_id"] for c in r.citations],
+                "rejected_citations": r.rejected_citations,
+                "groundedness": r.groundedness,
+                "tokens": (r.usage or {}).get("total_tokens", 0),
+                "seconds": round(time.perf_counter() - start, 2),
+            }
             runs.append(run)
         out[case["id"]] = runs
     return out
@@ -118,16 +136,21 @@ def aggregate(cases: list[dict], runs: dict) -> dict:
     ans_runs = [r for c in ans for r in runs[c["id"]]]
     cited = sum(r["citations"] for r in ans_runs)
     g = [r["groundedness"] for r in all_runs if r["answered"] and r["groundedness"] is not None]
-    return {"answerable": len(ans), "unanswerable": len(una),
-            "key_fact_ok": sum(majority(runs[c["id"]], "key_fact_ok") for c in ans),
-            "false_abstention": sum(majority(runs[c["id"]], "false_abstention") for c in ans),
-            "answered_wrong": sum(majority(runs[c["id"]], "answered_wrong") for c in ans),
-            "citation_recall": sum(majority(runs[c["id"]], "citation_recall") for c in ans),
-            "abstained": sum(majority(runs[c["id"]], "abstained") for c in una),
-            "citations": cited, "gold_citations": sum(r["gold_citations"] for r in ans_runs),
-            "rejected_citations": sum(r["rejected_citations"] for r in all_runs),
-            "groundedness_median": round(sorted(g)[len(g) // 2], 2) if g else None,
-            "tokens": sum(r["tokens"] for r in all_runs), "seconds": round(sum(r["seconds"] for r in all_runs), 1)}
+    return {
+        "answerable": len(ans),
+        "unanswerable": len(una),
+        "key_fact_ok": sum(majority(runs[c["id"]], "key_fact_ok") for c in ans),
+        "false_abstention": sum(majority(runs[c["id"]], "false_abstention") for c in ans),
+        "answered_wrong": sum(majority(runs[c["id"]], "answered_wrong") for c in ans),
+        "citation_recall": sum(majority(runs[c["id"]], "citation_recall") for c in ans),
+        "abstained": sum(majority(runs[c["id"]], "abstained") for c in una),
+        "citations": cited,
+        "gold_citations": sum(r["gold_citations"] for r in ans_runs),
+        "rejected_citations": sum(r["rejected_citations"] for r in all_runs),
+        "groundedness_median": round(sorted(g)[len(g) // 2], 2) if g else None,
+        "tokens": sum(r["tokens"] for r in all_runs),
+        "seconds": round(sum(r["seconds"] for r in all_runs), 1),
+    }
 
 
 def evaluate(llm: LLMClient, embedder: Embedder, base_seed: int, cases: list[dict] | None = None) -> dict:
@@ -138,48 +161,79 @@ def evaluate(llm: LLMClient, embedder: Embedder, base_seed: int, cases: list[dic
         snapshot = build_corpus(embedder, 80)
         modes = {m: run_mode(m, cases, keys, llm, embedder, tuned, seeds) for m in ("A", "B")}
         transaction.set_rollback(True)
-    by = lambda key, runs: {v: aggregate([c for c in cases if c[key] == v], runs) for v in sorted({c[key] for c in cases})}
-    return {"model": llm.model, "embedder": embedder.identity, "seeds": seeds, "settings": tuned, "corpus": snapshot,
-            "frozen_sha256": {k: frozen.WEEK5_FROZEN_SHA256[k] for k in ("eval/retrieval_cases.json", "eval/generation_keys.json")},
-            "modes": {m: {"overall": aggregate(cases, runs), "by_category": by("category", runs),
-                          "by_author": by("author", runs), "runs": runs} for m, runs in modes.items()}}
+    by = lambda key, runs: {
+        v: aggregate([c for c in cases if c[key] == v], runs) for v in sorted({c[key] for c in cases})
+    }
+    return {
+        "model": llm.model,
+        "embedder": embedder.identity,
+        "seeds": seeds,
+        "settings": tuned,
+        "corpus": snapshot,
+        "frozen_sha256": {
+            k: frozen.WEEK5_FROZEN_SHA256[k] for k in ("eval/retrieval_cases.json", "eval/generation_keys.json")
+        },
+        "modes": {
+            m: {
+                "overall": aggregate(cases, runs),
+                "by_category": by("category", runs),
+                "by_author": by("author", runs),
+                "runs": runs,
+            }
+            for m, runs in modes.items()
+        },
+    }
 
 
 # ---------------------------------------------------------------- report
 
+
 def _row(name: str, g: dict) -> str:
     a, u = g["answerable"], g["unanswerable"]
     prec = f"{g['gold_citations']} of {g['citations']}" if g["citations"] else "–"
-    return (f"| {name} | {count(g['key_fact_ok'], a)} | {count(g['false_abstention'], a)} | {count(g['answered_wrong'], a)} | "
-            f"{count(g['citation_recall'], a)} | {prec} | {count(g['abstained'], u)} |")
+    return (
+        f"| {name} | {count(g['key_fact_ok'], a)} | {count(g['false_abstention'], a)} | {count(g['answered_wrong'], a)} | "
+        f"{count(g['citation_recall'], a)} | {prec} | {count(g['abstained'], u)} |"
+    )
 
 
-HEAD = ("| | key fact correct | false abstention | answered but wrong | citation recall | citation precision (runs) | "
-        "correct abstention (unanswerable) |\n|---|---|---|---|---|---|---|")
+HEAD = (
+    "| | key fact correct | false abstention | answered but wrong | citation recall | citation precision (runs) | "
+    "correct abstention (unanswerable) |\n|---|---|---|---|---|---|---|"
+)
 
 
 def build_report(r: dict, cases: list[dict]) -> str:
     A, B = r["modes"]["A"], r["modes"]["B"]
-    cat = "\n".join(_row(f"{c} (A)", A["by_category"][c]) + "\n" + _row(f"{c} (B)", B["by_category"][c])
-                    for c in sorted(A["by_category"]))
-    auth = "\n".join(_row(f"{a} (A)", A["by_author"][a]) + "\n" + _row(f"{a} (B)", B["by_author"][a])
-                     for a in sorted(A["by_author"]))
+    cat = "\n".join(
+        _row(f"{c} (A)", A["by_category"][c]) + "\n" + _row(f"{c} (B)", B["by_category"][c])
+        for c in sorted(A["by_category"])
+    )
+    auth = "\n".join(
+        _row(f"{a} (A)", A["by_author"][a]) + "\n" + _row(f"{a} (B)", B["by_author"][a]) for a in sorted(A["by_author"])
+    )
     per = []
     for c in cases:
         for m, mode in (("A", A), ("B", B)):
             runs = mode["runs"][c["id"]]
             if c["answerable"]:
-                verdict = "correct" if majority(runs, "key_fact_ok") else ("abstained" if majority(runs, "false_abstention") else "**wrong**")
+                verdict = (
+                    "correct"
+                    if majority(runs, "key_fact_ok")
+                    else ("abstained" if majority(runs, "false_abstention") else "**wrong**")
+                )
             else:
                 verdict = "abstained" if majority(runs, "abstained") else "**answered**"
-            per.append(f"| {c['id']} | {m} | {c['category']} | {', '.join(x['status'] for x in runs)} | {verdict} | "
-                       f"{'; '.join(sorted({x['answer'][:90] for x in runs if x['answer']})) or '–'} |")
+            per.append(
+                f"| {c['id']} | {m} | {c['category']} | {', '.join(x['status'] for x in runs)} | {verdict} | "
+                f"{'; '.join(sorted({x['answer'][:90] for x in runs if x['answer']})) or '–'} |"
+            )
     oa, ob = A["overall"], B["overall"]
     return f"""# Generation evaluation, separately from retrieval (Step 4)
 
-> Generated by `python manage.py evaluate_generation`; do not edit by hand. Model `{r['model']}`, seeds
-> {', '.join(map(str, r['seeds']))} (each measure by 2-of-3 majority). Frozen Week 5 set and frozen answer key.
-> Shipped settings (floor {r['settings']['floor']}, top-k {r['settings']['top_k']}, groundedness {r['settings']['groundedness_threshold']}). **Reporting only: nothing was tuned.**
+> Generated by `python manage.py evaluate_generation`; do not edit by hand. Model `{r["model"]}`, seeds
+> {", ".join(map(str, r["seeds"]))} (each measure by 2-of-3 majority). Frozen Week 5 set and frozen answer key.
+> Shipped settings (floor {r["settings"]["floor"]}, top-k {r["settings"]["top_k"]}, groundedness {r["settings"]["groundedness_threshold"]}). **Reporting only: nothing was tuned.**
 
 **{CAVEAT}**
 
@@ -189,15 +243,15 @@ def build_report(r: dict, cases: list[dict]) -> str:
 
 Key facts are matched as whole words after normalising number words; a directly negated match doesn't count.
 
-## Overall ({oa['answerable']} answerable, {oa['unanswerable']} unanswerable)
+## Overall ({oa["answerable"]} answerable, {oa["unanswerable"]} unanswerable)
 
 {HEAD}
 {_row("**A: oracle context**", oa)}
 {_row("**B: end to end**", ob)}
 
-Groundedness (median, answered runs): A {oa['groundedness_median']}, B {ob['groundedness_median']}. Server-rejected
-citations: A {oa['rejected_citations']}, B {ob['rejected_citations']}. Tokens: A {oa['tokens']:,}, B {ob['tokens']:,}. Model time:
-A {oa['seconds']} s, B {ob['seconds']} s.
+Groundedness (median, answered runs): A {oa["groundedness_median"]}, B {ob["groundedness_median"]}. Server-rejected
+citations: A {oa["rejected_citations"]}, B {ob["rejected_citations"]}. Tokens: A {oa["tokens"]:,}, B {ob["tokens"]:,}. Model time:
+A {oa["seconds"]} s, B {ob["seconds"]} s.
 
 **Reading A against B:** a question correct in A but not in B lost its answer to retrieval; a question wrong or
 abstained in A is a generation problem even with the right text in front of the model.

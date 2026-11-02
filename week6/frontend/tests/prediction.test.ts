@@ -1,8 +1,18 @@
 import { describe as group, expect, it } from "vitest";
 import { ApiError } from "@/lib/api";
 import {
-  ACTIONS, buildRequest, DEFAULT_FORM, describe, errorView, FIELDS, FormState, LABELS, percent, PRESETS,
-  presetToForm, SCHEMA,
+  ACTIONS,
+  buildRequest,
+  DEFAULT_FORM,
+  describe,
+  errorView,
+  FIELDS,
+  FormState,
+  LABELS,
+  percent,
+  PRESETS,
+  presetToForm,
+  SCHEMA,
 } from "@/lib/prediction";
 import schemaDoc from "@/lib/noShowSchema.json";
 
@@ -64,8 +74,13 @@ group("wording", () => {
   const response = (action: keyof typeof ACTIONS) => ({
     model_version: "no-show-1.0.0",
     disclaimer: "Educational prototype. Not a medical assessment.",
-    prediction: { no_show_probability: 0.6582, suggested_action: action, suggested_action_label: ACTIONS[action],
-                  decision_threshold: 0.1688, average_no_show_rate: 0.1645 },
+    prediction: {
+      no_show_probability: 0.6582,
+      suggested_action: action,
+      suggested_action_label: ACTIONS[action],
+      decision_threshold: 0.1688,
+      average_no_show_rate: 0.1645,
+    },
   });
 
   it("shows the suggestion, the percentage, the version and the disclaimer", () => {
@@ -78,8 +93,11 @@ group("wording", () => {
 
   it("never uses clinical or alarming words anywhere on the page's text", () => {
     const everything = JSON.stringify([
-      describe(response("extra_reminder_suggested")), describe(response("standard_reminder")),
-      LABELS, ACTIONS, PRESETS.map((p) => p.label),
+      describe(response("extra_reminder_suggested")),
+      describe(response("standard_reminder")),
+      LABELS,
+      ACTIONS,
+      PRESETS.map((p) => p.label),
     ]).toLowerCase();
     for (const word of ["risk", "high", "danger", "diagnos", "disease", "illness", "patient is", "alarm"]) {
       expect(everything).not.toContain(word);
@@ -101,8 +119,15 @@ group("errorView", () => {
   });
 
   it("puts server field errors next to the fields", () => {
-    const view = errorView(new ApiError(400, "validation_error", "x", { appointment_hour: ["Ensure this value is less than or equal to 19."] }));
-    expect(view).toMatchObject({ kind: "fields", fields: { appointment_hour: "Ensure this value is less than or equal to 19." } });
+    const view = errorView(
+      new ApiError(400, "validation_error", "x", {
+        appointment_hour: ["Ensure this value is less than or equal to 19."],
+      }),
+    );
+    expect(view).toMatchObject({
+      kind: "fields",
+      fields: { appointment_hour: "Ensure this value is less than or equal to 19." },
+    });
   });
 
   it("tells the user how long to wait when rate limited", () => {

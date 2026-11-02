@@ -30,6 +30,7 @@ def real(result):
 
 # ---- Sanity of the comparison ----
 
+
 def test_every_real_model_beats_the_floor_on_validation(result):
     floor = next(s for c, s in result.validation.items() if c.family == "floor")
     for candidate, s in real(result).items():
@@ -54,23 +55,30 @@ def test_report_states_whatever_the_improvement_numbers_show(result):
     assert imp.low <= imp.difference <= imp.high
 
 
-@pytest.mark.parametrize("difference, low, high, expected", [
-    (0.020, 0.005, 0.035, "a real improvement"),
-    (0.010, -0.004, 0.024, "not clearly better"),
-    (-0.010, -0.025, 0.004, "no improvement"),
-])
+@pytest.mark.parametrize(
+    "difference, low, high, expected",
+    [
+        (0.020, 0.005, 0.035, "a real improvement"),
+        (0.010, -0.004, 0.024, "not clearly better"),
+        (-0.010, -0.025, 0.004, "no improvement"),
+    ],
+)
 def test_verdict_wording_for_every_outcome(difference, low, high, expected):
     assert train.Improvement(difference, low, high, 1000).verdict.startswith(expected)
 
 
 def test_the_grid_covers_floor_baseline_and_three_improved_families():
     assert {c.family for c in CANDIDATES} == {"floor", "baseline", "improved"}
-    assert {c.name for c in CANDIDATES if c.family == "improved"} == {"logreg_engineered", "random_forest",
-                                                                       "gradient_boosting"}
+    assert {c.name for c in CANDIDATES if c.family == "improved"} == {
+        "logreg_engineered",
+        "random_forest",
+        "gradient_boosting",
+    }
     assert "random_forest" not in {c.name for c in RELEASE_CANDIDATES}
 
 
 # ---- Selection and threshold use validation only ----
+
 
 def test_choice_and_threshold_do_not_depend_on_test_labels(df, result):
     _, _, test = split(df)
@@ -84,6 +92,7 @@ def test_choice_and_threshold_do_not_depend_on_test_labels(df, result):
 
 def test_selection_rule_prefers_the_simpler_model_on_a_tie():
     from ml.models import Candidate
+
     simple = Candidate("improved", "logreg_engineered", True, (("C", 1.0),), complexity=1)
     complex_ = Candidate("improved", "gradient_boosting", True, (), complexity=3)
     scores = {simple: train.Scores(0.300, 0.7, 0.12, 0.16), complex_: train.Scores(0.303, 0.7, 0.12, 0.16)}
@@ -106,6 +115,7 @@ def test_test_set_is_scored_in_exactly_one_place():
 
 # ---- Probabilities and determinism ----
 
+
 def test_probabilities_are_valid_and_calibrated_on_average(df, result):
     _, validation, _ = split(df)
     probability = result.chosen_pipeline.predict_proba(model_input(validation))[:, 1]
@@ -116,8 +126,9 @@ def test_probabilities_are_valid_and_calibrated_on_average(df, result):
 def test_training_is_deterministic(df, result):
     train_rows, validation, _ = split(df)
     again = build(result.chosen).fit(model_input(train_rows), train_rows[config.LABEL])
-    np.testing.assert_array_equal(again.predict_proba(model_input(validation)),
-                                  result.chosen_pipeline.predict_proba(model_input(validation)))
+    np.testing.assert_array_equal(
+        again.predict_proba(model_input(validation)), result.chosen_pipeline.predict_proba(model_input(validation))
+    )
 
 
 def test_committed_release_report_is_up_to_date(result):
@@ -139,9 +150,17 @@ def test_full_model_survives_joblib_save_and_reload_in_a_fresh_process(df, resul
     path, rows = tmp_path / "model.joblib", tmp_path / "rows.csv"
     joblib.dump(result.chosen_pipeline, path)
     model_input(split(df)[2]).head(300).to_csv(rows, index=False)
-    code = ("import joblib, json, sys, pandas as pd; m = joblib.load(sys.argv[1]); "
-            "print(json.dumps(m.predict_proba(pd.read_csv(sys.argv[2]))[:, 1].tolist()))")
-    out = subprocess.run([sys.executable, "-c", code, str(path), str(rows)],
-                         cwd=Path(__file__).resolve().parent.parent, capture_output=True, text=True, check=True)
-    np.testing.assert_allclose(json.loads(out.stdout), result.chosen_pipeline.predict_proba(pd.read_csv(rows))[:, 1],
-                               rtol=0, atol=1e-12)
+    code = (
+        "import joblib, json, sys, pandas as pd; m = joblib.load(sys.argv[1]); "
+        "print(json.dumps(m.predict_proba(pd.read_csv(sys.argv[2]))[:, 1].tolist()))"
+    )
+    out = subprocess.run(
+        [sys.executable, "-c", code, str(path), str(rows)],
+        cwd=Path(__file__).resolve().parent.parent,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    np.testing.assert_allclose(
+        json.loads(out.stdout), result.chosen_pipeline.predict_proba(pd.read_csv(rows))[:, 1], rtol=0, atol=1e-12
+    )

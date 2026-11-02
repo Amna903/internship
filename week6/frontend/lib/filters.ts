@@ -4,7 +4,14 @@
  * Everything here is pure so it can run on either side and be unit-tested.
  */
 import {
-  DAYS, VISIT_TYPES, locations, specialtyName, specialties, type Day, type Professional, type VisitType,
+  DAYS,
+  VISIT_TYPES,
+  locations,
+  specialtyName,
+  specialties,
+  type Day,
+  type Professional,
+  type VisitType,
 } from "@/lib/professionals";
 
 export const SORTS = {
@@ -28,11 +35,20 @@ export type Filters = {
   sort: Sort;
 };
 
-export const EMPTY_FILTERS: Filters = { q: "", specialties: [], location: "", visit: "", day: "", maxFee: null, sort: "name" };
+export const EMPTY_FILTERS: Filters = {
+  q: "",
+  specialties: [],
+  location: "",
+  visit: "",
+  day: "",
+  maxFee: null,
+  sort: "name",
+};
 
 type Params = Record<string, string | string[] | undefined>;
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) ?? "";
-const oneOf = <T extends string>(v: string, allowed: readonly T[]): T | "" => ((allowed as readonly string[]).includes(v) ? (v as T) : "");
+const oneOf = <T extends string>(v: string, allowed: readonly T[]): T | "" =>
+  (allowed as readonly string[]).includes(v) ? (v as T) : "";
 
 /** Unknown or malformed values are dropped rather than trusted: a hand-edited URL can't break the page. */
 export function parseFilters(params: Params): Filters {
@@ -42,7 +58,10 @@ export function parseFilters(params: Params): Filters {
   return {
     q: first(params.q).trim().slice(0, 80),
     specialties: [...new Set(first(params.specialty).split(","))].filter((s) => specialtyIds.includes(s)),
-    location: oneOf(first(params.location), locations.map((l) => l.id)),
+    location: oneOf(
+      first(params.location),
+      locations.map((l) => l.id),
+    ),
     visit: oneOf(first(params.visit), VISIT_TYPES),
     day: oneOf(first(params.day), DAYS),
     maxFee: Number.isFinite(fee) && fee > 0 ? fee : null,
@@ -73,9 +92,17 @@ function matches(p: Professional, f: Filters): boolean {
   if (f.day && !p.availability[f.day]?.length) return false;
   if (f.maxFee && p.feePkr > f.maxFee) return false;
   if (f.q) {
-    const haystack = [p.name, p.title, p.clinic, p.bio, specialtyName(p.specialtyId), ...p.languages].join(" ").toLowerCase();
+    const haystack = [p.name, p.title, p.clinic, p.bio, specialtyName(p.specialtyId), ...p.languages]
+      .join(" ")
+      .toLowerCase();
     // Every word must appear somewhere, so "urdu physio" narrows instead of widening.
-    if (!f.q.toLowerCase().split(/\s+/).every((word) => haystack.includes(word))) return false;
+    if (
+      !f.q
+        .toLowerCase()
+        .split(/\s+/)
+        .every((word) => haystack.includes(word))
+    )
+      return false;
   }
   return true;
 }

@@ -13,7 +13,14 @@ export function BrandMark({ className = "brand-mark" }: { className?: string }) 
         </linearGradient>
       </defs>
       <rect width="32" height="32" rx="9" fill={`url(#${id})`} />
-      <path d="M6 17h4.5l2.5-5.5 4 11 3-8 1.8 2.5H26" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M6 17h4.5l2.5-5.5 4 11 3-8 1.8 2.5H26"
+        fill="none"
+        stroke="#fff"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

@@ -11,7 +11,10 @@ export class ConfirmKeys {
   constructor(private make: () => string = () => newIdempotencyKey()) {}
   for(actionId: string): string {
     let key = this.keys.get(actionId);
-    if (!key) { key = this.make(); this.keys.set(actionId, key); }
+    if (!key) {
+      key = this.make();
+      this.keys.set(actionId, key);
+    }
     return key;
   }
 }

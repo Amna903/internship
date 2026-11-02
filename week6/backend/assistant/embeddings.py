@@ -41,9 +41,12 @@ class OllamaEmbedder(Embedder):
         self.identity = f"ollama/{model}"
 
     def embed(self, texts: list[str]) -> np.ndarray:
-        request = urllib.request.Request(f"{self.base_url}/api/embed",
-                                         data=json.dumps({"model": self.model, "input": texts}).encode(),
-                                         headers={"Content-Type": "application/json"}, method="POST")
+        request = urllib.request.Request(
+            f"{self.base_url}/api/embed",
+            data=json.dumps({"model": self.model, "input": texts}).encode(),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
         try:
             with urllib.request.urlopen(request, timeout=self.timeout_seconds) as response:
                 body = json.loads(response.read())

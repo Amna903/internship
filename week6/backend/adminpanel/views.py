@@ -167,7 +167,8 @@ class _ProfileStatusView(APIView):
             profile.user.is_active = not self.deactivate
             profile.user.save(update_fields=["is_active"])
             action = (
-                AuditEvent.Action.ADMIN_PROFILE_DEACTIVATED if self.deactivate
+                AuditEvent.Action.ADMIN_PROFILE_DEACTIVATED
+                if self.deactivate
                 else AuditEvent.Action.ADMIN_PROFILE_ACTIVATED
             )
             record_event(request, action, profile=profile, changed_fields=["status"])

@@ -31,8 +31,17 @@ def committed():
 def rebuilt(tmp_path_factory):
     """Rebuild the release in a brand-new Python process, into a temporary folder."""
     out = tmp_path_factory.mktemp("rebuilt")
-    subprocess.run([sys.executable, "-c", "import sys; from pathlib import Path; from ml.artifact import build; "
-                    "build(Path(sys.argv[1]))", str(out)], cwd=BACKEND, check=True, capture_output=True)
+    subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "import sys; from pathlib import Path; from ml.artifact import build; build(Path(sys.argv[1]))",
+            str(out),
+        ],
+        cwd=BACKEND,
+        check=True,
+        capture_output=True,
+    )
     return out
 
 
@@ -50,6 +59,7 @@ def sample_rows(n=300):
 
 # ---- A1: the training script reproduces the model artifact ----
 
+
 def test_rebuild_reproduces_data_metrics_and_predictions(rebuilt, committed):
     fresh = json.loads(artifact.artifact_paths(rebuilt)[1].read_text())
     assert fresh["training_data"] == committed.metadata["training_data"]  # level 1: identical data
@@ -57,7 +67,8 @@ def test_rebuild_reproduces_data_metrics_and_predictions(rebuilt, committed):
     assert fresh["decision"] == committed.metadata["decision"]
     rows = sample_rows()
     np.testing.assert_allclose(  # level 3: identical predictions
-        inference.load(rebuilt).pipeline.predict_proba(rows), committed.pipeline.predict_proba(rows), rtol=0, atol=1e-9)
+        inference.load(rebuilt).pipeline.predict_proba(rows), committed.pipeline.predict_proba(rows), rtol=0, atol=1e-9
+    )
 
 
 def test_rebuild_is_byte_identical_on_the_same_platform(rebuilt, committed):
@@ -92,14 +103,17 @@ def test_pinned_requirements_match_the_versions_the_model_was_built_with(committ
 
 
 def test_committed_file_loads_in_a_fresh_process():
-    code = ("from ml.inference import load; m = load(); "
-            "print(m.version, round(float(m.pipeline.predict_proba(__import__('ml.preprocess', fromlist=['x'])"
-            ".model_input(__import__('ml.data', fromlist=['x']).generate().head(1)))[0, 1]), 6))")
+    code = (
+        "from ml.inference import load; m = load(); "
+        "print(m.version, round(float(m.pipeline.predict_proba(__import__('ml.preprocess', fromlist=['x'])"
+        ".model_input(__import__('ml.data', fromlist=['x']).generate().head(1)))[0, 1]), 6))"
+    )
     out = subprocess.run([sys.executable, "-c", code], cwd=BACKEND, capture_output=True, text=True, check=True)
     assert out.stdout.startswith(f"{config.MODEL_NAME}-{config.MODEL_VERSION} ")
 
 
 # ---- The loader refuses what it should not open ----
+
 
 def refuses(directory, reason_part, monkeypatch=None):
     if monkeypatch is not None:  # prove the file is never unpickled
@@ -151,6 +165,7 @@ def test_unreadable_metadata_is_refused(copy, monkeypatch):
 
 # ---- Output wording and decision rule ----
 
+
 def test_suggestion_at_the_boundaries():
     assert inference.suggested_action(0.20, 0.20) == "extra_reminder_suggested"  # exactly at the threshold
     assert inference.suggested_action(0.1999, 0.20) == "standard_reminder"
@@ -173,9 +188,12 @@ def test_predictions_are_valid_probabilities_with_the_version(committed):
 
 def test_verify_release_reports_exactly_which_metadata_sections_differ(committed):
     from ml.verify_release import compare_metadata
+
     same = json.loads(json.dumps(committed.metadata))
     assert compare_metadata(committed.metadata, same) == []
     changed = {**same, "decision": {**same["decision"], "threshold": 0.5}, "seed": 7}
     assert compare_metadata(committed.metadata, changed) == ["seed", "decision"]
     # platform and file hash may legitimately differ between machines, so they are not compared here
-    assert compare_metadata(committed.metadata, {**same, "built_on": {"platform": "linux"}, "artifact_sha256": "x"}) == []
+    assert (
+        compare_metadata(committed.metadata, {**same, "built_on": {"platform": "linux"}, "artifact_sha256": "x"}) == []
+    )

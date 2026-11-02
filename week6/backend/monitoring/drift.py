@@ -28,13 +28,20 @@ MIN_ROWS = 100
 FAILURE_RATE, MIN_CALLS = 0.05, 20
 LATENCY_FACTOR = 3.0
 SERVED = f"no-show-{ml_config.MODEL_VERSION}"  # the name the loaded model reports
-DISCLAIMER = ("Synthetic data and a fictional clinic. These numbers describe the model's behaviour on synthetic "
-              "inputs only and make no claim about real-world medical impact.")
+DISCLAIMER = (
+    "Synthetic data and a fictional clinic. These numbers describe the model's behaviour on synthetic "
+    "inputs only and make no claim about real-world medical impact."
+)
 
 
 def _log(source, outcome, started, version=SERVED, probability=None):
-    PredictionLog.objects.create(model_version=version, source=source, outcome=outcome, probability=probability,
-                                 latency_ms=(time.perf_counter() - started) * 1000)
+    PredictionLog.objects.create(
+        model_version=version,
+        source=source,
+        outcome=outcome,
+        probability=probability,
+        latency_ms=(time.perf_counter() - started) * 1000,
+    )
 
 
 def log_invalid(source: str) -> None:
@@ -64,8 +71,9 @@ def shares(probabilities) -> list[float]:
 
 def psi(expected: list[float], actual: list[float]) -> float:
     """Population stability index, sum((a - e) * ln(a / e)), each share floored at 0.0001."""
-    return float(sum((max(a, FLOOR) - max(e, FLOOR)) * math.log(max(a, FLOOR) / max(e, FLOOR))
-                     for e, a in zip(expected, actual)))
+    return float(
+        sum((max(a, FLOOR) - max(e, FLOOR)) * math.log(max(a, FLOOR) / max(e, FLOOR)) for e, a in zip(expected, actual))
+    )
 
 
 def verdict(value: float | None) -> str:
@@ -99,17 +107,29 @@ def summarise(rows: list[tuple[str, str, float | None, float]], baseline: dict) 
         flags.append("latency")
     if other_versions:
         flags.append("baseline_is_for_another_version")
-    return {"predictions": len(ok), "invalid_input": len(rows) - len(calls), "failed": failed,
-            "failure_rate": None if rate is None else round(rate, 4),
-            "shares": [round(s, 4) for s in shares(comparable)] if comparable else None,
-            "baseline_shares": baseline["shares"], "psi": None if value is None else round(value, 4),
-            "verdict": verdict(value), "latency_ms": {"p50": p50 and round(p50, 2), "p95": p95 and round(p95, 2)},
-            "baseline_latency_ms": baseline["latency_ms"], "model_version": baseline["model_version"],
-            "other_versions": other_versions, "flags": flags, "disclaimer": DISCLAIMER}
+    return {
+        "predictions": len(ok),
+        "invalid_input": len(rows) - len(calls),
+        "failed": failed,
+        "failure_rate": None if rate is None else round(rate, 4),
+        "shares": [round(s, 4) for s in shares(comparable)] if comparable else None,
+        "baseline_shares": baseline["shares"],
+        "psi": None if value is None else round(value, 4),
+        "verdict": verdict(value),
+        "latency_ms": {"p50": p50 and round(p50, 2), "p95": p95 and round(p95, 2)},
+        "baseline_latency_ms": baseline["latency_ms"],
+        "model_version": baseline["model_version"],
+        "other_versions": other_versions,
+        "flags": flags,
+        "disclaimer": DISCLAIMER,
+    }
 
 
 def summary(days: int = 7) -> dict:
     since = timezone.now() - timedelta(days=days)
-    rows = list(PredictionLog.objects.filter(created_at__gte=since)
-                .values_list("model_version", "outcome", "probability", "latency_ms"))
+    rows = list(
+        PredictionLog.objects.filter(created_at__gte=since).values_list(
+            "model_version", "outcome", "probability", "latency_ms"
+        )
+    )
     return {"days": days, **summarise(rows, load_baseline())}

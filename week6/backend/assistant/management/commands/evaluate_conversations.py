@@ -20,9 +20,16 @@ class Command(BaseCommand):
             raise CommandError(str(exc)) from None
         path = conversation_eval.save(r, convs)
         o = r["summary"]["overall"]
-        self.stdout.write(f"Turn-2 hit: without history {o['hit_without']}/{o['answerable']}, with {o['hit_with']}/"
-                          f"{o['answerable']}; key fact {o['key_fact_ok']}/{o['answerable']}; declined "
-                          f"{o['abstained']}/{o['unanswerable']}")
-        self.stdout.write("Red-team gate: " + ("PASSED" if r["gate_passed"] else "FAILED") + " ("
-                          + ", ".join(f"{k} {'pass' if g['passed'] else 'FAIL'}" for k, g in r["gate"].items()) + ")")
+        self.stdout.write(
+            f"Turn-2 hit: without history {o['hit_without']}/{o['answerable']}, with {o['hit_with']}/"
+            f"{o['answerable']}; key fact {o['key_fact_ok']}/{o['answerable']}; declined "
+            f"{o['abstained']}/{o['unanswerable']}"
+        )
+        self.stdout.write(
+            "Red-team gate: "
+            + ("PASSED" if r["gate_passed"] else "FAILED")
+            + " ("
+            + ", ".join(f"{k} {'pass' if g['passed'] else 'FAIL'}" for k, g in r["gate"].items())
+            + ")"
+        )
         self.stdout.write(f"Wrote {path.name}.")

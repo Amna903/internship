@@ -10,7 +10,11 @@ export function Shell({ nav, children }: { nav?: ReactNode; children: ReactNode 
 }
 
 export function FieldError({ errors, name }: { errors: Record<string, string>; name: string }) {
-  return errors[name] ? <div className="field-error" role="alert">{errors[name]}</div> : null;
+  return errors[name] ? (
+    <div className="field-error" role="alert">
+      {errors[name]}
+    </div>
+  ) : null;
 }
 
 export { DISCLAIMER };

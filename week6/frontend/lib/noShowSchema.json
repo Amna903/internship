@@ -9,14 +9,7 @@
     },
     "appointment_weekday": {
       "type": "category",
-      "values": [
-        "monday",
-        "tuesday",
-        "wednesday",
-        "thursday",
-        "friday",
-        "saturday"
-      ]
+      "values": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
     },
     "appointment_hour": {
       "type": "integer",
@@ -25,29 +18,15 @@
     },
     "age_band": {
       "type": "category",
-      "values": [
-        "18-24",
-        "25-34",
-        "35-44",
-        "45-54",
-        "55-64",
-        "65+"
-      ]
+      "values": ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
     },
     "visit_type": {
       "type": "category",
-      "values": [
-        "in_person",
-        "telehealth"
-      ]
+      "values": ["in_person", "telehealth"]
     },
     "booking_channel": {
       "type": "category",
-      "values": [
-        "web",
-        "phone",
-        "app"
-      ]
+      "values": ["web", "phone", "app"]
     },
     "reminder_sent": {
       "type": "boolean"

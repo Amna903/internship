@@ -40,8 +40,12 @@ class Candidate:
         p = dict(self.params)
         depth = p.get("max_depth")
         features = p.get("max_features", "sqrt")
-        return (float("inf") if depth is None else depth, -p.get("min_samples_leaf", 1),
-                SQRT_FEATURE_SHARE if features == "sqrt" else features, -p.get("n_estimators", RF_TREES))
+        return (
+            float("inf") if depth is None else depth,
+            -p.get("min_samples_leaf", 1),
+            SQRT_FEATURE_SHARE if features == "sqrt" else features,
+            -p.get("n_estimators", RF_TREES),
+        )
 
     @property
     def label(self) -> str:
@@ -64,21 +68,31 @@ def _classifier(candidate: Candidate):
         # No class_weight, for the same reason as logistic regression.
         # n_jobs=1: with several threads, predict_proba adds the trees' outputs in whatever order the threads
         # finish, so repeated runs differ in the last digits, enough to flip a near-tie between two forests.
-        return RandomForestClassifier(**{"n_estimators": RF_TREES, "oob_score": True, "n_jobs": 1,
-                                         "random_state": config.SEED, **dict(candidate.params)})
+        return RandomForestClassifier(
+            **{
+                "n_estimators": RF_TREES,
+                "oob_score": True,
+                "n_jobs": 1,
+                "random_state": config.SEED,
+                **dict(candidate.params),
+            }
+        )
     if candidate.name == "gradient_boosting":
         # early_stopping=False: the automatic early stopping would carve its own random validation
         # set out of the training rows (ignoring patient groups) and add a second source of randomness.
-        return HistGradientBoostingClassifier(max_iter=200, early_stopping=False, random_state=config.SEED,
-                                              **dict(candidate.params))
+        return HistGradientBoostingClassifier(
+            max_iter=200, early_stopping=False, random_state=config.SEED, **dict(candidate.params)
+        )
     raise ValueError(f"Unknown candidate {candidate.name!r}")
 
 
 def build(candidate: Candidate) -> Pipeline:
-    return Pipeline([
-        ("preprocess", build_preprocessor(engineered=candidate.engineered)),
-        ("model", _classifier(candidate)),
-    ])
+    return Pipeline(
+        [
+            ("preprocess", build_preprocessor(engineered=candidate.engineered)),
+            ("model", _classifier(candidate)),
+        ]
+    )
 
 
 # Tie-break order, written before training (lower = simpler = wins a tie):

@@ -9,7 +9,10 @@ import { ConfirmKeys, STOP_REASONS, formatStep } from "@/lib/agent";
 import { ActionCard, AgentRunResponse, ApiError, agentApi } from "@/lib/api";
 
 const EXAMPLES = [
-  { label: "Multi-tool", message: "Is there a telehealth slot next Tuesday morning, and what is the late cancellation fee?" },
+  {
+    label: "Multi-tool",
+    message: "Is there a telehealth slot next Tuesday morning, and what is the late cancellation fee?",
+  },
   { label: "Booking (needs approval)", message: "Please book the first telehealth slot next Wednesday." },
   { label: "Missing details", message: "Will this patient miss their appointment?" },
 ];
@@ -40,57 +43,102 @@ export default function AgentPage() {
   }
 
   async function send(text: string) {
-    setBusy(true); setFailure(null); setRun(null); setCard(null);
+    setBusy(true);
+    setFailure(null);
+    setRun(null);
+    setCard(null);
     try {
       const r = await agentApi.run(text);
       setRun(r);
       // The card comes from the server's stored action, never from the model's text.
       if (r.pending_action) setCard(await agentApi.action(r.pending_action.action_id));
-    } catch (err) { fail(err); } finally { setBusy(false); }
+    } catch (err) {
+      fail(err);
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function decide(confirm: boolean) {
     if (!card) return;
-    setBusy(true); setFailure(null);
+    setBusy(true);
+    setFailure(null);
     try {
-      setCard(confirm ? await agentApi.confirm(card.action_id, keys.current.for(card.action_id))
-                      : await agentApi.decline(card.action_id));
-    } catch (err) { fail(err); } finally { setBusy(false); }
+      setCard(
+        confirm
+          ? await agentApi.confirm(card.action_id, keys.current.for(card.action_id))
+          : await agentApi.decline(card.action_id),
+      );
+    } catch (err) {
+      fail(err);
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
     <Shell nav={nav}>
-      <PageHeader eyebrow="Admin console · educational prototype" title="Clinic admin agent"
-                  lead="A controlled agent over five typed tools. The server checks every call; a booking is only proposed until you confirm it." />
+      <PageHeader
+        eyebrow="Admin console · educational prototype"
+        title="Clinic admin agent"
+        lead="A controlled agent over five typed tools. The server checks every call; a booking is only proposed until you confirm it."
+      />
       <AdminTabs />
       <section className="card" aria-labelledby="agent-title">
         <h2 id="agent-title">Ask the agent</h2>
         <div className="preset-row" aria-label="Examples">
           <span className="muted small">Try:</span>
           {EXAMPLES.map((e) => (
-            <button key={e.label} type="button" className="btn ghost small" disabled={busy}
-                    onClick={() => { setMessage(e.message); send(e.message); }}>{e.label}</button>
+            <button
+              key={e.label}
+              type="button"
+              className="btn ghost small"
+              disabled={busy}
+              onClick={() => {
+                setMessage(e.message);
+                send(e.message);
+              }}
+            >
+              {e.label}
+            </button>
           ))}
         </div>
-        <form onSubmit={(e) => { e.preventDefault(); if (message.trim()) send(message.trim()); }}>
-          <label htmlFor="agent-message" className="small">Request</label>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (message.trim()) send(message.trim());
+          }}
+        >
+          <label htmlFor="agent-message" className="small">
+            Request
+          </label>
           <div className="ask-row">
             <textarea id="agent-message" value={message} maxLength={500} onChange={(e) => setMessage(e.target.value)} />
-            <button type="submit" className="btn" disabled={busy || !message.trim()}>{busy ? "Working…" : "Run"}</button>
+            <button type="submit" className="btn" disabled={busy || !message.trim()}>
+              {busy ? "Working…" : "Run"}
+            </button>
           </div>
         </form>
 
         <div aria-live="polite" data-testid="agent-result">
-          {failure && <div className="alert warn" role="alert">{failure}</div>}
+          {failure && (
+            <div className="alert warn" role="alert">
+              {failure}
+            </div>
+          )}
           {run && (
             <>
               <p className="suggestion" data-testid="agent-status">
-                {run.status === "done" ? "Done" : STOP_REASONS[run.stopped_reason ?? ""] ?? `Ended: ${run.status}`}
+                {run.status === "done" ? "Done" : (STOP_REASONS[run.stopped_reason ?? ""] ?? `Ended: ${run.status}`)}
               </p>
               {run.answer && <p data-testid="agent-answer">{run.answer}</p>}
               {run.citations?.map((c, i) => (
-                <blockquote key={i} className="citation"><p className="small">“{c.quote}”</p>
-                  <span className="mono muted">{c.source} · {c.passage_id}</span></blockquote>
+                <blockquote key={i} className="citation">
+                  <p className="small">“{c.quote}”</p>
+                  <span className="mono muted">
+                    {c.source} · {c.passage_id}
+                  </span>
+                </blockquote>
               ))}
               {run.results.map((r, i) => (
                 <details key={i} className="small" data-testid="agent-tool-result" open>
@@ -100,9 +148,13 @@ export default function AgentPage() {
               ))}
               <h3 className="form-section">Trace</h3>
               <ol className="mono small" data-testid="agent-trace">
-                {run.steps.map((s) => <li key={s.n}>{formatStep(s)}</li>)}
+                {run.steps.map((s) => (
+                  <li key={s.n}>{formatStep(s)}</li>
+                ))}
               </ol>
-              <p className="muted small">{run.tool_calls} tool call(s) · about {run.tokens.toLocaleString()} tokens · {run.model}</p>
+              <p className="muted small">
+                {run.tool_calls} tool call(s) · about {run.tokens.toLocaleString()} tokens · {run.model}
+              </p>
               <p className="disclaimer small">{run.disclaimer}</p>
             </>
           )}
@@ -110,15 +162,25 @@ export default function AgentPage() {
             <section className="card" aria-labelledby="card-title" data-testid="approval-card">
               <h3 id="card-title">{card.proposed_by}</h3>
               <p>{card.summary}</p>
-              <p className="small muted">Status: <strong data-testid="card-status">{card.status}</strong>
-                {card.status === "pending" && ` · expires ${new Date(card.expires_at).toLocaleTimeString()}`}</p>
+              <p className="small muted">
+                Status: <strong data-testid="card-status">{card.status}</strong>
+                {card.status === "pending" && ` · expires ${new Date(card.expires_at).toLocaleTimeString()}`}
+              </p>
               {card.status === "pending" && (
                 <div className="preset-row">
-                  <button className="btn" disabled={busy} onClick={() => decide(true)} data-testid="confirm">Confirm booking</button>
-                  <button className="btn ghost" disabled={busy} onClick={() => decide(false)} data-testid="decline">Decline</button>
+                  <button className="btn" disabled={busy} onClick={() => decide(true)} data-testid="confirm">
+                    Confirm booking
+                  </button>
+                  <button className="btn ghost" disabled={busy} onClick={() => decide(false)} data-testid="decline">
+                    Decline
+                  </button>
                 </div>
               )}
-              {card.booking && <p className="small">Booked (fictional): {card.booking.date} {card.booking.time} with {card.booking.clinician}.</p>}
+              {card.booking && (
+                <p className="small">
+                  Booked (fictional): {card.booking.date} {card.booking.time} with {card.booking.clinician}.
+                </p>
+              )}
             </section>
           )}
         </div>

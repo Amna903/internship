@@ -22,12 +22,45 @@ from ml import config as ml_config
 from ml.inference import ModelUnavailable, get_model
 
 TODAY = date(2026, 11, 2)  # a Monday
-FORBIDDEN = {"user", "user_id", "userid", "username", "role", "roles", "permission", "permissions", "is_admin",
-             "admin", "actor", "owner", "account", "email", "token", "auth", "authorization", "scope", "caller",
-             "as_user", "impersonate", "privilege", "privileges", "group", "groups"}
-GOOD_PREDICTION = {"lead_time_days": 10, "appointment_weekday": "monday", "appointment_hour": 10, "age_band": "25-34",
-                   "visit_type": "in_person", "booking_channel": "app", "reminder_sent": True, "prior_appointments": 3,
-                   "prior_no_shows": 1, "distance_km": None}
+FORBIDDEN = {
+    "user",
+    "user_id",
+    "userid",
+    "username",
+    "role",
+    "roles",
+    "permission",
+    "permissions",
+    "is_admin",
+    "admin",
+    "actor",
+    "owner",
+    "account",
+    "email",
+    "token",
+    "auth",
+    "authorization",
+    "scope",
+    "caller",
+    "as_user",
+    "impersonate",
+    "privilege",
+    "privileges",
+    "group",
+    "groups",
+}
+GOOD_PREDICTION = {
+    "lead_time_days": 10,
+    "appointment_weekday": "monday",
+    "appointment_hour": 10,
+    "age_band": "25-34",
+    "visit_type": "in_person",
+    "booking_channel": "app",
+    "reminder_sent": True,
+    "prior_appointments": 3,
+    "prior_no_shows": 1,
+    "distance_km": None,
+}
 
 
 @pytest.fixture
@@ -53,6 +86,7 @@ def objects(schema: dict):
 
 
 # ---------------- the registry and its security rules ----------------
+
 
 def test_the_four_read_tools_plus_the_one_step7_write_tool_all_admin_only():
     reads = sorted(n for n, t in REGISTRY.items() if t.permission == "read")
@@ -87,6 +121,7 @@ def test_specs_are_short_and_carry_no_secrets(tool):
 def test_handlers_take_no_identity_from_arguments():
     """Every handler is (args, ctx): who is calling can only be read from ctx.user."""
     import inspect
+
     for tool in REGISTRY.values():
         assert list(inspect.signature(tool.handler).parameters) == ["args", "ctx"]
 
@@ -102,6 +137,7 @@ class TestAuthorisation:
 
     def test_anonymous_and_missing_callers_are_not_allowed(self):
         from django.contrib.auth.models import AnonymousUser
+
         for who in (None, AnonymousUser()):
             assert run_tool("cluster_summaries", {}, ToolContext(user=who)).code == "not_allowed"
 
@@ -139,6 +175,7 @@ class TestFailuresAndAudit:
     def test_failure_messages_are_fixed_and_never_carry_internal_details(self, ctx, monkeypatch):
         def boom(*a, **k):
             raise LLMUnavailable("connection refused to 10.0.0.5:11434")
+
         monkeypatch.setattr(read_tools, "shipped_retrieve", boom)
         r = run_tool("search_policies", {"query": "How long do refunds take?"}, ctx)
         assert r.code == "unavailable" and "10.0.0.5" not in json.dumps(r.public())
@@ -168,13 +205,16 @@ class TestFailuresAndAudit:
 
 # ---------------- search_policies (T2) ----------------
 
+
 @pytest.mark.django_db
 class TestSearch:
     @pytest.fixture(autouse=True)
     def policies(self, admin, monkeypatch):
         call_command("load_policies", admin=admin.email)
         # the tuned floor belongs to the real embedder; a low one lets the fake return passages
-        monkeypatch.setattr(read_tools, "load_tuned", lambda: {"floor": 0.0, "top_k": 5, "groundedness_threshold": 0.61})
+        monkeypatch.setattr(
+            read_tools, "load_tuned", lambda: {"floor": 0.0, "top_k": 5, "groundedness_threshold": 0.61}
+        )
 
     def test_returns_at_most_three_passages_with_edition_and_an_untrusted_flag(self, ctx):
         r = run_tool("search_policies", {"query": "How long do I have to request a refund?"}, ctx)
@@ -184,15 +224,22 @@ class TestSearch:
     def test_uses_the_shipped_retrieval_with_the_area_filter(self, ctx, monkeypatch):
         seen = {}
         real = read_tools.shipped_retrieve
-        monkeypatch.setattr(read_tools, "shipped_retrieve",
-                            lambda q, llm, emb, tuned, area=None: seen.update(q=q, area=area) or real(q, llm, emb, tuned, area=area))
+        monkeypatch.setattr(
+            read_tools,
+            "shipped_retrieve",
+            lambda q, llm, emb, tuned, area=None: seen.update(q=q, area=area) or real(q, llm, emb, tuned, area=area),
+        )
         run_tool("search_policies", {"query": "refund", "area": "billing"}, ctx)
         assert seen == {"q": "refund", "area": "billing"}
 
     def test_the_query_is_redacted_before_retrieval(self, ctx, monkeypatch):
         seen = {}
-        monkeypatch.setattr(read_tools, "shipped_retrieve", lambda q, *a, **k: seen.setdefault("q", q) and
-                            __import__("assistant.indexing", fromlist=["x"]).SearchResult([], [], 0, 0))
+        monkeypatch.setattr(
+            read_tools,
+            "shipped_retrieve",
+            lambda q, *a, **k: seen.setdefault("q", q)
+            and __import__("assistant.indexing", fromlist=["x"]).SearchResult([], [], 0, 0),
+        )
         run_tool("search_policies", {"query": "Refund for jane@example.test, card 4111111111111111?"}, ctx)
         assert "jane@example.test" not in seen["q"] and "4111111111111111" not in seen["q"]
 
@@ -202,16 +249,20 @@ class TestSearch:
         assert run_tool("search_policies", {"query": "Which medicine should I take for my fever?"}, c).code == "refused"
         assert built == []
 
-    @pytest.mark.parametrize("args", [{}, {"query": ""}, {"query": "x" * 501}, {"query": "ok", "area": "nope"},
-                                      {"query": 5}, {"query": "   "}])
+    @pytest.mark.parametrize(
+        "args",
+        [{}, {"query": ""}, {"query": "x" * 501}, {"query": "ok", "area": "nope"}, {"query": 5}, {"query": "   "}],
+    )
     def test_invalid_input(self, ctx, args):
         assert run_tool("search_policies", args, ctx).code == "invalid_input"
 
     def test_worst_case_output_fits_the_cap(self, ctx, monkeypatch):
         from assistant.models import Chunk
+
         longest = max(Chunk.objects.all(), key=lambda c: len(c.text))
         from assistant.indexing import SearchResult
         from assistant.prompts import Passage
+
         p = Passage(longest.passage_id, "x" * 40, longest.text)
         monkeypatch.setattr(read_tools, "shipped_retrieve", lambda *a, **k: SearchResult([p] * 5, [0.9] * 5, 0, 5))
         assert run_tool("search_policies", {"query": "anything"}, ctx).ok
@@ -227,8 +278,12 @@ class TestAvailability:
     def test_deterministic_with_a_fixed_clock(self, ctx):
         a, b = run_tool("check_availability", AVAIL, ctx), run_tool("check_availability", AVAIL, ctx)
         assert a.ok and a.output == b.output and a.output["fictional"] is True
-        assert a.output["slots"][0] == {"date": "2026-11-03", "time": "09:00", "visit_type": "telehealth",
-                                        "clinician": "Clinician B"}  # pinned: the schedule is a fixed function
+        assert a.output["slots"][0] == {
+            "date": "2026-11-03",
+            "time": "09:00",
+            "visit_type": "telehealth",
+            "clinician": "Clinician B",
+        }  # pinned: the schedule is a fixed function
 
     def test_at_most_ten_slots_earliest_first(self, ctx):
         out = run_tool("check_availability", {**AVAIL, "days": 14}, ctx).output
@@ -254,13 +309,22 @@ class TestAvailability:
         assert run_tool("check_availability", {**AVAIL, "start_date": "2027-01-29"}, later).ok
         assert run_tool("check_availability", AVAIL, later).code == "invalid_input"  # now in the past
 
-    @pytest.mark.parametrize("args", [{**AVAIL, "days": 15}, {**AVAIL, "days": 0}, {**AVAIL, "visit_type": "home"},
-                                      {"visit_type": "telehealth"}, {**AVAIL, "part_of_day": "night"}])
+    @pytest.mark.parametrize(
+        "args",
+        [
+            {**AVAIL, "days": 15},
+            {**AVAIL, "days": 0},
+            {**AVAIL, "visit_type": "home"},
+            {"visit_type": "telehealth"},
+            {**AVAIL, "part_of_day": "night"},
+        ],
+    )
     def test_invalid_input(self, ctx, args):
         assert run_tool("check_availability", args, ctx).code == "invalid_input"
 
 
 # ---------------- predict_no_show (T4) ----------------
+
 
 @pytest.mark.django_db
 class TestPrediction:
@@ -275,10 +339,15 @@ class TestPrediction:
         assert set(REGISTRY["predict_no_show"].input_schema["properties"]) == set(ml_config.FEATURE_SCHEMA)
         assert REGISTRY["predict_no_show"].input_schema["required"] == list(ml_config.FEATURE_SCHEMA)
 
-    @pytest.mark.parametrize("change, field", [({"prior_no_shows": 4}, "$.prior_no_shows"),  # more than prior appointments
-                                               ({"appointment_hour": 23}, "$.appointment_hour"),
-                                               ({"appointment_weekday": "sunday"}, "$.appointment_weekday"),
-                                               ({"reminder_sent": "yes"}, "$.reminder_sent")])
+    @pytest.mark.parametrize(
+        "change, field",
+        [
+            ({"prior_no_shows": 4}, "$.prior_no_shows"),  # more than prior appointments
+            ({"appointment_hour": 23}, "$.appointment_hour"),
+            ({"appointment_weekday": "sunday"}, "$.appointment_weekday"),
+            ({"reminder_sent": "yes"}, "$.reminder_sent"),
+        ],
+    )
     def test_invalid_input_names_the_field_only(self, ctx, change, field):
         r = run_tool("predict_no_show", {**GOOD_PREDICTION, **change}, ctx)
         assert r.code == "invalid_input" and field in r.fields
@@ -286,6 +355,7 @@ class TestPrediction:
     def test_a_missing_or_tampered_model_is_unavailable(self, ctx, monkeypatch):
         def broken():
             raise ModelUnavailable("SHA-256 does not match")
+
         monkeypatch.setattr(read_tools, "get_model", broken)
         r = run_tool("predict_no_show", GOOD_PREDICTION, ctx)
         assert r.code == "unavailable" and "SHA" not in json.dumps(r.public())
@@ -293,17 +363,22 @@ class TestPrediction:
 
 # ---------------- cluster_summaries (T5) ----------------
 
+
 @pytest.mark.django_db
 class TestClusters:
     def test_groups_only_never_individual_points(self, ctx):
         out = run_tool("cluster_summaries", {}, ctx).output
         text = json.dumps(out)
         assert "points" not in out.get("control", {}) and '"x"' not in text and "planted_habit" not in text
-        assert out["real"]["structure_found"] is False and "should not be read as types of patient" in out["real"]["verdict"]
+        assert (
+            out["real"]["structure_found"] is False
+            and "should not be read as types of patient" in out["real"]["verdict"]
+        )
         assert "not categories of people" in out["note"]
 
     def test_groups_under_ten_are_hidden_and_counted(self, ctx, monkeypatch):
         from predictions import views
+
         view, digest = views.load_cluster_view()
         view = json.loads(json.dumps(view))
         view["control"]["clusters"][0]["size"] = 9
@@ -314,6 +389,7 @@ class TestClusters:
 
     def test_missing_results_are_unavailable(self, ctx, monkeypatch):
         from predictions import views
+
         monkeypatch.setattr(views, "load_cluster_view", lambda: (_ for _ in ()).throw(OSError("no file")))
         assert run_tool("cluster_summaries", {}, ctx).code == "unavailable"
 

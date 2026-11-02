@@ -21,6 +21,8 @@ class Command(BaseCommand):
         path = generation_eval.save(r, cases)
         for m, label in (("A", "oracle context"), ("B", "end to end")):
             o = r["modes"][m]["overall"]
-            self.stdout.write(f"{m} ({label}): key fact {o['key_fact_ok']}/{o['answerable']}, false abstention "
-                              f"{o['false_abstention']}, wrong {o['answered_wrong']}, abstained {o['abstained']}/{o['unanswerable']}")
+            self.stdout.write(
+                f"{m} ({label}): key fact {o['key_fact_ok']}/{o['answerable']}, false abstention "
+                f"{o['false_abstention']}, wrong {o['answered_wrong']}, abstained {o['abstained']}/{o['unanswerable']}"
+            )
         self.stdout.write(f"Wrote {path.name}.")

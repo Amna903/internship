@@ -35,16 +35,26 @@ def policies(db, admin):
 
 # ---------------- Upload validation ----------------
 
+
 class TestValidation:
-    @pytest.mark.parametrize("name, data, message", [
-        ("a.md", b"", "empty"), ("a.md", b"   \n", "empty"),
-        ("a.md", b"x" * (MAX_UPLOAD_BYTES + 1), "larger"),
-        ("a.pdf", b"text", ".txt and .md"), ("a.exe", b"text", ".txt and .md"), ("a.html", b"<p>x</p>", ".txt and .md"),
-        ("policy.txt", b"%PDF-1.7 rest", "PDF"), ("policy.md", b"\x89PNG\r\n\x1a\n", "PNG"),
-        ("policy.md", b"PK\x03\x04docx", "ZIP"), ("policy.txt", b"MZ\x90\x00", "executable"),
-        ("policy.md", b"text\x00more", "binary"), ("policy.md", "caf\u00e9".encode("latin-1"), "UTF-8"),
-        ("policy.md", b"a\x01\x02\x03\x04\x05b", "control characters"),
-    ])
+    @pytest.mark.parametrize(
+        "name, data, message",
+        [
+            ("a.md", b"", "empty"),
+            ("a.md", b"   \n", "empty"),
+            ("a.md", b"x" * (MAX_UPLOAD_BYTES + 1), "larger"),
+            ("a.pdf", b"text", ".txt and .md"),
+            ("a.exe", b"text", ".txt and .md"),
+            ("a.html", b"<p>x</p>", ".txt and .md"),
+            ("policy.txt", b"%PDF-1.7 rest", "PDF"),
+            ("policy.md", b"\x89PNG\r\n\x1a\n", "PNG"),
+            ("policy.md", b"PK\x03\x04docx", "ZIP"),
+            ("policy.txt", b"MZ\x90\x00", "executable"),
+            ("policy.md", b"text\x00more", "binary"),
+            ("policy.md", "caf\u00e9".encode("latin-1"), "UTF-8"),
+            ("policy.md", b"a\x01\x02\x03\x04\x05b", "control characters"),
+        ],
+    )
     def test_rejections(self, name, data, message):
         with pytest.raises(UploadRejected, match=message):
             validate_upload(name, data)
@@ -53,9 +63,16 @@ class TestValidation:
         with pytest.raises(UploadRejected):
             validate_upload(None, None)
 
-    @pytest.mark.parametrize("name, safe", [("../../etc/passwd.md", "passwd.md"), ("C:\\Users\\x\\policy.txt", "policy.txt"),
-                                            ("my policy (v2).MD", "my-policy-v2.md"), (".hidden.md", "hidden.md"),
-                                            ("x" * 300 + ".txt", "x" * 96 + ".txt")])
+    @pytest.mark.parametrize(
+        "name, safe",
+        [
+            ("../../etc/passwd.md", "passwd.md"),
+            ("C:\\Users\\x\\policy.txt", "policy.txt"),
+            ("my policy (v2).MD", "my-policy-v2.md"),
+            (".hidden.md", "hidden.md"),
+            ("x" * 300 + ".txt", "x" * 96 + ".txt"),
+        ],
+    )
     def test_file_names_are_reduced_to_safe_base_names(self, name, safe):
         assert safe_filename(name) == safe
 
@@ -65,6 +82,7 @@ class TestValidation:
 
 
 # ---------------- Upload, approval and permissions ----------------
+
 
 @pytest.mark.django_db
 class TestDocumentsAPI:
@@ -107,7 +125,9 @@ class TestDocumentsAPI:
     def test_approval_indexes_with_the_current_embedder_and_is_audited(self, admin_browser):
         document_id = upload(admin_browser, "parking.md", b"Parking at the clinic is free for visitors.").json()["id"]
         response = admin_browser.post(approve_url(document_id))
-        assert response.status_code == 202 and response.json()["status"] == "approved" and response.json()["chunks"] >= 1
+        assert (
+            response.status_code == 202 and response.json()["status"] == "approved" and response.json()["chunks"] >= 1
+        )
         assert response.json()["job"]["status"] == "succeeded"  # Step 10: a background job (inline in unit tests)
         assert set(Chunk.objects.values_list("embedding_model", flat=True)) == {FakeEmbedder().identity}
         assert AuditEvent.objects.get(action="admin.document_approved").detail == f"document:{document_id}"
@@ -122,6 +142,7 @@ class TestDocumentsAPI:
         class Broken(FakeEmbedder):
             def embed(self, texts):
                 raise LLMUnavailable("down")
+
         monkeypatch.setattr("assistant.jobs.get_embedder", lambda: Broken())
         document_id = upload(admin_browser, "parking.md", b"Parking is free.").json()["id"]
         response = admin_browser.post(approve_url(document_id))
@@ -136,6 +157,7 @@ class TestDocumentsAPI:
 
 # ---------------- Retrieval ----------------
 
+
 @pytest.mark.django_db
 class TestRetrieval:
     def test_load_policies_loads_six_approved_documents_once(self, policies, admin):
@@ -144,7 +166,9 @@ class TestRetrieval:
         assert PolicyDocument.objects.count() == 6
 
     def test_load_policies_refuses_a_file_that_differs_from_its_frozen_hash(self, db, admin, monkeypatch):
-        monkeypatch.setitem(__import__("assistant.frozen", fromlist=["x"]).FROZEN_SHA256, "policies/billing.md", "0" * 64)
+        monkeypatch.setitem(
+            __import__("assistant.frozen", fromlist=["x"]).FROZEN_SHA256, "policies/billing.md", "0" * 64
+        )
         with pytest.raises(CommandError, match="frozen"):
             call_command("load_policies", admin=admin.email)
 
@@ -170,6 +194,7 @@ class TestRetrieval:
 
 
 # ---------------- Stale vectors and the re-index command ----------------
+
 
 @pytest.mark.django_db
 class TestStaleVectors:
@@ -206,6 +231,7 @@ class TestStaleVectors:
 
 
 # ---------------- Chunking ----------------
+
 
 class TestChunking:
     def test_headings_are_dropped_and_sentences_kept_whole(self):

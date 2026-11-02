@@ -11,7 +11,9 @@ from assistant.llm import LLMError, get_llm
 
 
 class Command(BaseCommand):
-    help = "Dev-only retrieval selection (Step 3). With --safety-gate, also run the safety gate on a shipping challenger."
+    help = (
+        "Dev-only retrieval selection (Step 3). With --safety-gate, also run the safety gate on a shipping challenger."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument("--safety-gate", action="store_true", help="Run the safety gate (needs the local model).")
@@ -24,10 +26,12 @@ class Command(BaseCommand):
             raise CommandError(str(exc)) from None
         path = retrieval_select.save(result)
         d = result["decision"]
-        self.stdout.write(f"{result['configurations']} configurations, {result['eligible']} eligible, best {result['best_hits']} "
-                          f"of {result['dev_answerable']} dev hits, {result['tied_at_top']} tied; champion "
-                          f"{result['champion_score']['hits']}. Challenger ships: {d['challenger_ships']} ({d['reason']}). "
-                          f"Wrote {path.name}.")
+        self.stdout.write(
+            f"{result['configurations']} configurations, {result['eligible']} eligible, best {result['best_hits']} "
+            f"of {result['dev_answerable']} dev hits, {result['tied_at_top']} tied; champion "
+            f"{result['champion_score']['hits']}. Challenger ships: {d['challenger_ships']} ({d['reason']}). "
+            f"Wrote {path.name}."
+        )
         if not safety_gate:
             return
         if not d["challenger_ships"]:
@@ -37,8 +41,13 @@ class Command(BaseCommand):
         if actor is None:
             raise CommandError("--admin must name an admin account.")
         try:
-            gate = safety_gate.run_gate(get_llm(), get_embedder(), actor,
-                                        retrieval_select.config_from(result["winner"]), settings.ASSISTANT["SEED"])
+            gate = safety_gate.run_gate(
+                get_llm(),
+                get_embedder(),
+                actor,
+                retrieval_select.config_from(result["winner"]),
+                settings.ASSISTANT["SEED"],
+            )
         except CorpusMismatch as exc:
             raise CommandError(str(exc)) from None
         out = safety_gate.save(gate)

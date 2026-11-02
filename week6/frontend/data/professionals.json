@@ -207,7 +207,12 @@
       "yearsExperience": 22,
       "feePkr": 3000,
       "visitTypes": ["in_person"],
-      "availability": { "mon": ["17:00", "18:00"], "tue": ["17:00", "18:00"], "wed": ["17:00", "18:00"], "thu": ["17:00"] },
+      "availability": {
+        "mon": ["17:00", "18:00"],
+        "tue": ["17:00", "18:00"],
+        "wed": ["17:00", "18:00"],
+        "thu": ["17:00"]
+      },
       "bio": "Long-standing neighbourhood practice offering general wellness check-ins."
     },
     {

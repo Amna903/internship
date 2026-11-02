@@ -29,8 +29,9 @@ class Command(BaseCommand):
                 raise CommandError(f"{path.name} does not match its frozen SHA-256; refusing to load it.")
             if DocumentVersion.objects.filter(sha256=digest, document__source=PolicyDocument.Source.SEED).exists():
                 continue
-            document = create_document(path.name, data.decode("utf-8"), digest, PolicyDocument.Source.SEED, None,
-                                       policy_area=path.stem)
+            document = create_document(
+                path.name, data.decode("utf-8"), digest, PolicyDocument.Source.SEED, None, policy_area=path.stem
+            )
             approve(document, approver, embedder)
             loaded += 1
         self.stdout.write(f"Loaded {loaded} new policies (embedder {embedder.identity}).")

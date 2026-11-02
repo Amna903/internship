@@ -39,6 +39,7 @@ def committed():
 
 # ---- Folds ----
 
+
 def test_folds_cover_every_training_row_exactly_once_as_scoring_rows(parts, folds):
     scored = np.concatenate([s for _, s in folds])
     assert len(folds) == tune.N_SPLITS
@@ -64,10 +65,22 @@ def test_tuning_only_ever_sees_training_rows(df, parts, monkeypatch):
     seen = []
     real_make_folds = tune.make_folds
     monkeypatch.setattr(tune, "make_folds", lambda rows, n: seen.append(set(rows.index)) or real_make_folds(rows, n))
-    monkeypatch.setattr(tune, "cross_validate", lambda c, rows, f: seen.append(set(rows.index)) or {x: [0.2, 0.2] for x in c})
-    monkeypatch.setattr(tune, "search", lambda rows, f, n: seen.append(set(rows.index)) or [
-        {"params": {"max_depth": 4, "min_samples_leaf": 10, "max_features": "sqrt", "n_estimators": 100},
-         "fold_scores": [0.2, 0.2], "mean": 0.2, "std": 0.0}])
+    monkeypatch.setattr(
+        tune, "cross_validate", lambda c, rows, f: seen.append(set(rows.index)) or {x: [0.2, 0.2] for x in c}
+    )
+    monkeypatch.setattr(
+        tune,
+        "search",
+        lambda rows, f, n: seen.append(set(rows.index))
+        or [
+            {
+                "params": {"max_depth": 4, "min_samples_leaf": 10, "max_features": "sqrt", "n_estimators": 100},
+                "fold_scores": [0.2, 0.2],
+                "mean": 0.2,
+                "std": 0.0,
+            }
+        ],
+    )
     tune.run(df, n_iter=1, n_splits=2, grid=GRID_CANDIDATES[:1])
     train_index, held_out = set(parts[0].index), set(parts[1].index) | set(parts[2].index)
     assert len(seen) == 3
@@ -76,6 +89,7 @@ def test_tuning_only_ever_sees_training_rows(df, parts, monkeypatch):
 
 
 # ---- Search ----
+
 
 def test_search_is_seeded_and_reproducible(parts):
     small = parts[0].iloc[:3000]
@@ -96,15 +110,20 @@ def test_search_scores_match_a_manual_cross_validation(parts):
 
 # ---- One-standard-error rule ----
 
+
 def _row(depth, leaf, mean, std=0.02, features="sqrt", trees=300, n=5):
-    return {"params": {"max_depth": depth, "min_samples_leaf": leaf, "max_features": features, "n_estimators": trees},
-            "fold_scores": [mean] * n, "mean": mean, "std": std}
+    return {
+        "params": {"max_depth": depth, "min_samples_leaf": leaf, "max_features": features, "n_estimators": trees},
+        "fold_scores": [mean] * n,
+        "mean": mean,
+        "std": std,
+    }
 
 
 def test_one_standard_error_rule_prefers_a_simpler_setting_within_noise():
     rows = [_row(None, 10, 0.290), _row(6, 50, 0.284), _row(4, 200, 0.270)]
     pick, bar = tune.one_standard_error_pick(rows)
-    assert bar == pytest.approx(0.290 - 0.02 / 5 ** 0.5)
+    assert bar == pytest.approx(0.290 - 0.02 / 5**0.5)
     assert pick["params"]["max_depth"] == 6  # within one SE of the best and simpler; depth 4 is below the bar
 
 
@@ -124,6 +143,7 @@ def test_fewer_columns_per_split_counts_as_simpler():
 
 
 # ---- The committed result ----
+
 
 def test_committed_result_used_the_planned_folds_and_draws(committed):
     assert committed["n_splits"] == tune.N_SPLITS and committed["n_iter"] == tune.N_ITER
@@ -149,6 +169,7 @@ def test_committed_report_matches_the_committed_result(committed):
 
 
 # ---- Reproducibility check for a rebuilt search (tolerances by what each number is used for) ----
+
 
 def test_identical_search_matches(committed):
     assert tuning_matches(committed, copy.deepcopy(committed))[0]
@@ -182,4 +203,3 @@ def test_a_large_fold_drift_still_fails(committed):
     rebuilt = copy.deepcopy(committed)
     rebuilt["grid_cv"][0]["fold_scores"][2] += 0.02
     assert not tuning_matches(committed, rebuilt)[0]
-

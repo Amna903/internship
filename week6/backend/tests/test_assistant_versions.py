@@ -26,8 +26,9 @@ NEW = "A refund can be requested within 30 days of a payment, in the patient app
 
 
 def upload(browser, url, name, text, **fields):
-    return browser.client.post(url, {"file": SimpleUploadedFile(name, text.encode()), **fields}, format="multipart",
-                               **browser._csrf_headers())
+    return browser.client.post(
+        url, {"file": SimpleUploadedFile(name, text.encode()), **fields}, format="multipart", **browser._csrf_headers()
+    )
 
 
 def post(browser, url):
@@ -53,11 +54,17 @@ def live_doc(admin_browser):
 
 # ---------------- versions and atomic swap ----------------
 
+
 @pytest.mark.django_db
 class TestVersions:
     def test_new_version_is_pending_and_the_current_one_stays_searchable(self, admin_browser, live_doc):
         r = upload(admin_browser, f"{DOCS}{live_doc}/versions/", "refunds.md", NEW)
-        assert r.status_code == 201 and r.json()["number"] == 2 and r.json()["status"] == "pending" and r.json()["chunks"] == 0
+        assert (
+            r.status_code == 201
+            and r.json()["number"] == 2
+            and r.json()["status"] == "pending"
+            and r.json()["chunks"] == 0
+        )
         assert OLD in texts() and NEW not in texts()
 
     def test_approving_an_update_swaps_editions_and_the_old_one_is_never_retrieved(self, admin_browser, live_doc):
@@ -70,12 +77,15 @@ class TestVersions:
         assert [(v["number"], v["status"]) for v in history] == [(1, "superseded"), (2, "current")]
         assert DocumentVersion.objects.get(document_id=live_doc, number=1).content == OLD  # kept for audit
 
-    def test_failed_embedding_leaves_the_old_edition_live_and_the_new_one_pending(self, admin_browser, live_doc, monkeypatch):
+    def test_failed_embedding_leaves_the_old_edition_live_and_the_new_one_pending(
+        self, admin_browser, live_doc, monkeypatch
+    ):
         upload(admin_browser, f"{DOCS}{live_doc}/versions/", "refunds.md", NEW)
 
         class Down(FakeEmbedder):
             def embed(self, texts):
                 raise LLMUnavailable("down")
+
         monkeypatch.setattr("assistant.jobs.get_embedder", lambda: Down())
         job = post(admin_browser, f"{DOCS}{live_doc}/versions/2/approve/").json()["job"]  # Step 10: was a 503
         assert (job["status"], job["error_code"]) == ("failed", "unavailable")
@@ -91,6 +101,7 @@ class TestVersions:
             def embed(self, texts):
                 documents.reject_version(version, admin)  # another admin decides meanwhile
                 return super().embed(texts)
+
         with pytest.raises(DocumentError, match="waiting for approval"):
             documents.approve_version(version, admin, RacingEmbedder())
         assert OLD in texts() and NEW not in texts()
@@ -99,7 +110,9 @@ class TestVersions:
         upload(admin_browser, f"{DOCS}{live_doc}/versions/", "refunds.md", NEW)
         locked = []
         real = PolicyDocument.objects.select_for_update
-        monkeypatch.setattr(PolicyDocument.objects, "select_for_update", lambda *a, **k: locked.append(1) or real(*a, **k))
+        monkeypatch.setattr(
+            PolicyDocument.objects, "select_for_update", lambda *a, **k: locked.append(1) or real(*a, **k)
+        )
         documents.approve_version(DocumentVersion.objects.get(document_id=live_doc, number=2), admin, FakeEmbedder())
         assert locked
 
@@ -130,6 +143,7 @@ class TestVersions:
 
 # ---------------- retire (soft delete) ----------------
 
+
 @pytest.mark.django_db
 class TestRetire:
     def test_retired_document_leaves_search_but_keeps_its_versions(self, admin_browser, live_doc):
@@ -155,18 +169,25 @@ class TestRetire:
 
 # ---------------- metadata and input checks ----------------
 
+
 @pytest.mark.django_db
 class TestMetadata:
     def test_seed_policies_get_their_area_from_the_filename(self, policies):
         assert dict(PolicyDocument.objects.values_list("filename", "policy_area")) == {
-            f"{a}.md": a for a in ["billing", "cancellation", "privacy", "reminders", "rescheduling", "telehealth"]}
+            f"{a}.md": a for a in ["billing", "cancellation", "privacy", "reminders", "rescheduling", "telehealth"]
+        }
 
     def test_upload_without_an_area_defaults_to_other_so_the_week4_contract_holds(self, admin_browser):
         assert upload(admin_browser, DOCS, "misc.md", "Parking is free.").json()["policy_area"] == "other"
 
-    @pytest.mark.parametrize("fields, message", [({"policy_area": "medical"}, "policy_area"),
-                                                 ({"effective_date": "next tuesday"}, "effective_date"),
-                                                 ({"owner": "x"}, "Unknown fields")])
+    @pytest.mark.parametrize(
+        "fields, message",
+        [
+            ({"policy_area": "medical"}, "policy_area"),
+            ({"effective_date": "next tuesday"}, "effective_date"),
+            ({"owner": "x"}, "Unknown fields"),
+        ],
+    )
     def test_bad_metadata_is_refused(self, admin_browser, fields, message):
         r = upload(admin_browser, DOCS, "misc.md", "Parking is free.", **fields)
         assert r.status_code == 400 and message in r.json()["error"]["message"]
@@ -180,15 +201,27 @@ class TestMetadata:
         assert r.status_code == 400
 
     def test_upload_checks_from_week4_still_apply_to_versions(self, admin_browser, live_doc):
-        r = admin_browser.client.post(f"{DOCS}{live_doc}/versions/", {"file": SimpleUploadedFile("x.pdf", b"%PDF-1.7")},
-                                      format="multipart", **admin_browser._csrf_headers())
+        r = admin_browser.client.post(
+            f"{DOCS}{live_doc}/versions/",
+            {"file": SimpleUploadedFile("x.pdf", b"%PDF-1.7")},
+            format="multipart",
+            **admin_browser._csrf_headers(),
+        )
         assert r.status_code == 400 and r.json()["error"]["code"] == "upload_rejected"
 
 
 @pytest.mark.django_db
 class TestPermissions:
-    @pytest.mark.parametrize("method, path", [("get", "1/versions/"), ("post", "1/versions/"), ("post", "1/versions/2/approve/"),
-                                              ("post", "1/versions/2/reject/"), ("post", "1/retire/")])
+    @pytest.mark.parametrize(
+        "method, path",
+        [
+            ("get", "1/versions/"),
+            ("post", "1/versions/"),
+            ("post", "1/versions/2/approve/"),
+            ("post", "1/versions/2/reject/"),
+            ("post", "1/retire/"),
+        ],
+    )
     def test_anonymous_and_members_are_refused(self, browser, user, method, path):
         assert getattr(browser.client, method)(DOCS + path).status_code in (401, 403)
         member = Browser()
@@ -199,7 +232,9 @@ class TestPermissions:
         assert admin_browser.client.post(f"{DOCS}{live_doc}/retire/").status_code == 403
         assert PolicyDocument.objects.get(pk=live_doc).status == "approved"
 
-    @pytest.mark.parametrize("path", ["999/versions/", "999/retire/", "999/versions/1/approve/", "999/versions/1/reject/"])
+    @pytest.mark.parametrize(
+        "path", ["999/versions/", "999/retire/", "999/versions/1/approve/", "999/versions/1/reject/"]
+    )
     def test_unknown_ids_are_404(self, admin_browser, path):
         r = post(admin_browser, DOCS + path) if not path.endswith("versions/") else admin_browser.get(DOCS + path)
         assert r.status_code == 404
@@ -207,9 +242,15 @@ class TestPermissions:
 
 # ---------------- citations name their edition; answer records ----------------
 
+
 def reply(passage, quote):
-    return json.dumps({"answer": "A refund can be requested within 30 days of a payment, in the patient app.",
-                       "citations": [{"passage_id": passage, "quote": quote}], "refused": False})
+    return json.dumps(
+        {
+            "answer": "A refund can be requested within 30 days of a payment, in the patient app.",
+            "citations": [{"passage_id": passage, "quote": quote}],
+            "refused": False,
+        }
+    )
 
 
 @pytest.mark.django_db
@@ -228,13 +269,19 @@ class TestEditionsInAnswers:
         fake = FakeLLM()
         fake.replies.append(reply("refunds.md@v2#0", NEW))
         monkeypatch.setattr("assistant.views.get_llm", lambda: fake)
-        monkeypatch.setattr("assistant.answering.load_tuned", lambda: {"floor": 0.0, "top_k": 3, "groundedness_threshold": 0.3})
-        body = admin_browser.post("/api/v1/assistant/ask/", {"question": "How many days do I have to request a refund?"}).json()
+        monkeypatch.setattr(
+            "assistant.answering.load_tuned", lambda: {"floor": 0.0, "top_k": 3, "groundedness_threshold": 0.3}
+        )
+        body = admin_browser.post(
+            "/api/v1/assistant/ask/", {"question": "How many days do I have to request a refund?"}
+        ).json()
         assert body["status"] == "answered", body
         assert body["citations"][0]["passage_id"] == "refunds.md@v2#0" and body["citations"][0]["version"] == 2
         record = AnswerRecord.objects.get()
         sha = DocumentVersion.objects.get(document_id=live_doc, number=2).sha256
-        assert record.citations == [{"passage_id": "refunds.md@v2#0", "document_id": live_doc, "version": 2, "sha256": sha}]
+        assert record.citations == [
+            {"passage_id": "refunds.md@v2#0", "document_id": live_doc, "version": 2, "sha256": sha}
+        ]
         assert record.audit_event.action == "admin.assistant_asked"
         assert "refund" not in json.dumps(record.citations + record.sources).replace("refunds.md", "")
 
@@ -246,6 +293,7 @@ class TestEditionsInAnswers:
 
 
 # ---------------- corpus snapshot: evaluations refuse a different corpus ----------------
+
 
 @pytest.mark.django_db
 class TestCorpusSnapshot:
@@ -288,6 +336,7 @@ class TestCorpusSnapshot:
 
     def test_evaluation_results_record_the_snapshot(self, policies, admin, monkeypatch):
         from assistant import evaluate
+
         monkeypatch.setattr(evaluate, "run_case", lambda *a, **k: {"status": "x"})
         result = evaluate.evaluate(FakeLLM(), FakeEmbedder(), admin, 42)
         assert result["corpus"] == corpus_snapshot() and len(result["corpus"]) == 6
@@ -310,11 +359,15 @@ def test_migration_moves_week4_documents_into_v1_and_back():
     executor.migrate([("assistant", "0001_initial")])
     apps = executor.loader.project_state([("assistant", "0001_initial")]).apps
     OldDoc, OldChunk = apps.get_model("assistant", "PolicyDocument"), apps.get_model("assistant", "Chunk")
-    doc = OldDoc.objects.create(filename="billing.md", sha256="a" * 64, content="Refunds within 14 days.",
-                                status="approved", source="seed")
-    pending = OldDoc.objects.create(filename="notes.md", sha256="b" * 64, content="Draft.", status="pending", source="upload")
-    OldChunk.objects.create(document=doc, position=0, text="Refunds within 14 days.", embedding=b"\x00" * 8,
-                            embedding_model="fake-hash/v1")
+    doc = OldDoc.objects.create(
+        filename="billing.md", sha256="a" * 64, content="Refunds within 14 days.", status="approved", source="seed"
+    )
+    pending = OldDoc.objects.create(
+        filename="notes.md", sha256="b" * 64, content="Draft.", status="pending", source="upload"
+    )
+    OldChunk.objects.create(
+        document=doc, position=0, text="Refunds within 14 days.", embedding=b"\x00" * 8, embedding_model="fake-hash/v1"
+    )
 
     executor = MigrationExecutor(connection)
     executor.migrate([("assistant", "0004_answerrecord")])

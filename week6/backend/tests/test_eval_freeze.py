@@ -69,6 +69,9 @@ def test_the_pattern_matches_real_readers_only():
 
 
 def test_no_tuning_code_reads_the_evaluation_cases():
-    offenders = [str(p.relative_to(ASSISTANT)) for p in ASSISTANT.rglob("*.py")
-                 if p not in MAY_READ_EVAL and re.search(PATTERN, p.read_text())]
+    offenders = [
+        str(p.relative_to(ASSISTANT))
+        for p in ASSISTANT.rglob("*.py")
+        if p not in MAY_READ_EVAL and re.search(PATTERN, p.read_text())
+    ]
     assert offenders == []

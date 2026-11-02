@@ -9,16 +9,22 @@ export function Stepper({ steps, current }: { steps: readonly Step[]; current: n
           const state = i < current ? "done" : i === current ? "current" : "todo";
           return (
             <li key={s.id} className={`step ${state}`} aria-current={state === "current" ? "step" : undefined}>
-              <span className="step-num" aria-hidden="true">{state === "done" ? "✓" : i + 1}</span>
+              <span className="step-num" aria-hidden="true">
+                {state === "done" ? "✓" : i + 1}
+              </span>
               <span className="step-label">
                 {s.label}
-                <span className="visually-hidden">{state === "done" ? " (completed)" : state === "todo" ? " (not started)" : ""}</span>
+                <span className="visually-hidden">
+                  {state === "done" ? " (completed)" : state === "todo" ? " (not started)" : ""}
+                </span>
               </span>
             </li>
           );
         })}
       </ol>
-      <p className="visually-hidden" aria-live="polite">Step {current + 1} of {steps.length}: {steps[current]?.label}</p>
+      <p className="visually-hidden" aria-live="polite">
+        Step {current + 1} of {steps.length}: {steps[current]?.label}
+      </p>
     </nav>
   );
 }

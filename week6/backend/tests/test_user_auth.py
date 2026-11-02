@@ -223,6 +223,7 @@ class TestLogoutAndRevocationLifecycle:
         from django.utils import timezone
 
         from accounts.models import RevokedAccessToken
+
         RevokedAccessToken.objects.create(jti="old", expires_at=timezone.now() - timedelta(minutes=1))
         user_browser.post("/api/auth/user/logout/")
         assert RevokedAccessToken.objects.count() == 1  # only the token this logout just revoked

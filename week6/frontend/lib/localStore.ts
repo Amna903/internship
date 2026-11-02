@@ -81,7 +81,11 @@ export function localStore<T>(key: string, fallback: T, isValid: (v: unknown) =>
 /** Returns [value, setValue, hydrated]. `hydrated` is false during SSR and the first client render. */
 export function useLocalStore<T>(store: Store<T>): [T, Store<T>["set"], boolean] {
   const value = useSyncExternalStore(store.subscribe, store.get, () => store.fallback);
-  const hydrated = useSyncExternalStore(noopSubscribe, () => true, () => false);
+  const hydrated = useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
   const set = useCallback<Store<T>["set"]>((next) => store.set(next), [store]);
   return [value, set, hydrated];
 }
