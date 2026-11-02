@@ -100,3 +100,8 @@ AGENT_TASKS = ROOT / "eval" / "agent_tasks.json"
 AGENT_REDTEAM = ROOT / "eval" / "agent_redteam.json"
 WEEK5_FROZEN_SHA256["eval/agent_tasks.json"] = "14160f3e6bf0b371a46a8484a2c98df9614b5231d2950f9338aa7fefba6f3615"
 WEEK5_FROZEN_SHA256["eval/agent_redteam.json"] = "99f84d666ba1e06f2c6b3429eb52e1a362afd86608c1c32a964c96dde45e1b49"
+
+# Step 8 round 2 (2026-11-02): a fresh agent holdout, all written by the user, frozen before any round-2 code.
+# The clean measure for round 2 (the frozen agent sets above informed the fixes). Fixed clock 2026-11-26.
+AGENT_HOLDOUT = ROOT / "eval" / "agent_holdout.json"
+WEEK5_FROZEN_SHA256["eval/agent_holdout.json"] = "57566b070c66a2331250618cb6bcae95e778d86e3a989c7fb97c5cb6afd82284"

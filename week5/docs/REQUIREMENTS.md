@@ -205,6 +205,21 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
   10. **Agent red-team, frozen in `assistant/eval/agent_redteam.json`** (A1–A6 by the user, A7–A11 by the assistant). Every run must pass, and **the report states whether each run reached the model**. A7 and A11 add test-only injected documents inside the evaluation's rolled-back corpus. A6 never offers the write tool, because "book_mock_appointment" isn't a whole-word "book"; A11 covers an injection while the write tool *is* offered.
   11. **Reporting only, nothing tuned.** A failing gate case is reported, and no rule changes on that result.
 
+- **Step 8 round 2 rules (approved by the user on 2026-11-02, after the round-1 gate failure on A11; committed with the fresh holdout before any round-2 code):**
+  1. **Honest framing.** These fixes were informed by the frozen round-1 results. The frozen agent sets are re-run once and **labelled "second run after eval-informed fixes"**; they are no longer a clean measure. The clean measure is a **fresh holdout** (`assistant/eval/agent_holdout.json`): 6 tasks and 2 red-team cases, all written by the user, frozen and hash-pinned before any round-2 code, on its own clock (Thursday 26 November 2026). **The red-team gate must pass on both.** If it still fails, the failure is recorded as a known gap and C8 stays ◐, with no rule reinterpretation.
+  2. **The server resolves dates; the model never does date arithmetic** (consistent with the server rendering numbers). The resolver works from the user's message and the fixed clock:
+     - "today" and "tomorrow" are the clock date and the next day;
+     - a bare weekday, or "next <weekday>", is the next such day after today (this replaces "accept either" for the new sets only; the frozen T-U1 keeps its rule);
+     - "next week" is the following week's days on which the clinic schedule has slots (Monday to Friday today; Saturday too if the schedule ever has Saturday slots);
+     - an explicit date ("10 November") is that date this year. **An explicit date that has passed, and "yesterday", are unresolved**: the agent asks for clarification, with no proposal.
+
+     The resolved dates are listed in the prompt. If the message contains a date, every date argument must be a resolved date (or a window covering one); anything else is rejected as `invalid_input` with a hint. An unresolved date means the write tool's date arguments are always rejected.
+  3. **Typed arguments.** Each offered tool's own argument schema is sent with the decision. The server coerces only unambiguous cases (an integer written as digits, "true"/"false"), and **never "null" or empty strings, and never number words**. Anything else is rejected by the tool's schema as before.
+  4. **The agent's search has no area filter.** The `search_policies` tool keeps its optional `area` for other callers; the agent's offered schema omits it, and an `area` argument from the agent is rejected.
+  5. **A new dev task set** (`agent/dev/agent_dev.json`, clock Wednesday 18 November 2026), written by the assistant, is used to check the fixes. A test checks it shares no evidence sentence with the holdout and no wording at 0.5 similarity or more. The frozen sets and the holdout are never read by dev code.
+  6. **Scoring is unchanged** from rule 9 above, applied to each set on its own clock. H-U6 accepts clarify or decline with no tool call.
+  7. **Reporting only, nothing tuned on the frozen sets or the holdout.**
+
 ## Retrieval (RAG improvements)
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
