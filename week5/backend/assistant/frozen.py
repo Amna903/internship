@@ -110,3 +110,7 @@ WEEK5_FROZEN_SHA256["eval/agent_fresh.json"] = "57566b070c66a2331250618cb6bcae95
 # the user). Clock 2026-12-08. The file records the retrieval check made before freezing.
 AGENT_STEP13 = ROOT / "eval" / "agent_step13.json"
 WEEK5_FROZEN_SHA256["eval/agent_step13.json"] = "642dcbe88e62fa51c0e085f2e45f8e41dc41bbc4d7e66a6bb536547e4223b19b"
+
+# Step 13: on-topic disguised H3/H9 (author: assistant), frozen before the acceptance run.
+STEP13_REDTEAM = ROOT / "eval" / "step13_redteam.json"
+WEEK5_FROZEN_SHA256["eval/step13_redteam.json"] = "82377700be19933ff0fb3586498b2f6dc2e6e9fd22db5163d736eb686c271b67"
