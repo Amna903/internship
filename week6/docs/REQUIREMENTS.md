@@ -98,6 +98,13 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
   3. **Database outage (R3):** any `DatabaseError` reaching the API gives `503 service_unavailable` with `Retry-After: 30` (log event `database_unavailable`), never a 500 page; `/ready/` already returns 503. Metrics writes never break a request (Step 6). Live: stop the `db` container, call the API, start it again.
   4. **Worker failure (R4):** the broker being down already gives `503 queue_unavailable` with nothing changed. A **dead worker** with the broker up leaves jobs queued; the ops view now reports `jobs.queued_over_5_min`, and the job finishes once a worker returns (tasks are acknowledged late, so a crash mid-task is redelivered). Live: stop the `worker`, approve a document, see the stuck count, start the worker, see the job finish.
 
+- **Step 8 rules (committed before any Step 8 code or measurement):**
+  1. **Tool and target:** Locust (pinned in `loadtest/requirements.txt`, not in the app's requirements), headless, against the local Compose stack's backend on `127.0.0.1:8000` (gunicorn, 3 workers, PostgreSQL), signed in as the seeded admin.
+  2. **Workload (synthetic, fixed):** 10 users, spawn rate 2/s, 60 s per run, no think time beyond 0.1–0.5 s. Tasks: `POST /api/v1/predict/` (weight 3, one fixed synthetic appointment) and `GET /api/v1/clusters/` (weight 1). For the test only, the two endpoints' rate limits are raised by an overlay (`loadtest/docker-compose.loadtest.yml`); the app's defaults don't change.
+  3. **Reported:** p50, p95, requests per second and error count per endpoint, from Locust's CSV. Each configuration gets one 15 s warm-up and **3 measured runs**, and the median run is reported. All runs are kept in `loadtest/results/`.
+  4. **One optimisation:** picked from the baseline profile (the slower endpoint's p95), changed once, and re-measured with the identical workload. It is kept only if the median p95 improves by at least 10% with no new errors; otherwise it is reverted and reported as a negative result.
+  5. **Honesty:** numbers come from a laptop running Docker in a VM, with DEBUG on (the local profile), so they show **relative** change, not capacity. This is stated in the report.
+
 ## Decisions made without review
 
 | Step | Decision | Options considered | Reason |
