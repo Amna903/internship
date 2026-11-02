@@ -105,10 +105,22 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
   4. **One optimisation:** picked from the baseline profile (the slower endpoint's p95), changed once, and re-measured with the identical workload. It is kept only if the median p95 improves by at least 10% with no new errors; otherwise it is reverted and reported as a negative result.
   5. **Honesty:** numbers come from a laptop running Docker in a VM, with DEBUG on (the local profile), so they show **relative** change, not capacity. This is stated in the report.
 
+- **Step 9 rules (committed before any Step 9 code or run):**
+  1. **One command:** `make eval`, which runs `manage.py evaluate_suite`. It writes **only** to `backend/eval_suite/` (`results.json`, `report.md`); the committed Week 3–5 result files are never overwritten. A summary goes into `docs/EVALUATION.md`.
+  2. **Supervised (V1):** `python -m ml.verify_release` must exit 0 (rebuilds the data, model and reports from scratch and compares). The reported metrics are the release's **already recorded** test metrics; the test set is **not** scored again (Week 3 rule: it is used once). Baseline: the Week 3 reference model recorded in `ml/reports/metrics.md`.
+  3. **Clustering (V2):** silhouette by k, the planted-control recovery (ARI) and the real-data verdict, read from the committed results that `verify_release` has just reproduced.
+  4. **RAG benchmark (V3):** the **frozen Week 5 retrieval set** (23 questions ≥ 20, file and SHA checked), in two parts:
+     - retrieval with the shipped settings: hit@k, MRR and correct "no answer";
+     - end to end with the real local model (`llama3.2:3b`), seeds 42, 43 and 44, majority of 3: right status and verified citations.
+     Baseline: the Week 5 first measurement (`retrieval_baseline.json`, and the end-to-end mode in `generation_eval.json`).
+  5. **Agent (V4):** the frozen Week 5 agent sets: 20 workflow tasks, the recovery cases and 11 red-team cases (31 ≥ 10), seeds 42, 43 and 44. The safety gate must pass: any red-team failure stops Week 6 (a stop reason). Baseline: Week 5 round 1 (`agent_eval.json`). The fresh holdout is **not** re-run (it was used once in Week 5). **No new agent cases**: the 31 frozen cases exceed the bar, and Week 6's new safety behaviour (outages, refusals) is covered by automated tests (logged under decisions made without review).
+  6. **Nothing is tuned in Step 9.** Results are reported as measured, including any drop from Week 5; a drop is explained, not fixed, unless it is a safety failure.
+
 ## Decisions made without review
 
 | Step | Decision | Options considered | Reason |
 |---|---|---|---|
+| 9 | **No new agent cases** (the approved plan said "plus a few new cases marked author: assistant") | Write 3 new cases | The 31 frozen cases already exceed the bar of 10. New cases written now, after Week 5's results were seen, would be weaker evidence than the frozen ones. Week 6's new behaviour is covered by tests. |
 | 7 | Django's `SessionMiddleware` is replaced by a **subclass** that keeps the 503 when the session can't be read on the way out; found by the live rehearsal (the first run returned 500 with the database down) | Catch it in a custom 500 handler | The subclass changes nothing when the database is up, and the fix is tested. |
 | 7 | `Retry-After` is checked on the backend directly: the Next.js proxy does not pass it on to the browser | Patch the proxy | The 503 code and message still reach the browser; the header is a hint for API clients, which call the backend. |
 | 4 | Examples are added by **one post-processing hook**, not by rewriting the Week 4/5 views; drf-spectacular's existing "unable to guess serializer" notices (10 Week 4/5 APIViews) are left as they are | Convert those views to serializers | That would be a risky change to working, tested views for documentation only. The hook documents their bodies and responses, and a test checks it. |
