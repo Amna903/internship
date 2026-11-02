@@ -274,6 +274,25 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
      If any expectation isn't met, that is reported as found and nothing is re-tuned (no threshold changes after the run). Results: `ml/reports/monitoring.md` and `.json`.
   7. **Tests:** PSI checked by hand on toy distributions; bins, floors and thresholds; logging from both paths with no input values stored; failure and invalid-input outcomes; the version mismatch; the API's permissions and disclaimer; pruning.
 
+- **Step 12 rules (decided without review on 2026-11-02; committed before any Step 12 code):**
+  1. **Agent tab (`/admin/agent`)** sends one message to `POST /api/v1/agent/run/` and shows:
+     - the status and the stop reason;
+     - the server-rendered results and any verified answer with its citations;
+     - the step trace (state, tool, result code, time);
+     - the disclaimer.
+
+     The message lives in React state only. A proposed write appears as a **card built only from the server's `GET /api/v1/agent/actions/<id>/`** (never from model text), labelled "Proposed by the agent". It has Confirm (sending a fresh random `Idempotency-Key`; the same key is reused if the click is retried) and Decline buttons, which are the existing human endpoints.
+  2. **Audit page (`/admin/audit`)**, backed by one admin-only endpoint, `GET /api/v1/audit/overview/`, with the newest 25 of each:
+     - **agent actions:** runs with status, stop reason, tools used and result codes, plus tool-call audit events;
+     - **approval decisions:** pending actions (proposed, confirmed, declined, expired, failed, and by whom) and document version approvals and rejections;
+     - **retrieval sources:** for each assistant answer, the passage ids and editions it was given and cited;
+     - **job status:** index jobs;
+     - **model versions:** the served no-show model, the monitoring baseline's version, the LLM and embedder identities in use, and the distinct LLM names recorded on answers and runs.
+
+     It also shows the monitoring summary.
+  3. **Ids, codes, versions and times only:** no messages, answers, document text, tool arguments of free text, or user emails beyond the acting admin's id. A test walks the overview JSON for forbidden content.
+  4. **Tests:** backend API tests (permissions, each section, no text leaks); frontend unit tests for the pure helpers (the idempotency key's format and reuse, trace formatting); an e2e browser check of both pages with the fake model is deferred to the Step 13 acceptance run, which uses the real model.
+
 ## Decisions made without review
 
 On 2026-11-02 the user asked me (Claude) to finish Week 5 (Steps 9–14) without stopping for approval:
@@ -295,6 +314,8 @@ Every decision I would normally have asked about is listed here with its reason.
 | 11 | Baseline = **validation-split** probabilities | Training split; validation; test | Training probabilities are optimistic. The test set is reserved for reporting, and the holdout stays unopened. |
 | 11 | PSI thresholds **0.10 and 0.25**, minimum 100 predictions | Other cut-offs | These are the conventional credit-risk cut-offs, and they're fixed before any run. Below 100 rows, bin shares are too noisy. |
 | 11 | Logs keep **no inputs and no user** | Keep inputs for per-feature drift | Privacy by default. The prediction distribution is enough for the brief's "log synthetic prediction distributions". |
+| 12 | One **overview endpoint** for the audit page rather than five | One endpoint; one per section | It's one page load, and one place to test for leaks. Each section is capped at 25 rows. |
+| 12 | The approval card is **fetched from the server by action id** | Render from the run response | The Step 7 rule: the human sees only server-written summaries. |
 
 ## Retrieval (RAG improvements)
 
