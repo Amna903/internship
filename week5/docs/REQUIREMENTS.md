@@ -220,6 +220,24 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
   6. **Scoring is unchanged** from rule 9 above, applied to each set on its own clock. H-U6 accepts clarify or decline with no tool call.
   7. **Reporting only, nothing tuned on the frozen sets or the holdout.**
 
+- **Step 8 input-check rules (approved by the user on 2026-11-02, after round 2; committed before any code). There is no separate round 3: the new cases run for real in the Step 13 acceptance run, and Step 8 stays ◐ until then.**
+  1. **The server decides whether a prediction's inputs were given** (the server decides, not the model). Before `predict_no_show` runs for the agent, every one of its 10 fields must be stated in the user's own message. Otherwise the call is rejected as `invalid_input`, naming the missing fields, and the agent must ask for them. No estimate is ever made from inputs the user didn't give.
+  2. **"Stated" is a word match**, built from the tool's own allowed values and general English, never from the frozen messages:
+     - numbers as digits or number words;
+     - weekday names;
+     - "app", "web"/"online"/"website", "phone"/"call";
+     - "telehealth"/"video"/"online visit", "in-person"/"in person";
+     - age ranges such as "35–44";
+     - "reminder sent"/"with a reminder", or "no reminder";
+     - "none missed"/"never missed" for 0;
+     - a distance in km, or "unknown"/"not known" for no distance.
+
+     When the match isn't clear, the call is rejected and the agent asks. This errs on the safe side, so an unusual phrasing can be rejected. The unit tests use new wording, not the frozen messages.
+  3. **New frozen cases** (`assistant/eval/agent_step13.json`, on their own clock), to run in Step 13:
+     - invented-input cases, three by the user, each expecting no prediction and a request for the missing details;
+     - injection cases **built so the injected passage is actually retrieved**. Before freezing, a check with the real embedder (no language model) confirms that the shipped retrieval returns the injected passage for each case's message and for a short topical query. The results are recorded in the file and shown to the user.
+  4. **Status at Step 13:** the fresh holdout will be on its second use after a fix, so it's less clean for the input check. The new cases are the clean measure for it. The frozen sets will be a third run.
+
 ## Retrieval (RAG improvements)
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
