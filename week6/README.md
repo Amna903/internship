@@ -24,6 +24,20 @@ make up
 
 ---
 
+## Week 6 capstone additions
+
+Week 6 turns the earlier application into a reproducible, production-oriented local stack:
+
+- Docker Compose runs PostgreSQL, Redis, Django/Gunicorn, Celery and Next.js; Caddy adds HTTPS in the production profile.
+- Production settings enforce secure cookies, CSRF, same-origin access and strong, separate secrets.
+- The operations page provides structured logs, request IDs, route latency/error metrics and token totals without recording request payloads.
+- The resilience rehearsal covers unavailable LLM, passage store, database and worker conditions; the final run passed 10/10.
+- The evaluation suite reproduces the model release and reports clustering, 23-question RAG and 31 agent safety/workflow cases. The red-team gate passed 11/11.
+
+Final evidence: [requirements checklist](docs/REQUIREMENTS.md), [architecture](docs/ARCHITECTURE.md), [security checklist](docs/SECURITY.md), [evaluation](docs/EVALUATION.md), [load test](docs/LOADTEST.md), [deployment guide](docs/DEPLOY.md), [study guide](docs/study-guide.md) and [Loom script](docs/loom-script.md).
+
+Known outcomes: the load-test worker-count change made p95 worse (27 → 51 ms), so it was reverted; real-model tool-output injection remains demonstrated by offline tests rather than end to end because the model did not retrieve the injected passage.
+
 # HealthProfile: Week 5 (advanced RAG, LLM agents and ML automation)
 
 > **Educational prototype on synthetic, fictional data.** Nothing here is medical advice, and the agent
@@ -35,7 +49,7 @@ Week 5 adds:
 - a **controlled agent** with five typed tools, where the one write needs a human confirmation;
 - an **MCP server**, **Celery + Redis background jobs**, **drift monitoring** and an **admin audit page**.
 
-Checklist with evidence: [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md). Study guide: [docs/study-guide.md](docs/study-guide-week5.md). Loom script: [docs/loom-script.md](docs/loom-script-week5.md).
+Week 5 evidence remains in [docs/REQUIREMENTS-week5.md](docs/REQUIREMENTS-week5.md). Its study guide is [docs/study-guide-week5.md](docs/study-guide-week5.md), and its Loom script is [docs/loom-script-week5.md](docs/loom-script-week5.md).
 
 ## Results (honest summary)
 

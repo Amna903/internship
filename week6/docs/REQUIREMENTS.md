@@ -262,9 +262,9 @@ CI1–CI6 record the completed Step 5 implementation and its earlier green GitHu
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| F1 | Repository with final release tag, documented commit history and deployment configuration | 13 | ☐ | | | | |
-| F2 | README with links, setup, tests, architecture, API docs, screenshots, dataset/model limitations and known issues | 13 | ☐ | | | | |
-| F3 | 5–10 minute Loom (script and cue list prepared; the user records it) | 13 | ☐ | | | | |
+| F1 | Repository with final release tag, documented commit history and deployment configuration | 13 | ◐ | Ordered commits and [DEPLOY.md](DEPLOY.md) are present; the release tag is intentionally waiting for latest GitHub CI to pass | `git log`, [DEPLOY.md](DEPLOY.md) | | |
+| F2 | README with links, setup, tests, architecture, API docs, screenshots, dataset/model limitations and known issues | 13 | ☑ | [README](../README.md): quick start, links to evidence, API and architecture, screenshots, limitations and known outcomes | Fresh-clone smoke 6/6; linked docs | | |
+| F3 | 5–10 minute Loom (script and cue list prepared; the user records it) | 13 | ◐ | [loom-script.md](loom-script.md): 8-minute walkthrough and cue list | Recording remains the user's action | | |
 | F4 | Share links in the team channel (the user does this) | 13 | ☐ | | | | |
 | F5 | Keep all previous features working; regression-test evidence | 0, 13 | ◐ | Baseline: [regression.md](regression.md) (1543 passed, 2 skipped; frontend 62, build OK) | CI full regression on the PR | | |
-| F6 | Study guide (the user's standing request) | 13 | ☐ | | | | |
+| F6 | Study guide (the user's standing request) | 13 | ☑ | [study-guide.md](study-guide.md): deployment, security, observability, resilience, load-test and evaluation notes | Linked from README | | |
