@@ -190,11 +190,11 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| L1 | LLM structured outputs with schema validation | 5 | ☐ | | | | |
-| L2 | Retry-on-invalid-output (bounded) | 5 | ☐ | | | | |
-| L3 | Conversation/session history | 5 | ☐ | | | | |
-| L4 | History summarization or truncation | 5 | ☐ | | | | |
-| L5 | Explicit token budgets | 5 | ☐ | | | | |
+| L1 | LLM structured outputs with schema validation | 5 | ☑ | `assistant/validation.py`: one validator; `strict()` derives the server schema from the one sent to Ollama (no extra keys, size limits), so the model's schema is unchanged. Used for answers (`schema.parse_reply`) and the relevance judge | `tests/test_assistant_history.py` (`TestValidator`), `tests/test_assistant_foundation.py` | | |
+| L2 | Retry-on-invalid-output (bounded) | 5 | ☑ | `service.ask`: at most 1 retry, only for invalid output (new seed, short note); never when the model declines or after a timeout; tokens from both attempts counted; `retries` recorded in `AnswerRecord`. Real runs: 0 retries needed in Step 5 (and 0 invalid outputs in Step 4) | `tests/test_assistant_history.py` (`TestRetry`) | | |
+| L3 | Conversation/session history | 5 | ☑ | `assistant/history.py`: signed, browser-held (React state only), tied to the user, 30-minute expiry, 12 turns / 20,000 tokens; whole-conversation medical check. [conversation_eval.md](../backend/assistant/eval/conversation_eval.md): **turn-2 retrieval hit 3 → 6 of 9 with history; end to end only 1 of 9 answered** (see the workflow record); red-team gate passed | `tests/test_assistant_history.py`, `tests/test_conversation_eval.py`, `e2e/run_week5_e2e.py` (13/13) | [w5-01](screenshots/w5-01-follow-up.png), [w5-02](screenshots/w5-02-tampered-history.png) | |
+| L4 | History summarization or truncation | 5 | ☑ | Truncation: the last 3 turns, oldest dropped first to fit 600 tokens (`History.turns`); summarising rejected (the 3B model could get it wrong or carry an injection) | `tests/test_assistant_history.py` (`test_truncation_drops_the_oldest_turns…`) | | |
+| L5 | Explicit token budgets | 5 | ☑ | `prompts.build_prompt` records the split (system, question, history, passages, 512 for the reply, of 4096) with each answer, in the API response and `AnswerRecord`; 600-token history cap; 20,000-token conversation cap | `tests/test_assistant_history.py` (`TestBudget`, H8) | | |
 
 ## Tools and agent
 

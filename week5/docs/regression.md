@@ -26,3 +26,13 @@ The browser tests ran against the `week5/` production frontend build on port 300
 backend, with only one agent session running.
 
 The backend count is 2 higher than Week 4's 761 only because the docs link test runs once per file in `docs/`, and `week5/docs/` has two more files (this one and the Week 5 `REQUIREMENTS.md`).
+
+## Step 5 (follow-up conversations)
+
+Run on 2026-11-02 at commit `2ba8d9a`, after the Step 5 code: the targeted backend files pass on SQLite and on
+local PostgreSQL (678 each), the frontend has 58 tests passing with a clean typecheck and `next build`, and in the browser:
+
+| Suite | Result |
+|---|---|
+| `e2e/run_week5_e2e.py` (Week 5 Step 5) | **13/13** |
+| `e2e/run_week4_e2e.py` (Week 4, the same Assistant tab) | **23/23** |
