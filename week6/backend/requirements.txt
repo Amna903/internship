@@ -1,0 +1,21 @@
+Django>=5.2,<5.3
+djangorestframework>=3.16,<4
+djangorestframework-simplejwt>=5.5,<6
+drf-spectacular>=0.28
+dj-database-url>=2.3
+psycopg[binary]>=3.2
+python-dotenv>=1.0
+argon2-cffi>=23.1
+
+# Week 3 ML stack, pinned EXACTLY. The same versions + the same seed reproduce the same dataset
+# and model file on any machine. scipy, joblib and threadpoolctl are scikit-learn's own
+# dependencies, pinned so nothing can drift underneath it.
+numpy==2.5.4
+pandas==3.0.6
+scikit-learn==1.9.1
+scipy==1.18.1
+joblib==1.6.0
+threadpoolctl==3.7.0
+mcp==2.3.0  # Week 5 Step 9: the official MCP Python SDK (stdio server)
+celery[redis]==5.6.3  # Week 5 Step 10: background indexing jobs (Redis broker)
+gunicorn==23.0.0  # Week 6 Step 1: production WSGI server in the container

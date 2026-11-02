@@ -1,0 +1,7 @@
+# Week 6 Step 8: raise the two load-tested endpoints' rate limits for the test only. Use with the base file:
+#   docker compose -f docker-compose.yml -f loadtest/docker-compose.loadtest.yml up -d --wait
+services:
+  backend:
+    environment:
+      THROTTLE_PREDICTIONS: 100000/min
+      THROTTLE_CLUSTERS: 100000/min

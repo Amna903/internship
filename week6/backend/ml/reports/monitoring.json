@@ -1,0 +1,148 @@
+{
+  "seed": 20261102,
+  "patients": 1000,
+  "rows": 3970,
+  "expected": {
+    "no_drift": "PSI < 0.10 (stable)",
+    "drift": "PSI > 0.25 (possible drift)",
+    "failures": "failure_rate flagged"
+  },
+  "met": {
+    "no_drift": true,
+    "drift": true,
+    "failures": true
+  },
+  "windows": {
+    "no_drift": {
+      "days": 1,
+      "predictions": 3970,
+      "invalid_input": 0,
+      "failed": 0,
+      "failure_rate": 0.0,
+      "shares": [
+        0.2584,
+        0.469,
+        0.1884,
+        0.0642,
+        0.0166,
+        0.0025,
+        0.0005,
+        0.0003,
+        0.0,
+        0.0
+      ],
+      "baseline_shares": [
+        0.2471,
+        0.484,
+        0.2024,
+        0.0505,
+        0.0138,
+        0.002,
+        0.0003,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "psi": 0.0062,
+      "verdict": "stable",
+      "latency_ms": {
+        "p50": 5.2,
+        "p95": 6.02
+      },
+      "baseline_latency_ms": {
+        "p50": 5.13,
+        "p95": 5.27,
+        "note": "single-row predictions timed on the build machine; machine-specific"
+      },
+      "model_version": "no-show-1.0.0",
+      "other_versions": [],
+      "flags": [],
+      "disclaimer": "Synthetic data and a fictional clinic. These numbers describe the model's behaviour on synthetic inputs only and make no claim about real-world medical impact."
+    },
+    "drift": {
+      "days": 1,
+      "predictions": 3970,
+      "invalid_input": 0,
+      "failed": 0,
+      "failure_rate": 0.0,
+      "shares": [
+        0.1156,
+        0.2393,
+        0.3015,
+        0.2088,
+        0.0935,
+        0.0325,
+        0.0071,
+        0.0018,
+        0.0,
+        0.0
+      ],
+      "baseline_shares": [
+        0.2471,
+        0.484,
+        0.2024,
+        0.0505,
+        0.0138,
+        0.002,
+        0.0003,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "psi": 0.7999,
+      "verdict": "possible drift",
+      "latency_ms": {
+        "p50": 5.19,
+        "p95": 5.56
+      },
+      "baseline_latency_ms": {
+        "p50": 5.13,
+        "p95": 5.27,
+        "note": "single-row predictions timed on the build machine; machine-specific"
+      },
+      "model_version": "no-show-1.0.0",
+      "other_versions": [],
+      "flags": [
+        "possible_drift"
+      ],
+      "disclaimer": "Synthetic data and a fictional clinic. These numbers describe the model's behaviour on synthetic inputs only and make no claim about real-world medical impact."
+    },
+    "failures": {
+      "days": 1,
+      "predictions": 0,
+      "invalid_input": 0,
+      "failed": 30,
+      "failure_rate": 1.0,
+      "shares": null,
+      "baseline_shares": [
+        0.2471,
+        0.484,
+        0.2024,
+        0.0505,
+        0.0138,
+        0.002,
+        0.0003,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "psi": null,
+      "verdict": "not enough data",
+      "latency_ms": {
+        "p50": null,
+        "p95": null
+      },
+      "baseline_latency_ms": {
+        "p50": 5.13,
+        "p95": 5.27,
+        "note": "single-row predictions timed on the build machine; machine-specific"
+      },
+      "model_version": "no-show-1.0.0",
+      "other_versions": [],
+      "flags": [
+        "failure_rate"
+      ],
+      "disclaimer": "Synthetic data and a fictional clinic. These numbers describe the model's behaviour on synthetic inputs only and make no claim about real-world medical impact."
+    }
+  }
+}

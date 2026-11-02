@@ -1,0 +1,18 @@
+# Week 6 Step 3: the only public entry. Real domain: SITE_ADDRESS=clinic.example.org + ACME_EMAIL for
+# automatic Let's Encrypt. Local rehearsal: healthprofile.localhost with Caddy's internal CA (TLS_MODE=internal).
+{
+	email {$ACME_EMAIL:admin@example.test}
+}
+
+{$SITE_ADDRESS:healthprofile.localhost} {
+	tls {$TLS_MODE:internal}
+	encode gzip
+	header ?Strict-Transport-Security "max-age=86400"
+	@backend path /api/* /health/ /ready/
+	handle @backend {
+		reverse_proxy backend:8000
+	}
+	handle {
+		reverse_proxy frontend:3000
+	}
+}
