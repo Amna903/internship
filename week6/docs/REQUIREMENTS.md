@@ -169,6 +169,8 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 
 ## CI
 
+CI1–CI6 record the completed Step 5 implementation and its earlier green GitHub run.  They show that the checks exist and have passed, but do **not** prove the current final commit is green.  CI7 remains open until GitHub completes a passing run for the latest commit.
+
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
 | CI1 | Lint/format | 5 | ☑ | `backend/ruff.toml`, `frontend/eslint.config.mjs`, `.prettierrc.json`; CI step "Lint and format" | ruff check/format, ESLint, Prettier check | | |
@@ -177,7 +179,7 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 | CI4 | Model-pipeline smoke tests | 5 | ☑ | CI step "Model-pipeline smoke tests" (`-m ml_pipeline`) | 274 passed | | |
 | CI5 | RAG regression tests | 5 | ☑ | CI step "RAG regression tests" (`-m rag`) | 605 passed; `tests/test_ci_groups.py` | | |
 | CI6 | Frontend build checks | 5 | ☑ | `frontend` job: lint, format check, typecheck, vitest, `next build` | 62 vitest | | |
-| CI7 | Publish a passing run | 5 | ☑ | All 7 jobs green, including the Docker job | [run 41479939168](https://github.com/AmanAtiq/healthprofile/actions/runs/41479939168) | | |
+| CI7 | Publish a passing run | 5, 13 | ◐ | Earlier evidence: all 7 jobs green, including the Docker job | [run 41479939168](https://github.com/AmanAtiq/healthprofile/actions/runs/41479939168) (Step 5); **GitHub must run green on the latest commit** | | |
 
 ## APIs and artifacts
 
@@ -247,14 +249,14 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| X1 | Live end-to-end demo: signup → profile completion → prediction → cluster visualization → cited LLM answer → agent tool call → human approval → audit trail | 12 | ☐ | | | | |
-| X2 | Synthetic data only; never present ML/LLM output as diagnosis or medical advice | all | ☐ | | | | |
-| X3 | Enforce user ownership, admin permissions, tool-level authorization; protect secrets; logs without sensitive payloads | 10 | ☐ | | | | |
-| X4 | Document reproducible builds, dependency versions, known limitations, model/data provenance, deployment costs, rollback steps | 11 | ☐ | | | | |
-| X5 | A reviewer can start the full stack from README and run all core flows with sample data (user's addition: verified from a fresh clone with `make up`) | 1, 13 | ◐ | Verified from a fresh clone with `make up` from the README alone (smoke test 6/6); re-checked at Step 13 | [regression.md](regression.md) | | |
-| X6 | CI and automated tests pass; cross-user access, unauthorized agent writes and invalid inputs are rejected | 5, 10 | ☐ | | | | |
-| X7 | Supervised/unsupervised evaluation, RAG/agent safety results, load-test measurements with at least one improvement | 8, 9 | ☐ | | | | |
-| X8 | Deployed application or fully reproducible deployment procedure, failure recovery and observability evidence | 3, 6, 7 | ☐ | | | | |
+| X1 | Live end-to-end demo: signup → profile completion → prediction → cluster visualization → cited LLM answer → agent tool call → human approval → audit trail | 12 | ☑ | `e2e/demo_week6.py`: real-browser flow through the full stack and real local model | 8/8 checks; [screenshots](screenshots/) `w6-01`–`w6-07` | | |
+| X2 | Synthetic data only; never present ML/LLM output as diagnosis or medical advice | all | ☑ | Synthetic seed data; fixed plain-language disclaimer on predictions; medical-query gate and no clinical tools | `test_output_uses_plain_non_clinical_wording`, `test_no_clinical_wording_in_the_response`, assistant/agent safety tests | | |
+| X3 | Enforce user ownership, admin permissions, tool-level authorization; protect secrets; logs without sensitive payloads | 10 | ☑ | Server-side ownership and tool authorization; secret handling; structured redacted logs | [SECURITY.md](SECURITY.md); authorization matrix, secret scan and `security` suite (434 passed) | | |
+| X4 | Document reproducible builds, dependency versions, known limitations, model/data provenance, deployment costs, rollback steps | 11 | ☑ | [MODEL_CARD.md](MODEL_CARD.md), [CLUSTERING_LIMITATIONS.md](CLUSTERING_LIMITATIONS.md), [RAG_EVALUATION.md](RAG_EVALUATION.md), [DEPLOY.md](DEPLOY.md) | Docs cite committed result files and the Step 3 rehearsal | | |
+| X5 | A reviewer can start the full stack from README and run all core flows with sample data (user's addition: verified from a fresh clone with `make up`) | 1, 13 | ☑ | Verified from a fresh clone with `make up` from the README alone; smoke test 6/6; re-checked at Step 13 | [regression.md](regression.md) | | |
+| X6 | CI and automated tests pass; cross-user access, unauthorized agent writes and invalid inputs are rejected | 5, 10 | ◐ | Authorization matrix, write authorization and invalid-input checks are implemented and passed locally | `security` suite 434 passed; **latest GitHub CI run still required** (CI7) | | |
+| X7 | Supervised/unsupervised evaluation, RAG/agent safety results, load-test measurements with at least one improvement | 8, 9 | ◐ | [EVALUATION.md](EVALUATION.md) and [LOADTEST.md](LOADTEST.md) record all measurements | Evaluation and safety gate passed; load test measured but the only optimization was worse and correctly reverted (L3) | | |
+| X8 | Deployed application or fully reproducible deployment procedure, failure recovery and observability evidence | 3, 6, 7 | ☑ | Compose/Caddy deployment procedure, operations view and safe failure handling | [DEPLOY.md](DEPLOY.md); HTTPS, backup/restore/rollback and resilience rehearsal in [regression.md](regression.md) (10/10) | | |
 
 ## Submission
 
