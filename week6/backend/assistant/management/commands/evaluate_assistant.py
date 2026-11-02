@@ -3,10 +3,9 @@
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from assistant.documents import CorpusMismatch
-
 from accounts.models import User
 from assistant import evaluate
+from assistant.documents import CorpusMismatch
 from assistant.embeddings import get_embedder
 from assistant.llm import get_llm
 

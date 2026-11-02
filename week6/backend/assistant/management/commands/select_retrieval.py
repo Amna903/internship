@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
 from accounts.models import User
-from assistant import retrieval_select, safety_gate
+from assistant import retrieval_select
 from assistant.documents import CorpusMismatch
 from assistant.embeddings import get_embedder
 from assistant.llm import LLMError, get_llm

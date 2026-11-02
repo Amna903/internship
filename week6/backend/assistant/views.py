@@ -15,29 +15,25 @@ from rest_framework.throttling import ScopedRateThrottle
 
 from audit.models import AuditEvent
 from audit.services import record_event
-from predictions.views import AdminOnlyAPIView
-
-from predictions.views import SmallJSONParser
+from predictions.views import AdminOnlyAPIView, SmallJSONParser
 
 from .answering import answer_question
-from .embeddings import get_embedder
+from .costs import ILLUSTRATIVE_HOSTED_PER_1K
 from .documents import DocumentError, add_version, create_document, pending_version, reject_version, retire
-from .jobs import QueueUnavailable, audit_detail, queue_approval
-from .history import ConversationLimit, HistoryInvalid
+from .embeddings import get_embedder
+from .history import CONVERSATION_TOKENS, MAX_TURNS, ConversationLimit, HistoryInvalid
 from .history import dump as dump_history
 from .history import load as load_history
-from .history import CONVERSATION_TOKENS, MAX_TURNS
+from .jobs import QueueUnavailable, audit_detail, queue_approval
 from .llm import get_llm
-from .service import QuestionInvalid
 from .models import POLICY_AREAS, AnswerRecord, DocumentVersion, IndexJob, PolicyDocument
+from .prompts import CHARS_PER_TOKEN, SAFETY_MARGIN
+from .schema import ANSWER_SCHEMA, MAX_ANSWER_CHARS, MAX_CITATIONS
+from .service import MAX_QUESTION_CHARS, QuestionInvalid
 from .uploads import MAX_UPLOAD_BYTES, UploadRejected, validate_upload
 
 logger = logging.getLogger(__name__)
 
-from .costs import ILLUSTRATIVE_HOSTED_PER_1K
-from .prompts import CHARS_PER_TOKEN, SAFETY_MARGIN
-from .schema import ANSWER_SCHEMA, MAX_ANSWER_CHARS, MAX_CITATIONS
-from .service import MAX_QUESTION_CHARS
 
 
 class AssistantStatusView(AdminOnlyAPIView):

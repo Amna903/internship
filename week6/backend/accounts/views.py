@@ -1,8 +1,8 @@
+import datetime
+
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import update_last_login
-import datetime
-
 from django.db import IntegrityError, transaction
 from django.middleware.csrf import get_token
 from django.utils import timezone

@@ -91,7 +91,7 @@ export function refreshSession(): Promise<boolean> {
 
 async function parse<T>(res: Response): Promise<T> {
   const text = await res.text();
-  let data: any = null;
+  let data: { error?: { code?: string; message?: string; details?: Record<string, string[]> } } | null = null;
   try { data = text ? JSON.parse(text) : null; } catch { /* non-JSON (proxy error page) */ }
   if (!res.ok) {
     const err = data?.error;
@@ -254,6 +254,24 @@ export const agentApi = {
   decline: (id: string) => api<ActionCard>("POST", `/api/v1/agent/actions/${id}/decline/`),
 };
 
+type Id = string | number | null;
+interface PassageRef { passage_id: string; document_id: number; version: number }
+export interface AuditOverview {
+  agent_runs: { created_at: string; status: string; stopped_reason: string | null; pending_action_id: string | null;
+                steps: { tool?: string | null; code?: string | null }[] }[];
+  approval_decisions: {
+    actions: { created_at: string; status: string; proposed_by_agent: boolean; decided_at: string | null; booking_id: Id }[];
+    document_versions: { document_id: number; version: number; status: string; decided_by: Id; decided_at: string | null }[];
+  };
+  retrieval_sources: { created_at: string; status: string; sources: PassageRef[]; citations: PassageRef[] }[];
+  jobs: { id: number; document_id: number; version: number; status: string; attempts: number; max_attempts: number;
+          error_code: string | null; finished_at: string | null }[];
+  model_versions: { no_show_served: string; monitoring_baseline: string | null; llm_configured: string;
+                    embedder_configured: string; llms_on_answers: string[]; llms_on_agent_runs: string[] };
+  monitoring: { verdict: string; psi: number | null; predictions: number; failure_rate: number | null; flags: string[];
+                disclaimer: string };
+}
+
 export const auditApi = {
-  overview: () => api<Record<string, any>>("GET", "/api/v1/audit/overview/"),
+  overview: () => api<AuditOverview>("GET", "/api/v1/audit/overview/"),
 };

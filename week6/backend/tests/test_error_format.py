@@ -7,8 +7,6 @@ returned an HTML 500 instead of a JSON 404. Found by test_deactivate_unknown_pro
 
 import pytest
 
-from .conftest import Browser
-
 
 @pytest.mark.django_db
 class TestErrorEnvelope:

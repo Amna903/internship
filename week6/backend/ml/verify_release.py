@@ -26,9 +26,9 @@ from pathlib import Path
 import numpy as np
 
 from . import artifact, cluster, cluster_features, cluster_view, config, eda, errors, explain, train, tune
-from .models import GRID_CANDIDATES
 from .data import dataset_hash, generate
 from .inference import load
+from .models import GRID_CANDIDATES
 from .preprocess import model_input
 from .split import split
 

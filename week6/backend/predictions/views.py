@@ -21,9 +21,9 @@ from accounts.permissions import IsAdminRole
 from adminpanel.authentication import AdminSessionAuthentication
 from audit.models import AuditEvent
 from audit.services import record_event
-from monitoring.drift import log_invalid, predict_logged
 from ml import config
 from ml.inference import ModelUnavailable, get_model
+from monitoring.drift import log_invalid, predict_logged
 
 from .serializers import NoShowInputSerializer, PredictionResponseSerializer
 

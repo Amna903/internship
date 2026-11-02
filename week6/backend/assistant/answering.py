@@ -50,6 +50,7 @@ def shipped_retrieve(query: str, llm: LLMClient, embedder: Embedder, tuned: dict
     exactly what ships)."""
     if tuned.get("judge"):  # Step 3 round 2: semantic candidates filtered by the LLM relevance judge
         from django.conf import settings as django_settings
+
         from .judge import JudgeConfig, judged_retrieve
         j = tuned["judge"]
         return judged_retrieve(query, embedder, llm, JudgeConfig(j["n"], j["f_low"], j["top_k"]),

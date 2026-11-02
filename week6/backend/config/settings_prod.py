@@ -14,8 +14,14 @@ for key, value in {"DJANGO_DEBUG": "false", "COOKIE_SECURE": "true", "SECURE_SSL
     os.environ.setdefault(key, value)
 
 from .settings import *  # noqa: E402,F401,F403
-from .settings import (ALLOWED_HOSTS, COOKIE_SECURE, CSRF_TRUSTED_ORIGINS, DEBUG, SECURE_HSTS_SECONDS,  # noqa: E402
-                       SECURE_SSL_REDIRECT)
+from .settings import (  # noqa: E402
+    ALLOWED_HOSTS,
+    COOKIE_SECURE,
+    CSRF_TRUSTED_ORIGINS,
+    DEBUG,
+    SECURE_HSTS_SECONDS,
+    SECURE_SSL_REDIRECT,
+)
 
 PROD_ERRORS = []
 if DEBUG:

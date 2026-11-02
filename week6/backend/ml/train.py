@@ -18,10 +18,9 @@ Order of operations, and why:
 The oracle row (the generator's true probabilities) is the best score any model could reach.
 """
 
-from dataclasses import dataclass
-
 import json
 import math
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
@@ -449,7 +448,7 @@ def _test_sections(result: TrainingResult) -> tuple[str, str]:
                           for k, s in result.test.items())
     baseline_test = next(s for k, s in result.test.items() if k.startswith("baseline"))
     chosen_test = next(s for k, s in result.test.items() if k.startswith("chosen"))
-    tt, imp = result.test_threshold, result.improvement
+    tt = result.test_threshold
     extra = "" if result.per_model_test is None else "\n\n" + _per_model_section(result) + "\n\n" + TEST_HISTORY_NOTE
     threshold_row = (f"| test (same threshold, applied once) | {tt.value:.4f} | {tt.precision:.3f} | {tt.recall:.3f} "
                      f"| {tt.f1:.3f} | {100 * tt.flagged_share:.1f}% |\n\n"

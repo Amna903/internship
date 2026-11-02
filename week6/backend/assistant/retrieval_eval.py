@@ -377,6 +377,7 @@ def evaluate_judged(embedder: Embedder, llm, cases: list[dict], jcfg, base_seed:
     """The round-2 winner on the frozen set, run once (rule 10). Ranks are semantic (the judge only filters)."""
     import statistics
     import time
+
     from .judge import VerdictCache, judged
     cases = cases if cases is not None else load_cases()
     cache = VerdictCache()
@@ -448,7 +449,7 @@ def _round2_section(before: dict) -> str:
     verdict = "improved" if a["shipped_hits"] > b["shipped_hits"] else (
         "did not improve" if a["shipped_hits"] == b["shipped_hits"] else "got worse")
     guard = "held" if a["false_retrievals"] <= b["false_retrievals"] else "**rose**"
-    d, inj, cost = sel["decision"], sel["injection_check"], r2["cost"]
+    inj, cost = sel["injection_check"], r2["cost"]
     gate_path = OUT / "safety_gate.json"
     gate = json.loads(gate_path.read_text()) if gate_path.exists() else None
     final = final_decision(sel, gate)

@@ -8,19 +8,18 @@ import logging
 
 import pytest
 from django.core import signing
-from django.core.management import call_command
 
+from accounts.models import User
 from assistant import answering, history, prompts, service
 from assistant.embeddings import FakeEmbedder
 from assistant.history import ConversationLimit, HistoryInvalid, Turn
 from assistant.indexing import SearchResult
-from assistant.llm import FakeLLM, LLMReply, LLMTimeout
+from assistant.llm import FakeLLM, LLMTimeout
 from assistant.models import AnswerRecord
 from assistant.prompts import Passage
 from assistant.schema import ANSWER_SCHEMA, SERVER_ANSWER_SCHEMA
 from assistant.validation import SchemaError, strict, validate
 from audit.models import AuditEvent
-from accounts.models import User
 
 from .conftest import PASSWORD, Browser, admin_login
 from .test_assistant_ask import ASK, REFUND_QUOTE, reply, setup  # noqa: F401 (setup is a fixture)
@@ -357,7 +356,7 @@ class TestEndpoint:
 
     def test_a_body_with_history_fits_but_a_huge_one_is_413(self, admin_browser, setup):
         h = history.empty(1)
-        for i in range(history.MAX_TURNS - 1):
+        for _ in range(history.MAX_TURNS - 1):
             h = h.after("x" * 500, "y" * 1200, 1, False)
         assert len(json.dumps({"question": "q" * 500, "history": history.dump(h)})) < 32 * 1024
         assert post(admin_browser, "x" * 40_000).status_code == 413

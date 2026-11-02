@@ -30,7 +30,6 @@ def test_descriptions_use_no_health_or_personal_words(view):
 
 def test_descriptions_are_built_from_the_numbers(view):
     """Every phrase comes from PHRASES and points the right way for that cluster's mean."""
-    import pandas as pd
     from ml import cluster_features
     from ml.data import generate
     table = cluster_features.patient_table(generate())

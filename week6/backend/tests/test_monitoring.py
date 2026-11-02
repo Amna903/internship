@@ -9,7 +9,6 @@ import pytest
 from django.core.management import call_command
 from django.utils import timezone
 
-from ml import config
 from ml.inference import ModelUnavailable
 from monitoring import drift
 from monitoring.drift import psi, shares, summarise, verdict

@@ -21,13 +21,13 @@ WEEK3_SECTION = README.split("# Week 2: Role-Based")[0]
 
 def metrics_test_row(prefix: str) -> list[str]:
     section = METRICS.split("## 4. Test set")[1].split("## 5.")[0]
-    line = next(l for l in section.splitlines() if l.lstrip("| *").startswith(prefix))
+    line = next(row for row in section.splitlines() if row.lstrip("| *").startswith(prefix))
     return [cell.strip(" *") for cell in line.strip("|").split("|")]
 
 
 def readme_row(label: str) -> list[str]:
     metrics_section = WEEK3_SECTION.split("## Metrics")[1].split("## Dataset limitations")[0]
-    line = next(l for l in metrics_section.splitlines() if l.startswith(f"| {label}") or l.startswith(f"| **{label}"))
+    line = next(row for row in metrics_section.splitlines() if row.startswith(f"| {label}") or row.startswith(f"| **{label}"))
     return [cell.strip(" *") for cell in line.strip("|").split("|")]
 
 

@@ -6,9 +6,6 @@ the registry (agent/registry.py) enforces authorisation, validation, output caps
 import hashlib
 from datetime import date, timedelta
 
-from ml import config as ml_config
-from ml.inference import ModelUnavailable, get_model
-
 from assistant.answering import shipped_retrieve
 from assistant.llm import LLMError
 from assistant.models import POLICY_AREAS
@@ -16,6 +13,8 @@ from assistant.privacy import redact
 from assistant.service import MAX_QUESTION_CHARS
 from assistant.tuning import load_tuned
 from assistant.verify import is_medical_advice_request
+from ml import config as ml_config
+from ml.inference import ModelUnavailable, get_model
 
 from .registry import Tool, ToolFailure, register
 

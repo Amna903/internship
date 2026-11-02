@@ -14,7 +14,6 @@ from assistant.indexing import GATE_S, GATE_SK, HYBRID, SEMANTIC, Candidates, Re
 from assistant.models import PolicyDocument
 from assistant.retrieval_select import CHAMPION, choose, ship_decision, tie_key
 
-
 # ---------------- BM25 and RRF by hand ----------------
 
 def test_tokens_keep_numbers_and_drop_stop_words():

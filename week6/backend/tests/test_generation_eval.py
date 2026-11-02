@@ -1,7 +1,6 @@
 """Week 5 Step 4: the generation harness (V4–V6). Oracle contexts, per-run scoring by hand, majority, and an
 offline end-to-end run that is rolled back. Fake model and FakeEmbedder."""
 
-import json
 
 import pytest
 from django.core.management import call_command

@@ -203,8 +203,9 @@ class TestAudit:
         assert "123.4" not in caplog.text and "987.6" not in caplog.text
 
     def test_append_only_triggers_survive_the_new_migration(self):
-        from .test_audit import immutability_triggers
         from django.db import connection
+
+        from .test_audit import immutability_triggers
         expected = {"audit_event_no_change", "audit_event_no_truncate"} if connection.vendor == "postgresql" \
             else {"audit_event_no_update", "audit_event_no_delete"}
         assert expected <= immutability_triggers()

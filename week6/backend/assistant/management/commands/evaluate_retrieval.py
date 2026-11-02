@@ -30,6 +30,7 @@ class Command(BaseCommand):
         if selection_winner or chunk_tokens:
             import json
             from dataclasses import replace
+
             from assistant import retrieval_select
             from assistant.indexing import RetrievalConfig
             if selection_winner:
@@ -53,7 +54,9 @@ class Command(BaseCommand):
 
     def _round2(self, label):
         import json
+
         from django.conf import settings
+
         from assistant import retrieval_round2
         from assistant.llm import get_llm
         winner = json.loads((retrieval_round2.OUT / "retrieval_round2.json").read_text())["winner"]

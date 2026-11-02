@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { AdminTabs, useAdminNav } from "@/components/AdminTabs";
 import { Shell } from "@/components/Shell";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { ApiError, auditApi } from "@/lib/api";
+import { ApiError, AuditOverview, auditApi } from "@/lib/api";
 
 const when = (t: string | null) => (t ? new Date(t).toLocaleString() : "—");
 
@@ -26,7 +26,7 @@ function Table({ id, title, head, rows }: { id: string; title: string; head: str
 export default function AuditPage() {
   const router = useRouter();
   const nav = useAdminNav();
-  const [data, setData] = useState<Record<string, any> | null>(null);
+  const [data, setData] = useState<AuditOverview | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,15 +36,13 @@ export default function AuditPage() {
     });
   }, [router]);
 
-  const m = data?.model_versions;
-  const mon = data?.monitoring;
   return (
     <Shell nav={nav}>
       <PageHeader eyebrow="Admin console · educational prototype" title="Audit trail"
                   lead="Agent actions, approval decisions, retrieval sources, background jobs and model versions. Ids, codes and versions only: no messages or document text are stored." />
       <AdminTabs />
       {failure && <div className="alert warn" role="alert">{failure}</div>}
-      {data && (
+      {data && (() => { const m = data.model_versions; const mon = data.monitoring; return (
         <>
           <section className="card" aria-labelledby="models" data-testid="audit-models">
             <h2 id="models">Model versions</h2>
@@ -58,19 +56,19 @@ export default function AuditPage() {
             <p className="disclaimer small">{mon.disclaimer}</p>
           </section>
           <Table id="audit-runs" title="Agent runs" head={["When", "Status", "Stop", "Tools → result", "Proposal"]}
-                 rows={data.agent_runs.map((r: any) => [when(r.created_at), r.status, r.stopped_reason,
-                   r.steps.filter((s: any) => s.tool).map((s: any) => `${s.tool}→${s.code}`).join(", "), r.pending_action_id])} />
+                 rows={data.agent_runs.map((r) => [when(r.created_at), r.status, r.stopped_reason,
+                   r.steps.filter((s) => s.tool).map((s) => `${s.tool}→${s.code}`).join(", "), r.pending_action_id])} />
           <Table id="audit-approvals" title="Approval decisions: proposed writes" head={["Proposed", "Status", "By agent", "Decided", "Booking"]}
-                 rows={data.approval_decisions.actions.map((a: any) => [when(a.created_at), a.status, a.proposed_by_agent ? "yes" : "no", when(a.decided_at), a.booking_id])} />
+                 rows={data.approval_decisions.actions.map((a) => [when(a.created_at), a.status, a.proposed_by_agent ? "yes" : "no", when(a.decided_at), a.booking_id])} />
           <Table id="audit-documents" title="Approval decisions: document versions" head={["Document", "Version", "Status", "Decided by", "When"]}
-                 rows={data.approval_decisions.document_versions.map((v: any) => [v.document_id, v.version, v.status, v.decided_by, when(v.decided_at)])} />
+                 rows={data.approval_decisions.document_versions.map((v) => [v.document_id, v.version, v.status, v.decided_by, when(v.decided_at)])} />
           <Table id="audit-sources" title="Retrieval sources (assistant answers)" head={["When", "Status", "Given", "Cited"]}
-                 rows={data.retrieval_sources.map((a: any) => [when(a.created_at), a.status,
-                   a.sources.map((p: any) => p.passage_id).join(", "), a.citations.map((p: any) => p.passage_id).join(", ")])} />
+                 rows={data.retrieval_sources.map((a) => [when(a.created_at), a.status,
+                   a.sources.map((p) => p.passage_id).join(", "), a.citations.map((p) => p.passage_id).join(", ")])} />
           <Table id="audit-jobs" title="Background indexing jobs" head={["Job", "Document v", "Status", "Attempts", "Error", "Finished"]}
-                 rows={data.jobs.map((j: any) => [j.id, `${j.document_id} v${j.version}`, j.status, `${j.attempts}/${j.max_attempts}`, j.error_code, when(j.finished_at)])} />
+                 rows={data.jobs.map((j) => [j.id, `${j.document_id} v${j.version}`, j.status, `${j.attempts}/${j.max_attempts}`, j.error_code, when(j.finished_at)])} />
         </>
-      )}
+      ); })()}
     </Shell>
   );
 }

@@ -4,6 +4,7 @@ seeded RandomizedSearchCV, the one-standard-error rule, and a committed result t
 The full 30-draw search takes minutes, so it runs in `python -m ml.verify_release` (its own CI job).
 Here the logic is tested on tiny searches, and the committed result is checked for consistency."""
 
+import copy
 import json
 
 import numpy as np
@@ -13,8 +14,6 @@ from ml import config, train, tune
 from ml.data import generate
 from ml.models import CANDIDATES, GRID_CANDIDATES
 from ml.split import split
-import copy
-
 from ml.verify_release import reports_match, tuning_matches
 
 

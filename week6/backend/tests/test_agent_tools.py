@@ -15,7 +15,6 @@ from django.core.management import call_command
 from accounts.models import User
 from agent import read_tools, registry
 from agent.registry import REGISTRY, ToolContext, run_tool
-from assistant import answering
 from assistant.embeddings import FakeEmbedder
 from assistant.llm import LLMUnavailable
 from audit.models import AuditEvent

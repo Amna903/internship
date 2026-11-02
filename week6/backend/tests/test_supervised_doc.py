@@ -6,7 +6,6 @@ real leakage scores, so the definitions can't drift from the pipeline."""
 import re
 from pathlib import Path
 
-import pandas as pd
 import pytest
 
 from ml import config

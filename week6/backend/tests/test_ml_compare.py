@@ -137,7 +137,7 @@ def test_final_evaluation_scores_the_test_set_once_with_every_algorithm(comparis
 def test_each_algorithm_has_a_confusion_matrix_over_all_test_rows(df, comparison):
     test_rows = len(split(df)[2])
     no_shows = int(split(df)[2][config.LABEL].sum())
-    for label, (cut, t, c) in comparison.per_model_test.items():
+    for label, (_cut, t, c) in comparison.per_model_test.items():
         assert c["tp"] + c["fp"] + c["fn"] + c["tn"] == test_rows, label
         assert c["tp"] + c["fn"] == no_shows, label
         assert t.recall == pytest.approx(c["tp"] / no_shows), label

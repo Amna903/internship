@@ -15,7 +15,6 @@ from config.exceptions import Conflict
 from .models import HealthProfile
 from .serializers import HealthProfileSerializer
 
-
 # Fields whose changes are audited (by name only, never by value).
 TRACKED_FIELDS = [
     name for name in HealthProfileSerializer.Meta.fields

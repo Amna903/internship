@@ -5,9 +5,9 @@ import hashlib
 from django.core.management.base import BaseCommand, CommandError
 
 from accounts.models import User
+from assistant.documents import approve, create_document
 from assistant.embeddings import get_embedder
 from assistant.frozen import FROZEN_SHA256, POLICY_DIR
-from assistant.documents import approve, create_document
 from assistant.models import DocumentVersion, PolicyDocument
 
 

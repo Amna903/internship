@@ -5,7 +5,7 @@ from django.db import DatabaseError, connection, transaction
 
 from audit.models import AuditEvent
 
-from .conftest import Browser, PASSWORD, admin_login
+from .conftest import PASSWORD, Browser, admin_login
 
 ME = "/api/profiles/me/"
 AUDIT = "/api/admin/audit-events/"

@@ -2,11 +2,12 @@ from django.conf import settings
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from .health import health, ready
+
 handler404 = "config.exceptions.not_found"
 handler500 = "config.exceptions.server_error"
 
 
-from .health import health, ready
 
 urlpatterns = [
     path("health/", health, name="liveness"),

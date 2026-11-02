@@ -16,7 +16,7 @@ import numpy as np
 from django.utils import timezone
 
 from ml import config as ml_config
-from ml.inference import ModelUnavailable, get_model
+from ml.inference import get_model
 
 from .models import PredictionLog
 

@@ -142,7 +142,7 @@ class Command(BaseCommand):
         admin = User.objects.filter(role=User.Role.ADMIN).first()
         now = timezone.now()
         events = []
-        for i in range(count):
+        for _ in range(count):
             profile_id, owner_id = rng.choice(profiles)
             by_admin = admin is not None and rng.random() < 0.3
             events.append(AuditEvent(

@@ -252,7 +252,7 @@ class TestAuditAndApi:
 
 @pytest.mark.django_db
 def test_job_polling_has_its_own_rate_limit_and_does_not_use_the_question_budget(admin_browser, pending):
-    from assistant.views import IndexJobView, IndexJobsView
+    from assistant.views import IndexJobsView, IndexJobView
     assert IndexJobView.throttle_scope == IndexJobsView.throttle_scope == "jobs"
     post(admin_browser, f"{DOCS}{pending.document_id}/approve/")
     job = IndexJob.objects.get()

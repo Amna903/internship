@@ -7,7 +7,7 @@ from datetime import date
 import pytest
 from django.core.management import call_command
 
-from agent import agent_eval, runner
+from agent import agent_eval
 from agent.dates import resolve
 from agent.models import MockBooking, PendingAction
 from agent.registry import ToolContext

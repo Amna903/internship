@@ -2,7 +2,9 @@
 reshuffle baseline that keeps what it should, false-pattern checks, a positive control whose labels are
 only used to score recovery, and wording computed from the numbers."""
 
+import copy
 import inspect
+import json
 
 import numpy as np
 import pandas as pd
@@ -11,9 +13,6 @@ from sklearn.metrics import adjusted_rand_score
 
 from ml import cluster, cluster_control, cluster_features, config, holdout
 from ml.data import generate
-import copy
-import json
-
 from ml.verify_release import clusters_match, reports_match
 
 

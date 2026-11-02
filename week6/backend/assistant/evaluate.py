@@ -37,10 +37,10 @@ from django.db import transaction
 
 from . import frozen
 from .answering import answer_question
+from .documents import check_corpus, create_document
 from .embeddings import Embedder
 from .indexing import approve, search
 from .llm import LLMClient
-from .documents import check_corpus, create_document
 from .models import PolicyDocument
 from .tuning import load_tuned
 from .uploads import validate_upload
