@@ -50,7 +50,7 @@ echo "backend=$(json $backend)"
 echo "frontend=$(json $frontend)"
 echo "ml=$(json $ml)"
 docker=false
-if [ "$EVENT" = "pull_request" ] && printf '%s\n' "$code" | grep -Eq "^$NEWEST/(docker-compose[^/]*\.yml|Makefile|deploy/|backend/(Dockerfile|docker-entrypoint\.sh|requirements[^/]*\.txt)|frontend/(Dockerfile|package(-lock)?\.json))"; then
+if [ "$EVENT" = "pull_request" ] && printf '%s\n' "$code" | grep -Eq "^$NEWEST/(docker-compose[^/]*\.yml|Makefile|deploy/|e2e/|backend/(Dockerfile|docker-entrypoint\.sh|requirements[^/]*\.txt)|frontend/(Dockerfile|package(-lock)?\.json))"; then
   docker=true
 fi
 echo "docker=$docker"

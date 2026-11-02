@@ -169,8 +169,10 @@ jobs:
 
   # Single required check for branch protection: fails if the plan failed, or any job it asked for failed or
   # was cancelled. A job the plan skipped (nothing in it changed) counts as passing.
-  # Week 6 Step 5 (the user's rule: Docker jobs only on PRs or manual runs, to save minutes). Builds both
+  # Week 6 Step 5/12 (the user's rule: Docker jobs only on PRs or manual runs, to save minutes). Builds both
   # images, starts the stack with the fake LLM/embedder, and runs API integration checks against the containers.
+  # The Step 12 Playwright demo stays a local acceptance check: it deliberately exercises the real local
+  # Ollama model and its human-confirmation flow, neither of which GitHub-hosted CI can provide.
   docker:
     name: docker stack (week6)
     needs: plan
