@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.http import JsonResponse
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
@@ -7,11 +6,11 @@ handler404 = "config.exceptions.not_found"
 handler500 = "config.exceptions.server_error"
 
 
-def health(request):
-    return JsonResponse({"status": "ok"})
-
+from .health import health, ready
 
 urlpatterns = [
+    path("health/", health, name="liveness"),
+    path("ready/", ready, name="readiness"),
     path("api/health/", health, name="health"),
     path("api/", include("accounts.urls")),
     path("api/", include("profiles.urls")),

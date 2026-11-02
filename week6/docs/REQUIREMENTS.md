@@ -39,6 +39,7 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 
 | Step | Decision | Options considered | Reason |
 |---|---|---|---|
+| 1 | Local `make up` runs with **DEBUG on over HTTP** (bound to 127.0.0.1); production is the HTTPS `prod` profile with DEBUG off | DEBUG off with secure cookies on localhost; relax the cookie check | The settings rightly refuse insecure cookies with DEBUG off. Secure cookies on http://localhost work in Chrome but not Safari, and relaxing the check would weaken production. |
 
 ## Integration and containers
 

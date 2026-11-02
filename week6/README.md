@@ -1,3 +1,29 @@
+# HealthProfile: Week 6 (production-ready AI/ML platform, capstone)
+
+> **Educational prototype on synthetic, fictional data.** Nothing here is a diagnosis or medical advice.
+
+## Quick start (one command)
+
+Requirements: Docker with Compose v2, `make`, `python3` (standard library only, used to generate secrets), and
+[Ollama](https://ollama.com) running on the host with the two models pulled:
+
+```bash
+ollama pull llama3.2:3b && ollama pull nomic-embed-text   # once
+git clone https://github.com/Amna903/internship.git && cd internship && git checkout week6
+cd week6
+make up
+```
+
+`make up` creates `backend/.env` with fresh secrets and demo passwords (printed once, and kept in that file), builds and starts PostgreSQL, Redis, the Django API, the Celery worker and the Next.js app, seeds the synthetic demo data, loads the fictional policies, and waits until `/ready/` passes.
+
+- App: http://localhost:3000. Admin sign-in: http://localhost:3000/admin/login as `admin@example.test`, with the password `SEED_ADMIN_PASSWORD` from `backend/.env`. Members (for example `amina.rahman@example.test`) use `SEED_USER_PASSWORD`.
+- Health: http://localhost:8000/health/ and http://localhost:8000/ready/
+- Other commands: `make logs`, `make ps`, `make seed` (re-load the policies if Ollama started late), `make test`, `make down`, `make clean` (also deletes the data volumes).
+- No Ollama on the host? `make up OLLAMA=container`, then `make models` (downloads about 2.3 GB).
+- On a Mac without Docker Desktop: `brew install colima docker docker-compose && colima start --disk 15`.
+
+---
+
 # HealthProfile: Week 5 (advanced RAG, LLM agents and ML automation)
 
 > **Educational prototype on synthetic, fictional data.** Nothing here is medical advice, and the agent
