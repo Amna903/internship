@@ -260,6 +260,20 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
   8. **Tests.** Unit tests use Celery's eager mode, with injected failing embedders (transient, then success; always transient; permanent; demoted requester; duplicate run). **At least one test runs a real `celery worker` process against a real Redis server** and checks job states for real: a transient failure followed by success (2 attempts, succeeded), and a permanent outage (failed after 3 attempts, version still pending). Locally that test is skipped when Redis isn't running. In CI `REQUIRE_REDIS=1` turns a missing Redis into a failure, and a `redis:7` service is added to the backend job, so the test can't skip silently in CI. Fault injection uses a test-only flaky fake embedder, refused unless the assistant provider is `fake`.
   9. **Setup is documented:** `brew install redis`, `brew services start redis`, and the worker command. Week 6 containerises the worker.
 
+- **Step 11 rules (decided without review on 2026-11-02; committed before any Step 11 code or run):**
+  1. **What is logged.** Every no-show prediction, from the API and from the agent's tool, writes one `PredictionLog` row: model version, source (`api` or `agent`), outcome (`ok`, `invalid_input` or `failed`), the probability (when ok), and the latency in milliseconds. **Never the input values**, and never the user. Rows older than 90 days are deleted by `manage.py prune_prediction_logs`.
+  2. **The baseline** is the served model's probabilities on the **validation split** (seed 42), stored in `ml/reports/monitoring_baseline.json` with the model version and the dataset hash. It never uses the test set, the fresh holdout or real people. Bins: 10 fixed bins of width 0.1 over [0, 1]. The baseline's latency reference is the median and p95 of 200 single-row predictions timed on the build machine (stated as machine-specific).
+  3. **Drift measure:** the population stability index, PSI = Σ (a − e) · ln(a / e), with each bin's share floored at 0.0001. **Thresholds, fixed now:** below 0.10 "stable", 0.10–0.25 "watch", above 0.25 "possible drift". A window with fewer than 100 ok predictions reports "not enough data" and no verdict.
+  4. **Other flags:** a failure rate (`failed`, excluding `invalid_input`) above 5% with at least 20 calls; a p95 latency above 3× the baseline p95. A prediction for a model version other than the baseline's is reported as "baseline is for another version", never compared.
+  5. **API:** `GET /api/v1/monitoring/` (admins only), by default the last 7 days (`?days=1–90`): counts, the distribution beside the baseline, PSI and verdict, latency p50/p95, failure rate, flags, and the disclaimer. The **M5 wording** is fixed: "Synthetic data and a fictional clinic. These numbers describe the model's behaviour on synthetic inputs only and make no claim about real-world medical impact."
+  6. **Evidence run (`manage.py monitoring_report`, deterministic, no LLM)**, with expectations declared now:
+     - **no drift:** 1,000 fresh synthetic patients from the same generator with a new seed (`20261102`, not the holdout's), scored through the logging path. **Expected: PSI < 0.10 ("stable").**
+     - **drift:** the same patients with a planted shift (reminders switched off for everyone, lead time ×3, capped at the API's maximum). **Expected: PSI > 0.25 ("possible drift").**
+     - **failures:** 30 calls with the model made unavailable. **Expected: failure rate flagged.**
+
+     If any expectation isn't met, that is reported as found and nothing is re-tuned (no threshold changes after the run). Results: `ml/reports/monitoring.md` and `.json`.
+  7. **Tests:** PSI checked by hand on toy distributions; bins, floors and thresholds; logging from both paths with no input values stored; failure and invalid-input outcomes; the version mismatch; the API's permissions and disclaimer; pruning.
+
 ## Decisions made without review
 
 On 2026-11-02 the user asked me (Claude) to finish Week 5 (Steps 9–14) without stopping for approval:
@@ -277,6 +291,10 @@ Every decision I would normally have asked about is listed here with its reason.
 | 10 | **3 attempts**, backoff 5 s and 10 s, only for `LLMUnavailable`/`LLMTimeout` | 3 or 5 attempts; retry everything | Bounded, as the C5 rule requires. Retrying permanent errors (not pending, retired) can't succeed and only hides the cause. |
 | 10 | Real-worker test **skips locally without Redis, but fails in CI** (`REQUIRE_REDIS=1`) | Always require Redis; always skippable | Developers without Redis can still run the suite, and CI (the authoritative check) can never pass with the real-worker test skipped. |
 | 10 | Broker publish **doesn't retry**; a Redis outage fails the job with `queue_unavailable` (503) | Retry the publish; fall back to synchronous indexing | A silent synchronous fallback would bypass the job's states and retries. A quick, clear 503 is honest, and nothing has changed. |
+| 11 | Drift measured on the **prediction distribution** (PSI), not on each input | Inputs; predictions; both | This is the approved Step 0 choice. One number per window is easy to read; per-input drift is noted as future work. |
+| 11 | Baseline = **validation-split** probabilities | Training split; validation; test | Training probabilities are optimistic. The test set is reserved for reporting, and the holdout stays unopened. |
+| 11 | PSI thresholds **0.10 and 0.25**, minimum 100 predictions | Other cut-offs | These are the conventional credit-risk cut-offs, and they're fixed before any run. Below 100 rows, bin shares are too noisy. |
+| 11 | Logs keep **no inputs and no user** | Keep inputs for per-feature drift | Privacy by default. The prediction distribution is enough for the brief's "log synthetic prediction distributions". |
 
 ## Retrieval (RAG improvements)
 
