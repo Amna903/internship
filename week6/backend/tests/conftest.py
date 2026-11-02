@@ -124,8 +124,29 @@ def ci_group(filename):
     return None
 
 
+# Week 6 Step 10: the high-risk tests, also run as their own named CI step (on top of their group).
+SECURITY_FILES = (
+    "test_security_",
+    "test_secret_scan",
+    "test_prod_settings",
+    "test_user_auth",
+    "test_signup",
+    "test_profiles",
+    "test_admin",
+    "test_assistant_documents",
+    "test_assistant_ask",
+    "test_agent_write",
+    "test_agent_mcp",
+    "test_agent_tools",
+    "test_ops",
+    "test_error_format",
+)
+
+
 def pytest_collection_modifyitems(config, items):
     for item in items:
+        if item.path.name.startswith(SECURITY_FILES):
+            item.add_marker(pytest.mark.security)
         group = ci_group(item.path.name)
         if group:
             item.add_marker(getattr(pytest.mark, group))

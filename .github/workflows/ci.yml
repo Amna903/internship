@@ -100,13 +100,16 @@ jobs:
         run: pip install ruff==0.14.3 && ruff check . && ruff format --check .
       - name: Unit and API integration tests
         if: matrix.week == 'week6'
-        run: python -m pytest -m "not rag and not ml_pipeline"
+        run: python -m pytest -m "not rag and not ml_pipeline and not security"
+      - name: Security regression tests (authorization matrix, secret scan, uploads, injection, write approvals)
+        if: matrix.week == 'week6'
+        run: python -m pytest -m security
       - name: RAG regression tests (frozen retrieval, generation and conversation sets, fake model)
         if: matrix.week == 'week6'
-        run: python -m pytest -m rag
+        run: python -m pytest -m "rag and not security"
       - name: Model-pipeline smoke tests
         if: matrix.week == 'week6'
-        run: python -m pytest -m ml_pipeline
+        run: python -m pytest -m "ml_pipeline and not security"
 
   frontend:
     name: frontend (${{ matrix.week }})

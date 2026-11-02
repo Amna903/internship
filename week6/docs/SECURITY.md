@@ -1,0 +1,22 @@
+# Security checklist (Week 6 Step 10)
+
+Every control maps to the code that implements it and the automated test that proves it. All of these tests carry the `security` marker and run as their own named CI step ("Security regression tests"). A failing check is a stop reason.
+
+| Area | Control | Code | Automated test |
+|---|---|---|---|
+| **Authorization** | Every `/api/` route refuses anonymous callers and members, except an explicit allow-list (sign-up, sign-in, CSRF, probes, docs, and the member's own profile). Admin routes use the admin session only. | `predictions/views.py` `AdminOnlyAPIView`, per-view permissions | **`test_security_matrix.py`**: built from the URL configuration (37 routes × each allowed method, anonymous and member, CSRF sent so a 403 is the permission check); `test_admin.py`, `test_profiles.py` |
+| Authorization (objects) | A member can only read and edit their own profile; agent proposals are tied to the admin who made them; MCP tokens are scoped and revocable | `profiles/views.py`, `agent/views.py`, `agent/mcp_tokens.py` | `test_profiles.py`, `test_agent_mcp.py` |
+| **Input validation** | DRF serializers with fixed choices and ranges; small JSON bodies only; one error envelope with no internals | `predictions/serializers.py`, `assistant/views.py` (`SmallJSONParser`), `config/exceptions.py` | `test_predictions_api.py`, `test_error_format.py`, `test_assistant_ask.py` |
+| **Rate limiting** | Scoped throttles per area (sign-in 10/min, sign-up 20/hour, predictions and clusters 60/min, assistant and agent 10/min, job polling 120/min, agent actions 30/min); 429 with `retry_after_seconds` | `config/settings.py` `DEFAULT_THROTTLE_RATES` | `test_user_auth.py`, `test_assistant_ask.py` (rate limit), `test_index_jobs.py` |
+| **Upload restrictions** | `.txt`/`.md` only; at most 50 KB; binary signatures, NUL bytes and invalid UTF-8 rejected; safe base names; duplicates 409; lands as `pending` and needs admin approval before it is searchable | `assistant/uploads.py`, `assistant/documents.py` | `test_assistant_documents.py` (rejections, 413, 409, CSRF, no contents in errors or lists) |
+| **Prompt injection** | Retrieved text reaches the model only as quoted data; citations are verified on the server; medical-advice refusal; uploads are approval-gated; the agent's tool output is never treated as instructions | `assistant/prompts.py`, `assistant/verify.py`, `agent/runner.py` | `test_assistant_ask.py` (injection), frozen agent red-team **11/11** in the Step 9 suite; the assistant red-team cases (`eval/redteam_cases.json`) from Weeks 4–5 |
+| **Agent write approvals** | The agent can only **propose** a booking (a `PendingAction`); no tool can confirm or decline; only the human admin confirms, through a separate endpoint; at most 3 open proposals; the card is built from stored, validated fields | `agent/write_tools.py`, `agent/views.py` | `test_agent_write.py` (`test_one_write_tool_and_no_tool_can_confirm_or_decline`, `test_model_text_has_no_way_in`, ...), `test_agent_tools.py` |
+| **Secrets** | `.env` generated locally with a random key (`scripts/init_env.py`), mode 600, never in git or images; production refuses weak, default or localhost settings | `scripts/init_env.py`, `.gitignore`, `.dockerignore`, `config/settings_prod.py` | **`test_secret_scan.py`** (no tracked `.env`, keys or key-shaped strings; local secret values absent from every tracked file), `test_prod_settings.py` (10 refusals) |
+| CSRF, cookies, headers | CSRF on every unsafe request; HttpOnly SameSite cookies, Secure plus HSTS in production; `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: same-origin`; Caddy HTTPS | `config/settings.py`, `settings_prod.py`, `deploy/Caddyfile` | `test_prod_settings.py`, `test_assistant_documents.py` (CSRF), Step 3 HTTPS rehearsal |
+| Logging privacy | Logs and audit rows hold ids, codes and route patterns only: never questions, answers, bodies, query strings, emails or passwords | `config/logging.py`, `config/middleware.py`, `audit/services.py` | `test_ops.py::TestLogs`, `test_resilience.py` |
+
+## Known gaps (not ticked as controls)
+
+- **Dependency scanning** (`pip-audit`, `npm audit`) is not in CI. It needs network access to advisory databases and could turn CI red for reasons outside the code. It is run by hand before a release; see the deploy guide.
+- **Account lockout** relies on rate limiting only: there is no per-account lockout after repeated failures.
+- **Admin MFA** is not implemented. This is a prototype with synthetic data only.

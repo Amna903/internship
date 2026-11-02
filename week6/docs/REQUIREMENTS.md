@@ -219,8 +219,8 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| S1 | Security checklist: authorization, input validation, rate limiting, upload restrictions, prompt injection, agent write approvals, secrets | 10 | ☐ | | | | |
-| S2 | Automate high-risk regression tests | 10 | ☐ | | | | |
+| S1 | Security checklist: authorization, input validation, rate limiting, upload restrictions, prompt injection, agent write approvals, secrets | 10 | ☑ | [SECURITY.md](SECURITY.md): 10 areas, each mapped to code and an automated test; known gaps listed | All cited tests carry the `security` marker | | |
+| S2 | Automate high-risk regression tests | 10 | ☑ | `test_security_matrix.py` (63 cases from the URL config), `test_secret_scan.py`, `security` marker and its own CI step | 434 passed under `-m security` | | |
 
 ## Documentation
 

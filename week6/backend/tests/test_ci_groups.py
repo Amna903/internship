@@ -15,3 +15,10 @@ def test_rag_and_ml_groups_are_not_empty():
 def test_every_file_has_one_group():
     for f in FILES:
         assert ci_group(f) in ("rag", "ml_pipeline", None)
+
+
+def test_every_security_prefix_matches_a_file():
+    from tests.conftest import SECURITY_FILES
+
+    for prefix in SECURITY_FILES:
+        assert any(f.startswith(prefix) for f in FILES), prefix
