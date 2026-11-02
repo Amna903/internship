@@ -29,6 +29,7 @@ class AuditEvent(models.Model):
         ADMIN_DOCUMENT_VERSION_UPLOADED = "admin.document_version_uploaded", "Admin uploaded a new document version (pending)"
         ADMIN_DOCUMENT_VERSION_REJECTED = "admin.document_version_rejected", "Admin rejected a pending document version"
         ADMIN_DOCUMENT_RETIRED = "admin.document_retired", "Admin retired a policy document"
+        AGENT_TOOL_CALLED = "agent.tool_called", "An agent tool was called (tool name and outcome only)"
 
     created_at = models.DateTimeField(auto_now_add=True)
     # Stable identifiers, not live links: DO_NOTHING + db_constraint=False means deleting the user or

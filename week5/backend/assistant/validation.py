@@ -10,11 +10,12 @@ raises, rather than being silently ignored.
 """
 
 import copy
+import math
 import re
 
 TYPES = {"object": dict, "array": list, "string": str, "boolean": bool, "integer": int, "number": (int, float)}
 KNOWN = {"type", "properties", "required", "additionalProperties", "items", "maxLength", "minLength", "maxItems",
-         "pattern", "enum"}
+         "pattern", "enum", "minimum", "maximum", "description"}
 
 
 class SchemaError(ValueError):
@@ -27,10 +28,9 @@ def validate(schema: dict, data, path: str = "$") -> None:
         raise TypeError(f"unsupported schema keyword(s): {sorted(unknown)}")
     kind = schema.get("type")
     if kind:
-        expected = TYPES[kind]
-        # bool is a subclass of int in Python; JSON keeps them apart
-        if not isinstance(data, expected) or (kind in ("integer", "number") and isinstance(data, bool)):
-            raise SchemaError(f"{path} must be {kind}")
+        kinds = kind if isinstance(kind, list) else [kind]  # e.g. ["number", "null"]
+        if not any(_is(data, k) for k in kinds):
+            raise SchemaError(f"{path} must be {' or '.join(kinds)}")
     if "enum" in schema and data not in schema["enum"]:
         raise SchemaError(f"{path} is not an allowed value")
     if isinstance(data, str):
@@ -40,6 +40,13 @@ def validate(schema: dict, data, path: str = "$") -> None:
             raise SchemaError(f"{path} is too short")
         if "pattern" in schema and not re.search(schema["pattern"], data):
             raise SchemaError(f"{path} has the wrong form")
+    if isinstance(data, (int, float)) and not isinstance(data, bool):
+        if not math.isfinite(data):  # json.loads accepts NaN and Infinity; they would slip past min/max
+            raise SchemaError(f"{path} must be a finite number")
+        if "minimum" in schema and data < schema["minimum"]:
+            raise SchemaError(f"{path} is below the minimum")
+        if "maximum" in schema and data > schema["maximum"]:
+            raise SchemaError(f"{path} is above the maximum")
     if isinstance(data, list):
         if len(data) > schema.get("maxItems", len(data)):
             raise SchemaError(f"{path} has too many items")
@@ -56,6 +63,13 @@ def validate(schema: dict, data, path: str = "$") -> None:
         for key, sub in props.items():
             if key in data:
                 validate(sub, data[key], f"{path}.{key}")
+
+
+def _is(data, kind: str) -> bool:
+    if kind == "null":
+        return data is None
+    # bool is a subclass of int in Python; JSON keeps them apart
+    return isinstance(data, TYPES[kind]) and not (kind in ("integer", "number") and isinstance(data, bool))
 
 
 def strict(schema: dict, limits: dict | None = None) -> dict:

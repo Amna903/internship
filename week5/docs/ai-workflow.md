@@ -602,3 +602,16 @@ A running record, added to as each step lands. The full decision history is in
     - **H3 and H9 never reached the model:** both turns were below the retrieval floor. They pass, but they don't show the model resisting anything. The offline tests cover redaction (H3) and citation checks (H9).
 - **A finding from the run's own data (observed, not a pre-declared measure):** with history, turn 2 declined for "no citation" in 11 of 30 runs, against 0 of 30 in turn 1 and 0 of 69 in Step 4's end-to-end mode. The most likely reading is that the history block makes the small model answer without citing. Candidates for a future dev round, not applied: put history after the passages, or add a system-prompt line that earlier turns are not sources. Either changes the Week 4 prompt, so it needs its own rules and evaluation.
 - **Verified in a real browser:** `e2e/run_week5_e2e.py` 13/13, including a tampered history rejected by the real server. `e2e/run_week4_e2e.py` still passes 23/23.
+
+## Step 6: four typed read tools
+
+- **Rules first (`b735687`).** User's choices: the recommended registry, a generated schedule plus Step 7 bookings, and no Step 6 endpoint. Three additions:
+  - identity only from the server-side context, with a test over every schema;
+  - an injectable clock;
+  - an output cap per tool, enforced and tested.
+- **The identity-field test caught a name.** The cluster tool's output field `groups` matched the forbidden list (meant for permission groups). It was renamed to `clusters` instead of loosening the test.
+- **The shared validator gained** minimum and maximum, nullable types, and a rejection of NaN and infinity. `json.loads` accepts those, and they would pass range checks.
+- **A test bug, found and fixed:** a version check compared against `MODEL_VERSION` ("1.0.0") instead of the served model's version ("no-show-1.0.0").
+- **Deadlines are honest about their limit.** A late result is discarded, but the slow call is stopped only by its own client timeout. This is recorded in the architecture doc.
+- **Verification:** 71 new tests. The full backend suite on SQLite gave 1236 passed and 1 skipped (the PostgreSQL-only TRUNCATE test); the affected files on PostgreSQL gave 473 passed. The audit migration is choices only, and `sqlmigrate` shows no SQL.
+- **No model evaluation in Step 6**, by the rules. Tool selection and the agent red-team are Step 8.

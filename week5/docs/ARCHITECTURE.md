@@ -202,6 +202,28 @@ Also present (from libraries): `django_session` (admin sessions) and
 Search (`icontains` on name/email) cannot use a B-tree index; at larger scale use `pg_trgm` GIN.
 I did not add one: it would be an unmeasured index for a 6-row demo.
 
+## Week 5: the agent tool layer (Step 6)
+
+The `agent` app holds a small typed tool registry (`agent/registry.py`) and four read tools (`agent/read_tools.py`):
+`search_policies`, `check_availability`, `predict_no_show` and `cluster_summaries`. The Step 8 agent and the
+Step 9 MCP server read the same tool definitions.
+
+```
+server builds ToolContext(user, request_id, clock, embedder, llm) from the authenticated request
+        │
+run_tool(name, args, ctx) ── authorise (ctx.user's role, every call) ── validate args (JSON schema)
+        │                                                                   │
+        └── handler(args, ctx) ── deadline ── validate output ── size cap ── audit (tool:outcome)
+```
+
+- **Identity never comes from tool arguments.** No schema has a user, role or permission field, every input
+  object forbids extra keys, and handlers take only `(args, ctx)`. A test walks every schema.
+- **Failures are typed results** (`invalid_input`, `not_allowed`, `unavailable`, `timeout`, `output_too_large`,
+  `refused`) with fixed messages, so the Step 8 agent can recover without seeing internal details.
+- **Deadlines:** a slow call is ended by its own client timeout; a result that arrives after the tool's
+  deadline is discarded. This isn't pre-emptive, because Python can't safely kill a thread that holds a database connection.
+- There is no endpoint in Step 6. The Step 8 agent endpoint will be the only way in.
+
 ## Known limitations (be upfront about these in the demo)
 
 - **Audit log growth:** no retention policy yet (needs one: e.g. archive after N months). Because the

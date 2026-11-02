@@ -215,11 +215,11 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| T1 | Controlled tool-using agent with at least four typed tools | 6 | ☐ | | | | |
-| T2 | Tool: search approved documents | 6 | ☐ | | | | |
-| T3 | Tool: check fictional appointment availability | 6 | ☐ | | | | |
-| T4 | Tool: request supervised ML prediction | 6 | ☐ | | | | |
-| T5 | Tool: retrieve anonymized cluster summaries | 6 | ☐ | | | | |
+| T1 | Controlled tool-using agent with at least four typed tools | 6 | ◐ | The four typed tools and the registry: `agent/registry.py`. Input and output schemas are checked by the Step 5 validator; authorisation on every call, from the server-side `ToolContext` only (no identity fields in any schema, tested); deadline; output cap (refused, never truncated); typed failures; one audit event per call. **The agent that uses them is Step 8** | `tests/test_agent_tools.py` (registry and security rules) | | |
+| T2 | Tool: search approved documents | 6 | ☑ | `search_policies` in `agent/read_tools.py`: the shipped retrieval unchanged; redaction and the medical check on the query (refused before any embedding); up to 3 passages with edition; text marked untrusted | `tests/test_agent_tools.py` (`TestSearch`) | | |
+| T3 | Tool: check fictional appointment availability | 6 | ☑ | `check_availability`: a predictable generated schedule (weekdays 09:00–16:30, fictional Clinicians A–D), an injectable clock, a start date within 60 days, a window of at most 14 days, at most 10 slots | `tests/test_agent_tools.py` (`TestAvailability`, fixed clock) | | |
+| T4 | Tool: request supervised ML prediction | 6 | ☑ | `predict_no_show`: input schema derived from the API's feature spec, the API's cross-field rules, the served `no-show-1.0.0`, with disclaimer | `tests/test_agent_tools.py` (`TestPrediction`: same answer as the served model) | | |
+| T5 | Tool: retrieve anonymized cluster summaries | 6 | ☑ | `cluster_summaries`: committed results only; cluster descriptions and sizes, never individual points; groups under 10 hidden; the real-data verdict | `tests/test_agent_tools.py` (`TestClusters`) | | |
 | T6 | Stateful multi-step workflow: plan → tool selection → validation → execution → response | 8 | ☐ | | | | |
 | T7 | Tool-call traces | 8 | ☐ | | | | |
 | T8 | Maximum-step limit | 8 | ☐ | | | | |
