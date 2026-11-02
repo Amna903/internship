@@ -28,6 +28,7 @@ jobs:
       backend: ${{ steps.plan.outputs.backend }}
       frontend: ${{ steps.plan.outputs.frontend }}
       ml: ${{ steps.plan.outputs.ml }}
+      docker: ${{ steps.plan.outputs.docker }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -91,7 +92,21 @@ jobs:
       - name: Migrations are complete (no model change without a migration)
         run: python manage.py makemigrations --check --dry-run
       - name: Tests
+        if: matrix.week != 'week6'
         run: python -m pytest -q
+      # Week 6 Step 5: lint/format, then the suite split into named groups (one run each, no repeats).
+      - name: Lint and format (ruff)
+        if: matrix.week == 'week6'
+        run: pip install ruff==0.14.3 && ruff check . && ruff format --check .
+      - name: Unit and API integration tests
+        if: matrix.week == 'week6'
+        run: python -m pytest -m "not rag and not ml_pipeline"
+      - name: RAG regression tests (frozen retrieval, generation and conversation sets, fake model)
+        if: matrix.week == 'week6'
+        run: python -m pytest -m rag
+      - name: Model-pipeline smoke tests
+        if: matrix.week == 'week6'
+        run: python -m pytest -m ml_pipeline
 
   frontend:
     name: frontend (${{ matrix.week }})
@@ -113,6 +128,9 @@ jobs:
           cache: npm
           cache-dependency-path: ${{ matrix.week }}/frontend/package-lock.json
       - run: npm ci
+      - name: Lint and format (ESLint, Prettier)
+        if: matrix.week == 'week6'
+        run: npm run lint && npm run format:check
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
@@ -148,12 +166,37 @@ jobs:
 
   # Single required check for branch protection: fails if the plan failed, or any job it asked for failed or
   # was cancelled. A job the plan skipped (nothing in it changed) counts as passing.
+  # Week 6 Step 5 (the user's rule: Docker jobs only on PRs or manual runs, to save minutes). Builds both
+  # images, starts the stack with the fake LLM/embedder, and runs API integration checks against the containers.
+  docker:
+    name: docker stack (week6)
+    needs: plan
+    if: needs.plan.outputs.docker == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: week6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create a CI .env (fake model, generated secrets)
+        run: |
+          python3 backend/scripts/init_env.py > /dev/null
+          printf 'ASSISTANT_PROVIDER=fake\nASSISTANT_EMBEDDER=fake\n' >> backend/.env
+      - name: Build and start
+        run: docker compose up -d --build --wait --wait-timeout 300
+      - name: API integration checks against the containers
+        run: python3 e2e/api_integration.py http://127.0.0.1:3000 http://127.0.0.1:8000
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --tail 80
+
   ci-passed:
     if: always()
-    needs: [plan, backend, frontend, ml-reproducibility]
+    needs: [plan, backend, frontend, ml-reproducibility, docker]
     runs-on: ubuntu-latest
     steps:
       - run: |
           ok() { [ "$1" = "success" ] || [ "$1" = "skipped" ]; }
           [ "${{ needs.plan.result }}" = "success" ] && ok "${{ needs.backend.result }}" \
-            && ok "${{ needs.frontend.result }}" && ok "${{ needs.ml-reproducibility.result }}"
+            && ok "${{ needs.frontend.result }}" && ok "${{ needs.ml-reproducibility.result }}" \
+            && ok "${{ needs.docker.result }}"

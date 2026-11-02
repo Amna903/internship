@@ -101,3 +101,31 @@ def admin_browser(admin):
     b = Browser()
     assert admin_login(b, admin.email).status_code == 200
     return b
+
+
+# Week 6 Step 5: CI runs three groups by marker. Files not listed here are unit/API integration tests.
+RAG_FILES = (
+    "test_assistant_",
+    "test_retrieval_",
+    "test_generation_",
+    "test_conversation_",
+    "test_dev_questions",
+    "test_eval_freeze",
+    "test_index_",
+)
+ML_FILES = ("test_ml_", "test_holdout", "test_release_rule", "test_cluster_features", "test_supervised_doc")
+
+
+def ci_group(filename):
+    if filename.startswith(RAG_FILES):
+        return "rag"
+    if filename.startswith(ML_FILES):
+        return "ml_pipeline"
+    return None
+
+
+def pytest_collection_modifyitems(config, items):
+    for item in items:
+        group = ci_group(item.path.name)
+        if group:
+            item.add_marker(getattr(pytest.mark, group))
