@@ -238,6 +238,17 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
      - injection cases **built so the injected passage is actually retrieved**. Before freezing, a check with the real embedder (no language model) confirms that the shipped retrieval returns the injected passage for each case's message and for a short topical query. The results are recorded in the file and shown to the user.
   4. **Status at Step 13:** the fresh holdout will be on its second use after a fix, so it's less clean for the input check. The new cases are the clean measure for it. The frozen sets will be a third run.
 
+- **Step 9 rules (approved by the user on 2026-11-02, committed before any Step 9 code):**
+  1. **A real MCP server built with the official Python SDK (`mcp`, pinned), over stdio only.** It is started by a local MCP client and opens no network port.
+  2. **Identity is a short-lived access token issued by an admin** (`manage.py create_mcp_token --admin <email>`, **default lifetime 8 hours**). The token is printed once; only its SHA-256 is stored. The client passes it in the server's environment. Every call resolves it to the admin and re-checks that the token isn't expired or revoked and that the account is still an active admin. `manage.py revoke_mcp_token` revokes a token. Identity is never a tool argument (the Step 6 rule).
+  3. **Only the 4 read tools are exposed.** There is no write tool, and confirming stays a human web endpoint. Schemas, validation, output caps, typed errors and audit all go through the registry's `run_tool`. MCP errors return the typed code and its fixed message, never a stack trace. Outputs carry structured content plus a short text form, and passage text stays marked as untrusted.
+  4. **Rate limit per token (added by the user):** at most 30 calls per minute per token, enforced by the server and tested, so a stolen token can't make unlimited calls. Over the limit, the call returns a typed `rate_limited` error and the tool doesn't run.
+  5. **Audit:** each tool call keeps its event, plus a marker that it came through MCP. Token issued, revoked and first used are recorded with ids only.
+  6. **`docs/MCP.md` (P2)** covers:
+     - permissions, inputs, outputs, audit and how to connect with MCP Inspector;
+     - a threat model, including (added by the user) that **the token sits in plain text in the MCP client's configuration or environment** (for example Claude Desktop's config file), so anyone who can read that file can use it until it expires or is revoked. The default lifetime is therefore short, and revocation is documented.
+  7. **Tests:** in-process MCP client tests (tool list, calls, typed errors, expired, revoked, non-admin and malformed tokens, a demoted admin, identity arguments rejected, the rate limit) and a real stdio subprocess smoke test, all without a language model.
+
 ## Retrieval (RAG improvements)
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
