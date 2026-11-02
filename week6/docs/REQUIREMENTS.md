@@ -236,12 +236,12 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| D1 | Final architecture diagram | 11 | ☐ | | | | |
-| D2 | Data-flow diagram | 11 | ☐ | | | | |
-| D3 | Model card for the supervised model | 11 | ☐ | | | | |
-| D4 | Clustering limitations note | 11 | ☐ | | | | |
-| D5 | RAG evaluation report | 11 | ☐ | | | | |
-| D6 | Deployment/rollback/backup guide | 11 | ☐ | | | | |
+| D1 | Final architecture diagram | 11 | ☑ | [ARCHITECTURE.md](ARCHITECTURE.md), Week 6 final architecture (Mermaid) | Renders on GitHub | | |
+| D2 | Data-flow diagram | 11 | ☑ | [ARCHITECTURE.md](ARCHITECTURE.md), data flow and where personal data may go | Matches `test_ops` / `test_secret_scan` privacy checks | | |
+| D3 | Model card for the supervised model | 11 | ☑ | [MODEL_CARD.md](MODEL_CARD.md) | Figures from the release metadata | | |
+| D4 | Clustering limitations note | 11 | ☑ | [CLUSTERING_LIMITATIONS.md](CLUSTERING_LIMITATIONS.md) | Figures from `clusters.json` | | |
+| D5 | RAG evaluation report | 11 | ☑ | [RAG_EVALUATION.md](RAG_EVALUATION.md) | Figures from `eval_suite/results.json` | | |
+| D6 | Deployment/rollback/backup guide | 11 | ☑ | [DEPLOY.md](DEPLOY.md): deploy, rollback, backup and restore, secret rotation, dependency audit, costs | Step 3 rehearsal in regression.md | | |
 
 ## Demo, constraints and acceptance
 

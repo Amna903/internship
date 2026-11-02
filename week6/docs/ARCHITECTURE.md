@@ -1,5 +1,60 @@
 # Architecture and design decisions
 
+## Week 6 final architecture (D1)
+
+```mermaid
+flowchart LR
+  U[Browser] -- "HTTPS 443" --> C[Caddy<br/>TLS, HSTS, routing]
+  C -- "/api/*, /health/, /ready/" --> B[Django + DRF<br/>gunicorn, 3 workers]
+  C -- "everything else" --> F[Next.js<br/>pages + /api proxy]
+  F -- "/api/* rewrite" --> B
+  B --> P[(PostgreSQL 16<br/>users, profiles, audit,<br/>policy passages + embeddings,<br/>metrics samples)]
+  B -- "enqueue index job" --> R[(Redis<br/>Celery broker)]
+  W[Celery worker<br/>indexing jobs] --> R
+  W --> P
+  B -- "chat + embeddings<br/>(local only)" --> O[Ollama on the host<br/>llama3.2:3b, nomic-embed-text]
+  W -- embeddings --> O
+  B -. "loads at start" .-> M[[no-show model 1.0.0<br/>joblib + JSON card, SHA-pinned]]
+  B -. "reads" .-> K[[committed cluster results]]
+```
+
+- **One Compose project** (`docker-compose.yml`) with services db, redis, backend, worker and frontend, plus an optional `ollama` profile. The production overlay (`docker-compose.prod.yml`) adds Caddy and closes the backend and frontend ports.
+- **Health:** `/health/` reports whether the process is alive; `/ready/` reports the database, broker and model, and the LLM without gating readiness.
+- **Observability:** JSON logs with request ids, and per-route latency and error samples behind `GET /api/v1/ops/`.
+- **Embeddings stay in PostgreSQL:** the vector store is a table, so one backup covers everything.
+- **The LLM never leaves the machine:** Ollama runs locally, on the host by default and in a container optionally.
+
+## Data flow, and where personal data may go (D2)
+
+```mermaid
+flowchart TB
+  subgraph Member
+    M1[sign-up / sign-in] --> M2[own wellness profile]
+  end
+  subgraph Admin
+    A1[sign-in] --> A2[predict no-show<br/>synthetic appointment fields]
+    A1 --> A3[clusters view<br/>committed results]
+    A1 --> A4[ask policy assistant]
+    A1 --> A5[agent: propose booking]
+    A5 --> A6[human confirms or declines]
+  end
+  M2 --> DB[(PostgreSQL)]
+  A2 --> LOG1[prediction log:<br/>model version, outcome, latency<br/>never the inputs]
+  A4 --> RED[redact identifiers] --> RET[retrieve approved passages] --> LLM[local LLM] --> VER[verify citations] --> ANS[answer + citations]
+  A4 --> AR[answer record:<br/>status, passage ids, tokens<br/>never question or answer text]
+  A5 --> PA[PendingAction] --> A6 --> BK[mock booking]
+  ALL[every request] --> AUD[audit event + JSON log:<br/>ids, codes, route pattern]
+```
+
+**Rules the flow enforces:**
+- **Patient profiles never reach the LLM.** The assistant sees only redacted questions and approved policy passages, and the agent's tools return fixed-field summaries.
+- **Free text is not stored.** Questions, answers and request bodies are absent from logs, audit rows and metrics; only ids, codes, versions and timings are kept.
+- **Uploads are untrusted:** they stay `pending` until an admin approves them, and reach the model only as quoted data.
+- **Writes need a human:** the agent can only propose a booking; the admin confirms or declines it through a separate endpoint.
+
+---
+
+
 ## Problem
 
 A small HealthTech product where **members** keep a wellness profile and **administrators** review
