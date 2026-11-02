@@ -163,6 +163,20 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
   10. **Reporting only, nothing tuned.** If a gate case fails, it is reported and no rule changes on that result.
   11. **Added by the user on 2026-11-02, after the Step 5 run, for Step 13:** in the Step 5 run, H3 and H9 never reached the model (both turns were below the retrieval floor), so they showed nothing about the model. Step 13 adds **on-topic disguised versions** that clear the floor, in the style of Week 4's R1–R6: the same attack wrapped in a real policy question. For example, a phone number inside a reminders question, or a "cite secret.md" instruction inside a refunds question. They are written and frozen before the Step 13 run, use the same pass/fail rules as H3 and H9, and the report states for each run whether the model was actually called. The original H3 and H9 stay as they are.
 
+- **Step 6 rules (approved by the user on 2026-11-02, committed before any Step 6 code):**
+  1. **Our own small tool registry** in a new `agent` app. Each tool has a name, a short description, input and output JSON schemas checked by the Step 5 validator (`assistant/validation.py`), a permission level (`read` here; Step 7's tool will be the only `write`), a per-tool timeout, a **maximum output size**, and a handler. The Step 8 agent and the Step 9 MCP server read these same definitions.
+  2. **Identity and role come only from the server-side request context** (`ToolContext`, built by the server from the authenticated request), **never from tool arguments**. No tool schema may contain a user, role, permission or similar field, and a test checks every schema ("don't trust prompts to enforce security"). Authorisation is checked inside each tool call, not only at an endpoint. All four read tools are admin-only, like the assistant.
+  3. **Four read tools:**
+     - `search_policies`: query (≤ 500 characters) plus an optional area. Redaction and the medical check run on the query. It uses the shipped retrieval unchanged and returns up to 3 passages (id, document, version, text, score), with the text marked as untrusted data;
+     - `check_availability`: a predictable generated schedule (fixed clinic hours, fictional clinicians "Clinician A–D"). Inputs: visit type, a start date within the next 60 days, a window of at most 14 days, and an optional part of the day. It returns at most 10 slots. **It uses an injectable clock, so tests use a fixed date and results are deterministic.** Step 7 adds a mock-bookings table whose entries remove slots;
+     - `predict_no_show`: the existing endpoint's 10 fields with the same validation and the served model. It returns a risk band, probability, model version and disclaimer;
+     - `cluster_summaries`: committed results only. It returns cluster descriptions and sizes plus the real-data verdict. **No individual points**; groups under 10 are hidden; "booking patterns, not categories of people".
+  4. **Output size cap per tool, enforced and tested:** a result over its cap is refused as `output_too_large`. It is never silently truncated, so a tool can't flood the prompt.
+  5. **Failures are typed results, not exceptions:** `invalid_input`, `not_allowed`, `unavailable`, `timeout`, `output_too_large`, `refused`. Messages never contain internal details. Step 8 uses these codes to recover.
+  6. **Audit:** one event per call, holding the tool name and the outcome code. Never the query, the prediction inputs or any free text.
+  7. **No endpoint in Step 6.** The tools are internal and tested; Step 8's agent endpoint will be the only way in.
+  8. **No model evaluation in Step 6:** no model chooses tools yet. Measuring tool selection, plus an agent red-team with cases by the user, is Step 8, frozen before it runs.
+
 ## Retrieval (RAG improvements)
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
