@@ -21,7 +21,7 @@ Checklist with evidence: [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md). Study gui
 | Prompt injection via tools (C8) | **Not demonstrated end to end**: the model never retrieved the injected passage in a real run |
 | Background jobs | A real worker on real Redis: retried, bounded at 3 attempts, recovered |
 | Drift | No drift PSI 0.006; planted drift 0.80; failures flagged ([monitoring](backend/ml/reports/monitoring.md)) |
-| Browser acceptance (real model) | 12 of 14 checks; the multi-tool demo request failed (the agent asked to clarify) |
+| Browser acceptance (real model) | 14 of 14 checks (multi-tool workflow: availability → proposal → human confirm) |
 
 ![Agent tab: a proposal card built by the server, awaiting human confirmation](docs/screenshots/w5-05-approval-card.png)
 
@@ -52,7 +52,6 @@ More in [docs/API.md](docs/API.md).
 - A small local model (3B): task success is modest, and safety comes from the server's checks.
 - Names aren't redacted. MCP is stdio-only (no remote access or OAuth).
 - Drift is measured on predictions only; latency baselines are machine-specific.
-- Job status reads share the assistant's rate limit (10 per minute), so polling can be throttled. The browser demo raised it to 60 per minute on the dev server.
 
 Everything from Weeks 1–4 below still works ([regression evidence](docs/regression.md)).
 

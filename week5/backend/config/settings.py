@@ -226,6 +226,8 @@ REST_FRAMEWORK = {
         "clusters": os.environ.get("THROTTLE_CLUSTERS", "60/min"),
         # Each assistant call runs a local model for seconds; a low limit protects the machine.
         "assistant": os.environ.get("THROTTLE_ASSISTANT", "10/min"),
+        # Week 5: job-status polling has its own budget, so it never uses up the question limit.
+        "jobs": os.environ.get("THROTTLE_JOBS", "120/min"),
         "agent_actions": os.environ.get("THROTTLE_AGENT_ACTIONS", "30/min"),
         # Each run can call the local model several times; a low limit protects the machine.
         "agent": os.environ.get("THROTTLE_AGENT", "10/min"),

@@ -573,12 +573,14 @@ After approval the new policy is answerable (`"Is there free parking at the clin
 | 413 | file over the size limit | `file_too_large` |
 | 503 | the indexing queue (Redis) is down; nothing changed | `queue_unavailable` |
 
+> **Breaking change (Week 5 Step 10):** both approve endpoints now return **202 Accepted** (previously **200 OK** with the approved document), and an embeddings outage no longer returns **503 `embedding_unavailable`**: the job retries and ends `failed`, and 503 now means only `queue_unavailable`. Clients must read `job.status` (or poll `/api/v1/assistant/jobs/<id>/`) instead of treating the response as "approved".
+
 **Week 5 Step 10: approval is a background job.** Both approve endpoints return **202** with the document and a
 `job` (`id`, `status` queued/running/succeeded/failed, `attempts`, `max_attempts`, `error_code`, `chunks`, times),
 or **200** with the already-open job for that version. A transient embedder failure is retried (3 attempts in
 all); a failed job leaves the version pending (`error_code` `unavailable`, `timeout`, `not_pending`,
 `not_allowed`, `time_limit`, `internal_error`). `GET /api/v1/assistant/jobs/` (newest 50, `?status=`) and
-`GET /api/v1/assistant/jobs/<id>/` show job states (admin only).
+`GET /api/v1/assistant/jobs/<id>/` show job states (admin only; their own rate limit, `THROTTLE_JOBS`, default 120/min).
 
 ## Week 5: confirming agent-proposed writes (admin only)
 

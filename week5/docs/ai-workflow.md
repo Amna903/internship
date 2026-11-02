@@ -745,3 +745,12 @@ A running record, added to as each step lands. The full decision history is in
 - **A1 failed in every attempt:** "telehealth slot on Wednesday morning, and the late cancellation fee" → `check_availability` rejected as `invalid_input`, then a clarify answer. Recorded as is; A1 stays ◐.
 - **The A8 leak check failed as written:** it flagged "lockers", which is the filename inside passage ids (`bag-lockers.md@v2#0`). Ids are allowed by the Step 12 rules; no document text or email appeared.
 - **New known gap:** job status reads share the assistant's rate limit.
+
+## Before marking ready: the user's four fixes
+
+1. **A1 is now the booking flow**, at the user's request (availability → proposal → human confirm), in the browser script and the Loom script. This changed the check after seeing the first result; it's disclosed here. The original multi-tool request still fails.
+2. **Job polling has its own rate limit** (`THROTTLE_JOBS`, 120/min), with a test; the demo-only assistant override is removed.
+3. **The A8 leak check excludes passage ids.**
+4. **API.md notes the 200 → 202 approve change as breaking.**
+- **Found while re-running:** the Next.js proxy's default timeout (about 30 s) cut off agent runs that take longer, returning an empty response, even though the agent's limit is 60 s. Fix: `experimental.proxyTimeout: 90_000`.
+- **Result: 14 of 14 browser checks passed** with default rate limits.

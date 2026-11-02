@@ -10,7 +10,8 @@ Before recording:
 ## 1. Intro (0:00–0:30)
 **"Week 5 adds advanced retrieval, a controlled agent with five typed tools, an MCP server, background jobs, drift monitoring and an audit page. All data is synthetic and the clinic is fictional. The rule throughout: the model suggests, the server decides."**
 
-## 2. Demo: the Agent tab (0:30–2:30)
+## 2. Demo: the Agent tab, the multi-tool workflow (0:30–2:30)
+- **"This is the multi-tool workflow: availability, then a proposal, then a human confirm."**
 - Ask: "Please book the first telehealth slot on Thursday morning."
   - Show the trace: `check_availability → ok`, `book_mock_appointment → ok`.
   - Show the card: **"Proposed by the agent"**, its summary written by the server.

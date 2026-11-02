@@ -198,7 +198,7 @@ def _approve(request, version: DocumentVersion) -> Response:
 
 class IndexJobsView(AdminOnlyAPIView):
     throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "assistant"
+    throttle_scope = "jobs"
 
     @extend_schema(summary="Background indexing jobs, newest first (at most 50; optional ?status=)",
                    responses={200: OpenApiResponse(description="Jobs"), 400: OpenApiResponse(description="Unknown status")})
@@ -214,7 +214,7 @@ class IndexJobsView(AdminOnlyAPIView):
 
 class IndexJobView(AdminOnlyAPIView):
     throttle_classes = [ScopedRateThrottle]
-    throttle_scope = "assistant"
+    throttle_scope = "jobs"
 
     @extend_schema(summary="One background indexing job",
                    responses={200: OpenApiResponse(description="The job"), 404: OpenApiResponse(description="No such job")})

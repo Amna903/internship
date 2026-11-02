@@ -17,6 +17,7 @@ os.environ["THROTTLE_SIGNUP"] = "20/hour"
 os.environ["THROTTLE_PREDICTIONS"] = "60/min"
 os.environ["THROTTLE_CLUSTERS"] = "60/min"
 os.environ["THROTTLE_ASSISTANT"] = "10/min"
+os.environ["THROTTLE_JOBS"] = "120/min"
 os.environ["THROTTLE_AGENT_ACTIONS"] = "30/min"
 os.environ["THROTTLE_AGENT"] = "10/min"
 os.environ["ASSISTANT_PROVIDER"] = "fake"  # CI has no Ollama; tests never call a real model

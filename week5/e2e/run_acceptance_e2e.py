@@ -104,20 +104,19 @@ try:
       page.fill("#email", "admin@example.test"); page.fill("#password", ADMIN_PW)
       page.click("button:has-text('Sign in')"); page.wait_for_url(f"{BASE}/admin")
 
-      # ---- A1 multi-tool workflow, A9 bounded loop (trace and limits) ----
+      # ---- A9 bounded loop on a plain policy request (trace and limits) ----
       page.goto(f"{BASE}/admin/agent")
-      run = run_agent(page, "Is there a telehealth slot on Wednesday morning, and what is the late cancellation fee?")
-      used = tools_used(run)
-      check(f"A1 multi-tool run used 2+ different tools ({', '.join(used) or 'none'})", len(set(used)) >= 2)
+      run = run_agent(page, "What is the late cancellation fee?")
       check(f"A9 bounded: {run['tool_calls']} tool call(s) within the 4-call limit, ended {run['status']}",
             run["tool_calls"] <= 4 and run["status"] in ("done", "stopped", "failed"))
-      page.screenshot(path=f"{SHOTS}/w5-04-agent-multi-tool.png", full_page=True)
 
-      # ---- A3 rejected write, A4 explicitly approved write ----
+      # ---- A1 multi-tool workflow (check_availability -> proposal -> human confirm), A3 rejected, A4 approved write ----
       run = run_agent(page, "Please book the first telehealth slot on Thursday morning.")
       card = page.locator("[data-testid=approval-card]")
       proposed = card.count() == 1
       check("A3/A4 a booking was proposed and shown as a server-built card", proposed)
+      if not proposed:
+          check("A1 multi-tool workflow: no proposal", False)
       if proposed:
           check("card says it was proposed by the agent", "agent" in card.inner_text().lower())
           page.screenshot(path=f"{SHOTS}/w5-05-approval-card.png", full_page=True)
@@ -130,11 +129,16 @@ try:
                   page.click("[data-testid=confirm]")
               key = conf.value.request.headers.get("idempotency-key", "")
               expect(page.locator("[data-testid=card-status]")).to_have_text("confirmed", timeout=20_000)
+              used = tools_used(run)
+              check(f"A1 multi-tool workflow: {' → '.join(used)} → human confirm",
+                    used[:2] == ["check_availability", "book_mock_appointment"])
+              page.screenshot(path=f"{SHOTS}/w5-04-agent-multi-tool.png", full_page=True)
               check("A4 confirmed by the human with an Idempotency-Key; booking shown",
                     bool(re.fullmatch(r"[A-Za-z0-9_-]{8,100}", key)) and "Booked (fictional)" in page.locator("[data-testid=approval-card]").inner_text())
               page.screenshot(path=f"{SHOTS}/w5-06-approved-write.png", full_page=True)
           else:
               check("A4 second proposal appeared", False)
+              check("A1 multi-tool workflow: no second proposal", False)
 
       # ---- A2 unauthorized denial: a member is refused; the write tool isn't offered without a booking request ----
       member = browser.new_context()
@@ -187,7 +191,10 @@ try:
       check("A8 audit page shows runs, approvals, jobs (a failed 3/3) and model versions",
             all(page.locator(f"[data-testid={t}]").count() for t in ("audit-runs", "audit-approvals", "audit-jobs", "audit-models"))
             and "3/3" in page.locator("[data-testid=audit-jobs]").inner_text())
-      check("A8 no member email or document text on the audit page", "amina.rahman@example.test" not in text and "lockers" not in text.lower())
+      # Passage ids (e.g. bag-lockers.md@v2#0) name the source document by design; only the remaining text is checked.
+      body = re.sub(r"[\w.-]+\.md(?:@v\d+)?#\d+", "", text).lower()
+      check("A8 no member email or document text on the audit page (passage ids excluded)",
+            "amina.rahman@example.test" not in body and "lockers" not in body and "second floor" not in body)
       page.screenshot(path=f"{SHOTS}/w5-08-audit-page.png", full_page=True)
       browser.close()
 finally:

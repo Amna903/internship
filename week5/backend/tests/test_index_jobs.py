@@ -248,3 +248,12 @@ class TestAuditAndApi:
         member = Browser()
         user_login(member, user.email)
         assert member.client.get(JOBS + path).status_code in (401, 403)
+
+
+@pytest.mark.django_db
+def test_job_polling_has_its_own_rate_limit_and_does_not_use_the_question_budget(admin_browser, pending):
+    from assistant.views import IndexJobView, IndexJobsView
+    assert IndexJobView.throttle_scope == IndexJobsView.throttle_scope == "jobs"
+    post(admin_browser, f"{DOCS}{pending.document_id}/approve/")
+    job = IndexJob.objects.get()
+    assert all(admin_browser.get(f"{JOBS}{job.id}/").status_code == 200 for _ in range(15))  # above the 10/min question limit
