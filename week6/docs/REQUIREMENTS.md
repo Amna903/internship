@@ -48,6 +48,22 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
   4. **Secrets:** only from the environment (a 600-mode `.env` locally, the host's secret store or env file in production); never in images, the repo or logs. The rotation procedure is documented in the deployment guide (Step 11). `.env.example` has placeholders only.
   5. **Tests:** prod-settings refusals (each invariant), security headers (HSTS, nosniff, frame deny, referrer), no CORS for a foreign origin, CSRF enforced, secure cookie flags under prod settings.
 
+- **Step 3 rules (committed before any Step 3 code):**
+  1. **Procedure:** `docker-compose.prod.yml` layered over the base file, started with `make prod`:
+     - a **Caddy** reverse proxy is the only public entry (ports 80 and 443). It sends `/api/*`, `/health/` and `/ready/` to the backend and everything else to the frontend, and passes `X-Forwarded-Proto`.
+     - the backend runs `config.settings_prod`: DEBUG off, secure cookies, SSL redirect (except `/health/` and `/ready/`, for internal probes), HSTS, API docs off;
+     - neither the backend nor the frontend publishes a port.
+  2. **TLS:** with a real domain, `SITE_ADDRESS=clinic.example.org` and `ACME_EMAIL=…` give automatic Let's Encrypt certificates. The local rehearsal uses `healthprofile.localhost` with Caddy's **internal CA** (`tls internal`), so HTTPS is real but the certificate is self-signed for the demo.
+  3. **Rehearsal acceptance:**
+     - `make prod` starts;
+     - `https://healthprofile.localhost/ready/` is ready;
+     - plain HTTP redirects to HTTPS;
+     - responses carry HSTS, and cookies are `Secure; HttpOnly; SameSite=Lax`;
+     - admin sign-in, a prediction and a cited answer work in a browser over HTTPS;
+     - `/api/docs/` is 404.
+  4. **No hosted deployment** (approved decision). Rollback (`make rollback TAG=…` from tagged images) and backup/restore (`make backup` / `make restore`: `pg_dump` to `backups/`, which is git-ignored) are scripted and rehearsed once. Costs and hosting choices are documented in the Step 11 guide.
+  5. **Allowed fix to my Step 2 rule (before any Step 3 run):** the prod origin check matched "localhost" as a substring, which would refuse `https://healthprofile.localhost`. It now compares hostnames exactly, the same as the hosts check: `localhost` itself is still refused, an explicit `*.localhost` name is allowed.
+
 ## Decisions made without review
 
 | Step | Decision | Options considered | Reason |
