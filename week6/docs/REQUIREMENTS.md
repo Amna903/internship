@@ -124,6 +124,16 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
      - a **`security` marker** grouping the high-risk tests (authorization, uploads, prompt injection and red-team, write approvals, MCP tokens, prod settings, logging privacy), run as its own named CI step so a failure is visible by name.
   3. **Any failing security check is a stop reason** (a safety gate): it is fixed before anything else, or the user is told.
 
+- **Step 11 rules (committed before any Step 11 docs):**
+  - Diagrams are **Mermaid** in Markdown (GitHub renders them, and they diff as text).
+  - Every number in the docs is copied from a committed result file and names that file. Nothing is re-measured or rounded up.
+  - The docs:
+    - `ARCHITECTURE.md` (D1, final architecture; D2, data flow, including where personal data may and may not go);
+    - `MODEL_CARD.md` (D3);
+    - `CLUSTERING_LIMITATIONS.md` (D4);
+    - `RAG_EVALUATION.md` (D5);
+    - `DEPLOY.md` (D6: deploy, rollback, backup and restore, secret rotation, dependency audit, costs).
+
 ## Decisions made without review
 
 | Step | Decision | Options considered | Reason |
