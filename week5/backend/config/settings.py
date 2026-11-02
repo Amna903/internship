@@ -226,6 +226,8 @@ REST_FRAMEWORK = {
         # Each assistant call runs a local model for seconds; a low limit protects the machine.
         "assistant": os.environ.get("THROTTLE_ASSISTANT", "10/min"),
         "agent_actions": os.environ.get("THROTTLE_AGENT_ACTIONS", "30/min"),
+        # Each run can call the local model several times; a low limit protects the machine.
+        "agent": os.environ.get("THROTTLE_AGENT", "10/min"),
     },
 }
 

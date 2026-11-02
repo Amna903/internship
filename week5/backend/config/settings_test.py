@@ -18,6 +18,7 @@ os.environ["THROTTLE_PREDICTIONS"] = "60/min"
 os.environ["THROTTLE_CLUSTERS"] = "60/min"
 os.environ["THROTTLE_ASSISTANT"] = "10/min"
 os.environ["THROTTLE_AGENT_ACTIONS"] = "30/min"
+os.environ["THROTTLE_AGENT"] = "10/min"
 os.environ["ASSISTANT_PROVIDER"] = "fake"  # CI has no Ollama; tests never call a real model
 os.environ["ASSISTANT_EMBEDDER"] = "fake"  # deterministic offline embeddings in tests and CI
 os.environ["ENABLE_API_DOCS"] = "true"

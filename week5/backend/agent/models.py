@@ -48,3 +48,26 @@ class PendingAction(models.Model):
     class Meta:
         ordering = ["-created_at"]
         constraints = [models.UniqueConstraint(fields=["user", "idempotency_key"], name="one_use_per_idempotency_key")]
+
+
+class AgentRun(models.Model):
+    """One agent run's trace (Week 5 Step 8): outcome, counts and per-step records with free-text arguments
+    replaced by "[text: N characters]". Never the message, tool output or answer text."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
+    status = models.CharField(max_length=10)  # done | stopped | failed | refused
+    stopped_reason = models.CharField(max_length=20, blank=True)
+    kind = models.CharField(max_length=10, blank=True)
+    offered = models.JSONField(default=list)  # tool names offered to the model
+    steps = models.JSONField(default=list)
+    tool_calls = models.PositiveSmallIntegerField(default=0)
+    model_calls = models.PositiveSmallIntegerField(default=0)
+    tokens = models.PositiveIntegerField(default=0)
+    seconds = models.FloatField(default=0)
+    model = models.CharField(max_length=100, blank=True)
+    pending_action = models.ForeignKey(PendingAction, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]

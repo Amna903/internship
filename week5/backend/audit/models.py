@@ -35,6 +35,7 @@ class AuditEvent(models.Model):
         AGENT_ACTION_DECLINED = "agent.action_declined", "Admin declined a proposed write"
         AGENT_ACTION_EXPIRED = "agent.action_expired", "A proposed write expired unconfirmed"
         AGENT_ACTION_FAILED = "agent.action_failed", "A confirmed write failed: the slot was already taken"
+        AGENT_RUN = "agent.run", "Admin ran the agent (run id and outcome only)"
 
     created_at = models.DateTimeField(auto_now_add=True)
     # Stable identifiers, not live links: DO_NOTHING + db_constraint=False means deleting the user or
