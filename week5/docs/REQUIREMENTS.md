@@ -240,9 +240,9 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| W1 | Fifth tool: draft a fictional reminder or schedule a mock appointment | 7 | ☐ | | | | |
-| W2 | Any write requires explicit human confirmation | 7 | ☐ | | | | |
-| W3 | Any write requires server-side authorization | 7 | ☐ | | | | |
+| W1 | Fifth tool: draft a fictional reminder or schedule a mock appointment | 7 | ☑ | `book_mock_appointment` in `agent/write_tools.py` (the only `write` tool); `MockBooking` holds only a fictional slot, the visit type, the admin and the time. A confirmed booking leaves `check_availability` | `tests/test_agent_write.py` (`TestPropose`, `TestConfirm`) | | |
+| W2 | Any write requires explicit human confirmation | 7 | ☑ | The tool only stores a `PendingAction` (single use, tied to the proposer, 10-minute expiry, `proposed_by_agent`). Confirm and decline are admin endpoints, not tools (`agent/views.py`). The card's summary is written by the server from the stored fields, never by the model. Limits: 3 open and 6 per 10 minutes per user | `tests/test_agent_write.py` (`TestServerWrittenSummary`, `TestLimits`, `test_one_write_tool_and_no_tool_can_confirm_or_decline`) | | |
+| W3 | Any write requires server-side authorization | 7 | ☑ | Checked at proposal (`run_tool`) and again at confirmation (`write_tools.confirm`): the same user, still an active admin; another admin gets 404; the slot is re-checked | `tests/test_agent_write.py` (`test_authorisation_is_checked_again_at_confirmation`, `test_only_the_proposer_can_see_confirm_or_decline`) | | |
 
 ## MCP
 
@@ -286,7 +286,7 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
 | C1 | Authorize each tool at execution time; do not trust prompts to enforce security | 6–8 | ☐ | | | | |
 | C2 | Allowlists | 6–8 | ☐ | | | | |
 | C3 | Schema validation | 5–8 | ☐ | | | | |
-| C4 | Idempotency keys for writes | 7 | ☐ | | | | |
+| C4 | Idempotency keys for writes | 7 | ☑ | `Idempotency-Key` header required on confirm. The same key and action replays the first result; the same key for another action gets 409 (unique per user). One booking per clinician and time is a database constraint, and the constraint decides a race | `tests/test_agent_write.py` (`TestConfirm`, `TestRaces`) | | |
 | C5 | Bounded retries | 5, 10 | ☐ | | | | |
 | C6 | Per-request timeouts | 6–10 | ☐ | | | | |
 | C7 | Defend against prompt injection in retrieved content | 3, 8 | ☐ | | | | |

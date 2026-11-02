@@ -92,6 +92,9 @@ def check_availability(args: dict, ctx) -> dict:
     if not today <= start <= today + timedelta(days=HORIZON_DAYS):
         raise ToolFailure("invalid_input", ("$.start_date",))
     part = args.get("part_of_day")
+    from .models import MockBooking  # Step 7: a confirmed mock booking removes its slot
+    taken = set(MockBooking.objects.filter(date__gte=start, date__lt=start + timedelta(days=args.get("days", 7)))
+                .values_list("date", "time", "clinician"))
     slots, more = [], False
     for offset in range(args.get("days", 7)):
         day = start + timedelta(days=offset)
@@ -101,7 +104,7 @@ def check_availability(args: dict, ctx) -> dict:
             if part == "morning" and t >= "12:00" or part == "afternoon" and t < "12:00":
                 continue
             for c in CLINICIANS[args["visit_type"]]:
-                if is_open(day, t, c, args["visit_type"]):
+                if is_open(day, t, c, args["visit_type"]) and (day, t, c) not in taken:
                     if len(slots) == MAX_SLOTS:
                         more = True
                         break

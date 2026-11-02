@@ -35,7 +35,8 @@ from audit.services import record_event
 
 logger = logging.getLogger(__name__)
 
-CODES = ("invalid_input", "not_allowed", "unavailable", "timeout", "output_too_large", "refused")
+CODES = ("invalid_input", "not_allowed", "unavailable", "timeout", "output_too_large", "refused", "limit_reached",
+         "slot_taken")
 MESSAGES = {
     "invalid_input": "The tool arguments are not valid.",
     "not_allowed": "You are not allowed to use this tool.",
@@ -43,6 +44,8 @@ MESSAGES = {
     "timeout": "The tool took too long to answer.",
     "output_too_large": "The tool result was too large to use.",
     "refused": "This tool does not answer that kind of request.",
+    "limit_reached": "Too many proposals waiting or made recently. Confirm or decline the open ones first.",
+    "slot_taken": "That slot is no longer available.",
 }
 
 
@@ -64,6 +67,7 @@ class ToolContext:
     today: Callable[[], date] = field(default=lambda: timezone.localdate())  # injectable clock
     embedder: Callable = None  # factories, so a tool that doesn't need them never builds them
     llm: Callable = None
+    via_agent: bool = True  # recorded on write proposals; the confirmation card says so
 
 
 @dataclass(frozen=True)

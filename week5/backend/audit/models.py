@@ -30,6 +30,11 @@ class AuditEvent(models.Model):
         ADMIN_DOCUMENT_VERSION_REJECTED = "admin.document_version_rejected", "Admin rejected a pending document version"
         ADMIN_DOCUMENT_RETIRED = "admin.document_retired", "Admin retired a policy document"
         AGENT_TOOL_CALLED = "agent.tool_called", "An agent tool was called (tool name and outcome only)"
+        AGENT_ACTION_PROPOSED = "agent.action_proposed", "A write was proposed and awaits confirmation"
+        AGENT_ACTION_CONFIRMED = "agent.action_confirmed", "Admin confirmed a proposed write"
+        AGENT_ACTION_DECLINED = "agent.action_declined", "Admin declined a proposed write"
+        AGENT_ACTION_EXPIRED = "agent.action_expired", "A proposed write expired unconfirmed"
+        AGENT_ACTION_FAILED = "agent.action_failed", "A confirmed write failed: the slot was already taken"
 
     created_at = models.DateTimeField(auto_now_add=True)
     # Stable identifiers, not live links: DO_NOTHING + db_constraint=False means deleting the user or

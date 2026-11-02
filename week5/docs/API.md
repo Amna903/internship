@@ -572,3 +572,51 @@ After approval the new policy is answerable (`"Is there free parking at the clin
 | 409 | same content already uploaded; approving an approved document | `duplicate_document` / `already_approved` |
 | 413 | file over the size limit | `file_too_large` |
 | 503 | embeddings unavailable while approving; the document stays pending | `embedding_unavailable` |
+
+## Week 5: confirming agent-proposed writes (admin only)
+
+The agent's one write tool, `book_mock_appointment`, never writes. It stores a **pending action** and
+returns its id. Nothing is booked until the admin who proposed it confirms it here. These endpoints are not
+tools, so the model can't call them. Admin session; CSRF on POST; 30 per minute. Another admin's action
+returns `404`, the same as a missing one.
+
+### `GET /api/v1/agent/actions/<id>/`
+
+The confirmation card. The `summary` is written by the server from the stored fields, never by the model.
+
+```json
+{
+ "action_id": "6f0c…",
+ "status": "pending",
+ "summary": "Book a mock telehealth appointment with Clinician B on Tuesday 3 November 2026 at 09:00.",
+ "proposed_by_agent": true,
+ "proposed_by": "Proposed by the assistant (agent). Nothing is booked until you confirm.",
+ "expires_at": "2026-11-02T10:10:00+00:00",
+ "replayed": false
+}
+```
+
+### `POST /api/v1/agent/actions/<id>/confirm/`
+
+Requires an `Idempotency-Key` header (8–100 letters, digits, `-` or `_`).
+
+```bash
+curl -b jar.txt -H "X-CSRFToken: $CSRF" -H "Idempotency-Key: confirm-6f0c-1" \
+  -X POST http://127.0.0.1:8000/api/v1/agent/actions/6f0c…/confirm/
+```
+
+- `200`: confirmed. The response adds `booking` (id, date, time, clinician, visit type).
+- Sending the same key again returns the first result with `"replayed": true`, and writes nothing.
+- `400` `invalid_idempotency_key`. `404` not yours or missing.
+- `409`:
+  - `idempotency_conflict`: the key was used for another action;
+  - `action_confirmed`, `action_declined`, `action_expired`: no longer pending;
+  - `slot_taken`: someone booked it first; nothing written.
+
+### `POST /api/v1/agent/actions/<id>/decline/`
+
+`200` declined; `409` if it is no longer pending.
+
+Pending actions expire after 10 minutes. Each admin may have at most 3 open, and may make at most 6 proposals
+per 10 minutes; over either limit the tool returns `limit_reached` and stores nothing. Audit events
+(`agent.action_proposed`, `_confirmed`, `_declined`, `_expired`, `_failed`) hold ids only.

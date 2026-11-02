@@ -6,4 +6,4 @@ class AgentConfig(AppConfig):
     name = "agent"
 
     def ready(self):
-        from . import read_tools  # noqa: F401  registers the tools
+        from . import read_tools, write_tools  # noqa: F401  registers the tools

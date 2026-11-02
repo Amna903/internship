@@ -615,3 +615,15 @@ A running record, added to as each step lands. The full decision history is in
 - **Deadlines are honest about their limit.** A late result is discarded, but the slow call is stopped only by its own client timeout. This is recorded in the architecture doc.
 - **Verification:** 71 new tests. The full backend suite on SQLite gave 1236 passed and 1 skipped (the PostgreSQL-only TRUNCATE test); the affected files on PostgreSQL gave 473 passed. The audit migration is choices only, and `sqlmigrate` shows no SQL.
 - **No model evaluation in Step 6**, by the rules. Tool selection and the agent red-team are Step 8.
+
+## Step 7: write tool with human confirmation
+
+- **Rules first (`cf824d7`).** User's choices: `book_mock_appointment`, propose-then-confirm with a pending-action table, an `Idempotency-Key`, and no cancel tool. Three additions:
+  - the card's summary is written by the server from the stored fields, never by the model;
+  - flood limits (3 open, 6 per 10 minutes);
+  - the action records that the agent proposed it, and the card says so.
+- **CI cost cut before Step 7 (user request, `affcaa1`).** Every push used to bill about 67 minutes. A plan job now runs only the changed week's jobs, and docs-only pushes run nothing. The first filtered run billed 24 minutes. Pushes are now one per step.
+- **A bug caught while writing it:** in `confirm`, marking an action expired and then raising inside the same transaction would have rolled the "expired" mark back. The error is now raised after the transaction commits, and a test checks the action stays expired.
+- **One change from the plan, told to the user:** a real thread-race test on PostgreSQL isn't possible here. Transactional tests TRUNCATE tables, which the append-only audit triggers block. The race window is opened deterministically instead: the slot check passes for both, so the unique constraint must decide. It runs on both databases.
+- **A Step 6 test was updated:** it expected exactly four tools; it now checks the four read tools plus the one write tool.
+- **Verification:** 46 new tests (117 across both agent files). The full backend suite on SQLite gave 1282 passed and 1 skipped; the agent, audit and assistant files on PostgreSQL gave 219 passed. Migrations are complete.

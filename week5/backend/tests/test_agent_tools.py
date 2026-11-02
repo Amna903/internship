@@ -55,9 +55,11 @@ def objects(schema: dict):
 
 # ---------------- the registry and its security rules ----------------
 
-def test_exactly_the_four_read_tools_all_admin_only():
-    assert sorted(REGISTRY) == ["check_availability", "cluster_summaries", "predict_no_show", "search_policies"]
-    assert all(t.permission == "read" and t.roles == ("admin",) for t in REGISTRY.values())
+def test_the_four_read_tools_plus_the_one_step7_write_tool_all_admin_only():
+    reads = sorted(n for n, t in REGISTRY.items() if t.permission == "read")
+    assert reads == ["check_availability", "cluster_summaries", "predict_no_show", "search_policies"]
+    assert [n for n, t in REGISTRY.items() if t.permission == "write"] == ["book_mock_appointment"]
+    assert all(t.roles == ("admin",) for t in REGISTRY.values())
 
 
 @pytest.mark.parametrize("tool", list(REGISTRY.values()), ids=lambda t: t.name)
