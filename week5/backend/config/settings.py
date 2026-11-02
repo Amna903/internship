@@ -301,3 +301,23 @@ ASSISTANT = {
     "EMBED_MODEL": os.environ.get("ASSISTANT_EMBED_MODEL", "nomic-embed-text:latest"),
 }
 
+# Week 5 Step 10: background indexing jobs on Celery + Redis (config/celery.py, assistant/jobs.py).
+# Job states live in assistant.IndexJob, so no result backend. Delivery is at least once (acks_late), and the
+# job is safe to repeat. Eager mode (run inline, no broker) is for unit tests only (settings_test.py).
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_TASK_DEFAULT_QUEUE = os.environ.get("CELERY_QUEUE", "healthprofile")  # tests use their own queue name
+CELERY_TASK_ALWAYS_EAGER = os.environ.get("CELERY_TASK_ALWAYS_EAGER", "false").lower() == "true"
+CELERY_TASK_IGNORE_RESULT = True
+CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_REJECT_ON_WORKER_LOST = True
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_BROKER_CONNECTION_TIMEOUT = 2  # seconds; a down broker fails the publish fast (queue_unavailable)
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+INDEX_JOB = {
+    "MAX_ATTEMPTS": 3,
+    # Seconds to wait before retry 1 and retry 2 (only transient embedder failures are retried).
+    "BACKOFF_SECONDS": [int(s) for s in os.environ.get("INDEX_JOB_BACKOFF", "5,10").split(",")],
+    "SOFT_TIME_LIMIT": 120,
+    "TIME_LIMIT": 150,
+}
+

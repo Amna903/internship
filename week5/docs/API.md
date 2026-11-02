@@ -571,7 +571,14 @@ After approval the new policy is answerable (`"Is there free parking at the clin
 | 404 | approving an unknown id | `not_found` |
 | 409 | same content already uploaded; approving an approved document | `duplicate_document` / `already_approved` |
 | 413 | file over the size limit | `file_too_large` |
-| 503 | embeddings unavailable while approving; the document stays pending | `embedding_unavailable` |
+| 503 | the indexing queue (Redis) is down; nothing changed | `queue_unavailable` |
+
+**Week 5 Step 10: approval is a background job.** Both approve endpoints return **202** with the document and a
+`job` (`id`, `status` queued/running/succeeded/failed, `attempts`, `max_attempts`, `error_code`, `chunks`, times),
+or **200** with the already-open job for that version. A transient embedder failure is retried (3 attempts in
+all); a failed job leaves the version pending (`error_code` `unavailable`, `timeout`, `not_pending`,
+`not_allowed`, `time_limit`, `internal_error`). `GET /api/v1/assistant/jobs/` (newest 50, `?status=`) and
+`GET /api/v1/assistant/jobs/<id>/` show job states (admin only).
 
 ## Week 5: confirming agent-proposed writes (admin only)
 

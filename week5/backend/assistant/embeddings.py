@@ -7,6 +7,7 @@ the current embedder.
 
 import hashlib
 import json
+import os
 import re
 import socket
 import urllib.error
@@ -14,6 +15,7 @@ import urllib.request
 
 import numpy as np
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 from .llm import LLMTimeout, LLMUnavailable
 
@@ -79,8 +81,30 @@ class FakeEmbedder(Embedder):
         return unit(rows)
 
 
+class FlakyEmbedder(FakeEmbedder):
+    """Test-only fault injection for the real-worker job test (Week 5 Step 10): the first `failures` embed
+    calls in this process raise LLMUnavailable, then it behaves like FakeEmbedder. Selected with
+    ASSISTANT_EMBEDDER=flaky and ASSISTANT_FLAKY_FAILURES=N, and refused unless the provider is "fake"."""
+
+    calls = 0  # per process, so it counts across a job's retries in one worker
+
+    def __init__(self, failures: int):
+        super().__init__()
+        self.failures = failures
+
+    def embed(self, texts: list[str]) -> np.ndarray:
+        FlakyEmbedder.calls += 1
+        if FlakyEmbedder.calls <= self.failures:
+            raise LLMUnavailable("injected test failure")
+        return super().embed(texts)
+
+
 def get_embedder() -> Embedder:
     cfg = settings.ASSISTANT
     if cfg["EMBEDDER"] == "fake":
         return FakeEmbedder()
+    if cfg["EMBEDDER"] == "flaky":
+        if cfg["PROVIDER"] != "fake":
+            raise ImproperlyConfigured("The flaky test embedder is only allowed with ASSISTANT_PROVIDER=fake.")
+        return FlakyEmbedder(int(os.environ.get("ASSISTANT_FLAKY_FAILURES", "0")))
     return OllamaEmbedder(base_url=cfg["OLLAMA_URL"], model=cfg["EMBED_MODEL"], timeout_seconds=cfg["TIMEOUT_SECONDS"])

@@ -700,3 +700,10 @@ A running record, added to as each step lands. The full decision history is in
 - **One test problem, solved without changing the server:** the SDK's in-process server handles requests on another thread, so its database connection couldn't see the test's uncommitted rows ("database table is locked"). Driving the client through asgiref's `async_to_sync` runs the server's `sync_to_async(thread_sensitive=True)` work on the test's own thread, which is asgiref's documented behaviour.
 - **The rate limit is stored in the database**, so a stolen token can't escape it by starting several server processes.
 - **Verification:** 26 MCP tests, including a real stdio subprocess (migrate a temporary database, issue a token with the command, list tools and call one through `run_mcp_server`).
+
+## Step 10: background indexing jobs (Celery + Redis)
+
+- **Decided without review** (the user's autonomous-mode instruction, 2026-11-02); rules first (`efe74b4`), with the options and reasons in REQUIREMENTS.md, "Decisions made without review".
+- **What changed for existing behaviour (disclosed):** both approve endpoints now queue a job and return 202 (previously 200, or 503 when embeddings were down). 4 existing tests were updated: three expect 202, and two "embeddings down" tests now expect a failed job (3 attempts, `unavailable`) instead of a 503. What they check is unchanged: the version stays pending and the old edition stays live.
+- **The real-worker test found a bug that eager mode hid:** `settings_test.py` forced `ASSISTANT_EMBEDDER=fake`, so the worker never received the injected failures (the job succeeded in 1 attempt, not 2). Now only the test-only `flaky` value is let through; anything else (for example a developer's `ollama`) is still overridden.
+- **Verification:** 23 eager-mode job tests; a real `celery worker` on a real Redis (queued with no worker → retried then succeeded in 2 attempts; a permanent outage failed after exactly 3); with `REQUIRE_REDIS=1` and no Redis, the test fails rather than skips. CI adds a `redis:7` service.

@@ -21,15 +21,15 @@ from predictions.views import SmallJSONParser
 
 from .answering import answer_question
 from .embeddings import get_embedder
-from .documents import (DocumentError, add_version, approve_version, create_document, pending_version, reject_version,
-                        retire)
+from .documents import DocumentError, add_version, create_document, pending_version, reject_version, retire
+from .jobs import QueueUnavailable, audit_detail, queue_approval
 from .history import ConversationLimit, HistoryInvalid
 from .history import dump as dump_history
 from .history import load as load_history
 from .history import CONVERSATION_TOKENS, MAX_TURNS
-from .llm import LLMError, get_llm
+from .llm import get_llm
 from .service import QuestionInvalid
-from .models import POLICY_AREAS, AnswerRecord, DocumentVersion, PolicyDocument
+from .models import POLICY_AREAS, AnswerRecord, DocumentVersion, IndexJob, PolicyDocument
 from .uploads import MAX_UPLOAD_BYTES, UploadRejected, validate_upload
 
 logger = logging.getLogger(__name__)
@@ -71,12 +71,6 @@ class AssistantStatusView(AdminOnlyAPIView):
         })
 
 
-class EmbeddingUnavailable(APIException):
-    status_code = status.HTTP_503_SERVICE_UNAVAILABLE
-    default_detail = "The document could not be indexed right now; it stays pending. Try again later."
-    default_code = "embedding_unavailable"
-
-
 def version_json(v: DocumentVersion) -> dict:
     return {"number": v.number, "status": v.status, "sha256": v.sha256, "effective_date": v.effective_date,
             "created_at": v.created_at, "decided_at": v.decided_at, "chunks": v.chunks.count()}
@@ -115,11 +109,6 @@ def _read_upload(request):
     except UploadRejected as exc:
         return rejection(str(exc), "upload_rejected")
     return valid, area, effective
-
-
-def audit_detail(document_id: int, version: int) -> str:
-    """Ids and version numbers only, never content. Version 1 keeps Week 4's form, like passage IDs."""
-    return f"document:{document_id}" if version == 1 else f"document:{document_id}:v{version}"
 
 
 def _refused(exc: DocumentError) -> Response:
@@ -168,11 +157,12 @@ class DocumentApproveView(AdminOnlyAPIView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "assistant"
 
-    @extend_schema(summary="Approve a pending document: index it and make it searchable",
-                   responses={200: OpenApiResponse(description="Approved and indexed"),
+    @extend_schema(summary="Approve a pending document: queue a background job that indexes it and makes it searchable",
+                   responses={202: OpenApiResponse(description="Job queued (the document and the job)"),
+                              200: OpenApiResponse(description="A job for this version is already open; that job"),
                               404: OpenApiResponse(description="No such document"),
                               409: OpenApiResponse(description="Already approved"),
-                              503: OpenApiResponse(description="Indexing unavailable; stays pending")})
+                              503: OpenApiResponse(description="Indexing queue unavailable; nothing changed")})
     def post(self, request, document_id: int):
         document = PolicyDocument.objects.filter(id=document_id).first()
         if document is None:
@@ -185,18 +175,54 @@ class DocumentApproveView(AdminOnlyAPIView):
         return _approve(request, version)
 
 
+def job_json(job: IndexJob) -> dict:
+    return {"id": job.id, "document_id": job.version.document_id, "version": job.version.number, "status": job.status,
+            "attempts": job.attempts, "max_attempts": job.max_attempts, "error_code": job.error_code or None,
+            "chunks": job.chunks, "requested_by": job.requested_by_id, "queued_at": job.queued_at,
+            "started_at": job.started_at, "finished_at": job.finished_at}
+
+
 def _approve(request, version: DocumentVersion) -> Response:
+    """Queue the approval as a background job (Week 5 Step 10). 202 with the new job; 200 with the open job
+    when one is already queued or running for this version."""
     try:
-        approval = approve_version(version, request.user, get_embedder())
+        job, created = queue_approval(version, request.user, getattr(request, "request_id", ""))
     except DocumentError as exc:
         return _refused(exc)
-    except LLMError as exc:
-        logger.error("assistant: indexing failed for document %s v%s (%s)", version.document_id, version.number, exc.reason)
-        raise EmbeddingUnavailable() from None
-    was = f":from_v{approval.previous}" if approval.previous else ""
-    record_event(request, AuditEvent.Action.ADMIN_DOCUMENT_APPROVED,
-                 detail=audit_detail(version.document_id, version.number) + was)
-    return Response(document_json(PolicyDocument.objects.get(pk=version.document_id)))
+    except QueueUnavailable:
+        return rejection("The indexing queue is unavailable. Nothing changed; try again shortly.", "queue_unavailable",
+                         status.HTTP_503_SERVICE_UNAVAILABLE)
+    body = {**document_json(PolicyDocument.objects.get(pk=version.document_id)), "job": job_json(job)}
+    return Response(body, status=status.HTTP_202_ACCEPTED if created else status.HTTP_200_OK)
+
+
+class IndexJobsView(AdminOnlyAPIView):
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "assistant"
+
+    @extend_schema(summary="Background indexing jobs, newest first (at most 50; optional ?status=)",
+                   responses={200: OpenApiResponse(description="Jobs"), 400: OpenApiResponse(description="Unknown status")})
+    def get(self, request):
+        jobs = IndexJob.objects.select_related("version")
+        wanted = request.query_params.get("status")
+        if wanted is not None:
+            if wanted not in IndexJob.Status.values:
+                return rejection("Unknown job status.", "invalid_filter")
+            jobs = jobs.filter(status=wanted)
+        return Response({"jobs": [job_json(j) for j in jobs[:50]]})
+
+
+class IndexJobView(AdminOnlyAPIView):
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "assistant"
+
+    @extend_schema(summary="One background indexing job",
+                   responses={200: OpenApiResponse(description="The job"), 404: OpenApiResponse(description="No such job")})
+    def get(self, request, job_id: int):
+        job = IndexJob.objects.select_related("version").filter(pk=job_id).first()
+        if job is None:
+            return rejection("No such job.", "not_found", status.HTTP_404_NOT_FOUND)
+        return Response(job_json(job))
 
 
 def _version(document_id: int, number: int) -> DocumentVersion | None:
@@ -244,10 +270,12 @@ class DocumentVersionApproveView(AdminOnlyAPIView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "assistant"
 
-    @extend_schema(summary="Approve a pending version: index it, then swap it in atomically",
-                   responses={200: OpenApiResponse(description="Approved and searchable"), 404: OpenApiResponse(description="No such version"),
+    @extend_schema(summary="Approve a pending version: queue a background job that indexes it, then swaps it in atomically",
+                   responses={202: OpenApiResponse(description="Job queued (the document and the job)"),
+                              200: OpenApiResponse(description="A job for this version is already open; that job"),
+                              404: OpenApiResponse(description="No such version"),
                               409: OpenApiResponse(description="Not pending"),
-                              503: OpenApiResponse(description="Indexing unavailable; nothing changed")})
+                              503: OpenApiResponse(description="Indexing queue unavailable; nothing changed")})
     def post(self, request, document_id: int, number: int):
         version = _version(document_id, number)
         if version is None:

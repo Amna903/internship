@@ -128,3 +128,39 @@ class AnswerRecord(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class IndexJob(models.Model):
+    """One background indexing job (Week 5 Step 10): approving a pending version, run by a Celery worker.
+
+    The states live here, not in Celery's result backend, so the audit page can join them to versions and
+    admins. One open (queued or running) job per version, by a database constraint. Never holds document text.
+    """
+
+    class Status(models.TextChoices):
+        QUEUED = "queued", "Waiting for a worker"
+        RUNNING = "running", "A worker is indexing it"
+        SUCCEEDED = "succeeded", "Indexed and swapped in"
+        FAILED = "failed", "Failed; the version stays pending"
+
+    OPEN = (Status.QUEUED, Status.RUNNING)
+
+    version = models.ForeignKey(DocumentVersion, on_delete=models.CASCADE, related_name="index_jobs")
+    requested_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+")
+    request_id = models.CharField(max_length=64, blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.QUEUED)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    max_attempts = models.PositiveSmallIntegerField(default=3)
+    error_code = models.CharField(max_length=30, blank=True)  # a typed code only, never upstream error text
+    chunks = models.PositiveIntegerField(null=True, blank=True)
+    queued_at = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-queued_at", "-id"]
+        constraints = [models.UniqueConstraint(fields=["version"], condition=models.Q(status__in=["queued", "running"]),
+                                               name="one_open_index_job_per_version")]
+
+    def __str__(self) -> str:
+        return f"index job {self.pk} ({self.status})"

@@ -345,9 +345,9 @@ Every decision I would normally have asked about is listed here with its reason.
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| J1 | Background job for document indexing or batch predictions using a task queue | 10 | ☐ | | | | |
-| J2 | Track queued/running/succeeded/failed status | 10 | ☐ | | | | |
-| J3 | Retry transient failures safely | 10 | ☐ | | | | |
+| J1 | Background job for document indexing or batch predictions using a task queue | 10 | ☑ | Document indexing on Celery + Redis: `assistant/jobs.py` (`queue_approval`, `index_version`), `config/celery.py`; both approve endpoints return 202 with the job | `tests/test_index_jobs.py` (eager), `tests/test_index_worker.py` (a real worker on real Redis) | | |
+| J2 | Track queued/running/succeeded/failed status | 10 | ☑ | `IndexJob` (status, attempts, error code, times; one open job per version by constraint); `GET /api/v1/assistant/jobs/` and `/jobs/<id>/` | `tests/test_index_jobs.py` (`TestStates`, `TestAuditAndApi`), `tests/test_index_worker.py` (queued → succeeded / failed seen from the database) | | |
+| J3 | Retry transient failures safely | 10 | ☑ | Only `LLMUnavailable`/`LLMTimeout`, at most 3 attempts, backoff 5 s then 10 s; `acks_late`; row lock plus the pending re-check make repeats harmless; the worker re-checks admin rights | `tests/test_index_jobs.py` (`TestRepeats`, `TestGuards`), `tests/test_index_worker.py` | | |
 
 ## Model monitoring
 

@@ -148,6 +148,10 @@ pip install -r requirements.txt
 python scripts/init_env.py            # writes .env with generated secrets
 python manage.py migrate
 python manage.py seed_demo            # synthetic admin and member accounts
+
+# Week 5: background indexing jobs (Celery + Redis)
+brew install redis && brew services start redis
+celery -A config worker -l info --pool=solo   # in its own terminal, from week5/backend
 python manage.py load_policies --admin admin@example.test   # the fictional clinic policies, approved and indexed
 python manage.py warm_llm             # loads the model so the first question isn't slow
 python manage.py runserver

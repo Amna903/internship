@@ -39,6 +39,8 @@ class AuditEvent(models.Model):
         MCP_TOKEN_ISSUED = "mcp.token_issued", "An MCP access token was issued (token id only)"
         MCP_TOKEN_REVOKED = "mcp.token_revoked", "An MCP access token was revoked"
         MCP_TOKEN_FIRST_USED = "mcp.token_first_used", "An MCP access token was used for the first time"
+        ADMIN_INDEX_JOB_QUEUED = "admin.index_job_queued", "Admin queued a background indexing job"
+        ADMIN_INDEX_JOB_FAILED = "admin.index_job_failed", "A background indexing job failed (error code only)"
 
     created_at = models.DateTimeField(auto_now_add=True)
     # Stable identifiers, not live links: DO_NOTHING + db_constraint=False means deleting the user or

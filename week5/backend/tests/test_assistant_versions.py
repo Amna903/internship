@@ -47,7 +47,7 @@ def policies(db, admin):
 def live_doc(admin_browser):
     """An uploaded document whose v1 is approved and searchable."""
     doc_id = upload(admin_browser, DOCS, "refunds.md", OLD, policy_area="billing").json()["id"]
-    assert post(admin_browser, f"{DOCS}{doc_id}/approve/").status_code == 200
+    assert post(admin_browser, f"{DOCS}{doc_id}/approve/").status_code == 202  # Step 10: a queued job
     return doc_id
 
 
@@ -76,8 +76,9 @@ class TestVersions:
         class Down(FakeEmbedder):
             def embed(self, texts):
                 raise LLMUnavailable("down")
-        monkeypatch.setattr("assistant.views.get_embedder", lambda: Down())
-        assert post(admin_browser, f"{DOCS}{live_doc}/versions/2/approve/").status_code == 503
+        monkeypatch.setattr("assistant.jobs.get_embedder", lambda: Down())
+        job = post(admin_browser, f"{DOCS}{live_doc}/versions/2/approve/").json()["job"]  # Step 10: was a 503
+        assert (job["status"], job["error_code"]) == ("failed", "unavailable")
         assert OLD in texts() and NEW not in texts()
         assert DocumentVersion.objects.get(document_id=live_doc, number=2).status == "pending"
 

@@ -16,4 +16,6 @@ urlpatterns = [
          name="assistant-version-reject"),
     path("assistant/documents/<int:document_id>/retire/", views.DocumentRetireView.as_view(),
          name="assistant-document-retire"),
+    path("assistant/jobs/", views.IndexJobsView.as_view(), name="assistant-jobs"),
+    path("assistant/jobs/<int:job_id>/", views.IndexJobView.as_view(), name="assistant-job"),
 ]

@@ -107,13 +107,14 @@ class TestDocumentsAPI:
     def test_approval_indexes_with_the_current_embedder_and_is_audited(self, admin_browser):
         document_id = upload(admin_browser, "parking.md", b"Parking at the clinic is free for visitors.").json()["id"]
         response = admin_browser.post(approve_url(document_id))
-        assert response.status_code == 200 and response.json()["status"] == "approved" and response.json()["chunks"] >= 1
+        assert response.status_code == 202 and response.json()["status"] == "approved" and response.json()["chunks"] >= 1
+        assert response.json()["job"]["status"] == "succeeded"  # Step 10: a background job (inline in unit tests)
         assert set(Chunk.objects.values_list("embedding_model", flat=True)) == {FakeEmbedder().identity}
         assert AuditEvent.objects.get(action="admin.document_approved").detail == f"document:{document_id}"
 
     def test_approving_twice_or_a_missing_document_is_refused(self, admin_browser):
         document_id = upload(admin_browser, "parking.md", b"Parking is free.").json()["id"]
-        assert admin_browser.post(approve_url(document_id)).status_code == 200
+        assert admin_browser.post(approve_url(document_id)).status_code == 202
         assert admin_browser.post(approve_url(document_id)).status_code == 409
         assert admin_browser.post(approve_url(99999)).status_code == 404
 
@@ -121,10 +122,13 @@ class TestDocumentsAPI:
         class Broken(FakeEmbedder):
             def embed(self, texts):
                 raise LLMUnavailable("down")
-        monkeypatch.setattr("assistant.views.get_embedder", lambda: Broken())
+        monkeypatch.setattr("assistant.jobs.get_embedder", lambda: Broken())
         document_id = upload(admin_browser, "parking.md", b"Parking is free.").json()["id"]
         response = admin_browser.post(approve_url(document_id))
-        assert response.status_code == 503 and "down" not in response.text
+        # Step 10: was a 503; now the job retries the transient failure and ends failed, with nothing changed
+        assert response.status_code == 202 and "down" not in response.text
+        job = response.json()["job"]
+        assert (job["status"], job["attempts"], job["error_code"]) == ("failed", 3, "unavailable")
         document = PolicyDocument.objects.get(id=document_id)
         assert document.status == "pending" and document.chunks.count() == 0
         assert not AuditEvent.objects.filter(action="admin.document_approved").exists()

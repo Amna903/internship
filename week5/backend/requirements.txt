@@ -17,3 +17,4 @@ scipy==1.18.1
 joblib==1.6.0
 threadpoolctl==3.7.0
 mcp==2.3.0  # Week 5 Step 9: the official MCP Python SDK (stdio server)
+celery[redis]==5.6.3  # Week 5 Step 10: background indexing jobs (Redis broker)

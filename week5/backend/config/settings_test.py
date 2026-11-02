@@ -20,7 +20,13 @@ os.environ["THROTTLE_ASSISTANT"] = "10/min"
 os.environ["THROTTLE_AGENT_ACTIONS"] = "30/min"
 os.environ["THROTTLE_AGENT"] = "10/min"
 os.environ["ASSISTANT_PROVIDER"] = "fake"  # CI has no Ollama; tests never call a real model
-os.environ["ASSISTANT_EMBEDDER"] = "fake"  # deterministic offline embeddings in tests and CI
+# Deterministic offline embeddings in tests and CI. Only the test-only "flaky" fake may be chosen instead (the
+# real-worker job test injects failures with it); anything else, such as a developer's "ollama", is overridden.
+os.environ["ASSISTANT_EMBEDDER"] = "flaky" if os.environ.get("ASSISTANT_EMBEDDER") == "flaky" else "fake"
 os.environ["ENABLE_API_DOCS"] = "true"
+# Unit tests run jobs inline with no broker and no backoff. The real-worker test (tests/test_index_worker.py)
+# starts its worker with CELERY_TASK_ALWAYS_EAGER=false, so these are defaults, not overrides.
+os.environ.setdefault("CELERY_TASK_ALWAYS_EAGER", "true")
+os.environ.setdefault("INDEX_JOB_BACKOFF", "0,0")
 
 from .settings import *  # noqa: E402,F401,F403
