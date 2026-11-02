@@ -228,6 +228,42 @@ run_tool(name, args, ctx) ── authorise (ctx.user's role, every call) ── 
   `/api/v1/agent/actions/<id>/confirm/`, which is not a tool, with an `Idempotency-Key`. Authorisation and the slot
   are re-checked at confirmation, and a unique constraint (clinician, date, time) decides races.
 
+## Week 5: the whole system (A11)
+
+```mermaid
+flowchart LR
+  B[Browser: Agent, Assistant, Audit tabs] -- same origin :3000 --> N[Next.js proxy]
+  N --> D[Django + DRF :8000]
+  C[MCP client<br/>Inspector / Claude Desktop] -- stdio + short-lived token --> M[run_mcp_server]
+  subgraph core [Django]
+    R[Agent runner<br/>state machine, limits] --> T[Tool registry + run_tool<br/>authorise, validate, cap, audit]
+    M --> T
+    T --> S[search_policies]
+    T --> A[check_availability]
+    T --> P[predict_no_show]
+    T --> K[cluster_summaries]
+    T --> W[book_mock_appointment<br/>proposes only]
+    W --> PA[(PendingAction)]
+    H[Human confirm / decline<br/>Idempotency-Key] --> PA
+    P --> L[(PredictionLog)] --> DR[PSI drift vs baseline]
+    J[Approve version] --> Q[(IndexJob)]
+    AU[Audit overview] --> PA & Q & L
+  end
+  D --> core
+  Q -- publish --> RD[(Redis)] --> WK[Celery worker<br/>retries transient only] --> DB[(PostgreSQL / SQLite)]
+  S & WK --> O[Ollama: llama3.2:3b, nomic-embed-text]
+  R --> O
+```
+
+Key decisions:
+- **The model only proposes.** The server validates and authorises every call, renders tool results itself, and lets model text through only as a verified policy answer or a short clarify or decline.
+- **One tool layer for the agent and MCP.** There's a single place where security is enforced.
+- **Writes need a human:** a pending action plus a confirm endpoint (which isn't a tool), with an idempotency key.
+- **Background indexing on Celery + Redis.** States live in our own table (for the audit page), and only transient failures are retried.
+- **Monitoring is PSI on the prediction distribution** against a validation-split baseline. Logs keep no inputs.
+
+Contracts: [TOOLS.md](TOOLS.md) · threats: [THREATS.md](THREATS.md) · MCP: [MCP.md](MCP.md).
+
 ## Known limitations (be upfront about these in the demo)
 
 - **Audit log growth:** no retention policy yet (needs one: e.g. archive after N months). Because the
