@@ -92,6 +92,12 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
   4. **Tokens and cost:** `AnswerRecord` gains `prompt_tokens` and `output_tokens` (agent runs already store tokens). The ops view totals tokens per day for the assistant and the agent, with the local cost (0) and the existing **illustrative** hosted-equivalent price, labelled as illustrative.
   5. **Ops view:** admin-only `GET /api/v1/ops/?hours=` (1–168) and an **Operations** section on the admin page. Members get 403/401.
 
+- **Step 7 rules (committed before any Step 7 code):** each failure gives a **safe JSON response** (the standard error envelope, no traceback or internal detail), a **JSON log line** with the request id and a stable `event` code, and shows up in the ops view (5xx rate, or the job counts). Each is proven by an automated test that injects the failure, and once by a live rehearsal on the Compose stack recorded in `docs/regression.md`.
+  1. **LLM timeout or provider failure (R1):** keep the existing `504 assistant_timeout` and `503 assistant_unavailable`; add the log event `llm_timeout` or `llm_unavailable`. Live: point the stack at an unreachable Ollama URL.
+  2. **Vector store unavailable (R2):** embeddings live in PostgreSQL. An embedder failure already gives `503 assistant_unavailable`; a database error while reading passages now gives `503 retrieval_unavailable` (log event `retrieval_unavailable`), not a 500.
+  3. **Database outage (R3):** any `DatabaseError` reaching the API gives `503 service_unavailable` with `Retry-After: 30` (log event `database_unavailable`), never a 500 page; `/ready/` already returns 503. Metrics writes never break a request (Step 6). Live: stop the `db` container, call the API, start it again.
+  4. **Worker failure (R4):** the broker being down already gives `503 queue_unavailable` with nothing changed. A **dead worker** with the broker up leaves jobs queued; the ops view now reports `jobs.queued_over_5_min`, and the job finishes once a worker returns (tasks are acknowledged late, so a crash mid-task is redelivered). Live: stop the `worker`, approve a document, see the stuck count, start the worker, see the job finish.
+
 ## Decisions made without review
 
 | Step | Decision | Options considered | Reason |
