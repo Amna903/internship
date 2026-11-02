@@ -21,6 +21,7 @@ from accounts.permissions import IsAdminRole
 from adminpanel.authentication import AdminSessionAuthentication
 from audit.models import AuditEvent
 from audit.services import record_event
+from monitoring.drift import log_invalid, predict_logged
 from ml import config
 from ml.inference import ModelUnavailable, get_model
 
@@ -150,9 +151,14 @@ class NoShowPredictionView(AdminOnlyAPIView):
     )
     def post(self, request):
         serializer = NoShowInputSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        model = _model()
-        prediction = model.predict([serializer.validated_data])[0]
+        if not serializer.is_valid():
+            log_invalid("api")
+            serializer.is_valid(raise_exception=True)
+        try:
+            model, prediction = predict_logged(serializer.validated_data, "api", loader=lambda: get_model())  # Week 5 Step 11: logged
+        except ModelUnavailable as exc:
+            logger.error("no-show model unavailable: %s", exc.reason)
+            raise ModelUnavailableError() from None
         # Audit: who asked and which model answered. Never the input values.
         record_event(request, AuditEvent.Action.ADMIN_PREDICTION_MADE, detail=model.version)
         return Response({"model_version": model.version, "prediction": prediction, "disclaimer": config.DISCLAIMER})

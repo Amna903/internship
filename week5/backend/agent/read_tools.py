@@ -157,13 +157,15 @@ def predict_no_show(args: dict, ctx) -> dict:
     from predictions.serializers import NoShowInputSerializer  # the same cross-field rules as the API
 
     serializer = NoShowInputSerializer(data=args)
+    from monitoring.drift import log_invalid, predict_logged  # Week 5 Step 11: every prediction is logged
+
     if not serializer.is_valid():
+        log_invalid("agent")
         raise ToolFailure("invalid_input", tuple(f"$.{k}" for k in sorted(serializer.errors)))
     try:
-        model = get_model()
+        model, p = predict_logged(serializer.validated_data, "agent", loader=lambda: get_model())
     except ModelUnavailable:
         raise ToolFailure("unavailable") from None
-    p = model.predict([serializer.validated_data])[0]
     return {"model_version": model.version, "no_show_probability": p["no_show_probability"],
             "suggested_action": p["suggested_action"], "suggested_action_label": p["suggested_action_label"],
             "decision_threshold": p["decision_threshold"], "average_no_show_rate": p["average_no_show_rate"],

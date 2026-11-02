@@ -113,6 +113,7 @@ INSTALLED_APPS = [
     "predictions",
     "assistant",
     "agent",
+    "monitoring",
 ]
 
 MIDDLEWARE = [
