@@ -644,3 +644,11 @@ until the admin confirms it at `/api/v1/agent/actions/<id>/confirm/`. `status` i
 4 tool calls, 8,000 tokens or 60 s), `failed` (a tool or the model kept failing) or `refused` (a medical
 question, before any planning). Limit: 10 per minute. Each run stores a trace (`AgentRun`) with free text
 masked, and an `agent.run` audit event with the run id and status.
+
+## Week 5: model monitoring (admin only)
+
+`GET /api/v1/monitoring/?days=7` (1–90): prediction counts, the 10-bin probability distribution beside the
+validation-split baseline, PSI and verdict (`stable` < 0.10 ≤ `watch` ≤ 0.25 < `possible drift`; fewer than 100
+predictions → `not enough data`), latency p50/p95, failure rate, `flags` (`possible_drift`, `failure_rate`,
+`latency`, `baseline_is_for_another_version`) and the fixed synthetic-data disclaimer. 400 `invalid_filter` for a
+bad `days`.

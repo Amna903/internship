@@ -371,11 +371,11 @@ Every decision I would normally have asked about is listed here with its reason.
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| M1 | Log synthetic prediction distributions | 11 | ☐ | | | | |
-| M2 | Log inference latency | 11 | ☐ | | | | |
-| M3 | Log failure rates | 11 | ☐ | | | | |
-| M4 | Compare with baseline to flag possible drift | 11 | ☐ | | | | |
-| M5 | No claims of real-world medical impact | 11 | ☐ | | | | |
+| M1 | Log synthetic prediction distributions | 11 | ☑ | `monitoring/drift.py` (`predict_logged`, used by the API and the agent tool), `PredictionLog` (version, source, outcome, probability, latency; no inputs, no user); 10-bin distribution in `GET /api/v1/monitoring/` | `tests/test_monitoring.py` (`TestLogging`) | | |
+| M2 | Log inference latency | 11 | ☑ | `latency_ms` per call; p50/p95 against the baseline's (flag above 3×) | `tests/test_monitoring.py` (`test_latency_flag…`) | | |
+| M3 | Log failure rates | 11 | ☑ | `failed` and `invalid_input` outcomes; failure-rate flag above 5% with at least 20 calls. Evidence: 30 injected failures flagged | `tests/test_monitoring.py`, [monitoring.md](../backend/ml/reports/monitoring.md) | | |
+| M4 | Compare with baseline to flag possible drift | 11 | ☑ | PSI against the validation-split baseline ([monitoring_baseline.json](../backend/ml/reports/monitoring_baseline.json)); thresholds 0.10/0.25 fixed before the run. **Evidence: no drift PSI 0.006 (stable), planted drift 0.80 (possible drift)**, as expected | `tests/test_monitoring.py` (`TestPsi` by hand), [monitoring.md](../backend/ml/reports/monitoring.md) | | |
+| M5 | No claims of real-world medical impact | 11 | ☑ | Fixed disclaimer on every monitoring response and report | `tests/test_monitoring.py` (`test_summary_has_the_fixed_disclaimer…`) | | |
 
 ## Admin audit page
 

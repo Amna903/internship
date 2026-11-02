@@ -707,3 +707,16 @@ A running record, added to as each step lands. The full decision history is in
 - **What changed for existing behaviour (disclosed):** both approve endpoints now queue a job and return 202 (previously 200, or 503 when embeddings were down). 4 existing tests were updated: three expect 202, and two "embeddings down" tests now expect a failed job (3 attempts, `unavailable`) instead of a 503. What they check is unchanged: the version stays pending and the old edition stays live.
 - **The real-worker test found a bug that eager mode hid:** `settings_test.py` forced `ASSISTANT_EMBEDDER=fake`, so the worker never received the injected failures (the job succeeded in 1 attempt, not 2). Now only the test-only `flaky` value is let through; anything else (for example a developer's `ollama`) is still overridden.
 - **Verification:** 23 eager-mode job tests; a real `celery worker` on a real Redis (queued with no worker → retried then succeeded in 2 attempts; a permanent outage failed after exactly 3); with `REQUIRE_REDIS=1` and no Redis, the test fails rather than skips. CI adds a `redis:7` service.
+
+## Step 11: model monitoring and drift
+
+- **Decided without review; rules and evidence expectations committed first (`fef059f`).**
+- Every prediction (API and agent tool) goes through one logging function. No inputs or users are stored.
+- **Evidence (`manage.py monitoring_report`, committed after the code):**
+  - no drift: PSI **0.006** (stable);
+  - planted drift (reminders off, lead time ×3): PSI **0.80** (possible drift);
+  - 30 injected failures: flagged.
+
+  All three met the expectations declared beforehand, and nothing was tuned.
+- **Bug caught by a test:** the failure log used the config's version string `1.0.0`, but the loaded model calls itself `no-show-1.0.0`. Failed rows would have been counted as a different model version. Fixed with one shared constant.
+- **Limits:** drift is measured on the output distribution only (not per input). Latency is machine-specific.
