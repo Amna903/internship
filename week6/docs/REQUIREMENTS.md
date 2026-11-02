@@ -68,6 +68,7 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 
 | Step | Decision | Options considered | Reason |
 |---|---|---|---|
+| 3 | Python's resolver can't resolve `*.localhost`, so the HTTPS smoke test resolves it through Chromium (`--host-resolver-rules`) | Edit /etc/hosts (needs sudo) | No system change is needed. |
 | 1 | Local `make up` runs with **DEBUG on over HTTP** (bound to 127.0.0.1); production is the HTTPS `prod` profile with DEBUG off | DEBUG off with secure cookies on localhost; relax the cookie check | The settings rightly refuse insecure cookies with DEBUG off. Secure cookies on http://localhost work in Chrome but not Safari, and relaxing the check would weaken production. |
 
 ## Integration and containers
@@ -84,8 +85,8 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| P1 | Deploy frontend/backend where feasible (or a fully reproducible deployment procedure) | 3 | ☐ | | | | |
-| P2 | HTTPS | 2, 3 | ☐ | | | | |
+| P1 | Deploy frontend/backend where feasible (or a fully reproducible deployment procedure) | 3 | ☑ | Fully reproducible procedure: `docker-compose.prod.yml` + `deploy/Caddyfile`, `make prod`; with a real domain, set `SITE_HOST`/`TLS_MODE`/`ACME_EMAIL` for Let's Encrypt. No hosted deployment (approved decision: Ollama must stay local) | HTTPS rehearsal, smoke 6/6 ([regression.md](regression.md)) | | |
+| P2 | HTTPS | 2, 3 | ☑ | Caddy terminates TLS (internal CA locally, ACME for a real domain); HTTP→HTTPS 308; HSTS; Django SSL redirect behind the proxy | [regression.md](regression.md), `tests/test_prod_settings.py` | | |
 | P3 | CORS | 2 | ☑ | Same-origin only: the browser talks to the Next.js origin, which proxies `/api`; no CORS headers are sent | `tests/test_prod_settings.py` (`test_no_cors_for_a_foreign_origin`) | | |
 | P4 | Secure session cookies | 2 | ☑ | HttpOnly and SameSite=Lax auth cookies; Secure is required by `config/settings_prod.py` | `tests/test_prod_settings.py` | | |
 | P5 | CSRF protection | 2 | ☑ | Django CSRF on every unsafe method; explicit https trusted origins in prod | `tests/test_prod_settings.py` (`test_csrf_is_enforced…`) | | |

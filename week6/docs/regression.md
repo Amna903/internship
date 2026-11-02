@@ -16,3 +16,18 @@ The Week 5 CI's final gate job had failed only because GitHub Actions minutes ra
 From a new folder: `git clone https://github.com/Amna903/internship.git`, `git checkout week6`, `cd week6`, `make up`, following only the README. Docker ran on Colima with a 15 GB disk; Ollama ran on the host.
 - `make up` generated `backend/.env`, built and started all 5 services, seeded the data, loaded 6 policies through the host Ollama, and `/ready/` returned ready (database, broker, model and LLM all ok).
 - The browser smoke test (`e2e/run_stack_smoke.py`) passed **6 of 6**: `/ready/`, admin sign-in, a prediction with its disclaimer, the clusters PCA plot, a cited assistant answer, and an agent run (done, 2 tool calls).
+
+## Step 3: production rehearsal over HTTPS, 2026-11-02
+
+`make prod` (base compose + `docker-compose.prod.yml`, Caddy with its internal CA at `https://healthprofile.localhost`):
+- all 6 services healthy; `/ready/` ready;
+- `http://` gives a 308 redirect to `https://`;
+- HSTS is sent once (`max-age=86400`) and `X-Frame-Options: DENY`;
+- `/api/docs/` returns 404;
+- the CSRF cookie is `Secure; SameSite=Lax`;
+- the browser smoke test over HTTPS passed **6 of 6** (sign-in, prediction, clusters, cited answer, agent run).
+
+Operations rehearsal:
+- `make backup` wrote a 128 KB `pg_dump`;
+- `make restore` brought it back (7 users before and after; a deleted table was restored);
+- `make tag TAG=rehearsal` then `make rollback TAG=rehearsal` restarted on the tagged images, and `/ready/` returned 200.

@@ -5,6 +5,7 @@ start if any production invariant is broken, rather than running half-secured.
 """
 
 import os
+from urllib.parse import urlparse
 
 from django.core.exceptions import ImproperlyConfigured
 
@@ -28,9 +29,13 @@ if os.environ.get("BEHIND_TLS_PROXY", "").lower() != "true":
 if SECURE_HSTS_SECONDS <= 0:
     PROD_ERRORS.append("SECURE_HSTS_SECONDS must be positive.")
 LOCAL = ("localhost", "127.0.0.1", "0.0.0.0", "::1")
-if any(h in LOCAL for h in ALLOWED_HOSTS) or any(any(l in o for l in LOCAL) for o in CSRF_TRUSTED_ORIGINS):
+_origin_hosts = [urlparse(o).hostname or "" for o in CSRF_TRUSTED_ORIGINS]  # exact names: *.localhost is allowed
+if any(h in LOCAL for h in ALLOWED_HOSTS) or any(h in LOCAL for h in _origin_hosts):
     PROD_ERRORS.append("DJANGO_ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS must not name localhost in production.")
 if any(not o.startswith("https://") for o in CSRF_TRUSTED_ORIGINS):
     PROD_ERRORS.append("CSRF_TRUSTED_ORIGINS must be https:// origins.")
+# Internal probes (container healthchecks) reach /health/ and /ready/ over plain HTTP inside the network.
+SECURE_REDIRECT_EXEMPT = [r"^health/$", r"^ready/$"]
+
 if PROD_ERRORS:
     raise ImproperlyConfigured("Production settings refused:\n  - " + "\n  - ".join(PROD_ERRORS))

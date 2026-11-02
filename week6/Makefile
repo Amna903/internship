@@ -43,3 +43,35 @@ test:
 
 clean:
 	@read -p "Delete the database and model volumes? [y/N] " a && [ "$$a" = y ] && $(COMPOSE) --profile ollama down -v
+
+# ---- Week 6 Step 3: production rehearsal, rollback, backup ----
+PROD = $(COMPOSE) -f docker-compose.yml -f docker-compose.prod.yml
+SITE_HOST ?= healthprofile.localhost
+export SITE_HOST
+
+.PHONY: prod prod-down tag rollback backup restore
+
+prod: backend/.env
+	$(PROD) up -d --build
+	@for i in $$(seq 1 120); do curl -kfsS -o /dev/null https://$(SITE_HOST)/ready/ 2>/dev/null && break; sleep 2; done
+	@curl -kfsS https://$(SITE_HOST)/ready/ && echo && echo "Ready: https://$(SITE_HOST)"
+
+prod-down:
+	$(PROD) down
+
+tag:  # keep the current images under a release tag, for rollback: make tag TAG=v1.0.0
+	docker tag healthprofile-backend:week6 healthprofile-backend:$(TAG)
+	docker tag healthprofile-frontend:week6 healthprofile-frontend:$(TAG)
+
+rollback:  # make rollback TAG=v1.0.0 : run the tagged images (database migrations are not reversed)
+	docker tag healthprofile-backend:$(TAG) healthprofile-backend:week6
+	docker tag healthprofile-frontend:$(TAG) healthprofile-frontend:week6
+	$(PROD) up -d --no-build
+
+backup:
+	@mkdir -p backups
+	$(COMPOSE) exec -T db pg_dump -U healthprofile -Fc healthprofile > backups/healthprofile-$$(date +%Y%m%d-%H%M%S).dump
+	@ls -1t backups | head -1
+
+restore:  # make restore FILE=backups/healthprofile-....dump
+	$(COMPOSE) exec -T db pg_restore -U healthprofile -d healthprofile --clean --if-exists < $(FILE)

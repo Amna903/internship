@@ -7,7 +7,6 @@ The model can vary; every check prints PASS or FAIL as it came out.
 
 import os
 import sys
-import urllib.request
 
 from playwright.sync_api import expect, sync_playwright
 
@@ -22,12 +21,13 @@ def check(name, ok):
     print(("PASS " if ok else "FAIL ") + name, flush=True)
 
 
-ready = urllib.request.urlopen(f"{API}/ready/", timeout=10)
-check("/ready/ returns 200", ready.status == 200)
-
+# E2E_INSECURE=1 for the HTTPS rehearsal, whose certificate comes from Caddy's internal (self-signed) CA.
+INSECURE = os.environ.get("E2E_INSECURE") == "1"
 with sync_playwright() as p:
-    browser = p.chromium.launch()
-    page = browser.new_page(viewport={"width": 1280, "height": 1000})
+    browser = p.chromium.launch(args=["--host-resolver-rules=MAP *.localhost 127.0.0.1"])
+    page = browser.new_page(viewport={"width": 1280, "height": 1000}, ignore_https_errors=INSECURE)
+    # Through the browser's own resolver (it maps *.localhost to loopback; Python's doesn't).
+    check("/ready/ returns 200", page.goto(f"{API}/ready/").status == 200)
     page.goto(f"{BASE}/admin/login")
     page.fill("#email", "admin@example.test"); page.fill("#password", ADMIN_PW)
     page.click("button:has-text('Sign in')")
