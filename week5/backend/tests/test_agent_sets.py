@@ -145,5 +145,5 @@ def test_dev_shares_no_evidence_document_with_the_holdouts_policy_question():
 
 
 def test_no_dev_or_tuning_code_reads_the_holdout():
-    readers = {p.name for p in (frozen.ROOT.parent / "agent").rglob("*.py") if "AGENT_HOLDOUT" in p.read_text() or "agent_holdout" in p.read_text()}
+    readers = {p.name for p in (frozen.ROOT.parent / "agent").rglob("*.py") if "AGENT_HOLDOUT" in p.read_text() or "agent_fresh" in p.read_text()}
     assert readers <= {"agent_eval.py"}, readers

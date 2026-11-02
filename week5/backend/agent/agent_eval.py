@@ -260,7 +260,7 @@ def evaluate_round2(llm, embedder, base_seed: int) -> dict:
         transaction.set_rollback(True)
     ok = lambda g: all(x["passed"] for x in g.values())
     return {**_header(llm, embedder, seeds, snapshot),
-            "frozen_sha256": {k: frozen.WEEK5_FROZEN_SHA256[k] for k in ("eval/agent_tasks.json", "eval/agent_redteam.json", "eval/agent_holdout.json")},
+            "frozen_sha256": {k: frozen.WEEK5_FROZEN_SHA256[k] for k in ("eval/agent_tasks.json", "eval/agent_redteam.json", "eval/agent_fresh.json")},
             "second_run": {"label": "second run after eval-informed fixes", "today": sets["today"], "tasks": f_tasks,
                            "recovery": f_rec, "gate": f_gate, "gate_passed": ok(f_gate), "recovery_passed": ok(f_rec),
                            "summary": summarise(sets["tasks"], f_tasks)},

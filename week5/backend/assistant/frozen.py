@@ -103,5 +103,5 @@ WEEK5_FROZEN_SHA256["eval/agent_redteam.json"] = "99f84d666ba1e06f2c6b3429eb52e1
 
 # Step 8 round 2 (2026-11-02): a fresh agent holdout, all written by the user, frozen before any round-2 code.
 # The clean measure for round 2 (the frozen agent sets above informed the fixes). Fixed clock 2026-11-26.
-AGENT_HOLDOUT = ROOT / "eval" / "agent_holdout.json"
-WEEK5_FROZEN_SHA256["eval/agent_holdout.json"] = "57566b070c66a2331250618cb6bcae95e778d86e3a989c7fb97c5cb6afd82284"
+AGENT_HOLDOUT = ROOT / "eval" / "agent_fresh.json"  # not "*holdout*": tests/test_holdout.py reserves that name for the ML holdout
+WEEK5_FROZEN_SHA256["eval/agent_fresh.json"] = "57566b070c66a2331250618cb6bcae95e778d86e3a989c7fb97c5cb6afd82284"
