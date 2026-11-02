@@ -16,3 +16,4 @@ scikit-learn==1.9.1
 scipy==1.18.1
 joblib==1.6.0
 threadpoolctl==3.7.0
+mcp==2.3.0  # Week 5 Step 9: the official MCP Python SDK (stdio server)

@@ -223,6 +223,7 @@ run_tool(name, args, ctx) ── authorise (ctx.user's role, every call) ── 
 - **Deadlines:** a slow call is ended by its own client timeout; a result that arrives after the tool's
   deadline is discarded. This isn't pre-emptive, because Python can't safely kill a thread that holds a database connection.
 - There is no endpoint in Step 6. The Step 8 agent endpoint will be the only way in.
+- **MCP (Step 9):** the same 4 read tools over stdio, through `run_tool`, for local MCP clients; see [MCP.md](MCP.md).
 - **Writes (Step 7) need a human.** `book_mock_appointment` only stores a pending action. A human confirms through
   `/api/v1/agent/actions/<id>/confirm/`, which is not a tool, with an `Idempotency-Key`. Authorisation and the slot
   are re-checked at confirmation, and a unique constraint (clinician, date, time) decides races.

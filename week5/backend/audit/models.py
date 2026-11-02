@@ -36,6 +36,9 @@ class AuditEvent(models.Model):
         AGENT_ACTION_EXPIRED = "agent.action_expired", "A proposed write expired unconfirmed"
         AGENT_ACTION_FAILED = "agent.action_failed", "A confirmed write failed: the slot was already taken"
         AGENT_RUN = "agent.run", "Admin ran the agent (run id and outcome only)"
+        MCP_TOKEN_ISSUED = "mcp.token_issued", "An MCP access token was issued (token id only)"
+        MCP_TOKEN_REVOKED = "mcp.token_revoked", "An MCP access token was revoked"
+        MCP_TOKEN_FIRST_USED = "mcp.token_first_used", "An MCP access token was used for the first time"
 
     created_at = models.DateTimeField(auto_now_add=True)
     # Stable identifiers, not live links: DO_NOTHING + db_constraint=False means deleting the user or

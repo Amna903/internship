@@ -309,8 +309,8 @@ Code comments in `ml/` and `assistant/` point here. Kept word for word from [REQ
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| P1 | Integrate one MCP server/tool where feasible, or an equivalent typed tool adapter | 9 | ☐ | | | | |
-| P2 | Explain how MCP permissions, inputs and outputs are handled | 9 | ☐ | | | | |
+| P1 | Integrate one MCP server/tool where feasible, or an equivalent typed tool adapter | 9 | ☑ | A real MCP server built with the official Python SDK (`mcp==2.3.0`), over stdio: `agent/mcp_server.py`, `manage.py run_mcp_server`. It exposes the 4 read tools from the agent's registry, through the same `run_tool`. Access is by short-lived, hashed, revocable tokens (`agent/mcp_tokens.py`), rate-limited at 30 calls per minute per token | `tests/test_agent_mcp.py` (the in-process SDK client, plus a real stdio subprocess) | | |
+| P2 | Explain how MCP permissions, inputs and outputs are handled | 9 | ☑ | [MCP.md](MCP.md): permissions (token identity re-checked per call, read-only, rate limit), inputs (registry schemas, validation), outputs (structured content, caps, untrusted marking, typed errors), audit, and a threat model including the plain-text token in the client's config | `tests/test_agent_mcp.py`, `tests/test_docs.py` (links) | | |
 
 ## Background jobs
 

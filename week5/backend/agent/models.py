@@ -71,3 +71,30 @@ class AgentRun(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class McpToken(models.Model):
+    """A short-lived MCP access token (Week 5 Step 9). Only the SHA-256 of the token is stored; the token itself
+    is shown once when issued. The holder acts as `user`, re-checked on every call."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="+")
+    token_sha256 = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    first_used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+
+class McpTokenUse(models.Model):
+    """Calls per token per minute, in the database so the limit holds across server processes."""
+
+    token = models.ForeignKey(McpToken, on_delete=models.CASCADE, related_name="+")
+    minute = models.DateTimeField()
+    calls = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["token", "minute"], name="one_counter_per_token_minute")]

@@ -690,3 +690,13 @@ A running record, added to as each step lands. The full decision history is in
 
   The agent writes its own query, so Step 13 must record per run whether the injection was actually retrieved.
 - **Verification:** full suite 1454 passed, 1 skipped; agent files on PostgreSQL 295 passed.
+
+## Step 9: MCP server
+
+- **Rules first (`0bcaf91`).** User's choices: stdio, short-lived admin-issued tokens, the 4 read tools only. Two additions:
+  - the threat model states that the token sits in plain text in the MCP client's config, with a short default lifetime and documented revocation;
+  - a per-token rate limit, tested.
+- **SDK version checked before any code:** `mcp` 2.3.0 (released 2026-10-02, a month old) installs on Python 3.14. Its v2 API differs from v1 (handlers are passed to `Server(...)`, and `Client` connects in-process or over stdio), so the code follows v2.
+- **One test problem, solved without changing the server:** the SDK's in-process server handles requests on another thread, so its database connection couldn't see the test's uncommitted rows ("database table is locked"). Driving the client through asgiref's `async_to_sync` runs the server's `sync_to_async(thread_sensitive=True)` work on the test's own thread, which is asgiref's documented behaviour.
+- **The rate limit is stored in the database**, so a stolen token can't escape it by starting several server processes.
+- **Verification:** 26 MCP tests, including a real stdio subprocess (migrate a temporary database, issue a token with the command, list tools and call one through `run_mcp_server`).
