@@ -119,13 +119,13 @@ Status: ☐ not started · ◐ in progress · ☑ done and evidenced. The **Me**
 
 | # | Requirement (brief wording) | Step | Status | Code | Test | Demo | Me |
 |---|---|---|---|---|---|---|---|
-| CI1 | Lint/format | 5 | ☐ | | | | |
-| CI2 | Unit tests | 5 | ☐ | | | | |
-| CI3 | API integration tests | 5 | ☐ | | | | |
-| CI4 | Model-pipeline smoke tests | 5 | ☐ | | | | |
-| CI5 | RAG regression tests | 5 | ☐ | | | | |
-| CI6 | Frontend build checks | 5 | ☐ | | | | |
-| CI7 | Publish a passing run | 5 | ☐ | | | | |
+| CI1 | Lint/format | 5 | ☑ | `backend/ruff.toml`, `frontend/eslint.config.mjs`, `.prettierrc.json`; CI step "Lint and format" | ruff check/format, ESLint, Prettier check | | |
+| CI2 | Unit tests | 5 | ☑ | CI step "Unit and API integration tests" (`-m "not rag and not ml_pipeline"`) | 694 passed (sqlite and postgres) | | |
+| CI3 | API integration tests | 5 | ☑ | `e2e/api_integration.py` in the `docker stack` job (PRs and manual runs only) | 10/10 against running containers | | |
+| CI4 | Model-pipeline smoke tests | 5 | ☑ | CI step "Model-pipeline smoke tests" (`-m ml_pipeline`) | 274 passed | | |
+| CI5 | RAG regression tests | 5 | ☑ | CI step "RAG regression tests" (`-m rag`) | 605 passed; `tests/test_ci_groups.py` | | |
+| CI6 | Frontend build checks | 5 | ☑ | `frontend` job: lint, format check, typecheck, vitest, `next build` | 62 vitest | | |
+| CI7 | Publish a passing run | 5 | ☑ | All 7 jobs green, including the Docker job | [run 41479939168](https://github.com/AmanAtiq/healthprofile/actions/runs/41479939168) | | |
 
 ## APIs and artifacts
 
