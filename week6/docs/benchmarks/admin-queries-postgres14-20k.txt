@@ -1,0 +1,361 @@
+# Admin endpoint query plans (SYNTHETIC DATA: not a production latency prediction)
+Database: PostgreSQL 14.21 (Homebrew) on aarch64-apple-darwin24.6.0, compiled by Apple clang version 17.0.0 (clang-1700.6.3.2), 64-bit
+Rows: 20007 users, 20006 profiles, 60000 audit events
+Data: seed_demo --bulk / --bulk-audit (random.Random(42), fictional names, .test emails)
+Indexes:
+  accounts_user.accounts_user_email_b2644a56_like: CREATE INDEX accounts_user_email_b2644a56_like ON public.accounts_user USING btree (email varchar_pattern_ops)
+  accounts_user.accounts_user_email_key: CREATE UNIQUE INDEX accounts_user_email_key ON public.accounts_user USING btree (email)
+  accounts_user.accounts_user_pkey: CREATE UNIQUE INDEX accounts_user_pkey ON public.accounts_user USING btree (id)
+  audit_auditevent.audit_action_created_idx: CREATE INDEX audit_action_created_idx ON public.audit_auditevent USING btree (action, created_at DESC)
+  audit_auditevent.audit_auditevent_actor_id_270bb4b7: CREATE INDEX audit_auditevent_actor_id_270bb4b7 ON public.audit_auditevent USING btree (actor_id)
+  audit_auditevent.audit_auditevent_pkey: CREATE UNIQUE INDEX audit_auditevent_pkey ON public.audit_auditevent USING btree (id)
+  audit_auditevent.audit_profile_created_idx: CREATE INDEX audit_profile_created_idx ON public.audit_auditevent USING btree (profile_id, created_at DESC)
+  profiles_healthprofile.hp_completion_created_idx: CREATE INDEX hp_completion_created_idx ON public.profiles_healthprofile USING btree (completion_status, created_at DESC)
+  profiles_healthprofile.hp_full_name_idx: CREATE INDEX hp_full_name_idx ON public.profiles_healthprofile USING btree (full_name)
+  profiles_healthprofile.hp_status_created_idx: CREATE INDEX hp_status_created_idx ON public.profiles_healthprofile USING btree (status, created_at DESC)
+  profiles_healthprofile.profiles_healthprofile_pkey: CREATE UNIQUE INDEX profiles_healthprofile_pkey ON public.profiles_healthprofile USING btree (id)
+  profiles_healthprofile.profiles_healthprofile_user_id_key: CREATE UNIQUE INDEX profiles_healthprofile_user_id_key ON public.profiles_healthprofile USING btree (user_id)
+
+## GET /api/admin/profiles/?status=active
+
+### paginator COUNT
+SELECT COUNT(*) AS "__count" FROM "profiles_healthprofile" WHERE "profiles_healthprofile"."status" = 'active'
+-- with indexes: median 3.632 ms over 5 runs
+   Aggregate  (cost=1195.04..1195.05 rows=1 width=8) (actual time=3.610..3.610 rows=1 loops=1)
+     Buffers: shared hit=900
+     ->  Seq Scan on profiles_healthprofile  (cost=0.00..1150.08 rows=17987 width=0) (actual time=0.002..2.936 rows=17987 loops=1)
+           Filter: ((status)::text = 'active'::text)
+           Rows Removed by Filter: 2019
+           Buffers: shared hit=900
+   Planning Time: 0.014 ms
+   Execution Time: 3.613 ms
+-- without hp_status_created_idx: median 3.615 ms over 5 runs
+   Aggregate  (cost=1195.04..1195.05 rows=1 width=8) (actual time=3.609..3.609 rows=1 loops=1)
+     Buffers: shared hit=900
+     ->  Seq Scan on profiles_healthprofile  (cost=0.00..1150.08 rows=17987 width=0) (actual time=0.002..2.928 rows=17987 loops=1)
+           Filter: ((status)::text = 'active'::text)
+           Rows Removed by Filter: 2019
+           Buffers: shared hit=900
+   Planning Time: 0.011 ms
+   Execution Time: 3.612 ms
+
+### page of rows
+SELECT "profiles_healthprofile"."id", "profiles_healthprofile"."user_id", "profiles_healthprofile"."full_name", "profiles_healthprofile"."date_of_birth", "profiles_healthprofile"."age_range", "profiles_healthprofile"."contact_preference", "profiles_healthprofile"."wellness_goals", "profiles_healthprofile"."allergies", "profiles_healthprofile"."emergency_contact_name", "profiles_healthprofile"."emergency_contact_phone", "profiles_healthprofile"."emergency_contact_relationship", "profiles_healthprofile"."lifestyle_notes", "profiles_healthprofile"."status", "profiles_healthprofile"."completion_status", "profiles_healthprofile"."deactivated_at", "profiles_healthprofile"."created_at", "profiles_healthprofile"."updated_at", "accounts_user"."id", "accounts_user"."password", "accounts_user"."last_login", "accounts_user"."email", "accounts_user"."role", "accounts_user"."is_active", "accounts_user"."date_joined" FROM "profiles_healthprofile" INNER JOIN "accounts_user" ON ("profiles_healthprofile"."user_id" = "accounts_user"."id") WHERE "profiles_healthprofile"."status" = 'active' ORDER BY "profiles_healthprofile"."created_at" DESC, "profiles_healthprofile"."id" DESC LIMIT 10
+-- with indexes: median 0.086 ms over 5 runs
+   Limit  (cost=1.18..7.53 rows=10 width=239) (actual time=0.074..0.075 rows=10 loops=1)
+     Buffers: shared hit=160
+     ->  Incremental Sort  (cost=1.18..11423.19 rows=17987 width=239) (actual time=0.074..0.075 rows=10 loops=1)
+           Sort Key: profiles_healthprofile.created_at DESC, profiles_healthprofile.id DESC
+           Presorted Key: profiles_healthprofile.created_at
+           Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 29kB  Peak Memory: 29kB
+           Buffers: shared hit=160
+           ->  Nested Loop  (cost=0.57..10613.77 rows=17987 width=239) (actual time=0.054..0.067 rows=11 loops=1)
+                 Buffers: shared hit=160
+                 ->  Index Scan using hp_status_created_idx on profiles_healthprofile  (cost=0.29..3639.84 rows=17987 width=143) (actual time=0.052..0.055 rows=11 loops=1)
+                       Index Cond: ((status)::text = 'active'::text)
+                       Buffers: shared hit=127
+                 ->  Index Scan using accounts_user_pkey on accounts_user  (cost=0.29..0.39 rows=1 width=96) (actual time=0.001..0.001 rows=1 loops=11)
+                       Index Cond: (id = profiles_healthprofile.user_id)
+                       Buffers: shared hit=33
+   Planning:
+     Buffers: shared hit=12
+   Planning Time: 0.078 ms
+   Execution Time: 0.085 ms
+-- without hp_status_created_idx: median 25.805 ms over 5 runs
+   Limit  (cost=2331.20..2331.23 rows=10 width=239) (actual time=25.652..25.653 rows=10 loops=1)
+     Buffers: shared hit=1215
+     ->  Sort  (cost=2331.20..2376.17 rows=17987 width=239) (actual time=25.652..25.652 rows=10 loops=1)
+           Sort Key: profiles_healthprofile.created_at DESC, profiles_healthprofile.id DESC
+           Sort Method: top-N heapsort  Memory: 29kB
+           Buffers: shared hit=1215
+           ->  Hash Join  (cost=1374.91..1942.51 rows=17987 width=239) (actual time=10.625..17.807 rows=17987 loops=1)
+                 Hash Cond: (accounts_user.id = profiles_healthprofile.user_id)
+                 Buffers: shared hit=1215
+                 ->  Seq Scan on accounts_user  (cost=0.00..515.07 rows=20007 width=96) (actual time=0.002..1.257 rows=20007 loops=1)
+                       Buffers: shared hit=315
+                 ->  Hash  (cost=1150.08..1150.08 rows=17987 width=143) (actual time=10.618..10.618 rows=17987 loops=1)
+                       Buckets: 32768  Batches: 1  Memory Usage: 3391kB
+                       Buffers: shared hit=900
+                       ->  Seq Scan on profiles_healthprofile  (cost=0.00..1150.08 rows=17987 width=143) (actual time=0.002..4.846 rows=17987 loops=1)
+                             Filter: ((status)::text = 'active'::text)
+                             Rows Removed by Filter: 2019
+                             Buffers: shared hit=900
+   Planning:
+     Buffers: shared hit=12
+   Planning Time: 0.072 ms
+   Execution Time: 25.805 ms
+
+## GET /api/admin/profiles/?completion=incomplete
+
+### paginator COUNT
+SELECT COUNT(*) AS "__count" FROM "profiles_healthprofile" WHERE "profiles_healthprofile"."completion_status" = 'incomplete'
+-- with indexes: median 3.530 ms over 5 runs
+   Aggregate  (cost=1170.05..1170.06 rows=1 width=8) (actual time=3.527..3.528 rows=1 loops=1)
+     Buffers: shared hit=900
+     ->  Seq Scan on profiles_healthprofile  (cost=0.00..1150.08 rows=7991 width=0) (actual time=0.002..3.228 rows=7991 loops=1)
+           Filter: ((completion_status)::text = 'incomplete'::text)
+           Rows Removed by Filter: 12015
+           Buffers: shared hit=900
+   Planning Time: 0.014 ms
+   Execution Time: 3.530 ms
+-- without hp_completion_created_idx: median 3.541 ms over 5 runs
+   Aggregate  (cost=1170.05..1170.06 rows=1 width=8) (actual time=3.538..3.539 rows=1 loops=1)
+     Buffers: shared hit=900
+     ->  Seq Scan on profiles_healthprofile  (cost=0.00..1150.08 rows=7991 width=0) (actual time=0.002..3.238 rows=7991 loops=1)
+           Filter: ((completion_status)::text = 'incomplete'::text)
+           Rows Removed by Filter: 12015
+           Buffers: shared hit=900
+   Planning Time: 0.011 ms
+   Execution Time: 3.541 ms
+
+### page of rows
+SELECT "profiles_healthprofile"."id", "profiles_healthprofile"."user_id", "profiles_healthprofile"."full_name", "profiles_healthprofile"."date_of_birth", "profiles_healthprofile"."age_range", "profiles_healthprofile"."contact_preference", "profiles_healthprofile"."wellness_goals", "profiles_healthprofile"."allergies", "profiles_healthprofile"."emergency_contact_name", "profiles_healthprofile"."emergency_contact_phone", "profiles_healthprofile"."emergency_contact_relationship", "profiles_healthprofile"."lifestyle_notes", "profiles_healthprofile"."status", "profiles_healthprofile"."completion_status", "profiles_healthprofile"."deactivated_at", "profiles_healthprofile"."created_at", "profiles_healthprofile"."updated_at", "accounts_user"."id", "accounts_user"."password", "accounts_user"."last_login", "accounts_user"."email", "accounts_user"."role", "accounts_user"."is_active", "accounts_user"."date_joined" FROM "profiles_healthprofile" INNER JOIN "accounts_user" ON ("profiles_healthprofile"."user_id" = "accounts_user"."id") WHERE "profiles_healthprofile"."completion_status" = 'incomplete' ORDER BY "profiles_healthprofile"."created_at" DESC, "profiles_healthprofile"."id" DESC LIMIT 10
+-- with indexes: median 0.070 ms over 5 runs
+   Limit  (cost=1.67..11.77 rows=10 width=239) (actual time=0.057..0.059 rows=10 loops=1)
+     Buffers: shared hit=111
+     ->  Incremental Sort  (cost=1.67..8066.95 rows=7991 width=239) (actual time=0.057..0.058 rows=10 loops=1)
+           Sort Key: profiles_healthprofile.created_at DESC, profiles_healthprofile.id DESC
+           Presorted Key: profiles_healthprofile.created_at
+           Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 27kB  Peak Memory: 27kB
+           Buffers: shared hit=111
+           ->  Nested Loop  (cost=0.70..7707.36 rows=7991 width=239) (actual time=0.038..0.051 rows=11 loops=1)
+                 Buffers: shared hit=111
+                 ->  Index Scan using hp_completion_created_idx on profiles_healthprofile  (cost=0.41..3782.10 rows=7991 width=143) (actual time=0.036..0.039 rows=11 loops=1)
+                       Index Cond: ((completion_status)::text = 'incomplete'::text)
+                       Buffers: shared hit=78
+                 ->  Index Scan using accounts_user_pkey on accounts_user  (cost=0.29..0.49 rows=1 width=96) (actual time=0.001..0.001 rows=1 loops=11)
+                       Index Cond: (id = profiles_healthprofile.user_id)
+                       Buffers: shared hit=33
+   Planning:
+     Buffers: shared hit=12
+   Planning Time: 0.076 ms
+   Execution Time: 0.068 ms
+-- without hp_completion_created_idx: median 14.826 ms over 5 runs
+   Limit  (cost=1990.24..1990.27 rows=10 width=239) (actual time=14.708..14.710 rows=10 loops=1)
+     Buffers: shared hit=1215
+     ->  Sort  (cost=1990.24..2010.22 rows=7991 width=239) (actual time=14.708..14.709 rows=10 loops=1)
+           Sort Key: profiles_healthprofile.created_at DESC, profiles_healthprofile.id DESC
+           Sort Method: top-N heapsort  Memory: 27kB
+           Buffers: shared hit=1215
+           ->  Hash Join  (cost=1249.96..1817.56 rows=7991 width=239) (actual time=6.307..11.369 rows=7991 loops=1)
+                 Hash Cond: (accounts_user.id = profiles_healthprofile.user_id)
+                 Buffers: shared hit=1215
+                 ->  Seq Scan on accounts_user  (cost=0.00..515.07 rows=20007 width=96) (actual time=0.002..1.101 rows=20007 loops=1)
+                       Buffers: shared hit=315
+                 ->  Hash  (cost=1150.08..1150.08 rows=7991 width=143) (actual time=6.297..6.297 rows=7991 loops=1)
+                       Buckets: 8192  Batches: 1  Memory Usage: 1335kB
+                       Buffers: shared hit=900
+                       ->  Seq Scan on profiles_healthprofile  (cost=0.00..1150.08 rows=7991 width=143) (actual time=0.003..3.895 rows=7991 loops=1)
+                             Filter: ((completion_status)::text = 'incomplete'::text)
+                             Rows Removed by Filter: 12015
+                             Buffers: shared hit=900
+   Planning:
+     Buffers: shared hit=12
+   Planning Time: 0.090 ms
+   Execution Time: 14.826 ms
+
+## GET /api/admin/profiles/?ordering=full_name
+
+### paginator COUNT
+SELECT COUNT(*) AS "__count" FROM "profiles_healthprofile"
+-- with indexes: median 1.941 ms over 5 runs
+   Aggregate  (cost=1150.08..1150.09 rows=1 width=8) (actual time=1.936..1.936 rows=1 loops=1)
+     Buffers: shared hit=900
+     ->  Seq Scan on profiles_healthprofile  (cost=0.00..1100.06 rows=20006 width=0) (actual time=0.001..1.186 rows=20006 loops=1)
+           Buffers: shared hit=900
+   Planning Time: 0.014 ms
+   Execution Time: 1.939 ms
+-- without hp_full_name_idx: median 1.942 ms over 5 runs
+   Aggregate  (cost=1150.08..1150.09 rows=1 width=8) (actual time=1.939..1.940 rows=1 loops=1)
+     Buffers: shared hit=900
+     ->  Seq Scan on profiles_healthprofile  (cost=0.00..1100.06 rows=20006 width=0) (actual time=0.001..1.189 rows=20006 loops=1)
+           Buffers: shared hit=900
+   Planning Time: 0.012 ms
+   Execution Time: 1.942 ms
+
+### page of rows
+SELECT "profiles_healthprofile"."id", "profiles_healthprofile"."user_id", "profiles_healthprofile"."full_name", "profiles_healthprofile"."date_of_birth", "profiles_healthprofile"."age_range", "profiles_healthprofile"."contact_preference", "profiles_healthprofile"."wellness_goals", "profiles_healthprofile"."allergies", "profiles_healthprofile"."emergency_contact_name", "profiles_healthprofile"."emergency_contact_phone", "profiles_healthprofile"."emergency_contact_relationship", "profiles_healthprofile"."lifestyle_notes", "profiles_healthprofile"."status", "profiles_healthprofile"."completion_status", "profiles_healthprofile"."deactivated_at", "profiles_healthprofile"."created_at", "profiles_healthprofile"."updated_at", "accounts_user"."id", "accounts_user"."password", "accounts_user"."last_login", "accounts_user"."email", "accounts_user"."role", "accounts_user"."is_active", "accounts_user"."date_joined" FROM "profiles_healthprofile" INNER JOIN "accounts_user" ON ("profiles_healthprofile"."user_id" = "accounts_user"."id") ORDER BY "profiles_healthprofile"."full_name" ASC, "profiles_healthprofile"."id" DESC LIMIT 10
+-- with indexes: median 0.367 ms over 5 runs
+   Limit  (cost=71.28..77.53 rows=10 width=239) (actual time=0.296..0.297 rows=10 loops=1)
+     Buffers: shared hit=714
+     ->  Incremental Sort  (cost=71.28..12581.16 rows=20006 width=239) (actual time=0.296..0.296 rows=10 loops=1)
+           Sort Key: profiles_healthprofile.full_name, profiles_healthprofile.id DESC
+           Presorted Key: profiles_healthprofile.full_name
+           Full-sort Groups: 1  Sort Method: top-N heapsort  Average Memory: 32kB  Peak Memory: 32kB
+           Pre-sorted Groups: 1  Sort Method: top-N heapsort  Average Memory: 32kB  Peak Memory: 32kB
+           Buffers: shared hit=714
+           ->  Nested Loop  (cost=0.57..11654.11 rows=20006 width=239) (actual time=0.021..0.223 rows=128 loops=1)
+                 Buffers: shared hit=714
+                 ->  Index Scan using hp_full_name_idx on profiles_healthprofile  (cost=0.29..4064.38 rows=20006 width=143) (actual time=0.018..0.076 rows=128 loops=1)
+                       Buffers: shared hit=324
+                 ->  Index Scan using accounts_user_pkey on accounts_user  (cost=0.29..0.38 rows=1 width=96) (actual time=0.001..0.001 rows=1 loops=128)
+                       Index Cond: (id = profiles_healthprofile.user_id)
+                       Buffers: shared hit=387
+   Planning:
+     Buffers: shared hit=12
+   Planning Time: 0.075 ms
+   Execution Time: 0.364 ms
+-- without hp_full_name_idx: median 30.017 ms over 5 runs
+   Limit  (cost=2350.07..2350.09 rows=10 width=239) (actual time=29.900..29.901 rows=10 loops=1)
+     Buffers: shared hit=1215
+     ->  Sort  (cost=2350.07..2400.08 rows=20006 width=239) (actual time=29.900..29.900 rows=10 loops=1)
+           Sort Key: profiles_healthprofile.full_name, profiles_healthprofile.id DESC
+           Sort Method: top-N heapsort  Memory: 31kB
+           Buffers: shared hit=1215
+           ->  Hash Join  (cost=765.16..1917.74 rows=20006 width=239) (actual time=2.456..11.448 rows=20006 loops=1)
+                 Hash Cond: (profiles_healthprofile.user_id = accounts_user.id)
+                 Buffers: shared hit=1215
+                 ->  Seq Scan on profiles_healthprofile  (cost=0.00..1100.06 rows=20006 width=143) (actual time=0.002..4.117 rows=20006 loops=1)
+                       Buffers: shared hit=900
+                 ->  Hash  (cost=515.07..515.07 rows=20007 width=96) (actual time=2.449..2.450 rows=20007 loops=1)
+                       Buckets: 32768  Batches: 1  Memory Usage: 2602kB
+                       Buffers: shared hit=315
+                       ->  Seq Scan on accounts_user  (cost=0.00..515.07 rows=20007 width=96) (actual time=0.002..1.043 rows=20007 loops=1)
+                             Buffers: shared hit=315
+   Planning:
+     Buffers: shared hit=12
+   Planning Time: 0.068 ms
+   Execution Time: 30.017 ms
+
+## GET /api/admin/profiles/?search=khan  (ILIKE '%khan%': no B-tree index can serve it)
+
+### paginator COUNT
+SELECT COUNT(*) AS "__count" FROM "profiles_healthprofile" INNER JOIN "accounts_user" ON ("profiles_healthprofile"."user_id" = "accounts_user"."id") WHERE (UPPER("profiles_healthprofile"."full_name"::text) LIKE UPPER('%khan%') OR UPPER("accounts_user"."email"::text) LIKE UPPER('%khan%'))
+-- with indexes: median 18.960 ms over 5 runs
+   Aggregate  (cost=1918.53..1918.54 rows=1 width=8) (actual time=18.631..18.632 rows=1 loops=1)
+     Buffers: shared hit=1215
+     ->  Hash Join  (cost=765.16..1917.73 rows=319 width=0) (actual time=3.464..18.566 rows=1687 loops=1)
+           Hash Cond: (profiles_healthprofile.user_id = accounts_user.id)
+           Join Filter: ((upper((profiles_healthprofile.full_name)::text) ~~ '%KHAN%'::text) OR (upper((accounts_user.email)::text) ~~ '%KHAN%'::text))
+           Rows Removed by Join Filter: 18319
+           Buffers: shared hit=1215
+           ->  Seq Scan on profiles_healthprofile  (cost=0.00..1100.06 rows=20006 width=18) (actual time=0.002..3.127 rows=20006 loops=1)
+                 Buffers: shared hit=900
+           ->  Hash  (cost=515.07..515.07 rows=20007 width=32) (actual time=3.440..3.440 rows=20007 loops=1)
+                 Buckets: 32768  Batches: 1  Memory Usage: 1507kB
+                 Buffers: shared hit=315
+                 ->  Seq Scan on accounts_user  (cost=0.00..515.07 rows=20007 width=32) (actual time=0.002..1.631 rows=20007 loops=1)
+                       Buffers: shared hit=315
+   Planning:
+     Buffers: shared hit=12
+   Planning Time: 0.070 ms
+   Execution Time: 18.744 ms
+
+### page of rows
+SELECT "profiles_healthprofile"."id", "profiles_healthprofile"."user_id", "profiles_healthprofile"."full_name", "profiles_healthprofile"."date_of_birth", "profiles_healthprofile"."age_range", "profiles_healthprofile"."contact_preference", "profiles_healthprofile"."wellness_goals", "profiles_healthprofile"."allergies", "profiles_healthprofile"."emergency_contact_name", "profiles_healthprofile"."emergency_contact_phone", "profiles_healthprofile"."emergency_contact_relationship", "profiles_healthprofile"."lifestyle_notes", "profiles_healthprofile"."status", "profiles_healthprofile"."completion_status", "profiles_healthprofile"."deactivated_at", "profiles_healthprofile"."created_at", "profiles_healthprofile"."updated_at", "accounts_user"."id", "accounts_user"."password", "accounts_user"."last_login", "accounts_user"."email", "accounts_user"."role", "accounts_user"."is_active", "accounts_user"."date_joined" FROM "profiles_healthprofile" INNER JOIN "accounts_user" ON ("profiles_healthprofile"."user_id" = "accounts_user"."id") WHERE (UPPER("profiles_healthprofile"."full_name"::text) LIKE UPPER('%khan%') OR UPPER("accounts_user"."email"::text) LIKE UPPER('%khan%')) ORDER BY "profiles_healthprofile"."created_at" DESC, "profiles_healthprofile"."id" DESC LIMIT 10
+-- with indexes: median 20.183 ms over 5 runs
+   Limit  (cost=1924.63..1924.65 rows=10 width=239) (actual time=19.999..20.001 rows=10 loops=1)
+     Buffers: shared hit=1215
+     ->  Sort  (cost=1924.63..1925.42 rows=319 width=239) (actual time=19.999..20.000 rows=10 loops=1)
+           Sort Key: profiles_healthprofile.created_at DESC, profiles_healthprofile.id DESC
+           Sort Method: top-N heapsort  Memory: 29kB
+           Buffers: shared hit=1215
+           ->  Hash Join  (cost=765.16..1917.73 rows=319 width=239) (actual time=2.436..19.229 rows=1687 loops=1)
+                 Hash Cond: (profiles_healthprofile.user_id = accounts_user.id)
+                 Join Filter: ((upper((profiles_healthprofile.full_name)::text) ~~ '%KHAN%'::text) OR (upper((accounts_user.email)::text) ~~ '%KHAN%'::text))
+                 Rows Removed by Join Filter: 18319
+                 Buffers: shared hit=1215
+                 ->  Seq Scan on profiles_healthprofile  (cost=0.00..1100.06 rows=20006 width=143) (actual time=0.002..4.346 rows=20006 loops=1)
+                       Buffers: shared hit=900
+                 ->  Hash  (cost=515.07..515.07 rows=20007 width=96) (actual time=2.411..2.411 rows=20007 loops=1)
+                       Buckets: 32768  Batches: 1  Memory Usage: 2602kB
+                       Buffers: shared hit=315
+                       ->  Seq Scan on accounts_user  (cost=0.00..515.07 rows=20007 width=96) (actual time=0.002..1.027 rows=20007 loops=1)
+                             Buffers: shared hit=315
+   Planning:
+     Buffers: shared hit=12
+   Planning Time: 0.076 ms
+   Execution Time: 20.144 ms
+
+## GET /api/admin/audit-events/?profile=1622  (busiest profile, 13 events)
+
+### paginator COUNT
+SELECT COUNT(*) AS "__count" FROM "audit_auditevent" WHERE "audit_auditevent"."profile_id" = 1622
+-- with indexes: median 0.012 ms over 5 runs
+   Aggregate  (cost=55.19..55.20 rows=1 width=8) (actual time=0.008..0.008 rows=1 loops=1)
+     Buffers: shared hit=15
+     ->  Bitmap Heap Scan on audit_auditevent  (cost=4.40..55.15 rows=14 width=0) (actual time=0.003..0.007 rows=13 loops=1)
+           Recheck Cond: (profile_id = 1622)
+           Heap Blocks: exact=13
+           Buffers: shared hit=15
+           ->  Bitmap Index Scan on audit_profile_created_idx  (cost=0.00..4.40 rows=14 width=0) (actual time=0.002..0.002 rows=13 loops=1)
+                 Index Cond: (profile_id = 1622)
+                 Buffers: shared hit=2
+   Planning Time: 0.012 ms
+   Execution Time: 0.012 ms
+-- without audit_profile_created_idx: median 5.859 ms over 5 runs
+   Aggregate  (cost=1591.04..1591.05 rows=1 width=8) (actual time=5.751..5.751 rows=1 loops=1)
+     Buffers: shared hit=841
+     ->  Seq Scan on audit_auditevent  (cost=0.00..1591.00 rows=14 width=0) (actual time=1.673..5.750 rows=13 loops=1)
+           Filter: (profile_id = 1622)
+           Rows Removed by Filter: 59987
+           Buffers: shared hit=841
+   Planning Time: 0.010 ms
+   Execution Time: 5.754 ms
+
+### page of rows
+SELECT "audit_auditevent"."id", "audit_auditevent"."created_at", "audit_auditevent"."actor_id", "audit_auditevent"."actor_role", "audit_auditevent"."action", "audit_auditevent"."profile_id", "audit_auditevent"."changed_fields", "audit_auditevent"."request_id", EXISTS(SELECT 1 AS "a" FROM "profiles_healthprofile" U0 WHERE U0."id" = ("audit_auditevent"."profile_id") LIMIT 1) AS "profile_exists", EXISTS(SELECT 1 AS "a" FROM "accounts_user" U0 WHERE U0."id" = ("audit_auditevent"."actor_id") LIMIT 1) AS "actor_exists", "accounts_user"."id", "accounts_user"."password", "accounts_user"."last_login", "accounts_user"."email", "accounts_user"."role", "accounts_user"."is_active", "accounts_user"."date_joined" FROM "audit_auditevent" LEFT OUTER JOIN "accounts_user" ON ("audit_auditevent"."actor_id" = "accounts_user"."id") WHERE "audit_auditevent"."profile_id" = 1622 ORDER BY "audit_auditevent"."created_at" DESC, "audit_auditevent"."id" DESC LIMIT 10
+-- with indexes: median 0.058 ms over 5 runs
+   Limit  (cost=12.89..293.77 rows=10 width=171) (actual time=0.024..0.042 rows=10 loops=1)
+     Buffers: shared hit=106
+     ->  Result  (cost=12.89..406.12 rows=14 width=171) (actual time=0.024..0.041 rows=10 loops=1)
+           Buffers: shared hit=106
+           ->  Incremental Sort  (cost=12.89..173.44 rows=14 width=169) (actual time=0.020..0.021 rows=10 loops=1)
+                 Sort Key: audit_auditevent.created_at DESC, audit_auditevent.id DESC
+                 Presorted Key: audit_auditevent.created_at
+                 Full-sort Groups: 1  Sort Method: quicksort  Average Memory: 27kB  Peak Memory: 27kB
+                 Buffers: shared hit=46
+                 ->  Nested Loop Left Join  (cost=0.58..172.81 rows=14 width=169) (actual time=0.004..0.016 rows=11 loops=1)
+                       Buffers: shared hit=46
+                       ->  Index Scan using audit_profile_created_idx on audit_auditevent  (cost=0.29..60.53 rows=14 width=73) (actual time=0.002..0.005 rows=11 loops=1)
+                             Index Cond: (profile_id = 1622)
+                             Buffers: shared hit=13
+                       ->  Index Scan using accounts_user_pkey on accounts_user  (cost=0.29..8.02 rows=1 width=96) (actual time=0.001..0.001 rows=1 loops=11)
+                             Index Cond: (id = audit_auditevent.actor_id)
+                             Buffers: shared hit=33
+           SubPlan 1
+             ->  Index Only Scan using profiles_healthprofile_pkey on profiles_healthprofile u0  (cost=0.29..8.30 rows=1 width=0) (actual time=0.001..0.001 rows=1 loops=10)
+                   Index Cond: (id = audit_auditevent.profile_id)
+                   Heap Fetches: 10
+                   Buffers: shared hit=30
+           SubPlan 3
+             ->  Index Only Scan using accounts_user_pkey on accounts_user u0_1  (cost=0.29..8.30 rows=1 width=0) (actual time=0.001..0.001 rows=1 loops=10)
+                   Index Cond: (id = audit_auditevent.actor_id)
+                   Heap Fetches: 10
+                   Buffers: shared hit=30
+   Planning:
+     Buffers: shared hit=12
+   Planning Time: 0.111 ms
+   Execution Time: 0.055 ms
+-- without audit_profile_created_idx: median 5.785 ms over 5 runs
+   Limit  (cost=1703.54..1869.76 rows=10 width=171) (actual time=5.753..5.772 rows=10 loops=1)
+     Buffers: shared hit=940
+     ->  Result  (cost=1703.54..1936.25 rows=14 width=171) (actual time=5.753..5.771 rows=10 loops=1)
+           Buffers: shared hit=940
+           ->  Sort  (cost=1703.54..1703.57 rows=14 width=169) (actual time=5.749..5.750 rows=10 loops=1)
+                 Sort Key: audit_auditevent.created_at DESC, audit_auditevent.id DESC
+                 Sort Method: quicksort  Memory: 28kB
+                 Buffers: shared hit=880
+                 ->  Nested Loop Left Join  (cost=0.29..1703.27 rows=14 width=169) (actual time=1.660..5.745 rows=13 loops=1)
+                       Buffers: shared hit=880
+                       ->  Seq Scan on audit_auditevent  (cost=0.00..1591.00 rows=14 width=73) (actual time=1.658..5.729 rows=13 loops=1)
+                             Filter: (profile_id = 1622)
+                             Rows Removed by Filter: 59987
+                             Buffers: shared hit=841
+                       ->  Index Scan using accounts_user_pkey on accounts_user  (cost=0.29..8.02 rows=1 width=96) (actual time=0.001..0.001 rows=1 loops=13)
+                             Index Cond: (id = audit_auditevent.actor_id)
+                             Buffers: shared hit=39
+           SubPlan 1
+             ->  Index Only Scan using profiles_healthprofile_pkey on profiles_healthprofile u0  (cost=0.29..8.30 rows=1 width=0) (actual time=0.001..0.001 rows=1 loops=10)
+                   Index Cond: (id = audit_auditevent.profile_id)
+                   Heap Fetches: 10
+                   Buffers: shared hit=30
+           SubPlan 3
+             ->  Index Only Scan using accounts_user_pkey on accounts_user u0_1  (cost=0.29..8.30 rows=1 width=0) (actual time=0.001..0.001 rows=1 loops=10)
+                   Index Cond: (id = audit_auditevent.actor_id)
+                   Heap Fetches: 10
+                   Buffers: shared hit=30
+   Planning:
+     Buffers: shared hit=12
+   Planning Time: 0.102 ms
+   Execution Time: 5.783 ms

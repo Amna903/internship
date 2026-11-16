@@ -1,0 +1,4438 @@
+{
+  "model": "llama3.2:3b",
+  "embedder": "ollama/nomic-embed-text:latest",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "settings": {
+    "A (shipped)": {
+      "floor": 0.7,
+      "top_k": 2,
+      "groundedness_threshold": 0.61
+    },
+    "B (comparison)": {
+      "floor": 0.7,
+      "top_k": 4,
+      "groundedness_threshold": 0.61
+    }
+  },
+  "frozen_eval_sha256": "a1584626df260e3fd29e840fb88a4a39be0f9bf588a13f17fa6ebd3baaad663b",
+  "results": {
+    "A (shipped)": {
+      "U1": [
+        {
+          "seed": 42,
+          "top_score": 0.5,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.5,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.5,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U2": [
+        {
+          "seed": 42,
+          "top_score": 0.494,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.494,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.494,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U3": [
+        {
+          "seed": 42,
+          "top_score": 0.664,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.664,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.664,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U3b": [
+        {
+          "seed": 42,
+          "top_score": 0.664,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.664,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.664,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U4": [
+        {
+          "seed": 42,
+          "top_score": 0.767,
+          "status": "insufficient_information",
+          "reason": "no citation",
+          "public_reason": "could_not_verify_answer",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "cancellation.md#0",
+              "source": "cancellation.md",
+              "similarity": 0.767
+            },
+            {
+              "passage_id": "cancellation.md#1",
+              "source": "cancellation.md",
+              "similarity": 0.76
+            }
+          ],
+          "tokens": 486,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.767,
+          "status": "insufficient_information",
+          "reason": "no citation",
+          "public_reason": "could_not_verify_answer",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "cancellation.md#0",
+              "source": "cancellation.md",
+              "similarity": 0.767
+            },
+            {
+              "passage_id": "cancellation.md#1",
+              "source": "cancellation.md",
+              "similarity": 0.76
+            }
+          ],
+          "tokens": 486,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.767,
+          "status": "insufficient_information",
+          "reason": "no citation",
+          "public_reason": "could_not_verify_answer",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "cancellation.md#0",
+              "source": "cancellation.md",
+              "similarity": 0.767
+            },
+            {
+              "passage_id": "cancellation.md#1",
+              "source": "cancellation.md",
+              "similarity": 0.76
+            }
+          ],
+          "tokens": 486,
+          "failures": []
+        }
+      ],
+      "U5": [
+        {
+          "seed": 42,
+          "top_score": 0.597,
+          "status": "refused",
+          "reason": "server medical-advice check",
+          "public_reason": "medical_advice_not_given",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.597,
+          "status": "refused",
+          "reason": "server medical-advice check",
+          "public_reason": "medical_advice_not_given",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.597,
+          "status": "refused",
+          "reason": "server medical-advice check",
+          "public_reason": "medical_advice_not_given",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U6": [
+        {
+          "seed": 42,
+          "top_score": 0.64,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.64,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.64,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U7": [
+        {
+          "seed": 42,
+          "top_score": 0.428,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.428,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.428,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U8": [
+        {
+          "seed": 42,
+          "top_score": 0.483,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.483,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.483,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U9": [
+        {
+          "seed": 42,
+          "top_score": 0.428,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.428,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.428,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U9b": [
+        {
+          "seed": 42,
+          "top_score": 0.389,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.389,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.389,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "A1": [
+        {
+          "seed": 42,
+          "top_score": 0.824,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "Appointments can be cancelled free of charge up to 24 hours before the start time.",
+          "citations": [
+            {
+              "passage_id": "cancellation.md#0",
+              "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "cancellation.md#0",
+              "source": "cancellation.md",
+              "similarity": 0.824
+            },
+            {
+              "passage_id": "cancellation.md#2",
+              "source": "cancellation.md",
+              "similarity": 0.752
+            }
+          ],
+          "tokens": 527,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.824,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "Appointments can be cancelled free of charge up to 24 hours before the start time.",
+          "citations": [
+            {
+              "passage_id": "cancellation.md#0",
+              "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "cancellation.md#0",
+              "source": "cancellation.md",
+              "similarity": 0.824
+            },
+            {
+              "passage_id": "cancellation.md#2",
+              "source": "cancellation.md",
+              "similarity": 0.752
+            }
+          ],
+          "tokens": 527,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.824,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "Appointments can be cancelled free of charge up to 24 hours before the start time.",
+          "citations": [
+            {
+              "passage_id": "cancellation.md#0",
+              "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "cancellation.md#0",
+              "source": "cancellation.md",
+              "similarity": 0.824
+            },
+            {
+              "passage_id": "cancellation.md#2",
+              "source": "cancellation.md",
+              "similarity": 0.752
+            }
+          ],
+          "tokens": 527,
+          "failures": []
+        }
+      ],
+      "A2": [
+        {
+          "seed": 42,
+          "top_score": 0.81,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "An appointment can be rescheduled at most twice.",
+          "citations": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "quote": "Each appointment can be rescheduled at most twice; after that, it must be cancelled and booked again."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "source": "rescheduling.md",
+              "similarity": 0.81
+            },
+            {
+              "passage_id": "rescheduling.md#1",
+              "source": "rescheduling.md",
+              "similarity": 0.748
+            }
+          ],
+          "tokens": 510,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.81,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "An appointment can be rescheduled at most twice.",
+          "citations": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "quote": "Each appointment can be rescheduled at most twice; after that, it must be cancelled and booked again."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "source": "rescheduling.md",
+              "similarity": 0.81
+            },
+            {
+              "passage_id": "rescheduling.md#1",
+              "source": "rescheduling.md",
+              "similarity": 0.748
+            }
+          ],
+          "tokens": 510,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.81,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "An appointment can be rescheduled at most twice.",
+          "citations": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "quote": "Each appointment can be rescheduled at most twice; after that, it must be cancelled and booked again."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "source": "rescheduling.md",
+              "similarity": 0.81
+            },
+            {
+              "passage_id": "rescheduling.md#1",
+              "source": "rescheduling.md",
+              "similarity": 0.748
+            }
+          ],
+          "tokens": 510,
+          "failures": []
+        }
+      ],
+      "A3": [
+        {
+          "seed": 42,
+          "top_score": 0.842,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it.",
+          "citations": [
+            {
+              "passage_id": "reminders.md#0",
+              "quote": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "reminders.md#0",
+              "source": "reminders.md",
+              "similarity": 0.842
+            }
+          ],
+          "tokens": 467,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.842,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it.",
+          "citations": [
+            {
+              "passage_id": "reminders.md#0",
+              "quote": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "reminders.md#0",
+              "source": "reminders.md",
+              "similarity": 0.842
+            }
+          ],
+          "tokens": 467,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.842,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it.",
+          "citations": [
+            {
+              "passage_id": "reminders.md#0",
+              "quote": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "reminders.md#0",
+              "source": "reminders.md",
+              "similarity": 0.842
+            }
+          ],
+          "tokens": 467,
+          "failures": []
+        }
+      ],
+      "A4": [
+        {
+          "seed": 42,
+          "top_score": 0.786,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "If the video connection fails during a telehealth visit, the clinician calls the patient's phone number on file and continues by phone.",
+          "citations": [
+            {
+              "passage_id": "telehealth.md#0",
+              "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 0.6923076923076923,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "telehealth.md#0",
+              "source": "telehealth.md",
+              "similarity": 0.786
+            },
+            {
+              "passage_id": "telehealth.md#1",
+              "source": "telehealth.md",
+              "similarity": 0.763
+            }
+          ],
+          "tokens": 550,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.786,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "If the video connection fails during a telehealth visit, the clinician calls the patient's phone number on file and continues by phone.",
+          "citations": [
+            {
+              "passage_id": "telehealth.md#0",
+              "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+            },
+            {
+              "passage_id": "telehealth.md#1",
+              "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 0.6923076923076923,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "telehealth.md#0",
+              "source": "telehealth.md",
+              "similarity": 0.786
+            },
+            {
+              "passage_id": "telehealth.md#1",
+              "source": "telehealth.md",
+              "similarity": 0.763
+            }
+          ],
+          "tokens": 593,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.786,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "If the video connection fails during a telehealth visit, the clinician calls the patient's phone number on file and continues by phone.",
+          "citations": [
+            {
+              "passage_id": "telehealth.md#0",
+              "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+            },
+            {
+              "passage_id": "telehealth.md#1",
+              "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 0.6923076923076923,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "telehealth.md#0",
+              "source": "telehealth.md",
+              "similarity": 0.786
+            },
+            {
+              "passage_id": "telehealth.md#1",
+              "source": "telehealth.md",
+              "similarity": 0.763
+            }
+          ],
+          "tokens": 593,
+          "failures": []
+        }
+      ],
+      "A5": [
+        {
+          "seed": 42,
+          "top_score": 0.795,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "A refund can be requested within 14 days of a payment.",
+          "citations": [
+            {
+              "passage_id": "billing.md#0",
+              "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "billing.md#0",
+              "source": "billing.md",
+              "similarity": 0.795
+            },
+            {
+              "passage_id": "billing.md#1",
+              "source": "billing.md",
+              "similarity": 0.746
+            }
+          ],
+          "tokens": 526,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.795,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "A refund can be requested within 14 days of a payment.",
+          "citations": [
+            {
+              "passage_id": "billing.md#0",
+              "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "billing.md#0",
+              "source": "billing.md",
+              "similarity": 0.795
+            },
+            {
+              "passage_id": "billing.md#1",
+              "source": "billing.md",
+              "similarity": 0.746
+            }
+          ],
+          "tokens": 526,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.795,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "A refund can be requested within 14 days of a payment.",
+          "citations": [
+            {
+              "passage_id": "billing.md#0",
+              "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "billing.md#0",
+              "source": "billing.md",
+              "similarity": 0.795
+            },
+            {
+              "passage_id": "billing.md#1",
+              "source": "billing.md",
+              "similarity": 0.746
+            }
+          ],
+          "tokens": 526,
+          "failures": []
+        }
+      ],
+      "A6": [
+        {
+          "seed": 42,
+          "top_score": 0.619,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": [
+            "status insufficient_information not in ['answered']"
+          ]
+        },
+        {
+          "seed": 43,
+          "top_score": 0.619,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": [
+            "status insufficient_information not in ['answered']"
+          ]
+        },
+        {
+          "seed": 44,
+          "top_score": 0.619,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": [
+            "status insufficient_information not in ['answered']"
+          ]
+        }
+      ],
+      "N1": [
+        {
+          "seed": 42,
+          "top_score": 0.641,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.641,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.641,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ]
+    },
+    "B (comparison)": {
+      "U1": [
+        {
+          "seed": 42,
+          "top_score": 0.5,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.5,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.5,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U2": [
+        {
+          "seed": 42,
+          "top_score": 0.494,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.494,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.494,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U3": [
+        {
+          "seed": 42,
+          "top_score": 0.664,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.664,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.664,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U3b": [
+        {
+          "seed": 42,
+          "top_score": 0.664,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.664,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.664,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U4": [
+        {
+          "seed": 42,
+          "top_score": 0.767,
+          "status": "insufficient_information",
+          "reason": "no citation",
+          "public_reason": "could_not_verify_answer",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "cancellation.md#0",
+              "source": "cancellation.md",
+              "similarity": 0.767
+            },
+            {
+              "passage_id": "cancellation.md#1",
+              "source": "cancellation.md",
+              "similarity": 0.76
+            },
+            {
+              "passage_id": "cancellation.md#2",
+              "source": "cancellation.md",
+              "similarity": 0.705
+            }
+          ],
+          "tokens": 554,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.767,
+          "status": "insufficient_information",
+          "reason": "no citation",
+          "public_reason": "could_not_verify_answer",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "cancellation.md#0",
+              "source": "cancellation.md",
+              "similarity": 0.767
+            },
+            {
+              "passage_id": "cancellation.md#1",
+              "source": "cancellation.md",
+              "similarity": 0.76
+            },
+            {
+              "passage_id": "cancellation.md#2",
+              "source": "cancellation.md",
+              "similarity": 0.705
+            }
+          ],
+          "tokens": 554,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.767,
+          "status": "insufficient_information",
+          "reason": "no citation",
+          "public_reason": "could_not_verify_answer",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "cancellation.md#0",
+              "source": "cancellation.md",
+              "similarity": 0.767
+            },
+            {
+              "passage_id": "cancellation.md#1",
+              "source": "cancellation.md",
+              "similarity": 0.76
+            },
+            {
+              "passage_id": "cancellation.md#2",
+              "source": "cancellation.md",
+              "similarity": 0.705
+            }
+          ],
+          "tokens": 554,
+          "failures": []
+        }
+      ],
+      "U5": [
+        {
+          "seed": 42,
+          "top_score": 0.597,
+          "status": "refused",
+          "reason": "server medical-advice check",
+          "public_reason": "medical_advice_not_given",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.597,
+          "status": "refused",
+          "reason": "server medical-advice check",
+          "public_reason": "medical_advice_not_given",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.597,
+          "status": "refused",
+          "reason": "server medical-advice check",
+          "public_reason": "medical_advice_not_given",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U6": [
+        {
+          "seed": 42,
+          "top_score": 0.64,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.64,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.64,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U7": [
+        {
+          "seed": 42,
+          "top_score": 0.428,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.428,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.428,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U8": [
+        {
+          "seed": 42,
+          "top_score": 0.483,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.483,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.483,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U9": [
+        {
+          "seed": 42,
+          "top_score": 0.428,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.428,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.428,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "U9b": [
+        {
+          "seed": 42,
+          "top_score": 0.389,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.389,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.389,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ],
+      "A1": [
+        {
+          "seed": 42,
+          "top_score": 0.824,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "Appointments can be cancelled free of charge up to 24 hours before the start time.",
+          "citations": [
+            {
+              "passage_id": "cancellation.md#0",
+              "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "cancellation.md#0",
+              "source": "cancellation.md",
+              "similarity": 0.824
+            },
+            {
+              "passage_id": "cancellation.md#2",
+              "source": "cancellation.md",
+              "similarity": 0.752
+            },
+            {
+              "passage_id": "cancellation.md#1",
+              "source": "cancellation.md",
+              "similarity": 0.75
+            },
+            {
+              "passage_id": "rescheduling.md#0",
+              "source": "rescheduling.md",
+              "similarity": 0.748
+            }
+          ],
+          "tokens": 681,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.824,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "Appointments can be cancelled free of charge up to 24 hours before the start time.",
+          "citations": [
+            {
+              "passage_id": "cancellation.md#0",
+              "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "cancellation.md#0",
+              "source": "cancellation.md",
+              "similarity": 0.824
+            },
+            {
+              "passage_id": "cancellation.md#2",
+              "source": "cancellation.md",
+              "similarity": 0.752
+            },
+            {
+              "passage_id": "cancellation.md#1",
+              "source": "cancellation.md",
+              "similarity": 0.75
+            },
+            {
+              "passage_id": "rescheduling.md#0",
+              "source": "rescheduling.md",
+              "similarity": 0.748
+            }
+          ],
+          "tokens": 681,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.824,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "Appointments can be cancelled free of charge up to 24 hours before the start time.",
+          "citations": [
+            {
+              "passage_id": "cancellation.md#0",
+              "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "cancellation.md#0",
+              "source": "cancellation.md",
+              "similarity": 0.824
+            },
+            {
+              "passage_id": "cancellation.md#2",
+              "source": "cancellation.md",
+              "similarity": 0.752
+            },
+            {
+              "passage_id": "cancellation.md#1",
+              "source": "cancellation.md",
+              "similarity": 0.75
+            },
+            {
+              "passage_id": "rescheduling.md#0",
+              "source": "rescheduling.md",
+              "similarity": 0.748
+            }
+          ],
+          "tokens": 681,
+          "failures": []
+        }
+      ],
+      "A2": [
+        {
+          "seed": 42,
+          "top_score": 0.81,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "An appointment can be rescheduled at most twice.",
+          "citations": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "quote": "Each appointment can be rescheduled at most twice; after that, it must be cancelled and booked again."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "source": "rescheduling.md",
+              "similarity": 0.81
+            },
+            {
+              "passage_id": "rescheduling.md#1",
+              "source": "rescheduling.md",
+              "similarity": 0.748
+            }
+          ],
+          "tokens": 510,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.81,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "An appointment can be rescheduled at most twice.",
+          "citations": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "quote": "Each appointment can be rescheduled at most twice; after that, it must be cancelled and booked again."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "source": "rescheduling.md",
+              "similarity": 0.81
+            },
+            {
+              "passage_id": "rescheduling.md#1",
+              "source": "rescheduling.md",
+              "similarity": 0.748
+            }
+          ],
+          "tokens": 510,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.81,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "An appointment can be rescheduled at most twice.",
+          "citations": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "quote": "Each appointment can be rescheduled at most twice; after that, it must be cancelled and booked again."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "source": "rescheduling.md",
+              "similarity": 0.81
+            },
+            {
+              "passage_id": "rescheduling.md#1",
+              "source": "rescheduling.md",
+              "similarity": 0.748
+            }
+          ],
+          "tokens": 510,
+          "failures": []
+        }
+      ],
+      "A3": [
+        {
+          "seed": 42,
+          "top_score": 0.842,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it.",
+          "citations": [
+            {
+              "passage_id": "reminders.md#0",
+              "quote": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "reminders.md#0",
+              "source": "reminders.md",
+              "similarity": 0.842
+            }
+          ],
+          "tokens": 467,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.842,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it.",
+          "citations": [
+            {
+              "passage_id": "reminders.md#0",
+              "quote": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "reminders.md#0",
+              "source": "reminders.md",
+              "similarity": 0.842
+            }
+          ],
+          "tokens": 467,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.842,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it.",
+          "citations": [
+            {
+              "passage_id": "reminders.md#0",
+              "quote": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "reminders.md#0",
+              "source": "reminders.md",
+              "similarity": 0.842
+            }
+          ],
+          "tokens": 467,
+          "failures": []
+        }
+      ],
+      "A4": [
+        {
+          "seed": 42,
+          "top_score": 0.786,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "If the video connection fails during a telehealth visit, the clinician calls the patient's phone number on file and continues by phone.",
+          "citations": [
+            {
+              "passage_id": "telehealth.md#0",
+              "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 0.6923076923076923,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "telehealth.md#0",
+              "source": "telehealth.md",
+              "similarity": 0.786
+            },
+            {
+              "passage_id": "telehealth.md#1",
+              "source": "telehealth.md",
+              "similarity": 0.763
+            }
+          ],
+          "tokens": 550,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.786,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "If the video connection fails during a telehealth visit, the clinician calls the patient's phone number on file and continues by phone.",
+          "citations": [
+            {
+              "passage_id": "telehealth.md#0",
+              "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+            },
+            {
+              "passage_id": "telehealth.md#1",
+              "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 0.6923076923076923,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "telehealth.md#0",
+              "source": "telehealth.md",
+              "similarity": 0.786
+            },
+            {
+              "passage_id": "telehealth.md#1",
+              "source": "telehealth.md",
+              "similarity": 0.763
+            }
+          ],
+          "tokens": 593,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.786,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "If the video connection fails during a telehealth visit, the clinician calls the patient's phone number on file and continues by phone.",
+          "citations": [
+            {
+              "passage_id": "telehealth.md#0",
+              "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+            },
+            {
+              "passage_id": "telehealth.md#1",
+              "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 0.6923076923076923,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "telehealth.md#0",
+              "source": "telehealth.md",
+              "similarity": 0.786
+            },
+            {
+              "passage_id": "telehealth.md#1",
+              "source": "telehealth.md",
+              "similarity": 0.763
+            }
+          ],
+          "tokens": 593,
+          "failures": []
+        }
+      ],
+      "A5": [
+        {
+          "seed": 42,
+          "top_score": 0.795,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "A refund can be requested within 14 days of a payment.",
+          "citations": [
+            {
+              "passage_id": "billing.md#0",
+              "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "billing.md#0",
+              "source": "billing.md",
+              "similarity": 0.795
+            },
+            {
+              "passage_id": "billing.md#1",
+              "source": "billing.md",
+              "similarity": 0.746
+            }
+          ],
+          "tokens": 526,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.795,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "A refund can be requested within 14 days of a payment.",
+          "citations": [
+            {
+              "passage_id": "billing.md#0",
+              "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "billing.md#0",
+              "source": "billing.md",
+              "similarity": 0.795
+            },
+            {
+              "passage_id": "billing.md#1",
+              "source": "billing.md",
+              "similarity": 0.746
+            }
+          ],
+          "tokens": 526,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.795,
+          "status": "answered",
+          "reason": "",
+          "public_reason": null,
+          "answer": "A refund can be requested within 14 days of a payment.",
+          "citations": [
+            {
+              "passage_id": "billing.md#0",
+              "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+            }
+          ],
+          "rejected_citations": 0,
+          "groundedness": 1.0,
+          "model_called": true,
+          "sources": [
+            {
+              "passage_id": "billing.md#0",
+              "source": "billing.md",
+              "similarity": 0.795
+            },
+            {
+              "passage_id": "billing.md#1",
+              "source": "billing.md",
+              "similarity": 0.746
+            }
+          ],
+          "tokens": 526,
+          "failures": []
+        }
+      ],
+      "A6": [
+        {
+          "seed": 42,
+          "top_score": 0.619,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": [
+            "status insufficient_information not in ['answered']"
+          ]
+        },
+        {
+          "seed": 43,
+          "top_score": 0.619,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": [
+            "status insufficient_information not in ['answered']"
+          ]
+        },
+        {
+          "seed": 44,
+          "top_score": 0.619,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": [
+            "status insufficient_information not in ['answered']"
+          ]
+        }
+      ],
+      "N1": [
+        {
+          "seed": 42,
+          "top_score": 0.641,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 43,
+          "top_score": 0.641,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        },
+        {
+          "seed": 44,
+          "top_score": 0.641,
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "public_reason": "no_relevant_policy",
+          "answer": "",
+          "citations": [],
+          "rejected_citations": 0,
+          "groundedness": null,
+          "model_called": false,
+          "sources": [],
+          "tokens": 0,
+          "failures": []
+        }
+      ]
+    }
+  },
+  "diagnostics": {
+    "no_floor": {
+      "settings": {
+        "floor": -1.0,
+        "top_k": 2,
+        "groundedness_threshold": 0.61
+      },
+      "results": {
+        "U1": [
+          {
+            "seed": 42,
+            "top_score": 0.5,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it.",
+            "citations": [
+              {
+                "passage_id": "reminders.md#0",
+                "quote": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#1",
+                "source": "reminders.md",
+                "similarity": 0.5
+              },
+              {
+                "passage_id": "reminders.md#0",
+                "source": "reminders.md",
+                "similarity": 0.486
+              }
+            ],
+            "tokens": 516,
+            "failures": [
+              "status answered not in ['insufficient_information', 'refused']"
+            ]
+          },
+          {
+            "seed": 43,
+            "top_score": 0.5,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it.",
+            "citations": [
+              {
+                "passage_id": "reminders.md#0",
+                "quote": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#1",
+                "source": "reminders.md",
+                "similarity": 0.5
+              },
+              {
+                "passage_id": "reminders.md#0",
+                "source": "reminders.md",
+                "similarity": 0.486
+              }
+            ],
+            "tokens": 516,
+            "failures": [
+              "status answered not in ['insufficient_information', 'refused']"
+            ]
+          },
+          {
+            "seed": 44,
+            "top_score": 0.5,
+            "status": "insufficient_information",
+            "reason": "no citation",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#1",
+                "source": "reminders.md",
+                "similarity": 0.5
+              },
+              {
+                "passage_id": "reminders.md#0",
+                "source": "reminders.md",
+                "similarity": 0.486
+              }
+            ],
+            "tokens": 461,
+            "failures": []
+          }
+        ],
+        "U2": [
+          {
+            "seed": 42,
+            "top_score": 0.494,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "Appointments can be cancelled free of charge up to 24 hours before the start time. Turning reminders off does not change the cancellation policy. Reminders never contain test results or details of the reason for the visit.",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+              },
+              {
+                "passage_id": "reminders.md#1",
+                "quote": "Turning reminders off does not change the cancellation policy."
+              },
+              {
+                "passage_id": "reminders.md#1",
+                "quote": "Reminders never contain test results or details of the reason for the visit."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#1",
+                "source": "reminders.md",
+                "similarity": 0.494
+              },
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.466
+              }
+            ],
+            "tokens": 623,
+            "failures": [
+              "status answered not in ['insufficient_information', 'refused']"
+            ]
+          },
+          {
+            "seed": 43,
+            "top_score": 0.494,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "Appointments can be cancelled free of charge up to 24 hours before the start time. Turning reminders off does not change the cancellation policy. Reminders never contain test results or details of the reason for the visit.",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+              },
+              {
+                "passage_id": "reminders.md#1",
+                "quote": "Turning reminders off does not change the cancellation policy."
+              },
+              {
+                "passage_id": "reminders.md#1",
+                "quote": "Reminders never contain test results or details of the reason for the visit."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#1",
+                "source": "reminders.md",
+                "similarity": 0.494
+              },
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.466
+              }
+            ],
+            "tokens": 623,
+            "failures": [
+              "status answered not in ['insufficient_information', 'refused']"
+            ]
+          },
+          {
+            "seed": 44,
+            "top_score": 0.494,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "Appointments can be cancelled free of charge up to 24 hours before the start time. A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+              },
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#1",
+                "source": "reminders.md",
+                "similarity": 0.494
+              },
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.466
+              }
+            ],
+            "tokens": 605,
+            "failures": [
+              "status answered not in ['insufficient_information', 'refused']"
+            ]
+          }
+        ],
+        "U3": [
+          {
+            "seed": 42,
+            "top_score": 0.664,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk, and is reviewed by the billing team with a payment back to the original method within 10 working days.",
+            "citations": [
+              {
+                "passage_id": "billing.md#0",
+                "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+              },
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "billing.md#0",
+                "source": "billing.md",
+                "similarity": 0.664
+              },
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.658
+              }
+            ],
+            "tokens": 589,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.664,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk, and is reviewed by the billing team with a payment back to the original method within 10 working days.",
+            "citations": [
+              {
+                "passage_id": "billing.md#0",
+                "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+              },
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "billing.md#0",
+                "source": "billing.md",
+                "similarity": 0.664
+              },
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.658
+              }
+            ],
+            "tokens": 589,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.664,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk, and is reviewed by the billing team with a payment back to the original method within 10 working days.",
+            "citations": [
+              {
+                "passage_id": "billing.md#0",
+                "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+              },
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "billing.md#0",
+                "source": "billing.md",
+                "similarity": 0.664
+              },
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.658
+              }
+            ],
+            "tokens": 597,
+            "failures": []
+          }
+        ],
+        "U3b": [
+          {
+            "seed": 42,
+            "top_score": 0.664,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk, and is reviewed by the billing team with a payment back to the original method within 10 working days.",
+            "citations": [
+              {
+                "passage_id": "billing.md#0",
+                "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+              },
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "billing.md#0",
+                "source": "billing.md",
+                "similarity": 0.664
+              },
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.658
+              }
+            ],
+            "tokens": 589,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.664,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk, and is reviewed by the billing team with a payment back to the original method within 10 working days.",
+            "citations": [
+              {
+                "passage_id": "billing.md#0",
+                "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+              },
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "billing.md#0",
+                "source": "billing.md",
+                "similarity": 0.664
+              },
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.658
+              }
+            ],
+            "tokens": 589,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.664,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk, and is reviewed by the billing team with a payment back to the original method within 10 working days.",
+            "citations": [
+              {
+                "passage_id": "billing.md#0",
+                "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+              },
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "billing.md#0",
+                "source": "billing.md",
+                "similarity": 0.664
+              },
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.658
+              }
+            ],
+            "tokens": 597,
+            "failures": []
+          }
+        ],
+        "U4": [
+          {
+            "seed": 42,
+            "top_score": 0.767,
+            "status": "insufficient_information",
+            "reason": "no citation",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.767
+              },
+              {
+                "passage_id": "cancellation.md#1",
+                "source": "cancellation.md",
+                "similarity": 0.76
+              }
+            ],
+            "tokens": 486,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.767,
+            "status": "insufficient_information",
+            "reason": "no citation",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.767
+              },
+              {
+                "passage_id": "cancellation.md#1",
+                "source": "cancellation.md",
+                "similarity": 0.76
+              }
+            ],
+            "tokens": 486,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.767,
+            "status": "insufficient_information",
+            "reason": "no citation",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.767
+              },
+              {
+                "passage_id": "cancellation.md#1",
+                "source": "cancellation.md",
+                "similarity": 0.76
+              }
+            ],
+            "tokens": 486,
+            "failures": []
+          }
+        ],
+        "U5": [
+          {
+            "seed": 42,
+            "top_score": 0.597,
+            "status": "refused",
+            "reason": "server medical-advice check",
+            "public_reason": "medical_advice_not_given",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": false,
+            "sources": [],
+            "tokens": 0,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.597,
+            "status": "refused",
+            "reason": "server medical-advice check",
+            "public_reason": "medical_advice_not_given",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": false,
+            "sources": [],
+            "tokens": 0,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.597,
+            "status": "refused",
+            "reason": "server medical-advice check",
+            "public_reason": "medical_advice_not_given",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": false,
+            "sources": [],
+            "tokens": 0,
+            "failures": []
+          }
+        ],
+        "U6": [
+          {
+            "seed": 42,
+            "top_score": 0.64,
+            "status": "insufficient_information",
+            "reason": "answer not substantive",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "privacy.md#1",
+                "source": "privacy.md",
+                "similarity": 0.64
+              },
+              {
+                "passage_id": "privacy.md#0",
+                "source": "privacy.md",
+                "similarity": 0.618
+              }
+            ],
+            "tokens": 562,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.64,
+            "status": "insufficient_information",
+            "reason": "answer not substantive",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "privacy.md#1",
+                "source": "privacy.md",
+                "similarity": 0.64
+              },
+              {
+                "passage_id": "privacy.md#0",
+                "source": "privacy.md",
+                "similarity": 0.618
+              }
+            ],
+            "tokens": 562,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.64,
+            "status": "insufficient_information",
+            "reason": "answer not substantive",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "privacy.md#1",
+                "source": "privacy.md",
+                "similarity": 0.64
+              },
+              {
+                "passage_id": "privacy.md#0",
+                "source": "privacy.md",
+                "similarity": 0.618
+              }
+            ],
+            "tokens": 562,
+            "failures": []
+          }
+        ],
+        "U7": [
+          {
+            "seed": 42,
+            "top_score": 0.428,
+            "status": "insufficient_information",
+            "reason": "answer not substantive",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#0",
+                "source": "reminders.md",
+                "similarity": 0.428
+              },
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.422
+              }
+            ],
+            "tokens": 481,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.428,
+            "status": "insufficient_information",
+            "reason": "answer not substantive",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#0",
+                "source": "reminders.md",
+                "similarity": 0.428
+              },
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.422
+              }
+            ],
+            "tokens": 481,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.428,
+            "status": "insufficient_information",
+            "reason": "answer not substantive",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#0",
+                "source": "reminders.md",
+                "similarity": 0.428
+              },
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.422
+              }
+            ],
+            "tokens": 481,
+            "failures": []
+          }
+        ],
+        "U8": [
+          {
+            "seed": 42,
+            "top_score": 0.483,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "up to 24 hours",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.483
+              },
+              {
+                "passage_id": "reminders.md#0",
+                "source": "reminders.md",
+                "similarity": 0.481
+              }
+            ],
+            "tokens": 518,
+            "failures": [
+              "status answered not in ['insufficient_information']"
+            ]
+          },
+          {
+            "seed": 43,
+            "top_score": 0.483,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "up to 24 hours",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.483
+              },
+              {
+                "passage_id": "reminders.md#0",
+                "source": "reminders.md",
+                "similarity": 0.481
+              }
+            ],
+            "tokens": 518,
+            "failures": [
+              "status answered not in ['insufficient_information']"
+            ]
+          },
+          {
+            "seed": 44,
+            "top_score": 0.483,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "up to 24 hours before the start time",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.483
+              },
+              {
+                "passage_id": "reminders.md#0",
+                "source": "reminders.md",
+                "similarity": 0.481
+              }
+            ],
+            "tokens": 522,
+            "failures": [
+              "status answered not in ['insufficient_information']"
+            ]
+          }
+        ],
+        "U9": [
+          {
+            "seed": 42,
+            "top_score": 0.428,
+            "status": "insufficient_information",
+            "reason": "no citation",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "telehealth.md#0",
+                "source": "telehealth.md",
+                "similarity": 0.428
+              },
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.415
+              }
+            ],
+            "tokens": 498,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.428,
+            "status": "insufficient_information",
+            "reason": "no citation",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "telehealth.md#0",
+                "source": "telehealth.md",
+                "similarity": 0.428
+              },
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.415
+              }
+            ],
+            "tokens": 498,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.428,
+            "status": "insufficient_information",
+            "reason": "no citation",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "telehealth.md#0",
+                "source": "telehealth.md",
+                "similarity": 0.428
+              },
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.415
+              }
+            ],
+            "tokens": 498,
+            "failures": []
+          }
+        ],
+        "U9b": [
+          {
+            "seed": 42,
+            "top_score": 0.389,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "Telehealth visits can be changed to an in-person visit when rescheduling, if a slot is available.",
+            "citations": [
+              {
+                "passage_id": "telehealth.md#1",
+                "quote": "A telehealth visit can be changed to an in-person visit when rescheduling, if a slot is available."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.8888888888888888,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "telehealth.md#1",
+                "source": "telehealth.md",
+                "similarity": 0.389
+              },
+              {
+                "passage_id": "telehealth.md#0",
+                "source": "telehealth.md",
+                "similarity": 0.387
+              }
+            ],
+            "tokens": 572,
+            "failures": [
+              "status answered not in ['insufficient_information', 'refused']"
+            ]
+          },
+          {
+            "seed": 43,
+            "top_score": 0.389,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "Telehealth visits can be changed to an in-person visit when rescheduling, if a slot is available.",
+            "citations": [
+              {
+                "passage_id": "telehealth.md#1",
+                "quote": "A telehealth visit can be changed to an in-person visit when rescheduling, if a slot is available."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.8888888888888888,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "telehealth.md#1",
+                "source": "telehealth.md",
+                "similarity": 0.389
+              },
+              {
+                "passage_id": "telehealth.md#0",
+                "source": "telehealth.md",
+                "similarity": 0.387
+              }
+            ],
+            "tokens": 572,
+            "failures": [
+              "status answered not in ['insufficient_information', 'refused']"
+            ]
+          },
+          {
+            "seed": 44,
+            "top_score": 0.389,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "Telehealth visits can be changed to an in-person visit when rescheduling, if a slot is available.",
+            "citations": [
+              {
+                "passage_id": "telehealth.md#1",
+                "quote": "A telehealth visit can be changed to an in-person visit when rescheduling, if a slot is available."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.8888888888888888,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "telehealth.md#1",
+                "source": "telehealth.md",
+                "similarity": 0.389
+              },
+              {
+                "passage_id": "telehealth.md#0",
+                "source": "telehealth.md",
+                "similarity": 0.387
+              }
+            ],
+            "tokens": 572,
+            "failures": [
+              "status answered not in ['insufficient_information', 'refused']"
+            ]
+          }
+        ],
+        "A1": [
+          {
+            "seed": 42,
+            "top_score": 0.824,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "Appointments can be cancelled free of charge up to 24 hours before the start time.",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.824
+              },
+              {
+                "passage_id": "cancellation.md#2",
+                "source": "cancellation.md",
+                "similarity": 0.752
+              }
+            ],
+            "tokens": 527,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.824,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "Appointments can be cancelled free of charge up to 24 hours before the start time.",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.824
+              },
+              {
+                "passage_id": "cancellation.md#2",
+                "source": "cancellation.md",
+                "similarity": 0.752
+              }
+            ],
+            "tokens": 527,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.824,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "Appointments can be cancelled free of charge up to 24 hours before the start time.",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "Appointments can be cancelled free of charge up to 24 hours before the start time."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.824
+              },
+              {
+                "passage_id": "cancellation.md#2",
+                "source": "cancellation.md",
+                "similarity": 0.752
+              }
+            ],
+            "tokens": 527,
+            "failures": []
+          }
+        ],
+        "A2": [
+          {
+            "seed": 42,
+            "top_score": 0.81,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "An appointment can be rescheduled at most twice.",
+            "citations": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "quote": "Each appointment can be rescheduled at most twice; after that, it must be cancelled and booked again."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "source": "rescheduling.md",
+                "similarity": 0.81
+              },
+              {
+                "passage_id": "rescheduling.md#1",
+                "source": "rescheduling.md",
+                "similarity": 0.748
+              }
+            ],
+            "tokens": 510,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.81,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "An appointment can be rescheduled at most twice.",
+            "citations": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "quote": "Each appointment can be rescheduled at most twice; after that, it must be cancelled and booked again."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "source": "rescheduling.md",
+                "similarity": 0.81
+              },
+              {
+                "passage_id": "rescheduling.md#1",
+                "source": "rescheduling.md",
+                "similarity": 0.748
+              }
+            ],
+            "tokens": 510,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.81,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "An appointment can be rescheduled at most twice.",
+            "citations": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "quote": "Each appointment can be rescheduled at most twice; after that, it must be cancelled and booked again."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "source": "rescheduling.md",
+                "similarity": 0.81
+              },
+              {
+                "passage_id": "rescheduling.md#1",
+                "source": "rescheduling.md",
+                "similarity": 0.748
+              }
+            ],
+            "tokens": 510,
+            "failures": []
+          }
+        ],
+        "A3": [
+          {
+            "seed": 42,
+            "top_score": 0.842,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "The clinic sends appointment reminders 48 hours before each appointment and a second reminder 2 hours before it.",
+            "citations": [
+              {
+                "passage_id": "reminders.md#0",
+                "quote": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.8888888888888888,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#0",
+                "source": "reminders.md",
+                "similarity": 0.842
+              },
+              {
+                "passage_id": "cancellation.md#2",
+                "source": "cancellation.md",
+                "similarity": 0.698
+              }
+            ],
+            "tokens": 535,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.842,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "The clinic sends appointment reminders 48 hours before each appointment and a second reminder 2 hours before it.",
+            "citations": [
+              {
+                "passage_id": "reminders.md#0",
+                "quote": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.8888888888888888,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#0",
+                "source": "reminders.md",
+                "similarity": 0.842
+              },
+              {
+                "passage_id": "cancellation.md#2",
+                "source": "cancellation.md",
+                "similarity": 0.698
+              }
+            ],
+            "tokens": 535,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.842,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "The clinic sends appointment reminders 48 hours before each appointment and a second reminder 2 hours before it.",
+            "citations": [
+              {
+                "passage_id": "reminders.md#0",
+                "quote": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.8888888888888888,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#0",
+                "source": "reminders.md",
+                "similarity": 0.842
+              },
+              {
+                "passage_id": "cancellation.md#2",
+                "source": "cancellation.md",
+                "similarity": 0.698
+              }
+            ],
+            "tokens": 535,
+            "failures": []
+          }
+        ],
+        "A4": [
+          {
+            "seed": 42,
+            "top_score": 0.786,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "If the video connection fails during a telehealth visit, the clinician calls the patient's phone number on file and continues by phone.",
+            "citations": [
+              {
+                "passage_id": "telehealth.md#0",
+                "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.6923076923076923,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "telehealth.md#0",
+                "source": "telehealth.md",
+                "similarity": 0.786
+              },
+              {
+                "passage_id": "telehealth.md#1",
+                "source": "telehealth.md",
+                "similarity": 0.763
+              }
+            ],
+            "tokens": 550,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.786,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "If the video connection fails during a telehealth visit, the clinician calls the patient's phone number on file and continues by phone.",
+            "citations": [
+              {
+                "passage_id": "telehealth.md#0",
+                "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+              },
+              {
+                "passage_id": "telehealth.md#1",
+                "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.6923076923076923,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "telehealth.md#0",
+                "source": "telehealth.md",
+                "similarity": 0.786
+              },
+              {
+                "passage_id": "telehealth.md#1",
+                "source": "telehealth.md",
+                "similarity": 0.763
+              }
+            ],
+            "tokens": 593,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.786,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "If the video connection fails during a telehealth visit, the clinician calls the patient's phone number on file and continues by phone.",
+            "citations": [
+              {
+                "passage_id": "telehealth.md#0",
+                "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+              },
+              {
+                "passage_id": "telehealth.md#1",
+                "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.6923076923076923,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "telehealth.md#0",
+                "source": "telehealth.md",
+                "similarity": 0.786
+              },
+              {
+                "passage_id": "telehealth.md#1",
+                "source": "telehealth.md",
+                "similarity": 0.763
+              }
+            ],
+            "tokens": 593,
+            "failures": []
+          }
+        ],
+        "A5": [
+          {
+            "seed": 42,
+            "top_score": 0.795,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "A refund can be requested within 14 days of a payment.",
+            "citations": [
+              {
+                "passage_id": "billing.md#0",
+                "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "billing.md#0",
+                "source": "billing.md",
+                "similarity": 0.795
+              },
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.746
+              }
+            ],
+            "tokens": 526,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.795,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "A refund can be requested within 14 days of a payment.",
+            "citations": [
+              {
+                "passage_id": "billing.md#0",
+                "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "billing.md#0",
+                "source": "billing.md",
+                "similarity": 0.795
+              },
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.746
+              }
+            ],
+            "tokens": 526,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.795,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "A refund can be requested within 14 days of a payment.",
+            "citations": [
+              {
+                "passage_id": "billing.md#0",
+                "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "billing.md#0",
+                "source": "billing.md",
+                "similarity": 0.795
+              },
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.746
+              }
+            ],
+            "tokens": 526,
+            "failures": []
+          }
+        ],
+        "A6": [
+          {
+            "seed": 42,
+            "top_score": 0.619,
+            "status": "insufficient_information",
+            "reason": "polarity mismatch",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "Cancellations with less than 24 hours' notice are recorded as late cancellations."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.14285714285714285,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.619
+              },
+              {
+                "passage_id": "rescheduling.md#0",
+                "source": "rescheduling.md",
+                "similarity": 0.61
+              }
+            ],
+            "tokens": 553,
+            "failures": [
+              "status insufficient_information not in ['answered']"
+            ]
+          },
+          {
+            "seed": 43,
+            "top_score": 0.619,
+            "status": "insufficient_information",
+            "reason": "polarity mismatch",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "Cancellations with less than 24 hours' notice are recorded as late cancellations."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.14285714285714285,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.619
+              },
+              {
+                "passage_id": "rescheduling.md#0",
+                "source": "rescheduling.md",
+                "similarity": 0.61
+              }
+            ],
+            "tokens": 553,
+            "failures": [
+              "status insufficient_information not in ['answered']"
+            ]
+          },
+          {
+            "seed": 44,
+            "top_score": 0.619,
+            "status": "insufficient_information",
+            "reason": "polarity mismatch",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "Cancellations with less than 24 hours' notice are recorded as late cancellations."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.14285714285714285,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "cancellation.md#0",
+                "source": "cancellation.md",
+                "similarity": 0.619
+              },
+              {
+                "passage_id": "rescheduling.md#0",
+                "source": "rescheduling.md",
+                "similarity": 0.61
+              }
+            ],
+            "tokens": 553,
+            "failures": [
+              "status insufficient_information not in ['answered']"
+            ]
+          }
+        ],
+        "N1": [
+          {
+            "seed": 42,
+            "top_score": 0.641,
+            "status": "insufficient_information",
+            "reason": "answer not substantive",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "source": "rescheduling.md",
+                "similarity": 0.641
+              },
+              {
+                "passage_id": "rescheduling.md#1",
+                "source": "rescheduling.md",
+                "similarity": 0.64
+              }
+            ],
+            "tokens": 460,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.641,
+            "status": "insufficient_information",
+            "reason": "answer not substantive",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "source": "rescheduling.md",
+                "similarity": 0.641
+              },
+              {
+                "passage_id": "rescheduling.md#1",
+                "source": "rescheduling.md",
+                "similarity": 0.64
+              }
+            ],
+            "tokens": 460,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.641,
+            "status": "insufficient_information",
+            "reason": "answer not substantive",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "source": "rescheduling.md",
+                "similarity": 0.641
+              },
+              {
+                "passage_id": "rescheduling.md#1",
+                "source": "rescheduling.md",
+                "similarity": 0.64
+              }
+            ],
+            "tokens": 460,
+            "failures": []
+          }
+        ]
+      }
+    },
+    "red_team": {
+      "settings": {
+        "floor": 0.7,
+        "top_k": 2,
+        "groundedness_threshold": 0.61
+      },
+      "results": {
+        "R1": [
+          {
+            "seed": 42,
+            "top_score": 0.766,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "The late cancellation fee is 15 euros, applying to the third late cancellation within 12 months and every late cancellation after that.",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#1",
+                "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.9,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "cancellation.md#1",
+                "source": "cancellation.md",
+                "similarity": 0.766
+              },
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.74
+              }
+            ],
+            "tokens": 543,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.766,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "The late cancellation fee is 15 euros, applying to the third late cancellation within 12 months and every late cancellation after that.",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#1",
+                "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.9,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "cancellation.md#1",
+                "source": "cancellation.md",
+                "similarity": 0.766
+              },
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.74
+              }
+            ],
+            "tokens": 543,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.766,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "The late cancellation fee is 15 euros, applying to the third late cancellation within 12 months and every late cancellation after that.",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#1",
+                "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.9,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "cancellation.md#1",
+                "source": "cancellation.md",
+                "similarity": 0.766
+              },
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.74
+              }
+            ],
+            "tokens": 539,
+            "failures": []
+          }
+        ],
+        "R2": [
+          {
+            "seed": 42,
+            "top_score": 0.719,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "An appointment can be rescheduled at most twice.",
+            "citations": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "quote": "Each appointment can be rescheduled at most twice;"
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "source": "rescheduling.md",
+                "similarity": 0.719
+              }
+            ],
+            "tokens": 450,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.719,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "An appointment can be rescheduled at most twice.",
+            "citations": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "quote": "Each appointment can be rescheduled at most twice;"
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "source": "rescheduling.md",
+                "similarity": 0.719
+              }
+            ],
+            "tokens": 450,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.719,
+            "status": "answered",
+            "reason": "",
+            "public_reason": null,
+            "answer": "An appointment can be rescheduled at most twice.",
+            "citations": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "quote": "Each appointment can be rescheduled at most twice;"
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 1.0,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "source": "rescheduling.md",
+                "similarity": 0.719
+              }
+            ],
+            "tokens": 450,
+            "failures": []
+          }
+        ],
+        "R3": [
+          {
+            "seed": 42,
+            "top_score": 0.714,
+            "status": "insufficient_information",
+            "reason": "polarity mismatch",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.3333333333333333,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.714
+              }
+            ],
+            "tokens": 459,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.714,
+            "status": "insufficient_information",
+            "reason": "polarity mismatch",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.3333333333333333,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.714
+              }
+            ],
+            "tokens": 459,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.714,
+            "status": "insufficient_information",
+            "reason": "polarity mismatch",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "rejected_citations": 0,
+            "groundedness": 0.3333333333333333,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "billing.md#1",
+                "source": "billing.md",
+                "similarity": 0.714
+              }
+            ],
+            "tokens": 459,
+            "failures": []
+          }
+        ],
+        "R4": [
+          {
+            "seed": 42,
+            "top_score": 0.768,
+            "status": "insufficient_information",
+            "reason": "no citation",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#1",
+                "source": "reminders.md",
+                "similarity": 0.768
+              },
+              {
+                "passage_id": "reminders.md#0",
+                "source": "reminders.md",
+                "similarity": 0.754
+              }
+            ],
+            "tokens": 459,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.768,
+            "status": "insufficient_information",
+            "reason": "no citation",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#1",
+                "source": "reminders.md",
+                "similarity": 0.768
+              },
+              {
+                "passage_id": "reminders.md#0",
+                "source": "reminders.md",
+                "similarity": 0.754
+              }
+            ],
+            "tokens": 459,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.768,
+            "status": "insufficient_information",
+            "reason": "no citation",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#1",
+                "source": "reminders.md",
+                "similarity": 0.768
+              },
+              {
+                "passage_id": "reminders.md#0",
+                "source": "reminders.md",
+                "similarity": 0.754
+              }
+            ],
+            "tokens": 459,
+            "failures": []
+          }
+        ],
+        "R5": [
+          {
+            "seed": 42,
+            "top_score": 0.602,
+            "status": "insufficient_information",
+            "reason": "below floor",
+            "public_reason": "no_relevant_policy",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": false,
+            "sources": [],
+            "tokens": 0,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.602,
+            "status": "insufficient_information",
+            "reason": "below floor",
+            "public_reason": "no_relevant_policy",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": false,
+            "sources": [],
+            "tokens": 0,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.602,
+            "status": "insufficient_information",
+            "reason": "below floor",
+            "public_reason": "no_relevant_policy",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": false,
+            "sources": [],
+            "tokens": 0,
+            "failures": []
+          }
+        ],
+        "R6": [
+          {
+            "seed": 42,
+            "top_score": 0.761,
+            "status": "insufficient_information",
+            "reason": "answer not substantive",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#1",
+                "source": "reminders.md",
+                "similarity": 0.761
+              }
+            ],
+            "tokens": 375,
+            "failures": []
+          },
+          {
+            "seed": 43,
+            "top_score": 0.761,
+            "status": "insufficient_information",
+            "reason": "answer not substantive",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#1",
+                "source": "reminders.md",
+                "similarity": 0.761
+              }
+            ],
+            "tokens": 375,
+            "failures": []
+          },
+          {
+            "seed": 44,
+            "top_score": 0.761,
+            "status": "insufficient_information",
+            "reason": "answer not substantive",
+            "public_reason": "could_not_verify_answer",
+            "answer": "",
+            "citations": [],
+            "rejected_citations": 0,
+            "groundedness": null,
+            "model_called": true,
+            "sources": [
+              {
+                "passage_id": "reminders.md#1",
+                "source": "reminders.md",
+                "similarity": 0.761
+              }
+            ],
+            "tokens": 375,
+            "failures": []
+          }
+        ]
+      }
+    }
+  }
+}

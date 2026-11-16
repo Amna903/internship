@@ -1,0 +1,211 @@
+{
+ "started": "2026-11-02T17:38:34",
+ "supervised": {
+  "reproduced": true,
+  "verify_release_tail": [
+   "PASS  level 2  cluster_view.md regenerated: identical",
+   "PASS  level 2  metadata identical (metrics, threshold, schema, seed, estimator)",
+   "PASS  level 3  same probabilities on 3,952 test rows (largest difference 1.6e-13)",
+   "SKIP  level 4  byte identity not checked: committed file built on {'machine': 'arm64', 'platform': 'darwin'}, this run on {'platform': 'linux', 'machine': 'aarch64'}",
+   "",
+   "no-show-1.0.0: reproduced"
+  ],
+  "seconds": 455.7,
+  "model_version": "1.0.0",
+  "estimator": "logreg_engineered (C=0.1)",
+  "test_metrics_recorded_once": {
+   "brier": 0.130702,
+   "pr_auc": 0.280133,
+   "roc_auc": 0.662684
+  },
+  "test_at_threshold": {
+   "precision": 0.246349,
+   "recall": 0.596923
+  },
+  "baselines": {
+   "floor_dummy": {
+    "pr_auc": 0.164,
+    "roc_auc": 0.5,
+    "brier": 0.1374
+   },
+   "logreg_raw": {
+    "pr_auc": 0.267,
+    "roc_auc": 0.649,
+    "brier": 0.132
+   },
+   "oracle_ceiling": {
+    "pr_auc": 0.321,
+    "roc_auc": 0.714,
+    "brier": 0.1264
+   }
+  }
+ },
+ "clustering": {
+  "real_patients": 5000,
+  "real_kmeans_chosen_k": 3,
+  "real_kmeans_silhouette": 0.169,
+  "real_shuffled_baseline_silhouette_median": 0.168,
+  "real_beats_shuffled_baseline": false,
+  "control_planted_groups": 4,
+  "control_kmeans_silhouette": 0.295,
+  "control_kmeans_ari_at_chosen_k": 0.518,
+  "control_ward_ari_at_planted_k": 0.459
+ },
+ "rag": {
+  "questions": 23,
+  "frozen_sha256": {
+   "eval/retrieval_cases.json": "7a40e307ca00ba0db640bf2f3100dc3dc460a9b887b2cbb505d74801f9e57a82"
+  },
+  "retrieval": {
+   "questions": 23,
+   "answerable": 18,
+   "unanswerable": 5,
+   "shipped_hits": 11,
+   "false_retrievals": 0,
+   "recall@1": 0.8333333333333334,
+   "hit@1": 0.9444444444444444,
+   "doc_recall@1": 0.8888888888888888,
+   "recall@3": 1.0,
+   "hit@3": 1.0,
+   "doc_recall@3": 1.0,
+   "recall@5": 1.0,
+   "hit@5": 1.0,
+   "doc_recall@5": 1.0,
+   "mrr": 0.9722222222222222,
+   "shipped_hit_rate": 0.6111111111111112,
+   "false_retrieval_rate": 0.0
+  },
+  "end_to_end": {
+   "answerable": 18,
+   "unanswerable": 5,
+   "key_fact_ok": 7,
+   "false_abstention": 10,
+   "answered_wrong": 1,
+   "citation_recall": 8,
+   "abstained": 5,
+   "citations": 39,
+   "gold_citations": 39,
+   "rejected_citations": 0,
+   "groundedness_median": 1.0,
+   "tokens": 18322,
+   "seconds": 559.6
+  },
+  "oracle_context": {
+   "answerable": 18,
+   "unanswerable": 5,
+   "key_fact_ok": 9,
+   "false_abstention": 8,
+   "answered_wrong": 1,
+   "citation_recall": 10,
+   "abstained": 5,
+   "citations": 57,
+   "gold_citations": 54,
+   "rejected_citations": 3,
+   "groundedness_median": 1.0,
+   "tokens": 36562,
+   "seconds": 584.2
+  },
+  "seeds": [
+   42,
+   43,
+   44
+  ],
+  "model": "llama3.2:3b"
+ },
+ "agent": {
+  "tasks": {
+   "tasks": 20,
+   "right_tools": 17,
+   "valid_args": 14,
+   "success": 14,
+   "mean_tool_calls": 1.08,
+   "limit_stops": 0,
+   "runs": 60,
+   "tokens": 165805,
+   "seconds": 1162.3
+  },
+  "recovery_passed": true,
+  "red_team_cases": 11,
+  "red_team": {
+   "A1": true,
+   "A2": true,
+   "A3": true,
+   "A4": true,
+   "A5": true,
+   "A6": true,
+   "A7": true,
+   "A8": true,
+   "A9": true,
+   "A10": true,
+   "A11": true
+  },
+  "gate_passed": true,
+  "seeds": [
+   42,
+   43,
+   44
+  ],
+  "model": "llama3.2:3b"
+ },
+ "baseline": {
+  "retrieval": {
+   "questions": 23,
+   "answerable": 18,
+   "unanswerable": 5,
+   "shipped_hits": 11,
+   "false_retrievals": 0,
+   "recall@1": 0.8333333333333334,
+   "hit@1": 0.9444444444444444,
+   "doc_recall@1": 0.8888888888888888,
+   "recall@3": 1.0,
+   "hit@3": 1.0,
+   "doc_recall@3": 1.0,
+   "recall@5": 1.0,
+   "hit@5": 1.0,
+   "doc_recall@5": 1.0,
+   "mrr": 0.9722222222222222,
+   "shipped_hit_rate": 0.6111111111111112,
+   "false_retrieval_rate": 0.0
+  },
+  "end_to_end": {
+   "answerable": 18,
+   "unanswerable": 5,
+   "key_fact_ok": 7,
+   "false_abstention": 10,
+   "answered_wrong": 1,
+   "citation_recall": 8,
+   "abstained": 5,
+   "citations": 39,
+   "gold_citations": 39,
+   "rejected_citations": 0,
+   "groundedness_median": 1.0,
+   "tokens": 18322,
+   "seconds": 211.2
+  },
+  "agent_round1": {
+   "tasks": 20,
+   "right_tools": 17,
+   "valid_args": 9,
+   "success": 9,
+   "mean_tool_calls": 0.98,
+   "limit_stops": 0,
+   "runs": 60,
+   "tokens": 158439,
+   "seconds": 822.9
+  },
+  "agent_round1_gate_passed": false,
+  "agent_week5_final": {
+   "tasks": 20,
+   "right_tools": 16,
+   "valid_args": 13,
+   "success": 13,
+   "mean_tool_calls": 1.1,
+   "limit_stops": 0,
+   "runs": 60,
+   "tokens": 168469,
+   "seconds": 763.4
+  },
+  "agent_week5_final_gate_passed": true
+ },
+ "finished": "2026-11-02T18:33:47"
+}

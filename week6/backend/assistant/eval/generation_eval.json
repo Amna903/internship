@@ -1,0 +1,3019 @@
+{
+ "model": "llama3.2:3b",
+ "embedder": "ollama/nomic-embed-text:latest",
+ "seeds": [
+  42,
+  43,
+  44
+ ],
+ "settings": {
+  "floor": 0.7,
+  "top_k": 2,
+  "groundedness_threshold": 0.61
+ },
+ "corpus": [
+  {
+   "filename": "accessibility.md",
+   "document_id": 13,
+   "version": 1,
+   "sha256": "13fb0bcf249d147509c43748b8dd5c16eea596ace9e4ffc11d02d4a1881cc9b4"
+  },
+  {
+   "filename": "billing.md",
+   "document_id": 7,
+   "version": 1,
+   "sha256": "b7f158d91efdfd4167b3981c54af7480b4094137f981bdc081d2c015769fc03b"
+  },
+  {
+   "filename": "cancellation.md",
+   "document_id": 8,
+   "version": 2,
+   "sha256": "f4c51ee5c08b6ade01c38d54e281cfd7f9ac63b079d12120b81f68e0bb41643e"
+  },
+  {
+   "filename": "interpreter-services.md",
+   "document_id": 14,
+   "version": 1,
+   "sha256": "187fe1ca0a650c79b5cb520149a6a3576f67154182fb4e90d45d753c601160a5"
+  },
+  {
+   "filename": "lab-results-admin.md",
+   "document_id": 15,
+   "version": 1,
+   "sha256": "c5d0f7dbeb22a6d51925dc67ea201dfbb051ec4cd4f26c934e4bce202581eeb1"
+  },
+  {
+   "filename": "parking.md",
+   "document_id": 16,
+   "version": 1,
+   "sha256": "a05551a631d571dc216a0d4d922f28f7fb503f1823fd595835cf3ed2acd31f88"
+  },
+  {
+   "filename": "payment-plans.md",
+   "document_id": 17,
+   "version": 1,
+   "sha256": "395d0cf7cdcdf25dc15daf864c6267a9c3376abbbb6c1e42b8c9dfaefaee18cb"
+  },
+  {
+   "filename": "privacy.md",
+   "document_id": 9,
+   "version": 1,
+   "sha256": "c9f2bc5f7d3264bb6ee9e504a2dc558f4a70b5438240e16ad14f211f3d24ba91"
+  },
+  {
+   "filename": "records-requests.md",
+   "document_id": 18,
+   "version": 1,
+   "sha256": "be159543f595f87c438b4d369d815d60831ff1162cbea494867d61920dc64fd1"
+  },
+  {
+   "filename": "reminders.md",
+   "document_id": 10,
+   "version": 1,
+   "sha256": "47a9067b477addeef2c744c0311c67895ef2f289f8332f40ea65f8a878328a8f"
+  },
+  {
+   "filename": "rescheduling.md",
+   "document_id": 11,
+   "version": 1,
+   "sha256": "6a1e12a241f68b361f88372c14cf6f0f1eebe5b0a2afb81656ea3e6487667885"
+  },
+  {
+   "filename": "telehealth.md",
+   "document_id": 12,
+   "version": 1,
+   "sha256": "3b11b21980242ee8c006bdc43bdfa8ccf49172074af20f3abc906a7e39fd34a8"
+  }
+ ],
+ "frozen_sha256": {
+  "eval/retrieval_cases.json": "7a40e307ca00ba0db640bf2f3100dc3dc460a9b887b2cbb505d74801f9e57a82",
+  "eval/generation_keys.json": "e8c3d6c063c706edfbea78c42c2d9d8ed2ac33b5aee3dc271ae747540f3e55b4"
+ },
+ "modes": {
+  "A": {
+   "overall": {
+    "answerable": 18,
+    "unanswerable": 5,
+    "key_fact_ok": 9,
+    "false_abstention": 8,
+    "answered_wrong": 1,
+    "citation_recall": 10,
+    "abstained": 5,
+    "citations": 57,
+    "gold_citations": 54,
+    "rejected_citations": 3,
+    "groundedness_median": 1.0,
+    "tokens": 36562,
+    "seconds": 368.9
+   },
+   "by_category": {
+    "area_hint": {
+     "answerable": 3,
+     "unanswerable": 0,
+     "key_fact_ok": 2,
+     "false_abstention": 1,
+     "answered_wrong": 0,
+     "citation_recall": 2,
+     "abstained": 0,
+     "citations": 9,
+     "gold_citations": 9,
+     "rejected_citations": 0,
+     "groundedness_median": 1.0,
+     "tokens": 4761,
+     "seconds": 47.9
+    },
+    "current_version": {
+     "answerable": 2,
+     "unanswerable": 0,
+     "key_fact_ok": 1,
+     "false_abstention": 1,
+     "answered_wrong": 0,
+     "citation_recall": 1,
+     "abstained": 0,
+     "citations": 6,
+     "gold_citations": 6,
+     "rejected_citations": 0,
+     "groundedness_median": 1.0,
+     "tokens": 3181,
+     "seconds": 37.9
+    },
+    "direct": {
+     "answerable": 2,
+     "unanswerable": 0,
+     "key_fact_ok": 2,
+     "false_abstention": 0,
+     "answered_wrong": 0,
+     "citation_recall": 2,
+     "abstained": 0,
+     "citations": 6,
+     "gold_citations": 6,
+     "rejected_citations": 0,
+     "groundedness_median": 1.0,
+     "tokens": 3138,
+     "seconds": 37.2
+    },
+    "keyword": {
+     "answerable": 3,
+     "unanswerable": 0,
+     "key_fact_ok": 2,
+     "false_abstention": 1,
+     "answered_wrong": 0,
+     "citation_recall": 2,
+     "abstained": 0,
+     "citations": 9,
+     "gold_citations": 9,
+     "rejected_citations": 0,
+     "groundedness_median": 1.0,
+     "tokens": 4566,
+     "seconds": 43.8
+    },
+    "multi_doc": {
+     "answerable": 2,
+     "unanswerable": 0,
+     "key_fact_ok": 0,
+     "false_abstention": 1,
+     "answered_wrong": 1,
+     "citation_recall": 1,
+     "abstained": 0,
+     "citations": 12,
+     "gold_citations": 9,
+     "rejected_citations": 0,
+     "groundedness_median": 0.85,
+     "tokens": 3990,
+     "seconds": 59.5
+    },
+    "paraphrase": {
+     "answerable": 6,
+     "unanswerable": 0,
+     "key_fact_ok": 2,
+     "false_abstention": 4,
+     "answered_wrong": 0,
+     "citation_recall": 2,
+     "abstained": 0,
+     "citations": 15,
+     "gold_citations": 15,
+     "rejected_citations": 3,
+     "groundedness_median": 1.0,
+     "tokens": 9782,
+     "seconds": 117.5
+    },
+    "unanswerable": {
+     "answerable": 0,
+     "unanswerable": 5,
+     "key_fact_ok": 0,
+     "false_abstention": 0,
+     "answered_wrong": 0,
+     "citation_recall": 0,
+     "abstained": 5,
+     "citations": 0,
+     "gold_citations": 0,
+     "rejected_citations": 0,
+     "groundedness_median": null,
+     "tokens": 7144,
+     "seconds": 25.0
+    }
+   },
+   "by_author": {
+    "assistant": {
+     "answerable": 10,
+     "unanswerable": 2,
+     "key_fact_ok": 5,
+     "false_abstention": 4,
+     "answered_wrong": 1,
+     "citation_recall": 6,
+     "abstained": 2,
+     "citations": 36,
+     "gold_citations": 33,
+     "rejected_citations": 0,
+     "groundedness_median": 1.0,
+     "tokens": 19407,
+     "seconds": 210.2
+    },
+    "user": {
+     "answerable": 8,
+     "unanswerable": 3,
+     "key_fact_ok": 4,
+     "false_abstention": 4,
+     "answered_wrong": 0,
+     "citation_recall": 4,
+     "abstained": 3,
+     "citations": 21,
+     "gold_citations": 21,
+     "rejected_citations": 3,
+     "groundedness_median": 1.0,
+     "tokens": 17155,
+     "seconds": 158.7
+    }
+   },
+   "runs": {
+    "U01": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "parking.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 539,
+      "seconds": 9.88
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "parking.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 539,
+      "seconds": 6.24
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "parking.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 539,
+      "seconds": 6.31
+     }
+    ],
+    "U02": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "a number in the answer is not in its quotes",
+      "cited": [
+       "interpreter-services.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5384615384615384,
+      "tokens": 552,
+      "seconds": 7.71
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "a number in the answer is not in its quotes",
+      "cited": [
+       "interpreter-services.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5384615384615384,
+      "tokens": 552,
+      "seconds": 6.63
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "a number in the answer is not in its quotes",
+      "cited": [
+       "interpreter-services.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5384615384615384,
+      "tokens": 552,
+      "seconds": 6.97
+     }
+    ],
+    "U03": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "You can split a balance of more than 120 euros into up to 3 monthly payments.",
+      "reason": "",
+      "cited": [
+       "payment-plans.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 537,
+      "seconds": 6.96
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "You can split a balance of more than 120 euros into up to 3 monthly payments.",
+      "reason": "",
+      "cited": [
+       "payment-plans.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 537,
+      "seconds": 5.5
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "You can split a balance of more than 120 euros into up to 3 monthly payments.",
+      "reason": "",
+      "cited": [
+       "payment-plans.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 537,
+      "seconds": 5.81
+     }
+    ],
+    "U04": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "Records are sent within 15 working days of a complete request.",
+      "reason": "",
+      "cited": [
+       "records-requests.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 563,
+      "seconds": 10.09
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "Records are sent within 15 working days of a complete request.",
+      "reason": "",
+      "cited": [
+       "records-requests.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 523,
+      "seconds": 5.47
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "Records are sent within 15 working days of a complete request.",
+      "reason": "",
+      "cited": [
+       "records-requests.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 523,
+      "seconds": 5.14
+     }
+    ],
+    "U05": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "no verified citation",
+      "cited": [],
+      "rejected_citations": 1,
+      "groundedness": null,
+      "tokens": 537,
+      "seconds": 5.73
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "no verified citation",
+      "cited": [],
+      "rejected_citations": 1,
+      "groundedness": null,
+      "tokens": 537,
+      "seconds": 4.3
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "no verified citation",
+      "cited": [],
+      "rejected_citations": 1,
+      "groundedness": null,
+      "tokens": 537,
+      "seconds": 4.14
+     }
+    ],
+    "U06": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "No interest is charged for a payment plan.",
+      "reason": "",
+      "cited": [
+       "payment-plans.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 515,
+      "seconds": 5.48
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "No interest is charged for a payment plan.",
+      "reason": "",
+      "cited": [
+       "payment-plans.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 515,
+      "seconds": 3.77
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "No interest is charged for a payment plan.",
+      "reason": "",
+      "cited": [
+       "payment-plans.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 515,
+      "seconds": 3.76
+     }
+    ],
+    "U07": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "The patient or someone the patient has authorised in writing",
+      "reason": "",
+      "cited": [
+       "records-requests.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 528,
+      "seconds": 6.02
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "The patient or someone the patient has authorised in writing",
+      "reason": "",
+      "cited": [
+       "records-requests.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 528,
+      "seconds": 4.87
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "The patient or someone the patient has authorised in writing",
+      "reason": "",
+      "cited": [
+       "records-requests.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 528,
+      "seconds": 4.74
+     }
+    ],
+    "U08": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "accessibility.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 544,
+      "seconds": 7.16
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "accessibility.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 544,
+      "seconds": 6.15
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "accessibility.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 544,
+      "seconds": 5.95
+     }
+    ],
+    "U09": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 42,
+      "answer": "",
+      "reason": "answer not substantive",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 464,
+      "seconds": 2.3
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 43,
+      "answer": "",
+      "reason": "answer not substantive",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 464,
+      "seconds": 1.44
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 44,
+      "answer": "",
+      "reason": "answer not substantive",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 464,
+      "seconds": 1.57
+     }
+    ],
+    "U10": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 42,
+      "answer": "",
+      "reason": "answer not substantive",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 489,
+      "seconds": 2.13
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 43,
+      "answer": "",
+      "reason": "answer not substantive",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 489,
+      "seconds": 1.12
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 44,
+      "answer": "",
+      "reason": "answer not substantive",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 489,
+      "seconds": 1.1
+     }
+    ],
+    "U11": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 42,
+      "answer": "",
+      "reason": "answer not substantive",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 477,
+      "seconds": 2.07
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 43,
+      "answer": "",
+      "reason": "answer not substantive",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 477,
+      "seconds": 1.09
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 44,
+      "answer": "",
+      "reason": "answer not substantive",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 477,
+      "seconds": 1.1
+     }
+    ],
+    "A01": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "A refund can be requested within 14 days of a payment.",
+      "reason": "",
+      "cited": [
+       "billing.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 523,
+      "seconds": 6.27
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "A refund can be requested within 14 days of a payment.",
+      "reason": "",
+      "cited": [
+       "billing.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 523,
+      "seconds": 5.43
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "A refund can be requested within 14 days of a payment.",
+      "reason": "",
+      "cited": [
+       "billing.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 523,
+      "seconds": 5.53
+     }
+    ],
+    "A02": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "Each additional paper copy costs 10 euros.",
+      "reason": "",
+      "cited": [
+       "records-requests.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 503,
+      "seconds": 4.32
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "Each additional paper copy costs 10 euros.",
+      "reason": "",
+      "cited": [
+       "records-requests.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 503,
+      "seconds": 3.52
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "Each additional paper copy costs 10 euros.",
+      "reason": "",
+      "cited": [
+       "records-requests.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 503,
+      "seconds": 3.5
+     }
+    ],
+    "A03": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "reminders.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 507,
+      "seconds": 5.36
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "reminders.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 507,
+      "seconds": 4.56
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "reminders.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 507,
+      "seconds": 4.55
+     }
+    ],
+    "A04": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.",
+      "reason": "",
+      "cited": [
+       "billing.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 512,
+      "seconds": 6.57
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.",
+      "reason": "",
+      "cited": [
+       "billing.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 512,
+      "seconds": 5.76
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.",
+      "reason": "",
+      "cited": [
+       "billing.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 512,
+      "seconds": 5.7
+     }
+    ],
+    "A05": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "From 1 October 2026, a late cancellation fee of 20 euros applies to the second late cancellation within 12 months, and to every late cancellation after that.",
+      "reason": "",
+      "cited": [
+       "cancellation.md@v2#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 547,
+      "seconds": 7.94
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "a number in the answer is not in its quotes",
+      "cited": [
+       "cancellation.md@v2#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.7692307692307693,
+      "tokens": 539,
+      "seconds": 6.64
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "From 1 October 2026, a late cancellation fee of 20 euros applies to the second late cancellation within 12 months, and to every late cancellation after that.",
+      "reason": "",
+      "cited": [
+       "cancellation.md@v2#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 547,
+      "seconds": 7.13
+     }
+    ],
+    "A06": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "a number in the answer is not in its quotes",
+      "cited": [
+       "cancellation.md@v2#2"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.0,
+      "tokens": 516,
+      "seconds": 5.75
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "a number in the answer is not in its quotes",
+      "cited": [
+       "cancellation.md@v2#2"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.0,
+      "tokens": 516,
+      "seconds": 5.17
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "a number in the answer is not in its quotes",
+      "cited": [
+       "cancellation.md@v2#2"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.0,
+      "tokens": 516,
+      "seconds": 5.28
+     }
+    ],
+    "A07": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": false,
+      "false_abstention": false,
+      "answered_wrong": true,
+      "citations": 3,
+      "gold_citations": 2,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "Yes, a professional interpreter can be provided for a video visit, and patients should join 5 minutes before the start time to ensure a stable connection. If the connection fails, the clinician will call the patient's phone number on file and continue by phone.",
+      "reason": "",
+      "cited": [
+       "telehealth.md#0",
+       "telehealth.md#1",
+       "interpreter-services.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.7272727272727273,
+      "tokens": 732,
+      "seconds": 14.94
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": false,
+      "false_abstention": false,
+      "answered_wrong": true,
+      "citations": 3,
+      "gold_citations": 2,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "Yes, a professional interpreter can be requested for a video visit, and can join the video call or take part by phone. Patients should join 5 minutes before the start time to check their camera and microphone, and if the connection fails, the clinician calls the patient's phone number on file and continues by phone.",
+      "reason": "",
+      "cited": [
+       "interpreter-services.md#1",
+       "telehealth.md#0",
+       "telehealth.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.8461538461538461,
+      "tokens": 744,
+      "seconds": 14.14
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": false,
+      "false_abstention": false,
+      "answered_wrong": true,
+      "citations": 3,
+      "gold_citations": 2,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "Yes, a professional interpreter can be requested for a video visit, and can join the video call or take part by phone. Patients should join 5 minutes before the start time to check their camera and microphone, and if the connection fails, the clinician calls the patient's phone number on file and continues by phone.",
+      "reason": "",
+      "cited": [
+       "interpreter-services.md#1",
+       "telehealth.md#0",
+       "telehealth.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.8461538461538461,
+      "tokens": 744,
+      "seconds": 14.19
+     }
+    ],
+    "A08": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "billing.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 590,
+      "seconds": 6.2
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "billing.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 590,
+      "seconds": 5.01
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "billing.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 590,
+      "seconds": 5.01
+     }
+    ],
+    "A09": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "Test results appear in the patient app within 5 working days of the clinic receiving them.",
+      "reason": "",
+      "cited": [
+       "lab-results-admin.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.9,
+      "tokens": 523,
+      "seconds": 7.43
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "Test results appear in the patient app within 5 working days of the clinic receiving them.",
+      "reason": "",
+      "cited": [
+       "lab-results-admin.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.9,
+      "tokens": 523,
+      "seconds": 6.23
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "Test results appear in the patient app within 5 working days of the clinic receiving them.",
+      "reason": "",
+      "cited": [
+       "lab-results-admin.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.9,
+      "tokens": 523,
+      "seconds": 6.36
+     }
+    ],
+    "A10": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "telehealth.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.45454545454545453,
+      "tokens": 560,
+      "seconds": 7.79
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "telehealth.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5833333333333334,
+      "tokens": 558,
+      "seconds": 6.37
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "telehealth.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.45454545454545453,
+      "tokens": 560,
+      "seconds": 6.49
+     }
+    ],
+    "A11": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 42,
+      "answer": "",
+      "reason": "answer not substantive",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 472,
+      "seconds": 1.94
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 43,
+      "answer": "",
+      "reason": "answer not substantive",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 472,
+      "seconds": 1.2
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 44,
+      "answer": "",
+      "reason": "answer not substantive",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 472,
+      "seconds": 1.25
+     }
+    ],
+    "A12": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 42,
+      "answer": "",
+      "reason": "no citation",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 480,
+      "seconds": 2.85
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 43,
+      "answer": "",
+      "reason": "no citation",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 480,
+      "seconds": 1.97
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 44,
+      "answer": "",
+      "reason": "no citation",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 478,
+      "seconds": 1.87
+     }
+    ]
+   }
+  },
+  "B": {
+   "overall": {
+    "answerable": 18,
+    "unanswerable": 5,
+    "key_fact_ok": 7,
+    "false_abstention": 10,
+    "answered_wrong": 1,
+    "citation_recall": 8,
+    "abstained": 5,
+    "citations": 39,
+    "gold_citations": 39,
+    "rejected_citations": 0,
+    "groundedness_median": 1.0,
+    "tokens": 18322,
+    "seconds": 211.2
+   },
+   "by_category": {
+    "area_hint": {
+     "answerable": 3,
+     "unanswerable": 0,
+     "key_fact_ok": 0,
+     "false_abstention": 3,
+     "answered_wrong": 0,
+     "citation_recall": 0,
+     "abstained": 0,
+     "citations": 0,
+     "gold_citations": 0,
+     "rejected_citations": 0,
+     "groundedness_median": null,
+     "tokens": 0,
+     "seconds": 0.2
+    },
+    "current_version": {
+     "answerable": 2,
+     "unanswerable": 0,
+     "key_fact_ok": 1,
+     "false_abstention": 0,
+     "answered_wrong": 1,
+     "citation_recall": 2,
+     "abstained": 0,
+     "citations": 6,
+     "gold_citations": 6,
+     "rejected_citations": 0,
+     "groundedness_median": 1.0,
+     "tokens": 3228,
+     "seconds": 33.6
+    },
+    "direct": {
+     "answerable": 2,
+     "unanswerable": 0,
+     "key_fact_ok": 2,
+     "false_abstention": 0,
+     "answered_wrong": 0,
+     "citation_recall": 2,
+     "abstained": 0,
+     "citations": 6,
+     "gold_citations": 6,
+     "rejected_citations": 0,
+     "groundedness_median": 1.0,
+     "tokens": 3138,
+     "seconds": 35.8
+    },
+    "keyword": {
+     "answerable": 3,
+     "unanswerable": 0,
+     "key_fact_ok": 2,
+     "false_abstention": 1,
+     "answered_wrong": 0,
+     "citation_recall": 2,
+     "abstained": 0,
+     "citations": 9,
+     "gold_citations": 9,
+     "rejected_citations": 0,
+     "groundedness_median": 1.0,
+     "tokens": 4175,
+     "seconds": 42.7
+    },
+    "multi_doc": {
+     "answerable": 2,
+     "unanswerable": 0,
+     "key_fact_ok": 0,
+     "false_abstention": 2,
+     "answered_wrong": 0,
+     "citation_recall": 0,
+     "abstained": 0,
+     "citations": 9,
+     "gold_citations": 9,
+     "rejected_citations": 0,
+     "groundedness_median": null,
+     "tokens": 3434,
+     "seconds": 49.1
+    },
+    "paraphrase": {
+     "answerable": 6,
+     "unanswerable": 0,
+     "key_fact_ok": 2,
+     "false_abstention": 4,
+     "answered_wrong": 0,
+     "citation_recall": 2,
+     "abstained": 0,
+     "citations": 9,
+     "gold_citations": 9,
+     "rejected_citations": 0,
+     "groundedness_median": 1.0,
+     "tokens": 4347,
+     "seconds": 49.5
+    },
+    "unanswerable": {
+     "answerable": 0,
+     "unanswerable": 5,
+     "key_fact_ok": 0,
+     "false_abstention": 0,
+     "answered_wrong": 0,
+     "citation_recall": 0,
+     "abstained": 5,
+     "citations": 0,
+     "gold_citations": 0,
+     "rejected_citations": 0,
+     "groundedness_median": null,
+     "tokens": 0,
+     "seconds": 0.3
+    }
+   },
+   "by_author": {
+    "assistant": {
+     "answerable": 10,
+     "unanswerable": 2,
+     "key_fact_ok": 5,
+     "false_abstention": 4,
+     "answered_wrong": 1,
+     "citation_recall": 6,
+     "abstained": 2,
+     "citations": 30,
+     "gold_citations": 30,
+     "rejected_citations": 0,
+     "groundedness_median": 1.0,
+     "tokens": 13975,
+     "seconds": 161.4
+    },
+    "user": {
+     "answerable": 8,
+     "unanswerable": 3,
+     "key_fact_ok": 2,
+     "false_abstention": 6,
+     "answered_wrong": 0,
+     "citation_recall": 2,
+     "abstained": 3,
+     "citations": 9,
+     "gold_citations": 9,
+     "rejected_citations": 0,
+     "groundedness_median": 1.0,
+     "tokens": 4347,
+     "seconds": 49.7
+    }
+   },
+   "runs": {
+    "U01": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "parking.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.4,
+      "tokens": 461,
+      "seconds": 5.0
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "parking.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.4,
+      "tokens": 461,
+      "seconds": 6.45
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "parking.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.4,
+      "tokens": 461,
+      "seconds": 6.44
+     }
+    ],
+    "U02": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.04
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     }
+    ],
+    "U03": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "You can split a balance of more than 120 euros into up to 3 monthly payments.",
+      "reason": "",
+      "cited": [
+       "payment-plans.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 476,
+      "seconds": 7.23
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "You can split a balance of more than 120 euros into up to 3 monthly payments.",
+      "reason": "",
+      "cited": [
+       "payment-plans.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 476,
+      "seconds": 5.5
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "You can split a balance of more than 120 euros into up to 3 monthly payments.",
+      "reason": "",
+      "cited": [
+       "payment-plans.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 476,
+      "seconds": 5.41
+     }
+    ],
+    "U04": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "Records are sent within 15 working days of a complete request.",
+      "reason": "",
+      "cited": [
+       "records-requests.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 512,
+      "seconds": 4.94
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "Records are sent within 15 working days of a complete request.",
+      "reason": "",
+      "cited": [
+       "records-requests.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 512,
+      "seconds": 4.13
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "Records are sent within 15 working days of a complete request.",
+      "reason": "",
+      "cited": [
+       "records-requests.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 512,
+      "seconds": 4.1
+     }
+    ],
+    "U05": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.03
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.03
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     }
+    ],
+    "U06": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     }
+    ],
+    "U07": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     }
+    ],
+    "U08": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     }
+    ],
+    "U09": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 42,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 43,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 44,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     }
+    ],
+    "U10": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 42,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 43,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 44,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     }
+    ],
+    "U11": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 42,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.03
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 43,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.03
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 44,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     }
+    ],
+    "A01": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "A refund can be requested within 14 days of a payment.",
+      "reason": "",
+      "cited": [
+       "billing.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 523,
+      "seconds": 6.41
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "A refund can be requested within 14 days of a payment.",
+      "reason": "",
+      "cited": [
+       "billing.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 523,
+      "seconds": 5.5
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "A refund can be requested within 14 days of a payment.",
+      "reason": "",
+      "cited": [
+       "billing.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 523,
+      "seconds": 5.64
+     }
+    ],
+    "A02": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "Each additional paper copy costs 10 euros.",
+      "reason": "",
+      "cited": [
+       "records-requests.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 427,
+      "seconds": 4.09
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "Each additional paper copy costs 10 euros.",
+      "reason": "",
+      "cited": [
+       "records-requests.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 427,
+      "seconds": 3.59
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "Each additional paper copy costs 10 euros.",
+      "reason": "",
+      "cited": [
+       "records-requests.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 427,
+      "seconds": 3.55
+     }
+    ],
+    "A03": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "reminders.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 434,
+      "seconds": 4.47
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "reminders.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 434,
+      "seconds": 3.74
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "reminders.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 434,
+      "seconds": 3.67
+     }
+    ],
+    "A04": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "Refunds are paid back within 10 working days after approval.",
+      "reason": "",
+      "cited": [
+       "billing.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.8571428571428571,
+      "tokens": 528,
+      "seconds": 6.54
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "Refunds are paid back to the original payment method within 10 working days after approval.",
+      "reason": "",
+      "cited": [
+       "billing.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.9,
+      "tokens": 533,
+      "seconds": 6.11
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "Refunds are paid back to the original payment method within 10 working days.",
+      "reason": "",
+      "cited": [
+       "billing.md#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 531,
+      "seconds": 6.98
+     }
+    ],
+    "A05": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": false,
+      "false_abstention": false,
+      "answered_wrong": true,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "The late cancellation fee is 20 euros.",
+      "reason": "",
+      "cited": [
+       "cancellation.md@v2#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 535,
+      "seconds": 6.51
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": false,
+      "false_abstention": false,
+      "answered_wrong": true,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "The late cancellation fee is 20 euros.",
+      "reason": "",
+      "cited": [
+       "cancellation.md@v2#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 535,
+      "seconds": 4.95
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": false,
+      "false_abstention": false,
+      "answered_wrong": true,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "The late cancellation fee is 20 euros.",
+      "reason": "",
+      "cited": [
+       "cancellation.md@v2#1"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 535,
+      "seconds": 4.99
+     }
+    ],
+    "A06": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "From 1 October 2026",
+      "reason": "",
+      "cited": [
+       "cancellation.md@v2#2"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 541,
+      "seconds": 6.38
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "From 1 October 2026",
+      "reason": "",
+      "cited": [
+       "cancellation.md@v2#2"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 541,
+      "seconds": 5.37
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "From 1 October 2026",
+      "reason": "",
+      "cited": [
+       "cancellation.md@v2#2"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 1.0,
+      "tokens": 541,
+      "seconds": 5.43
+     }
+    ],
+    "A07": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 2,
+      "gold_citations": 2,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "interpreter-services.md#1",
+       "interpreter-services.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.47368421052631576,
+      "tokens": 607,
+      "seconds": 10.76
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 2,
+      "gold_citations": 2,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "interpreter-services.md#1",
+       "interpreter-services.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.47368421052631576,
+      "tokens": 607,
+      "seconds": 10.37
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 2,
+      "gold_citations": 2,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "interpreter-services.md#1",
+       "interpreter-services.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.47368421052631576,
+      "tokens": 607,
+      "seconds": 10.23
+     }
+    ],
+    "A08": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "billing.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.5,
+      "tokens": 529,
+      "seconds": 5.64
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "billing.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.3333333333333333,
+      "tokens": 542,
+      "seconds": 6.08
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "answer not grounded in its quotes",
+      "cited": [
+       "billing.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.3333333333333333,
+      "tokens": 542,
+      "seconds": 5.99
+     }
+    ],
+    "A09": [
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 42,
+      "answer": "Test results appear in the patient app within 5 working days of the clinic receiving them.",
+      "reason": "",
+      "cited": [
+       "lab-results-admin.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.9,
+      "tokens": 523,
+      "seconds": 6.62
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 43,
+      "answer": "Test results appear in the patient app within 5 working days of the clinic receiving them.",
+      "reason": "",
+      "cited": [
+       "lab-results-admin.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.9,
+      "tokens": 523,
+      "seconds": 5.89
+     },
+     {
+      "status": "answered",
+      "answered": true,
+      "key_fact_ok": true,
+      "false_abstention": false,
+      "answered_wrong": false,
+      "citations": 1,
+      "gold_citations": 1,
+      "citation_recall": true,
+      "seed": 44,
+      "answer": "Test results appear in the patient app within 5 working days of the clinic receiving them.",
+      "reason": "",
+      "cited": [
+       "lab-results-admin.md#0"
+      ],
+      "rejected_citations": 0,
+      "groundedness": 0.9,
+      "tokens": 523,
+      "seconds": 5.73
+     }
+    ],
+    "A10": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 42,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.04
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 43,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.03
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "key_fact_ok": false,
+      "false_abstention": true,
+      "answered_wrong": false,
+      "citations": 0,
+      "gold_citations": 0,
+      "citation_recall": false,
+      "seed": 44,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.03
+     }
+    ],
+    "A11": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 42,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 43,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 44,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     }
+    ],
+    "A12": [
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 42,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 43,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     },
+     {
+      "status": "insufficient_information",
+      "answered": false,
+      "abstained": true,
+      "seed": 44,
+      "answer": "",
+      "reason": "below floor",
+      "cited": [],
+      "rejected_citations": 0,
+      "groundedness": null,
+      "tokens": 0,
+      "seconds": 0.02
+     }
+    ]
+   }
+  }
+ }
+}

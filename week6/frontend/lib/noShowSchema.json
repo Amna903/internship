@@ -1,0 +1,109 @@
+{
+  "_comment": "Shared by the dashboard form and checked by backend tests (tests/test_frontend_contract.py). The 'features' block must equal ml.config.FEATURE_SCHEMA.",
+  "model": "no-show-1.0.0",
+  "features": {
+    "lead_time_days": {
+      "type": "integer",
+      "min": 0,
+      "max": 90
+    },
+    "appointment_weekday": {
+      "type": "category",
+      "values": ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+    },
+    "appointment_hour": {
+      "type": "integer",
+      "min": 7,
+      "max": 19
+    },
+    "age_band": {
+      "type": "category",
+      "values": ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
+    },
+    "visit_type": {
+      "type": "category",
+      "values": ["in_person", "telehealth"]
+    },
+    "booking_channel": {
+      "type": "category",
+      "values": ["web", "phone", "app"]
+    },
+    "reminder_sent": {
+      "type": "boolean"
+    },
+    "prior_appointments": {
+      "type": "integer",
+      "min": 0,
+      "max": 500
+    },
+    "prior_no_shows": {
+      "type": "integer",
+      "min": 0,
+      "max": 500,
+      "at_most": "prior_appointments"
+    },
+    "distance_km": {
+      "type": "number",
+      "min": 0,
+      "max": 500,
+      "nullable": true
+    }
+  },
+  "actions": {
+    "extra_reminder_suggested": "Extra reminder suggested",
+    "standard_reminder": "Standard reminder"
+  },
+  "presets": [
+    {
+      "id": "next_day",
+      "label": "Next-day, reminder sent",
+      "expected_action": "standard_reminder",
+      "values": {
+        "lead_time_days": 1,
+        "appointment_weekday": "tuesday",
+        "appointment_hour": 10,
+        "age_band": "45-54",
+        "visit_type": "in_person",
+        "booking_channel": "phone",
+        "reminder_sent": true,
+        "prior_appointments": 4,
+        "prior_no_shows": 0,
+        "distance_km": 4.0
+      }
+    },
+    {
+      "id": "far_ahead",
+      "label": "Booked 60 days ahead, no reminder, past misses",
+      "expected_action": "extra_reminder_suggested",
+      "values": {
+        "lead_time_days": 60,
+        "appointment_weekday": "friday",
+        "appointment_hour": 8,
+        "age_band": "25-34",
+        "visit_type": "in_person",
+        "booking_channel": "web",
+        "reminder_sent": false,
+        "prior_appointments": 5,
+        "prior_no_shows": 3,
+        "distance_km": 18.5
+      }
+    },
+    {
+      "id": "new_unknown_distance",
+      "label": "New patient, distance unknown",
+      "expected_action": "standard_reminder",
+      "values": {
+        "lead_time_days": 3,
+        "appointment_weekday": "wednesday",
+        "appointment_hour": 14,
+        "age_band": "55-64",
+        "visit_type": "telehealth",
+        "booking_channel": "app",
+        "reminder_sent": true,
+        "prior_appointments": 0,
+        "prior_no_shows": 0,
+        "distance_km": null
+      }
+    }
+  ]
+}

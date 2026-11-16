@@ -1,0 +1,354 @@
+{
+ "status": "FROZEN 2026-11-01, before any Step 3 design: never used for tuning or choices",
+ "note": "Week 5 retrieval evaluation. Labels are one-sentence evidence quotes; a hit needs a retrieved chunk to contain the whole quote.",
+ "cases": [
+  {
+   "id": "U01",
+   "question": "If I leave my car behind the clinic, how long before I have to pay?",
+   "author": "user",
+   "category": "paraphrase",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "parking.md",
+     "version": 1,
+     "quote": "Patients can park free of charge for up to 3 hours in the car park behind the clinic."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "U02",
+   "question": "My mum doesn't speak English well. Can someone translate at her visit, and will it cost us?",
+   "author": "user",
+   "category": "paraphrase",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "interpreter-services.md",
+     "version": 1,
+     "quote": "The clinic provides a professional interpreter free of charge for any appointment."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "U03",
+   "question": "I owe the clinic 300 euros. Can I pay it off bit by bit?",
+   "author": "user",
+   "category": "paraphrase",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "payment-plans.md",
+     "version": 1,
+     "quote": "A balance of more than 120 euros can be split into up to 3 monthly payments."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "U04",
+   "question": "After I ask, how long until another doctor gets my file?",
+   "author": "user",
+   "category": "paraphrase",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "records-requests.md",
+     "version": 1,
+     "quote": "Records are sent within 15 working days of a complete request."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "U05",
+   "question": "I use a wheelchair. Can I get to the upper floors?",
+   "author": "user",
+   "category": "paraphrase",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "accessibility.md",
+     "version": 1,
+     "quote": "The clinic has a step-free entrance and a lift to every floor."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "U06",
+   "question": "Billing question: is there any interest if I split my bill?",
+   "author": "user",
+   "category": "area_hint",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "payment-plans.md",
+     "version": 1,
+     "quote": "No interest or extra fee is charged for a payment plan."
+    }
+   ],
+   "area": "billing",
+   "notes": ""
+  },
+  {
+   "id": "U07",
+   "question": "Privacy question: who is allowed to sign a records request for me?",
+   "author": "user",
+   "category": "area_hint",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "records-requests.md",
+     "version": 1,
+     "quote": "The request must be signed by the patient, or by someone the patient has authorised in writing."
+    }
+   ],
+   "area": "privacy",
+   "notes": ""
+  },
+  {
+   "id": "U08",
+   "question": "Access question: can I bring my guide dog?",
+   "author": "user",
+   "category": "area_hint",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "accessibility.md",
+     "version": 1,
+     "quote": "Assistance animals are welcome in all areas of the clinic."
+    }
+   ],
+   "area": "access",
+   "notes": ""
+  },
+  {
+   "id": "U09",
+   "question": "Do you have electric car charging points in the car park?",
+   "author": "user",
+   "category": "unanswerable",
+   "answerable": false,
+   "evidence": [],
+   "area": null,
+   "notes": "near-miss: parking.md says 'free of charge' and 'charged'"
+  },
+  {
+   "id": "U10",
+   "question": "Is there a pharmacy inside the clinic?",
+   "author": "user",
+   "category": "unanswerable",
+   "answerable": false,
+   "evidence": [],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "U11",
+   "question": "What are the clinic's opening hours on public holidays?",
+   "author": "user",
+   "category": "unanswerable",
+   "answerable": false,
+   "evidence": [],
+   "area": null,
+   "notes": "near-miss: rescheduling.md mentions 'opening hours' without giving them"
+  },
+  {
+   "id": "A01",
+   "question": "How long do I have to request a refund?",
+   "author": "assistant",
+   "category": "direct",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "billing.md",
+     "version": 1,
+     "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "A02",
+   "question": "How much does an extra paper copy of my records cost?",
+   "author": "assistant",
+   "category": "keyword",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "records-requests.md",
+     "version": 1,
+     "quote": "each additional paper copy costs 10 euros"
+    }
+   ],
+   "area": null,
+   "notes": "exact amount; 10 euros vs other amounts"
+  },
+  {
+   "id": "A03",
+   "question": "When is the 2-hour reminder sent?",
+   "author": "assistant",
+   "category": "keyword",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "reminders.md",
+     "version": 1,
+     "quote": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "A04",
+   "question": "How many working days until an approved refund is paid back?",
+   "author": "assistant",
+   "category": "keyword",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "billing.md",
+     "version": 1,
+     "quote": "paid back to the original payment method within 10 working days"
+    }
+   ],
+   "area": null,
+   "notes": "several 'working days' figures across documents"
+  },
+  {
+   "id": "A05",
+   "question": "How much is the late cancellation fee now?",
+   "author": "assistant",
+   "category": "current_version",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "cancellation.md",
+     "version": 2,
+     "quote": "a late cancellation fee of 20 euros applies to the second late cancellation within 12 months"
+    }
+   ],
+   "area": null,
+   "notes": "v1 said 15 euros on the third; v1 must never be retrieved"
+  },
+  {
+   "id": "A06",
+   "question": "When did the new cancellation fee start?",
+   "author": "assistant",
+   "category": "current_version",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "cancellation.md",
+     "version": 2,
+     "quote": "From 1 October 2026"
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "A07",
+   "question": "Can I get an interpreter for a video visit, and how do video visits work?",
+   "author": "assistant",
+   "category": "multi_doc",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "interpreter-services.md",
+     "version": 1,
+     "quote": "For telehealth visits, the interpreter joins the video call or takes part by phone."
+    },
+    {
+     "document": "telehealth.md",
+     "version": 1,
+     "quote": "Telehealth visits take place by video in the patient app."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "A08",
+   "question": "If I pay through a payment plan, how long do I have to ask for a refund of one of those payments?",
+   "author": "assistant",
+   "category": "multi_doc",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "payment-plans.md",
+     "version": 1,
+     "quote": "Refunds for payments made under a plan follow the normal billing and refund policy."
+    },
+    {
+     "document": "billing.md",
+     "version": 1,
+     "quote": "A refund can be requested within 14 days of a payment, in the patient app or at the front desk."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "A09",
+   "question": "When do test results appear in the app?",
+   "author": "assistant",
+   "category": "direct",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "lab-results-admin.md",
+     "version": 1,
+     "quote": "Test results are released to the patient app within 5 working days of the clinic receiving them."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "A10",
+   "question": "My video call dropped in the middle of the appointment. What happens then?",
+   "author": "assistant",
+   "category": "paraphrase",
+   "answerable": true,
+   "evidence": [
+    {
+     "document": "telehealth.md",
+     "version": 1,
+     "quote": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+    }
+   ],
+   "area": null,
+   "notes": ""
+  },
+  {
+   "id": "A11",
+   "question": "Can I pay my bill in cryptocurrency?",
+   "author": "assistant",
+   "category": "unanswerable",
+   "answerable": false,
+   "evidence": [],
+   "area": null,
+   "notes": "billing words without an answer"
+  },
+  {
+   "id": "A12",
+   "question": "How long are my records kept before they are deleted?",
+   "author": "assistant",
+   "category": "unanswerable",
+   "answerable": false,
+   "evidence": [],
+   "area": null,
+   "notes": "near-miss: privacy and records documents, no retention period"
+  }
+ ]
+}

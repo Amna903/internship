@@ -1,0 +1,200 @@
+"""Week 6 Step 9: the evaluation suite in one command (V1–V5). Rules: docs/REQUIREMENTS.md, "Step 9 rules".
+
+Writes only to eval_suite/ (results.json, report.md); the committed Week 3–5 result files are never overwritten.
+Needs the local model for the RAG and agent parts. Nothing is tuned here.
+"""
+
+import json
+import statistics
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError
+
+from agent import agent_eval
+from assistant import generation_eval, retrieval_eval
+from assistant.documents import CorpusMismatch
+from assistant.embeddings import get_embedder
+from assistant.llm import get_llm
+
+BACKEND = Path(settings.BASE_DIR)
+OUT = BACKEND / "eval_suite"
+EVAL = BACKEND / "assistant" / "eval"
+
+
+def _json(path):
+    return json.loads(Path(path).read_text())
+
+
+def supervised() -> dict:
+    started = time.time()
+    run = subprocess.run([sys.executable, "-m", "ml.verify_release"], cwd=BACKEND, capture_output=True, text=True)
+    meta = _json(BACKEND / "ml/artifacts/no-show-1.0.0.json")
+    return {
+        "reproduced": run.returncode == 0,
+        "verify_release_tail": run.stdout.strip().splitlines()[-6:],
+        "seconds": round(time.time() - started, 1),
+        "model_version": meta["version"],
+        "estimator": meta["estimator"],
+        "test_metrics_recorded_once": meta["metrics"]["test"],
+        "test_at_threshold": meta["metrics"]["test_threshold"],
+        # From ml/reports/metrics.md, section 4 (test, scored once in Week 3).
+        "baselines": {
+            "floor_dummy": {"pr_auc": 0.164, "roc_auc": 0.500, "brier": 0.1374},
+            "logreg_raw": {"pr_auc": 0.267, "roc_auc": 0.649, "brier": 0.1320},
+            "oracle_ceiling": {"pr_auc": 0.321, "roc_auc": 0.714, "brier": 0.1264},
+        },
+    }
+
+
+def clustering() -> dict:
+    c = _json(BACKEND / "ml/reports/clusters.json")
+    real, control = c["real"], c["control"]
+    k = real["chosen_k"]["k-means"]
+    shuffled = real["baseline"]["k-means"]
+    return {
+        "real_patients": real["patients"],
+        "real_kmeans_chosen_k": k,
+        "real_kmeans_silhouette": round(real["silhouette"]["k-means"][str(k)], 3),
+        "real_shuffled_baseline_silhouette_median": round(statistics.median(shuffled), 3),
+        "real_beats_shuffled_baseline": real["silhouette"]["k-means"][str(k)] > max(shuffled),
+        "control_planted_groups": control["planted_groups"],
+        "control_kmeans_silhouette": round(control["silhouette"]["k-means"][str(control["chosen_k"]["k-means"])], 3),
+        "control_kmeans_ari_at_chosen_k": round(control["methods"]["k-means"]["ari_at_chosen_k"], 3),
+        "control_ward_ari_at_planted_k": round(control["methods"]["agglomerative (Ward)"]["ari_at_planted_k"], 3),
+    }
+
+
+def rag(llm, embedder) -> dict:
+    cases = retrieval_eval.load_cases()
+    retrieval = retrieval_eval.evaluate(embedder, cases, label="week6_suite")
+    generation = generation_eval.evaluate(llm, embedder, settings.ASSISTANT["SEED"], generation_eval.load_cases())
+    return {
+        "questions": len(cases),
+        "frozen_sha256": retrieval.get("frozen_sha256"),
+        "retrieval": retrieval["overall"],
+        "end_to_end": generation["modes"]["B"]["overall"],
+        "oracle_context": generation["modes"]["A"]["overall"],
+        "seeds": generation.get("seeds"),
+        "model": generation.get("model"),
+    }
+
+
+def agent(llm, embedder) -> dict:
+    r = agent_eval.evaluate(llm, embedder, settings.ASSISTANT["SEED"])
+    return {
+        "tasks": r["summary"]["overall"],
+        "recovery_passed": r["recovery_passed"],
+        "red_team_cases": len(r["gate"]),
+        "red_team": {k: g["passed"] for k, g in r["gate"].items()},
+        "gate_passed": r["gate_passed"],
+        "seeds": r.get("seeds"),
+        "model": r.get("model"),
+    }
+
+
+def baselines() -> dict:
+    """Week 5's first measurements on the same frozen sets."""
+    return {
+        "retrieval": _json(EVAL / "retrieval_baseline.json")["overall"],
+        "end_to_end": _json(EVAL / "generation_eval.json")["modes"]["B"]["overall"],
+        "agent_round1": _json(EVAL / "agent_eval.json")["summary"]["overall"],
+        "agent_round1_gate_passed": _json(EVAL / "agent_eval.json")["gate_passed"],
+        # Week 5's final run of the same frozen sets, after the round-2 fixes (not the fresh holdout).
+        "agent_week5_final": _json(EVAL / "agent_eval_round2.json")["second_run"]["summary"]["overall"],
+        "agent_week5_final_gate_passed": _json(EVAL / "agent_eval_round2.json")["second_run"]["gate_passed"],
+    }
+
+
+def _pct(v):
+    return "—" if v is None else f"{v:.0%}" if isinstance(v, float) and v <= 1 else str(v)
+
+
+def report(r: dict) -> str:
+    sup, cl, base = r["supervised"], r["clustering"], r["baseline"]
+    t = sup["test_metrics_recorded_once"]
+    lines = [
+        "# Week 6 evaluation suite (generated by `make eval`)",
+        "",
+        f"Run {r['started']} → {r['finished']}. Rules: docs/REQUIREMENTS.md, Step 9.",
+        "",
+        "## V1 Supervised (no-show model)",
+        "",
+        f"- Release reproduced from scratch (`ml.verify_release`): **{'yes' if sup['reproduced'] else 'NO'}**"
+        f" ({sup['seconds']} s)",
+        f"- Served `{sup['model_version']}`; test metrics recorded once in Week 3: PR-AUC {t['pr_auc']:.3f},"
+        f" ROC-AUC {t['roc_auc']:.3f}, Brier {t['brier']:.4f}",
+        "- Baselines on the same test set: "
+        + "; ".join(f"{k} PR-AUC {v['pr_auc']}" for k, v in sup["baselines"].items()),
+        "",
+        "## V2 Clustering",
+        "",
+        f"- Real synthetic patients: k-means k={cl['real_kmeans_chosen_k']}, silhouette"
+        f" {cl['real_kmeans_silhouette']} vs shuffled-data median {cl['real_shuffled_baseline_silhouette_median']}"
+        f" (beats every shuffled run: {cl['real_beats_shuffled_baseline']})",
+        f"- Planted-control data ({cl['control_planted_groups']} groups): silhouette {cl['control_kmeans_silhouette']},"
+        f" ARI {cl['control_kmeans_ari_at_chosen_k']} (k-means), {cl['control_ward_ari_at_planted_k']} (Ward at planted k)",
+        "",
+    ]
+    if "rag" in r:
+        rg, ag = r["rag"], r["agent"]
+        rows = [("Retrieval", base["retrieval"], rg["retrieval"]), ("End to end", base["end_to_end"], rg["end_to_end"])]
+        lines += [
+            "## V3 RAG benchmark",
+            "",
+            f"{rg['questions']} frozen questions, {rg['model']}, seeds {rg['seeds']}.",
+            "",
+        ]
+        for name, b, f in rows:
+            lines += [f"### {name}", "", "| metric | Week 5 baseline | Week 6 final |", "|---|---|---|"]
+            lines += [
+                f"| {k} | {_pct(b.get(k))} | {_pct(v)} |" for k, v in f.items() if not isinstance(v, (dict, list))
+            ]
+            lines += [""]
+        lines += ["## V4 Agent", "", "| metric | Week 5 round 1 | Week 5 final | Week 6 final |", "|---|---|---|---|"]
+        lines += [
+            f"| {k} | {base['agent_round1'].get(k)} | {base['agent_week5_final'].get(k)} | {v} |"
+            for k, v in ag["tasks"].items()
+        ]
+        lines += [
+            f"| red-team gate ({ag['red_team_cases']} cases) | {base['agent_round1_gate_passed']} |"
+            f" {base['agent_week5_final_gate_passed']} | {ag['gate_passed']} |",
+            f"| recovery passed | — | — | {ag['recovery_passed']} |",
+            "",
+        ]
+    return "\n".join(lines) + "\n"
+
+
+class Command(BaseCommand):
+    help = "Run the Week 6 evaluation suite; writes eval_suite/results.json and eval_suite/report.md."
+
+    def add_arguments(self, parser):
+        parser.add_argument("--skip-model", action="store_true", help="Only the supervised and clustering parts.")
+
+    def handle(self, *args, skip_model=False, **options):
+        result = {"started": time.strftime("%Y-%m-%dT%H:%M:%S"), "supervised": supervised(), "clustering": clustering()}
+        self.stdout.write(f"V1 supervised: reproduced={result['supervised']['reproduced']}")
+        self.stdout.write(f"V2 clustering: {result['clustering']}")
+        if not skip_model:
+            llm, embedder = get_llm(), get_embedder()
+            try:
+                result["rag"] = rag(llm, embedder)
+                self.stdout.write(f"V3 RAG: retrieval {result['rag']['retrieval']}")
+                self.stdout.write(f"V3 RAG: end to end {result['rag']['end_to_end']}")
+                result["agent"] = agent(llm, embedder)
+                self.stdout.write(f"V4 agent: {result['agent']['tasks']}, gate passed={result['agent']['gate_passed']}")
+            except CorpusMismatch as exc:
+                raise CommandError(str(exc)) from None
+        result["baseline"] = baselines()
+        result["finished"] = time.strftime("%Y-%m-%dT%H:%M:%S")
+        OUT.mkdir(exist_ok=True)
+        (OUT / "results.json").write_text(json.dumps(result, indent=1, default=str) + "\n")
+        (OUT / "report.md").write_text(report(result))
+        self.stdout.write(f"Wrote {OUT / 'results.json'} and report.md")
+        if not result["supervised"]["reproduced"]:
+            raise CommandError("verify_release did not reproduce the model release.")
+        if "agent" in result and not result["agent"]["gate_passed"]:
+            raise CommandError("The agent red-team gate FAILED. This is a Week 6 stop reason.")

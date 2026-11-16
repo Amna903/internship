@@ -1,0 +1,90 @@
+# Week 6 Step 1: the whole stack with one command (`make up`). Secrets come from backend/.env (git-ignored,
+# created by `make up`). The database password below is a throwaway local value on an unpublished network.
+# The LLM defaults to Ollama on the host (Mac); `make up OLLAMA=container` starts the optional container.
+name: healthprofile
+
+x-backend: &backend
+  build: ./backend
+  image: healthprofile-backend:week6
+  env_file: backend/.env
+  environment:
+    DATABASE_URL: postgres://healthprofile:healthprofile@db:5432/healthprofile
+    CELERY_BROKER_URL: redis://redis:6379/0
+    OLLAMA_URL: ${OLLAMA_URL:-http://host.docker.internal:11434}
+    DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1,backend}
+    CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+    # Local `make up` uses the development settings over plain HTTP on 127.0.0.1. Production uses
+    # docker-compose.prod.yml (config.settings_prod behind the HTTPS proxy), which refuses unsafe values.
+    DJANGO_SETTINGS_MODULE: ${DJANGO_SETTINGS_MODULE:-config.settings_dev}
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  depends_on:
+    db: {condition: service_healthy}
+    redis: {condition: service_healthy}
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:16.10-alpine
+    environment:
+      POSTGRES_DB: healthprofile
+      POSTGRES_USER: healthprofile
+      POSTGRES_PASSWORD: healthprofile
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U healthprofile"]
+      interval: 3s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      retries: 20
+    restart: unless-stopped
+
+  backend:
+    <<: *backend
+    command: ["api"]
+    ports: ["127.0.0.1:8000:8000"]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:8000/ready/"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 20s
+
+  worker:
+    <<: *backend
+    command: ["worker"]
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A config inspect ping -d celery@$$HOSTNAME --timeout 5 >/dev/null"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+
+  frontend:
+    build: ./frontend
+    image: healthprofile-frontend:week6
+    ports: ["127.0.0.1:3000:3000"]
+    depends_on:
+      backend: {condition: service_healthy}
+    healthcheck:
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://127.0.0.1:3000/"]
+      interval: 5s
+      retries: 30
+    restart: unless-stopped
+
+  ollama:
+    profiles: [ollama]
+    image: ollama/ollama:0.12.6
+    volumes: [ollama:/root/.ollama]
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  ollama:

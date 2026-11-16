@@ -1,0 +1,38 @@
+# Week 6 Step 3: production overlay. `make prod` = docker compose -f docker-compose.yml -f docker-compose.prod.yml
+# Caddy is the only public entry (HTTPS); the backend runs config.settings_prod (refuses unsafe settings).
+services:
+  backend:
+    ports: !reset []
+    environment: &prod
+      DJANGO_SETTINGS_MODULE: config.settings_prod
+      DJANGO_DEBUG: "false"
+      COOKIE_SECURE: "true"
+      SECURE_SSL_REDIRECT: "true"
+      BEHIND_TLS_PROXY: "true"
+      SECURE_HSTS_SECONDS: "86400"
+      ENABLE_API_DOCS: "false"
+      DJANGO_ALLOWED_HOSTS: ${SITE_HOST:-healthprofile.localhost},backend
+      CSRF_TRUSTED_ORIGINS: https://${SITE_HOST:-healthprofile.localhost}
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "-H", "Host: backend", "http://localhost:8000/ready/"]
+  worker:
+    environment: *prod
+  frontend:
+    ports: !reset []
+  caddy:
+    image: caddy:2.10-alpine
+    ports: ["80:80", "443:443"]
+    environment:
+      SITE_ADDRESS: ${SITE_HOST:-healthprofile.localhost}
+      TLS_MODE: ${TLS_MODE:-internal}
+      ACME_EMAIL: ${ACME_EMAIL:-admin@example.test}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on:
+      backend: {condition: service_healthy}
+      frontend: {condition: service_healthy}
+    restart: unless-stopped
+
+volumes:
+  caddy_data:

@@ -1,0 +1,13 @@
+# Week 6 Step 5: lint and format for the Week 6 backend.
+line-length = 120
+target-version = "py313"
+extend-exclude = [".venv", "**/migrations"]
+
+[lint]
+select = ["E", "F", "W", "I", "B"]
+ignore = ["E501", "B008", "B904", "E731", "B905"]  # B905: zip(strict=...) everywhere would be noise
+
+
+[lint.per-file-ignores]
+"config/settings_*.py" = ["E402", "F403", "F405"]
+"tests/*.py" = ["F811"]  # pytest fixtures imported from other test modules

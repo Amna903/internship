@@ -1,0 +1,969 @@
+{
+ "label": "after_chunk200",
+ "method": "semantic only (Week 4 retrieval)",
+ "embedder": "ollama/nomic-embed-text:latest",
+ "settings": {
+  "method": "semantic",
+  "floor": 0.74,
+  "top_k": 2,
+  "rrf_k": 60,
+  "gate": "S",
+  "f_kw": 1.0,
+  "chunk_tokens": 200,
+  "filters": false
+ },
+ "frozen_sha256": {
+  "eval/retrieval_cases.json": "7a40e307ca00ba0db640bf2f3100dc3dc460a9b887b2cbb505d74801f9e57a82"
+ },
+ "corpus": [
+  {
+   "filename": "accessibility.md",
+   "document_id": 13,
+   "version": 1,
+   "sha256": "13fb0bcf249d147509c43748b8dd5c16eea596ace9e4ffc11d02d4a1881cc9b4"
+  },
+  {
+   "filename": "billing.md",
+   "document_id": 7,
+   "version": 1,
+   "sha256": "b7f158d91efdfd4167b3981c54af7480b4094137f981bdc081d2c015769fc03b"
+  },
+  {
+   "filename": "cancellation.md",
+   "document_id": 8,
+   "version": 2,
+   "sha256": "f4c51ee5c08b6ade01c38d54e281cfd7f9ac63b079d12120b81f68e0bb41643e"
+  },
+  {
+   "filename": "interpreter-services.md",
+   "document_id": 14,
+   "version": 1,
+   "sha256": "187fe1ca0a650c79b5cb520149a6a3576f67154182fb4e90d45d753c601160a5"
+  },
+  {
+   "filename": "lab-results-admin.md",
+   "document_id": 15,
+   "version": 1,
+   "sha256": "c5d0f7dbeb22a6d51925dc67ea201dfbb051ec4cd4f26c934e4bce202581eeb1"
+  },
+  {
+   "filename": "parking.md",
+   "document_id": 16,
+   "version": 1,
+   "sha256": "a05551a631d571dc216a0d4d922f28f7fb503f1823fd595835cf3ed2acd31f88"
+  },
+  {
+   "filename": "payment-plans.md",
+   "document_id": 17,
+   "version": 1,
+   "sha256": "395d0cf7cdcdf25dc15daf864c6267a9c3376abbbb6c1e42b8c9dfaefaee18cb"
+  },
+  {
+   "filename": "privacy.md",
+   "document_id": 9,
+   "version": 1,
+   "sha256": "c9f2bc5f7d3264bb6ee9e504a2dc558f4a70b5438240e16ad14f211f3d24ba91"
+  },
+  {
+   "filename": "records-requests.md",
+   "document_id": 18,
+   "version": 1,
+   "sha256": "be159543f595f87c438b4d369d815d60831ff1162cbea494867d61920dc64fd1"
+  },
+  {
+   "filename": "reminders.md",
+   "document_id": 10,
+   "version": 1,
+   "sha256": "47a9067b477addeef2c744c0311c67895ef2f289f8332f40ea65f8a878328a8f"
+  },
+  {
+   "filename": "rescheduling.md",
+   "document_id": 11,
+   "version": 1,
+   "sha256": "6a1e12a241f68b361f88372c14cf6f0f1eebe5b0a2afb81656ea3e6487667885"
+  },
+  {
+   "filename": "telehealth.md",
+   "document_id": 12,
+   "version": 1,
+   "sha256": "3b11b21980242ee8c006bdc43bdfa8ccf49172074af20f3abc906a7e39fd34a8"
+  }
+ ],
+ "overall": {
+  "questions": 23,
+  "answerable": 18,
+  "unanswerable": 5,
+  "shipped_hits": 5,
+  "false_retrievals": 0,
+  "recall@1": 0.8888888888888888,
+  "hit@1": 1.0,
+  "doc_recall@1": 0.8888888888888888,
+  "recall@3": 1.0,
+  "hit@3": 1.0,
+  "doc_recall@3": 1.0,
+  "recall@5": 1.0,
+  "hit@5": 1.0,
+  "doc_recall@5": 1.0,
+  "mrr": 1.0,
+  "shipped_hit_rate": 0.2777777777777778,
+  "false_retrieval_rate": 0.0
+ },
+ "by_category": {
+  "area_hint": {
+   "questions": 3,
+   "answerable": 3,
+   "unanswerable": 0,
+   "shipped_hits": 0,
+   "false_retrievals": 0,
+   "recall@1": 1.0,
+   "hit@1": 1.0,
+   "doc_recall@1": 1.0,
+   "recall@3": 1.0,
+   "hit@3": 1.0,
+   "doc_recall@3": 1.0,
+   "recall@5": 1.0,
+   "hit@5": 1.0,
+   "doc_recall@5": 1.0,
+   "mrr": 1.0,
+   "shipped_hit_rate": 0.0,
+   "false_retrieval_rate": null
+  },
+  "current_version": {
+   "questions": 2,
+   "answerable": 2,
+   "unanswerable": 0,
+   "shipped_hits": 1,
+   "false_retrievals": 0,
+   "recall@1": 1.0,
+   "hit@1": 1.0,
+   "doc_recall@1": 1.0,
+   "recall@3": 1.0,
+   "hit@3": 1.0,
+   "doc_recall@3": 1.0,
+   "recall@5": 1.0,
+   "hit@5": 1.0,
+   "doc_recall@5": 1.0,
+   "mrr": 1.0,
+   "shipped_hit_rate": 0.5,
+   "false_retrieval_rate": null
+  },
+  "direct": {
+   "questions": 2,
+   "answerable": 2,
+   "unanswerable": 0,
+   "shipped_hits": 2,
+   "false_retrievals": 0,
+   "recall@1": 1.0,
+   "hit@1": 1.0,
+   "doc_recall@1": 1.0,
+   "recall@3": 1.0,
+   "hit@3": 1.0,
+   "doc_recall@3": 1.0,
+   "recall@5": 1.0,
+   "hit@5": 1.0,
+   "doc_recall@5": 1.0,
+   "mrr": 1.0,
+   "shipped_hit_rate": 1.0,
+   "false_retrieval_rate": null
+  },
+  "keyword": {
+   "questions": 3,
+   "answerable": 3,
+   "unanswerable": 0,
+   "shipped_hits": 1,
+   "false_retrievals": 0,
+   "recall@1": 1.0,
+   "hit@1": 1.0,
+   "doc_recall@1": 1.0,
+   "recall@3": 1.0,
+   "hit@3": 1.0,
+   "doc_recall@3": 1.0,
+   "recall@5": 1.0,
+   "hit@5": 1.0,
+   "doc_recall@5": 1.0,
+   "mrr": 1.0,
+   "shipped_hit_rate": 0.3333333333333333,
+   "false_retrieval_rate": null
+  },
+  "multi_doc": {
+   "questions": 2,
+   "answerable": 2,
+   "unanswerable": 0,
+   "shipped_hits": 0,
+   "false_retrievals": 0,
+   "recall@1": 0.0,
+   "hit@1": 1.0,
+   "doc_recall@1": 0.0,
+   "recall@3": 1.0,
+   "hit@3": 1.0,
+   "doc_recall@3": 1.0,
+   "recall@5": 1.0,
+   "hit@5": 1.0,
+   "doc_recall@5": 1.0,
+   "mrr": 1.0,
+   "shipped_hit_rate": 0.0,
+   "false_retrieval_rate": null
+  },
+  "paraphrase": {
+   "questions": 6,
+   "answerable": 6,
+   "unanswerable": 0,
+   "shipped_hits": 1,
+   "false_retrievals": 0,
+   "recall@1": 1.0,
+   "hit@1": 1.0,
+   "doc_recall@1": 1.0,
+   "recall@3": 1.0,
+   "hit@3": 1.0,
+   "doc_recall@3": 1.0,
+   "recall@5": 1.0,
+   "hit@5": 1.0,
+   "doc_recall@5": 1.0,
+   "mrr": 1.0,
+   "shipped_hit_rate": 0.16666666666666666,
+   "false_retrieval_rate": null
+  },
+  "unanswerable": {
+   "questions": 5,
+   "answerable": 0,
+   "unanswerable": 5,
+   "shipped_hits": 0,
+   "false_retrievals": 0,
+   "recall@1": null,
+   "hit@1": null,
+   "doc_recall@1": null,
+   "recall@3": null,
+   "hit@3": null,
+   "doc_recall@3": null,
+   "recall@5": null,
+   "hit@5": null,
+   "doc_recall@5": null,
+   "mrr": null,
+   "shipped_hit_rate": null,
+   "false_retrieval_rate": 0.0
+  }
+ },
+ "by_author": {
+  "assistant": {
+   "questions": 12,
+   "answerable": 10,
+   "unanswerable": 2,
+   "shipped_hits": 4,
+   "false_retrievals": 0,
+   "recall@1": 0.8,
+   "hit@1": 1.0,
+   "doc_recall@1": 0.8,
+   "recall@3": 1.0,
+   "hit@3": 1.0,
+   "doc_recall@3": 1.0,
+   "recall@5": 1.0,
+   "hit@5": 1.0,
+   "doc_recall@5": 1.0,
+   "mrr": 1.0,
+   "shipped_hit_rate": 0.4,
+   "false_retrieval_rate": 0.0
+  },
+  "user": {
+   "questions": 11,
+   "answerable": 8,
+   "unanswerable": 3,
+   "shipped_hits": 1,
+   "false_retrievals": 0,
+   "recall@1": 1.0,
+   "hit@1": 1.0,
+   "doc_recall@1": 1.0,
+   "recall@3": 1.0,
+   "hit@3": 1.0,
+   "doc_recall@3": 1.0,
+   "recall@5": 1.0,
+   "hit@5": 1.0,
+   "doc_recall@5": 1.0,
+   "mrr": 1.0,
+   "shipped_hit_rate": 0.125,
+   "false_retrieval_rate": 0.0
+  }
+ },
+ "cases": [
+  {
+   "id": "U01",
+   "answerable": true,
+   "top_score": 0.762271523475647,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 1,
+   "shipped_hit": true,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "parking.md#0",
+    "cancellation.md@v2#0",
+    "billing.md#0",
+    "accessibility.md#0",
+    "reminders.md#0"
+   ],
+   "top_scores": [
+    0.762,
+    0.65,
+    0.649,
+    0.647,
+    0.609
+   ]
+  },
+  {
+   "id": "U02",
+   "answerable": true,
+   "top_score": 0.6296072006225586,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 0,
+   "shipped_hit": false,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "interpreter-services.md#0",
+    "billing.md#0",
+    "telehealth.md#0",
+    "accessibility.md#0",
+    "rescheduling.md#0"
+   ],
+   "top_scores": [
+    0.63,
+    0.497,
+    0.495,
+    0.487,
+    0.48
+   ]
+  },
+  {
+   "id": "U03",
+   "answerable": true,
+   "top_score": 0.7152851223945618,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 0,
+   "shipped_hit": false,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "payment-plans.md#0",
+    "cancellation.md@v2#0",
+    "records-requests.md#0",
+    "billing.md#0",
+    "accessibility.md#0"
+   ],
+   "top_scores": [
+    0.715,
+    0.625,
+    0.619,
+    0.616,
+    0.596
+   ]
+  },
+  {
+   "id": "U04",
+   "answerable": true,
+   "top_score": 0.7278932332992554,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 0,
+   "shipped_hit": false,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "records-requests.md#0",
+    "privacy.md#0",
+    "billing.md#0",
+    "lab-results-admin.md#0",
+    "cancellation.md@v2#0"
+   ],
+   "top_scores": [
+    0.728,
+    0.668,
+    0.636,
+    0.634,
+    0.618
+   ]
+  },
+  {
+   "id": "U05",
+   "answerable": true,
+   "top_score": 0.5908966064453125,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 0,
+   "shipped_hit": false,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "accessibility.md#0",
+    "parking.md#0",
+    "telehealth.md#0",
+    "records-requests.md#0",
+    "interpreter-services.md#0"
+   ],
+   "top_scores": [
+    0.591,
+    0.53,
+    0.471,
+    0.444,
+    0.441
+   ]
+  },
+  {
+   "id": "U06",
+   "answerable": true,
+   "top_score": 0.6256791353225708,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 0,
+   "shipped_hit": false,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "payment-plans.md#0",
+    "billing.md#0",
+    "cancellation.md@v2#0",
+    "privacy.md#0",
+    "records-requests.md#0"
+   ],
+   "top_scores": [
+    0.626,
+    0.534,
+    0.509,
+    0.478,
+    0.476
+   ]
+  },
+  {
+   "id": "U07",
+   "answerable": true,
+   "top_score": 0.6897217035293579,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 0,
+   "shipped_hit": false,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "records-requests.md#0",
+    "privacy.md#0",
+    "interpreter-services.md#0",
+    "accessibility.md#0",
+    "telehealth.md#0"
+   ],
+   "top_scores": [
+    0.69,
+    0.686,
+    0.596,
+    0.558,
+    0.546
+   ]
+  },
+  {
+   "id": "U08",
+   "answerable": true,
+   "top_score": 0.622938871383667,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 0,
+   "shipped_hit": false,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "accessibility.md#0",
+    "parking.md#0",
+    "interpreter-services.md#0",
+    "telehealth.md#0",
+    "privacy.md#0"
+   ],
+   "top_scores": [
+    0.623,
+    0.558,
+    0.539,
+    0.524,
+    0.515
+   ]
+  },
+  {
+   "id": "U09",
+   "answerable": false,
+   "top_score": 0.6608755588531494,
+   "false_retrieval": false,
+   "shipped_returned": 0,
+   "top_passages": [
+    "parking.md#0",
+    "accessibility.md#0",
+    "telehealth.md#0",
+    "payment-plans.md#0",
+    "cancellation.md@v2#0"
+   ],
+   "top_scores": [
+    0.661,
+    0.461,
+    0.459,
+    0.455,
+    0.427
+   ]
+  },
+  {
+   "id": "U10",
+   "answerable": false,
+   "top_score": 0.6385748386383057,
+   "false_retrieval": false,
+   "shipped_returned": 0,
+   "top_passages": [
+    "accessibility.md#0",
+    "parking.md#0",
+    "interpreter-services.md#0",
+    "privacy.md#0",
+    "records-requests.md#0"
+   ],
+   "top_scores": [
+    0.639,
+    0.624,
+    0.567,
+    0.566,
+    0.548
+   ]
+  },
+  {
+   "id": "U11",
+   "answerable": false,
+   "top_score": 0.6338178515434265,
+   "false_retrieval": false,
+   "shipped_returned": 0,
+   "top_passages": [
+    "interpreter-services.md#0",
+    "accessibility.md#0",
+    "parking.md#0",
+    "cancellation.md@v2#0",
+    "rescheduling.md#0"
+   ],
+   "top_scores": [
+    0.634,
+    0.626,
+    0.624,
+    0.616,
+    0.599
+   ]
+  },
+  {
+   "id": "A01",
+   "answerable": true,
+   "top_score": 0.7468847036361694,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 1,
+   "shipped_hit": true,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "billing.md#0",
+    "payment-plans.md#0",
+    "records-requests.md#0",
+    "cancellation.md@v2#0",
+    "lab-results-admin.md#0"
+   ],
+   "top_scores": [
+    0.747,
+    0.593,
+    0.564,
+    0.56,
+    0.54
+   ]
+  },
+  {
+   "id": "A02",
+   "answerable": true,
+   "top_score": 0.6945501565933228,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 0,
+   "shipped_hit": false,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "records-requests.md#0",
+    "privacy.md#0",
+    "payment-plans.md#0",
+    "cancellation.md@v2#0",
+    "billing.md#0"
+   ],
+   "top_scores": [
+    0.695,
+    0.51,
+    0.508,
+    0.501,
+    0.497
+   ]
+  },
+  {
+   "id": "A03",
+   "answerable": true,
+   "top_score": 0.741039514541626,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 1,
+   "shipped_hit": true,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "reminders.md#0",
+    "rescheduling.md#0",
+    "cancellation.md@v2#0",
+    "lab-results-admin.md#0",
+    "records-requests.md#0"
+   ],
+   "top_scores": [
+    0.741,
+    0.583,
+    0.562,
+    0.536,
+    0.511
+   ]
+  },
+  {
+   "id": "A04",
+   "answerable": true,
+   "top_score": 0.694848895072937,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 0,
+   "shipped_hit": false,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "billing.md#0",
+    "payment-plans.md#0",
+    "lab-results-admin.md#0",
+    "cancellation.md@v2#0",
+    "records-requests.md#0"
+   ],
+   "top_scores": [
+    0.695,
+    0.608,
+    0.567,
+    0.54,
+    0.529
+   ]
+  },
+  {
+   "id": "A05",
+   "answerable": true,
+   "top_score": 0.7698701620101929,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 1,
+   "shipped_hit": true,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "cancellation.md@v2#0",
+    "billing.md#0",
+    "reminders.md#0",
+    "rescheduling.md#0",
+    "payment-plans.md#0"
+   ],
+   "top_scores": [
+    0.77,
+    0.697,
+    0.562,
+    0.55,
+    0.543
+   ]
+  },
+  {
+   "id": "A06",
+   "answerable": true,
+   "top_score": 0.707587480545044,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 0,
+   "shipped_hit": false,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "cancellation.md@v2#0",
+    "billing.md#0",
+    "reminders.md#0",
+    "rescheduling.md#0",
+    "payment-plans.md#0"
+   ],
+   "top_scores": [
+    0.708,
+    0.604,
+    0.546,
+    0.536,
+    0.512
+   ]
+  },
+  {
+   "id": "A07",
+   "answerable": true,
+   "top_score": 0.7724142074584961,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 1,
+   "shipped_hit": false,
+   "recall@1": false,
+   "hit@1": true,
+   "doc_recall@1": false,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "interpreter-services.md#0",
+    "telehealth.md#0",
+    "accessibility.md#0",
+    "rescheduling.md#0",
+    "billing.md#0"
+   ],
+   "top_scores": [
+    0.772,
+    0.654,
+    0.587,
+    0.541,
+    0.54
+   ]
+  },
+  {
+   "id": "A08",
+   "answerable": true,
+   "top_score": 0.7161893844604492,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 0,
+   "shipped_hit": false,
+   "recall@1": false,
+   "hit@1": true,
+   "doc_recall@1": false,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "payment-plans.md#0",
+    "billing.md#0",
+    "cancellation.md@v2#0",
+    "records-requests.md#0",
+    "lab-results-admin.md#0"
+   ],
+   "top_scores": [
+    0.716,
+    0.709,
+    0.544,
+    0.539,
+    0.525
+   ]
+  },
+  {
+   "id": "A09",
+   "answerable": true,
+   "top_score": 0.8014278411865234,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 1,
+   "shipped_hit": true,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "lab-results-admin.md#0",
+    "reminders.md#0",
+    "telehealth.md#0",
+    "billing.md#0",
+    "privacy.md#0"
+   ],
+   "top_scores": [
+    0.801,
+    0.525,
+    0.516,
+    0.494,
+    0.47
+   ]
+  },
+  {
+   "id": "A10",
+   "answerable": true,
+   "top_score": 0.6875346899032593,
+   "first_rank": 1,
+   "reciprocal_rank": 1.0,
+   "shipped_returned": 0,
+   "shipped_hit": false,
+   "recall@1": true,
+   "hit@1": true,
+   "doc_recall@1": true,
+   "recall@3": true,
+   "hit@3": true,
+   "doc_recall@3": true,
+   "recall@5": true,
+   "hit@5": true,
+   "doc_recall@5": true,
+   "top_passages": [
+    "telehealth.md#0",
+    "rescheduling.md#0",
+    "reminders.md#0",
+    "cancellation.md@v2#0",
+    "billing.md#0"
+   ],
+   "top_scores": [
+    0.688,
+    0.626,
+    0.624,
+    0.612,
+    0.605
+   ]
+  },
+  {
+   "id": "A11",
+   "answerable": false,
+   "top_score": 0.5677249431610107,
+   "false_retrieval": false,
+   "shipped_returned": 0,
+   "top_passages": [
+    "payment-plans.md#0",
+    "records-requests.md#0",
+    "accessibility.md#0",
+    "billing.md#0",
+    "interpreter-services.md#0"
+   ],
+   "top_scores": [
+    0.568,
+    0.496,
+    0.485,
+    0.484,
+    0.483
+   ]
+  },
+  {
+   "id": "A12",
+   "answerable": false,
+   "top_score": 0.6182318329811096,
+   "false_retrieval": false,
+   "shipped_returned": 0,
+   "top_passages": [
+    "records-requests.md#0",
+    "privacy.md#0",
+    "cancellation.md@v2#0",
+    "reminders.md#0",
+    "billing.md#0"
+   ],
+   "top_scores": [
+    0.618,
+    0.591,
+    0.538,
+    0.536,
+    0.53
+   ]
+  }
+ ]
+}
