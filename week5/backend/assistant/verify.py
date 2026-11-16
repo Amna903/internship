@@ -19,11 +19,17 @@ Checks:
     a quote saying "24 hours" (3 of 4 terms matched).
   - Checkable: an answer needs at least MIN_KEY_TERMS key terms. A bare "No" has none, so groundedness had
     nothing to check and scored 1.0; on the dev set a wrong "No" (reminders by email) passed that way.
+  - Relevance (Week 4 review follow-up): the answer must be about the question's policy topic and contain
+    the kind of fact asked for (an amount, a time, a count); see relevance.py. Checked last, so the reasons
+    of the earlier checks are unchanged.
   - Polarity: if negation words appear in the answer but not in its quotes, or in the quotes but not in the
     answer, the meaning may be flipped ("No, you cannot switch to email" shares every key word with a quote
     saying you can), so it is insufficient_information with reason "polarity mismatch".
 
-LIMITATION: these are lexical checks. They compare words, not meaning, so they can't fully verify an answer;
+LIMITATION: these are lexical checks. They compare words, not meaning, so they can't fully verify an answer.
+A verified citation shows the quote is real policy text; it does NOT show the answer means what the quote says
+(citation validity is not entailment). Swapped clauses, "after" for "before", "at least" for "at most" and
+antonyms still pass: see tests/test_relevance.py::TestRemainingFailures and eval/relevance_report.md;
 a negation flip can still get through in other forms (an antonym, "only after" versus "before", a negation
 the list doesn't cover). The evaluation records such failures.
 """
@@ -141,7 +147,8 @@ class Verdict:
 
 
 def decide(question: str, reply: ModelReply | None, given: list[Passage],
-           threshold: float = GROUNDEDNESS_THRESHOLD, check_polarity: bool = True) -> Verdict:
+           threshold: float = GROUNDEDNESS_THRESHOLD, check_polarity: bool = True,
+           relevance_variant: str | None = None) -> Verdict:
     if is_medical_advice_request(question):
         return Verdict(status="refused", reason="server medical-advice check")
     if reply is None:
@@ -176,4 +183,10 @@ def decide(question: str, reply: ModelReply | None, given: list[Passage],
     if score < threshold:
         return Verdict(status="insufficient_information", verified=verified, rejected_citations=rejected,
                        groundedness=score, reason="answer not grounded in its quotes")
+    from . import relevance  # imported here: relevance uses key_terms from this module
+    off_topic = relevance.check(question, reply.answer, quotes,
+                                variant=relevance.VARIANT if relevance_variant is None else relevance_variant)
+    if off_topic:
+        return Verdict(status="insufficient_information", verified=verified, rejected_citations=rejected,
+                       groundedness=score, reason=off_topic)
     return Verdict(status="answered", verified=verified, rejected_citations=rejected, groundedness=score)
