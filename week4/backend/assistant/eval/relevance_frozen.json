@@ -1,0 +1,210 @@
+{
+  "frozen_note": "Week 4 review follow-up: frozen relevance set, written and committed 2026-11-16 BEFORE the relevance check existed. Never used to choose or tune the check; scored once with the variant chosen on dev/relevance_dev.json. Weaker independence than a user-written set: the same author (the assistant) wrote this set and the check, so it may share blind spots.",
+  "kinds": {
+    "off_topic_overlap": "shares policy vocabulary with the question but answers a different question; a real, correctly cited quote",
+    "on_topic": "a correct, cited answer that must stay answered",
+    "reversal": "cites a real quote but the answer reverses or changes its meaning (clause swap, antonym, before/after)"
+  },
+  "replies": "Hand-written replies, modelled on the real off-topic replies recorded in eval_results.json (no-floor diagnostic: U1, U2, U9b). They are not model output, so they test the server checks deterministically; they do not measure how often the model produces such replies.",
+  "author": "assistant (Claude), 2026-11-16",
+  "cases": [
+    {
+      "id": "RF1",
+      "kind": "off_topic_overlap",
+      "question": "How many hours ahead is the first reminder sent?",
+      "source": "cancellation.md",
+      "answer": "Appointments can be cancelled free of charge up to 24 hours before the start time.",
+      "quotes": [
+        "Appointments can be cancelled free of charge up to 24 hours before the start time."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RF2",
+      "kind": "off_topic_overlap",
+      "question": "Can I turn off reminders?",
+      "source": "reminders.md",
+      "answer": "Turning reminders off does not change the cancellation policy.",
+      "quotes": [
+        "Turning reminders off does not change the cancellation policy."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RF3",
+      "kind": "off_topic_overlap",
+      "question": "How much does a telehealth visit cost?",
+      "source": "telehealth.md",
+      "answer": "Telehealth visits take place by video in the patient app.",
+      "quotes": [
+        "Telehealth visits take place by video in the patient app."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RF4",
+      "kind": "off_topic_overlap",
+      "question": "Where can I cancel an appointment?",
+      "source": "cancellation.md",
+      "answer": "Cancellations with less than 24 hours' notice are recorded as late cancellations.",
+      "quotes": [
+        "Cancellations with less than 24 hours' notice are recorded as late cancellations."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RF5",
+      "kind": "off_topic_overlap",
+      "question": "What is the time limit for a reply from the privacy office?",
+      "source": "billing.md",
+      "answer": "Refunds are paid back to the original payment method within 10 working days.",
+      "quotes": [
+        "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RF6",
+      "kind": "off_topic_overlap",
+      "question": "What should I check before a telehealth visit starts?",
+      "source": "telehealth.md",
+      "answer": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone.",
+      "quotes": [
+        "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RF7",
+      "kind": "off_topic_overlap",
+      "question": "How many times may I move a booking?",
+      "source": "rescheduling.md",
+      "answer": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost.",
+      "quotes": [
+        "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RF8",
+      "kind": "off_topic_overlap",
+      "question": "Does the clinic give out other patients' phone numbers?",
+      "source": "telehealth.md",
+      "answer": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone.",
+      "quotes": [
+        "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RF20",
+      "kind": "on_topic",
+      "question": "Is rescheduling free?",
+      "source": "rescheduling.md",
+      "answer": "Yes, an appointment can be moved up to 2 hours before it starts, at no cost.",
+      "quotes": [
+        "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+      ],
+      "expected_status": "answered"
+    },
+    {
+      "id": "RF21",
+      "kind": "on_topic",
+      "question": "What happens after the third late cancellation in a year?",
+      "source": "cancellation.md",
+      "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.",
+      "quotes": [
+        "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+      ],
+      "expected_status": "answered"
+    },
+    {
+      "id": "RF22",
+      "kind": "on_topic",
+      "question": "How many days do I have to ask for my money back?",
+      "source": "billing.md",
+      "answer": "A refund can be requested within 14 days of a payment.",
+      "quotes": [
+        "A refund can be requested within 14 days of a payment"
+      ],
+      "expected_status": "answered"
+    },
+    {
+      "id": "RF23",
+      "kind": "on_topic",
+      "question": "Will reminders show my test results?",
+      "source": "reminders.md",
+      "answer": "No, reminders never contain test results.",
+      "quotes": [
+        "Reminders never contain test results or details of the reason for the visit."
+      ],
+      "expected_status": "answered"
+    },
+    {
+      "id": "RF24",
+      "kind": "on_topic",
+      "question": "Could my video appointment be switched to coming in person?",
+      "source": "telehealth.md",
+      "answer": "Yes, a telehealth visit can be changed to an in-person visit when rescheduling, if a slot is available.",
+      "quotes": [
+        "A telehealth visit can be changed to an in-person visit when rescheduling, if a slot is available."
+      ],
+      "expected_status": "answered"
+    },
+    {
+      "id": "RF25",
+      "kind": "on_topic",
+      "question": "How do I get a copy of my data?",
+      "source": "privacy.md",
+      "answer": "Patients can request a copy of their data through the patient app.",
+      "quotes": [
+        "Patients can request a copy of their data through the patient app"
+      ],
+      "expected_status": "answered"
+    },
+    {
+      "id": "RF40",
+      "kind": "reversal",
+      "question": "How long before the start should I join a video visit?",
+      "source": "telehealth.md",
+      "answer": "Patients should join 5 minutes after the start time to check their camera and microphone.",
+      "quotes": [
+        "Patients should join 5 minutes before the start time to check their camera and microphone."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RF41",
+      "kind": "reversal",
+      "question": "Are late cancellation fees refunded?",
+      "source": "billing.md",
+      "answer": "Late cancellation fees are refunded only if the cancellation was caused by the patient.",
+      "quotes": [
+        "Late cancellation fees are refunded only if the cancellation was caused by a clinic error."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RF42",
+      "kind": "reversal",
+      "question": "Is cancelling 24 hours ahead free?",
+      "source": "cancellation.md",
+      "answer": "Appointments cancelled up to 24 hours before the start time are not free of charge.",
+      "quotes": [
+        "Appointments can be cancelled free of charge up to 24 hours before the start time."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RF43",
+      "kind": "reversal",
+      "question": "What is the most times I can reschedule?",
+      "source": "rescheduling.md",
+      "answer": "Each appointment can be rescheduled at least twice.",
+      "quotes": [
+        "Each appointment can be rescheduled at most twice"
+      ],
+      "expected_status": "insufficient_information"
+    }
+  ]
+}

@@ -1,0 +1,287 @@
+{
+  "note": "Week 4 review follow-up: development cases for the relevance/abstention check. Results on this set MAY be used to choose the check. Separate from the frozen 18-case benchmark (eval/eval_cases.json, unchanged) and from the frozen relevance set (eval/relevance_frozen.json).",
+  "kinds": {
+    "off_topic_overlap": "shares policy vocabulary with the question but answers a different question; a real, correctly cited quote",
+    "on_topic": "a correct, cited answer that must stay answered",
+    "reversal": "cites a real quote but the answer reverses or changes its meaning (clause swap, antonym, before/after)"
+  },
+  "replies": "Hand-written replies, modelled on the real off-topic replies recorded in eval_results.json (no-floor diagnostic: U1, U2, U9b). They are not model output, so they test the server checks deterministically; they do not measure how often the model produces such replies.",
+  "author": "assistant (Claude), 2026-11-16",
+  "cases": [
+    {
+      "id": "RD1",
+      "kind": "off_topic_overlap",
+      "question": "How much notice do reminders give before a visit?",
+      "source": "cancellation.md",
+      "answer": "Cancellations with less than 24 hours' notice are recorded as late cancellations.",
+      "quotes": [
+        "Cancellations with less than 24 hours' notice are recorded as late cancellations."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD2",
+      "kind": "off_topic_overlap",
+      "question": "Can I switch my reminders to email?",
+      "source": "reminders.md",
+      "answer": "Turning reminders off does not change the cancellation policy.",
+      "quotes": [
+        "Turning reminders off does not change the cancellation policy."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD3",
+      "kind": "off_topic_overlap",
+      "question": "Is there a limit on how often I reschedule?",
+      "source": "rescheduling.md",
+      "answer": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost.",
+      "quotes": [
+        "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD4",
+      "kind": "off_topic_overlap",
+      "question": "How much is the late cancellation fee?",
+      "source": "cancellation.md",
+      "answer": "Appointments can be cancelled free of charge up to 24 hours before the start time.",
+      "quotes": [
+        "Appointments can be cancelled free of charge up to 24 hours before the start time."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD5",
+      "kind": "off_topic_overlap",
+      "question": "How many days does the clinic take to answer a data request?",
+      "source": "billing.md",
+      "answer": "Refunds are paid back to the original payment method within 10 working days.",
+      "quotes": [
+        "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD6",
+      "kind": "off_topic_overlap",
+      "question": "What happens if I miss my telehealth video call?",
+      "source": "telehealth.md",
+      "answer": "Telehealth visits take place by video in the patient app.",
+      "quotes": [
+        "Telehealth visits take place by video in the patient app."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD7",
+      "kind": "off_topic_overlap",
+      "question": "When is the second reminder sent?",
+      "source": "reminders.md",
+      "answer": "Reminders are sent by text message by default.",
+      "quotes": [
+        "Reminders are sent by text message by default"
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD8",
+      "kind": "off_topic_overlap",
+      "question": "How do I request a refund?",
+      "source": "billing.md",
+      "answer": "Late cancellation fees are refunded only if the cancellation was caused by a clinic error.",
+      "quotes": [
+        "Late cancellation fees are refunded only if the cancellation was caused by a clinic error."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD9",
+      "kind": "off_topic_overlap",
+      "question": "Who can see my personal data?",
+      "source": "reminders.md",
+      "answer": "Reminders never contain test results or details of the reason for the visit.",
+      "quotes": [
+        "Reminders never contain test results or details of the reason for the visit."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD10",
+      "kind": "off_topic_overlap",
+      "question": "Can I change a telehealth visit to an in-person one?",
+      "source": "telehealth.md",
+      "answer": "Telehealth visits follow the same cancellation policy as in-person visits.",
+      "quotes": [
+        "Telehealth visits follow the same cancellation policy as in-person visits."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD11",
+      "kind": "off_topic_overlap",
+      "question": "How early should I join a telehealth visit?",
+      "source": "telehealth.md",
+      "answer": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone.",
+      "quotes": [
+        "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD20",
+      "kind": "on_topic",
+      "question": "Is there a charge for moving my visit to another day?",
+      "source": "rescheduling.md",
+      "answer": "Yes, it can be moved to a new date or time up to 2 hours before it starts, at no cost.",
+      "quotes": [
+        "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+      ],
+      "expected_status": "answered"
+    },
+    {
+      "id": "RD21",
+      "kind": "on_topic",
+      "question": "How long before my visit do reminders arrive?",
+      "source": "reminders.md",
+      "answer": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it.",
+      "quotes": [
+        "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it."
+      ],
+      "expected_status": "answered"
+    },
+    {
+      "id": "RD22",
+      "kind": "on_topic",
+      "question": "What is the fee if I cancel late for the third time?",
+      "source": "cancellation.md",
+      "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months.",
+      "quotes": [
+        "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+      ],
+      "expected_status": "answered"
+    },
+    {
+      "id": "RD23",
+      "kind": "on_topic",
+      "question": "Can someone else get my personal data?",
+      "source": "privacy.md",
+      "answer": "Only someone the patient has authorised in writing; the clinic only shares a patient's personal data with that patient or with them.",
+      "quotes": [
+        "The clinic only shares a patient's personal data with that patient, or with someone they have authorised in writing."
+      ],
+      "expected_status": "answered"
+    },
+    {
+      "id": "RD24",
+      "kind": "on_topic",
+      "question": "What if my video connection drops?",
+      "source": "telehealth.md",
+      "answer": "If the connection fails, the clinician calls the patient's phone number on file and continues by phone.",
+      "quotes": [
+        "If the connection fails, the clinician calls the patient's phone number on file and continues by phone."
+      ],
+      "expected_status": "answered"
+    },
+    {
+      "id": "RD25",
+      "kind": "on_topic",
+      "question": "How many days until an approved refund is paid?",
+      "source": "billing.md",
+      "answer": "Approved refunds are paid back to the original payment method within 10 working days.",
+      "quotes": [
+        "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+      ],
+      "expected_status": "answered"
+    },
+    {
+      "id": "RD26",
+      "kind": "on_topic",
+      "question": "How often am I allowed to reschedule a visit?",
+      "source": "rescheduling.md",
+      "answer": "Each appointment can be rescheduled at most twice.",
+      "quotes": [
+        "Each appointment can be rescheduled at most twice"
+      ],
+      "expected_status": "answered"
+    },
+    {
+      "id": "RD27",
+      "kind": "on_topic",
+      "question": "Does a missed appointment count as a late cancellation?",
+      "source": "cancellation.md",
+      "answer": "Yes, missed appointments without any cancellation are recorded as no-shows and are treated the same way as late cancellations.",
+      "quotes": [
+        "Missed appointments without any cancellation are recorded as no-shows and are treated the same way as late cancellations."
+      ],
+      "expected_status": "answered"
+    },
+    {
+      "id": "RD40",
+      "kind": "reversal",
+      "question": "How long before the visit can I reschedule?",
+      "source": "rescheduling.md",
+      "answer": "An appointment can be moved up to 2 hours after it starts.",
+      "quotes": [
+        "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD41",
+      "kind": "reversal",
+      "question": "When are reminders sent?",
+      "source": "reminders.md",
+      "answer": "The clinic sends a reminder 2 hours before each appointment and a second reminder 48 hours before it.",
+      "quotes": [
+        "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD42",
+      "kind": "reversal",
+      "question": "When does the late cancellation fee apply?",
+      "source": "cancellation.md",
+      "answer": "A late cancellation fee of 15 euros applies to the first late cancellation within 12 months.",
+      "quotes": [
+        "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD43",
+      "kind": "reversal",
+      "question": "Can I switch reminders to email?",
+      "source": "reminders.md",
+      "answer": "No, patients cannot switch reminders to email in the patient app.",
+      "quotes": [
+        "patients can switch to email or turn reminders off in the patient app."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD44",
+      "kind": "reversal",
+      "question": "Do telehealth visits follow the cancellation policy?",
+      "source": "telehealth.md",
+      "answer": "Telehealth visits do not follow the same cancellation policy as in-person visits.",
+      "quotes": [
+        "Telehealth visits follow the same cancellation policy as in-person visits."
+      ],
+      "expected_status": "insufficient_information"
+    },
+    {
+      "id": "RD45",
+      "kind": "reversal",
+      "question": "Who reviews refund requests?",
+      "source": "billing.md",
+      "answer": "Refunds are rejected by the billing team.",
+      "quotes": [
+        "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+      ],
+      "expected_status": "insufficient_information"
+    }
+  ]
+}

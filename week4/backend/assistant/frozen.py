@@ -22,3 +22,9 @@ FROZEN_SHA256 = {
     "policies/rescheduling.md": "6a1e12a241f68b361f88372c14cf6f0f1eebe5b0a2afb81656ea3e6487667885",
     "policies/telehealth.md": "3b11b21980242ee8c006bdc43bdfa8ccf49172074af20f3abc906a7e39fd34a8",
 }
+
+# Week 4 review follow-up (2026-11-16): the relevance set, frozen BEFORE the relevance check was written. It is
+# kept apart from FROZEN_SHA256 so the original 18-case benchmark record stays exactly as it was.
+RELEVANCE_FROZEN_ON = "2026-11-16"
+RELEVANCE_FROZEN = ROOT / "eval" / "relevance_frozen.json"
+RELEVANCE_FROZEN_SHA256 = "777c040aac8bf0a329fd4960ec2d9df6e1dead5eabeb8480521b077fa0980ecd"
