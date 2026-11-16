@@ -464,3 +464,35 @@ checked for such flips beyond the frozen expectations, so a passing case is not 
 def save(result: dict) -> None:
     RESULT.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n")
     REPORT.write_text(build_report(json.loads(RESULT.read_text()), load_cases()))
+
+
+# ---------------------------------------------------------------- Week 4 review follow-up
+
+
+def benchmark_replay() -> list[dict]:
+    """Diagnostic only, nothing chosen from it: the recorded answered runs of the original 18-case benchmark
+    (shipped and no-floor settings) passed through the shipped relevance check."""
+    from . import relevance
+
+    recorded = json.loads(RESULT.read_text())
+    cases = {c["id"]: c["question"] for c in load_cases()}
+    out = []
+    for label, results in [
+        ("shipped", recorded["results"][SHIPPED]),
+        ("no floor", recorded["diagnostics"]["no_floor"]["results"]),
+    ]:
+        for cid, runs in results.items():
+            answered = [r for r in runs if r["status"] == "answered"]
+            if not answered:
+                continue
+            reasons = [relevance.check(cases[cid], r["answer"], [c["quote"] for c in r["citations"]]) for r in answered]
+            out.append(
+                {
+                    "setting": label,
+                    "case": cid,
+                    "answered_runs": len(answered),
+                    "now_stopped": sum(bool(x) for x in reasons),
+                    "reasons": sorted({x for x in reasons if x}),
+                }
+            )
+    return out

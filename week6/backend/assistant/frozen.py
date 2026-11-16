@@ -119,3 +119,9 @@ WEEK5_FROZEN_SHA256["eval/agent_step13.json"] = "642dcbe88e62fa51c0e085f2e45f8e4
 # Step 13: on-topic disguised H3/H9 (author: assistant), frozen before the acceptance run.
 STEP13_REDTEAM = ROOT / "eval" / "step13_redteam.json"
 WEEK5_FROZEN_SHA256["eval/step13_redteam.json"] = "82377700be19933ff0fb3586498b2f6dc2e6e9fd22db5163d736eb686c271b67"
+
+# Week 4 review follow-up (2026-11-16): the relevance set, frozen BEFORE the relevance check was written. It is
+# kept apart from FROZEN_SHA256 so the original 18-case benchmark record stays exactly as it was.
+RELEVANCE_FROZEN_ON = "2026-11-16"
+RELEVANCE_FROZEN = ROOT / "eval" / "relevance_frozen.json"
+RELEVANCE_FROZEN_SHA256 = "777c040aac8bf0a329fd4960ec2d9df6e1dead5eabeb8480521b077fa0980ecd"

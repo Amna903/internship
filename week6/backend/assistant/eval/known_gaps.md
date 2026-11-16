@@ -33,3 +33,31 @@ not-substantive check.
    antonyms can get through, and they are kept as explicit tests in `tests/test_assistant_polarity.py`.
 6. **Answerable questions are blocked by the floor:** A6 (0.619) and the refund question in U3 (0.664).
    The dev set had no paraphrase-style questions.
+
+## Review follow-up (2026-11-16): relevance and entailment
+
+The mentor's follow-up review asked for gap 1 to be treated as an unresolved product limitation. What was done
+(details in [relevance_report.md](relevance_report.md) and [../dev/relevance_dev.md](../dev/relevance_dev.md)):
+
+- **New cases, not the benchmark.** 25 development cases (off-topic answers that share the question's policy
+  words, correct on-topic answers, and clause/meaning reversals) and a separate 18-case relevance set, frozen
+  and hash-pinned *before* the check was written. The original 18 cases and their results are unchanged.
+- **A relevance/abstention check** (`assistant/relevance.py`, last step of `verify.decide`): the answer must be
+  about the question's policy topic and contain the kind of fact asked for (amount, time, count). Chosen on dev
+  by a rule fixed beforehand; adding a word-coverage threshold stopped nothing more, so it was not shipped.
+- **Frozen result, scored once:** off-topic + reversal replies stopped 1/12 → **5/12**; correct answers kept
+  **6/6**. Replies are hand-written, so this measures the server check, not the model.
+
+Still open, stated plainly:
+
+1. **Gap 1 is narrowed, not closed.** U1, U2 and U9b are still answered with the floor off: injection
+   questions name no policy topic and ask for no amount, time or count, so the check has nothing to compare.
+   The similarity floor remains their only defence.
+2. **Same topic, different intent passes** (RF2, RF4, RF6, RF8; RD2, RD4, RD6, RD8, RD10): e.g. "Where can I
+   cancel?" answered with what counts as a late cancellation.
+3. **Citation validity is not entailment.** A verified citation proves the quote is real policy text, not that
+   the answer means the same thing. Still answered: "after it starts" for "before", swapped 48-hour/2-hour
+   reminders, "first" for "third", "rejected" for "reviewed", "at least twice" for "at most twice". These are
+   strict expected-failure tests (`tests/test_relevance.py::TestRemainingFailures`). Only added/dropped negation
+   words are caught (polarity check). **The assistant is not "fully verified"**: its answers are cited and
+   word-checked.

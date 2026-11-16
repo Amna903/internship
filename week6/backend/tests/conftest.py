@@ -112,6 +112,7 @@ RAG_FILES = (
     "test_dev_questions",
     "test_eval_freeze",
     "test_index_",
+    "test_relevance",
 )
 ML_FILES = ("test_ml_", "test_holdout", "test_release_rule", "test_cluster_features", "test_supervised_doc")
 

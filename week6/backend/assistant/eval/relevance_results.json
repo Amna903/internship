@@ -1,0 +1,423 @@
+{
+  "frozen_sha256": "777c040aac8bf0a329fd4960ec2d9df6e1dead5eabeb8480521b077fa0980ecd",
+  "shipped": {
+    "variant": "topic+type",
+    "threshold": null,
+    "rows": [
+      {
+        "id": "RF1",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "insufficient_information",
+        "reason": "answer is about a different policy topic",
+        "correct": true
+      },
+      {
+        "id": "RF2",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF3",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "insufficient_information",
+        "reason": "answer does not give what the question asks for",
+        "correct": true
+      },
+      {
+        "id": "RF4",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF5",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "insufficient_information",
+        "reason": "answer is about a different policy topic",
+        "correct": true
+      },
+      {
+        "id": "RF6",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF7",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "insufficient_information",
+        "reason": "answer does not give what the question asks for",
+        "correct": true
+      },
+      {
+        "id": "RF8",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF20",
+        "kind": "on_topic",
+        "expected": "answered",
+        "status": "answered",
+        "reason": "",
+        "correct": true
+      },
+      {
+        "id": "RF21",
+        "kind": "on_topic",
+        "expected": "answered",
+        "status": "answered",
+        "reason": "",
+        "correct": true
+      },
+      {
+        "id": "RF22",
+        "kind": "on_topic",
+        "expected": "answered",
+        "status": "answered",
+        "reason": "",
+        "correct": true
+      },
+      {
+        "id": "RF23",
+        "kind": "on_topic",
+        "expected": "answered",
+        "status": "answered",
+        "reason": "",
+        "correct": true
+      },
+      {
+        "id": "RF24",
+        "kind": "on_topic",
+        "expected": "answered",
+        "status": "answered",
+        "reason": "",
+        "correct": true
+      },
+      {
+        "id": "RF25",
+        "kind": "on_topic",
+        "expected": "answered",
+        "status": "answered",
+        "reason": "",
+        "correct": true
+      },
+      {
+        "id": "RF40",
+        "kind": "reversal",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF41",
+        "kind": "reversal",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF42",
+        "kind": "reversal",
+        "expected": "insufficient_information",
+        "status": "insufficient_information",
+        "reason": "polarity mismatch",
+        "correct": true
+      },
+      {
+        "id": "RF43",
+        "kind": "reversal",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      }
+    ],
+    "stopped_bad": 5,
+    "bad": 12,
+    "kept_good": 6,
+    "good": 6
+  },
+  "baseline_off": {
+    "rows": [
+      {
+        "id": "RF1",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF2",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF3",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF4",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF5",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF6",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF7",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF8",
+        "kind": "off_topic_overlap",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF20",
+        "kind": "on_topic",
+        "expected": "answered",
+        "status": "answered",
+        "reason": "",
+        "correct": true
+      },
+      {
+        "id": "RF21",
+        "kind": "on_topic",
+        "expected": "answered",
+        "status": "answered",
+        "reason": "",
+        "correct": true
+      },
+      {
+        "id": "RF22",
+        "kind": "on_topic",
+        "expected": "answered",
+        "status": "answered",
+        "reason": "",
+        "correct": true
+      },
+      {
+        "id": "RF23",
+        "kind": "on_topic",
+        "expected": "answered",
+        "status": "answered",
+        "reason": "",
+        "correct": true
+      },
+      {
+        "id": "RF24",
+        "kind": "on_topic",
+        "expected": "answered",
+        "status": "answered",
+        "reason": "",
+        "correct": true
+      },
+      {
+        "id": "RF25",
+        "kind": "on_topic",
+        "expected": "answered",
+        "status": "answered",
+        "reason": "",
+        "correct": true
+      },
+      {
+        "id": "RF40",
+        "kind": "reversal",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF41",
+        "kind": "reversal",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      },
+      {
+        "id": "RF42",
+        "kind": "reversal",
+        "expected": "insufficient_information",
+        "status": "insufficient_information",
+        "reason": "polarity mismatch",
+        "correct": true
+      },
+      {
+        "id": "RF43",
+        "kind": "reversal",
+        "expected": "insufficient_information",
+        "status": "answered",
+        "reason": "",
+        "correct": false
+      }
+    ],
+    "stopped_bad": 1,
+    "bad": 12,
+    "kept_good": 6,
+    "good": 6
+  },
+  "benchmark_replay": [
+    {
+      "setting": "shipped",
+      "case": "A1",
+      "answered_runs": 3,
+      "now_stopped": 0,
+      "reasons": []
+    },
+    {
+      "setting": "shipped",
+      "case": "A2",
+      "answered_runs": 3,
+      "now_stopped": 0,
+      "reasons": []
+    },
+    {
+      "setting": "shipped",
+      "case": "A3",
+      "answered_runs": 3,
+      "now_stopped": 0,
+      "reasons": []
+    },
+    {
+      "setting": "shipped",
+      "case": "A4",
+      "answered_runs": 3,
+      "now_stopped": 0,
+      "reasons": []
+    },
+    {
+      "setting": "shipped",
+      "case": "A5",
+      "answered_runs": 3,
+      "now_stopped": 0,
+      "reasons": []
+    },
+    {
+      "setting": "no floor",
+      "case": "U1",
+      "answered_runs": 2,
+      "now_stopped": 0,
+      "reasons": []
+    },
+    {
+      "setting": "no floor",
+      "case": "U2",
+      "answered_runs": 3,
+      "now_stopped": 0,
+      "reasons": []
+    },
+    {
+      "setting": "no floor",
+      "case": "U3",
+      "answered_runs": 3,
+      "now_stopped": 0,
+      "reasons": []
+    },
+    {
+      "setting": "no floor",
+      "case": "U3b",
+      "answered_runs": 3,
+      "now_stopped": 0,
+      "reasons": []
+    },
+    {
+      "setting": "no floor",
+      "case": "U8",
+      "answered_runs": 3,
+      "now_stopped": 0,
+      "reasons": []
+    },
+    {
+      "setting": "no floor",
+      "case": "U9b",
+      "answered_runs": 3,
+      "now_stopped": 0,
+      "reasons": []
+    },
+    {
+      "setting": "no floor",
+      "case": "A1",
+      "answered_runs": 3,
+      "now_stopped": 0,
+      "reasons": []
+    },
+    {
+      "setting": "no floor",
+      "case": "A2",
+      "answered_runs": 3,
+      "now_stopped": 0,
+      "reasons": []
+    },
+    {
+      "setting": "no floor",
+      "case": "A3",
+      "answered_runs": 3,
+      "now_stopped": 0,
+      "reasons": []
+    },
+    {
+      "setting": "no floor",
+      "case": "A4",
+      "answered_runs": 3,
+      "now_stopped": 0,
+      "reasons": []
+    },
+    {
+      "setting": "no floor",
+      "case": "A5",
+      "answered_runs": 3,
+      "now_stopped": 0,
+      "reasons": []
+    }
+  ]
+}
