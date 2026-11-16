@@ -1,0 +1,1964 @@
+{
+  "model": "llama3.2:3b",
+  "embedder": "ollama/nomic-embed-text:latest",
+  "temperature": 0.1,
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "dev_questions": 11,
+  "top_scores": {
+    "D2": 0.8305079936981201,
+    "D3": 0.7898126244544983,
+    "D4": 0.7262446284294128,
+    "D5": 0.7243062853813171,
+    "D6": 0.7570370435714722,
+    "D7": 0.7237530946731567,
+    "D8": 0.5745283961296082,
+    "D9": 0.5757384896278381,
+    "D10": 0.6638089418411255,
+    "D11": 0.6194117069244385,
+    "D12": 0.7206100225448608
+  },
+  "runs": {
+    "2": {
+      "D2": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "cancellation.md#0",
+              "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+            }
+          ],
+          "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\", \"citations\": [{\"passage_id\": \"cancellation.md#0\", \"quote\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+              }
+            ],
+            "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "cancellation.md#0",
+              "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+            }
+          ],
+          "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\", \"citations\": [{\"passage_id\": \"cancellation.md#0\", \"quote\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+              }
+            ],
+            "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "cancellation.md#0",
+              "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+            }
+          ],
+          "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\", \"citations\": [{\"passage_id\": \"cancellation.md#0\", \"quote\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+              }
+            ],
+            "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+          }
+        }
+      ],
+      "D3": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+            }
+          ],
+          "answer": "up to 2 hours before the visit can be moved to another time",
+          "groundedness": 0.6666666666666666,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"up to 2 hours before the visit can be moved to another time\", \"citations\": [{\"passage_id\": \"rescheduling.md#0\", \"quote\": \"An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+              }
+            ],
+            "answer": "up to 2 hours before the visit can be moved to another time"
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+            }
+          ],
+          "answer": "up to 2 hours before the visit can be moved to another time",
+          "groundedness": 0.6666666666666666,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"up to 2 hours before the visit can be moved to another time\", \"citations\": [{\"passage_id\": \"rescheduling.md#0\", \"quote\": \"An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+              }
+            ],
+            "answer": "up to 2 hours before the visit can be moved to another time"
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+            }
+          ],
+          "answer": "up to 2 hours before the visit can be moved to another time",
+          "groundedness": 0.6666666666666666,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"up to 2 hours before the visit can be moved to another time\", \"citations\": [{\"passage_id\": \"rescheduling.md#0\", \"quote\": \"An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+              }
+            ],
+            "answer": "up to 2 hours before the visit can be moved to another time"
+          }
+        }
+      ],
+      "D4": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#0",
+              "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+            }
+          ],
+          "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"reminders.md#0\",\n      \"quote\": \"Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#0",
+                "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+              }
+            ],
+            "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#0",
+              "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+            }
+          ],
+          "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"reminders.md#0\",\n      \"quote\": \"Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#0",
+                "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+              }
+            ],
+            "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#0",
+              "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+            }
+          ],
+          "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"reminders.md#0\",\n      \"quote\": \"Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#0",
+                "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+              }
+            ],
+            "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app."
+          }
+        }
+      ],
+      "D5": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "telehealth.md#0",
+              "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+            }
+          ],
+          "answer": "Patients should join 5 minutes before the start time to check their camera and microphone.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\", \"citations\": [{\"passage_id\": \"telehealth.md#0\", \"quote\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "telehealth.md#0",
+                "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+              }
+            ],
+            "answer": "Patients should join 5 minutes before the start time to check their camera and microphone."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "telehealth.md#0",
+              "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+            }
+          ],
+          "answer": "Patients should join 5 minutes before the start time to check their camera and microphone.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\", \"citations\": [{\"passage_id\": \"telehealth.md#0\", \"quote\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "telehealth.md#0",
+                "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+              }
+            ],
+            "answer": "Patients should join 5 minutes before the start time to check their camera and microphone."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "telehealth.md#0",
+              "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+            }
+          ],
+          "answer": "Patients should join 5 minutes before the start time to check their camera and microphone.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\", \"citations\": [{\"passage_id\": \"telehealth.md#0\", \"quote\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "telehealth.md#0",
+                "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+              }
+            ],
+            "answer": "Patients should join 5 minutes before the start time to check their camera and microphone."
+          }
+        }
+      ],
+      "D6": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "privacy.md#1",
+              "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+            }
+          ],
+          "answer": "The clinic responds to a patient's request for a copy of their data within 30 days.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"The clinic responds to a patient's request for a copy of their data within 30 days.\", \"citations\": [{\"passage_id\": \"privacy.md#1\", \"quote\": \"Patients can request a copy of their data through the patient app; the clinic responds within 30 days.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "privacy.md#1",
+                "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+              }
+            ],
+            "answer": "The clinic responds to a patient's request for a copy of their data within 30 days."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "privacy.md#1",
+              "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+            }
+          ],
+          "answer": "The clinic responds to a patient's request for a copy of their data within 30 days.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"The clinic responds to a patient's request for a copy of their data within 30 days.\", \"citations\": [{\"passage_id\": \"privacy.md#1\", \"quote\": \"Patients can request a copy of their data through the patient app; the clinic responds within 30 days.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "privacy.md#1",
+                "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+              }
+            ],
+            "answer": "The clinic responds to a patient's request for a copy of their data within 30 days."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "privacy.md#1",
+              "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+            }
+          ],
+          "answer": "The clinic responds within 30 days.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"The clinic responds within 30 days.\", \"citations\": [{\"passage_id\": \"privacy.md#1\", \"quote\": \"Patients can request a copy of their data through the patient app; the clinic responds within 30 days.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "privacy.md#1",
+                "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+              }
+            ],
+            "answer": "The clinic responds within 30 days."
+          }
+        }
+      ],
+      "D7": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "billing.md#1",
+              "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+            }
+          ],
+          "answer": "Refunds are paid back to the original payment method within 10 working days after approval.",
+          "groundedness": 0.9,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Refunds are paid back to the original payment method within 10 working days after approval.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"billing.md#1\",\n      \"quote\": \"Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "answer": "Refunds are paid back to the original payment method within 10 working days after approval."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "billing.md#1",
+              "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+            }
+          ],
+          "answer": "Refunds are paid back to the original payment method within 10 working days after approval.",
+          "groundedness": 0.9,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Refunds are paid back to the original payment method within 10 working days after approval.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"billing.md#1\",\n      \"quote\": \"Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "answer": "Refunds are paid back to the original payment method within 10 working days after approval."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "billing.md#1",
+              "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+            }
+          ],
+          "answer": "Refunds are paid back to the original payment method within 10 working days after approval.",
+          "groundedness": 0.9,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Refunds are paid back to the original payment method within 10 working days after approval.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"billing.md#1\",\n      \"quote\": \"Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "answer": "Refunds are paid back to the original payment method within 10 working days after approval."
+          }
+        }
+      ],
+      "D8": [
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        }
+      ],
+      "D9": [
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        }
+      ],
+      "D10": [
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        }
+      ],
+      "D11": [
+        {
+          "status": "refused",
+          "reason": "server medical-advice check",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "refused",
+          "reason": "server medical-advice check",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "refused",
+          "reason": "server medical-advice check",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        }
+      ],
+      "D12": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#1",
+              "quote": "Reminders never contain test results or details of the reason for the visit."
+            }
+          ],
+          "answer": "No, reminders do not include test results.",
+          "groundedness": 0.75,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"No, reminders do not include test results.\", \"citations\": [{\"passage_id\": \"reminders.md#1\", \"quote\": \"Reminders never contain test results or details of the reason for the visit.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#1",
+                "quote": "Reminders never contain test results or details of the reason for the visit."
+              }
+            ],
+            "answer": "No, reminders do not include test results."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#1",
+              "quote": "Reminders never contain test results or details of the reason for the visit."
+            }
+          ],
+          "answer": "No, reminders do not include test results.",
+          "groundedness": 0.75,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"No, reminders do not include test results.\", \"citations\": [{\"passage_id\": \"reminders.md#1\", \"quote\": \"Reminders never contain test results or details of the reason for the visit.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#1",
+                "quote": "Reminders never contain test results or details of the reason for the visit."
+              }
+            ],
+            "answer": "No, reminders do not include test results."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#1",
+              "quote": "Reminders never contain test results or details of the reason for the visit."
+            }
+          ],
+          "answer": "No, reminders do not include test results.",
+          "groundedness": 0.75,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"No, reminders do not include test results.\", \"citations\": [{\"passage_id\": \"reminders.md#1\", \"quote\": \"Reminders never contain test results or details of the reason for the visit.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#1",
+                "quote": "Reminders never contain test results or details of the reason for the visit."
+              }
+            ],
+            "answer": "No, reminders do not include test results."
+          }
+        }
+      ]
+    },
+    "3": {
+      "D2": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "cancellation.md#0",
+              "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+            }
+          ],
+          "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\", \"citations\": [{\"passage_id\": \"cancellation.md#0\", \"quote\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+              }
+            ],
+            "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "cancellation.md#0",
+              "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+            }
+          ],
+          "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\", \"citations\": [{\"passage_id\": \"cancellation.md#0\", \"quote\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+              }
+            ],
+            "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "cancellation.md#0",
+              "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+            }
+          ],
+          "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\", \"citations\": [{\"passage_id\": \"cancellation.md#0\", \"quote\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+              }
+            ],
+            "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+          }
+        }
+      ],
+      "D3": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+            }
+          ],
+          "answer": "up to 2 hours before the visit can be moved to another time",
+          "groundedness": 0.6666666666666666,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"up to 2 hours before the visit can be moved to another time\", \"citations\": [{\"passage_id\": \"rescheduling.md#0\", \"quote\": \"An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+              }
+            ],
+            "answer": "up to 2 hours before the visit can be moved to another time"
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+            }
+          ],
+          "answer": "up to 2 hours before the visit can be moved to another time",
+          "groundedness": 0.6666666666666666,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"up to 2 hours before the visit can be moved to another time\", \"citations\": [{\"passage_id\": \"rescheduling.md#0\", \"quote\": \"An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+              }
+            ],
+            "answer": "up to 2 hours before the visit can be moved to another time"
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+            }
+          ],
+          "answer": "up to 2 hours before the visit can be moved to another time",
+          "groundedness": 0.6666666666666666,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"up to 2 hours before the visit can be moved to another time\", \"citations\": [{\"passage_id\": \"rescheduling.md#0\", \"quote\": \"An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+              }
+            ],
+            "answer": "up to 2 hours before the visit can be moved to another time"
+          }
+        }
+      ],
+      "D4": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#0",
+              "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+            }
+          ],
+          "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"reminders.md#0\",\n      \"quote\": \"Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#0",
+                "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+              }
+            ],
+            "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#0",
+              "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+            }
+          ],
+          "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"reminders.md#0\",\n      \"quote\": \"Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#0",
+                "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+              }
+            ],
+            "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#0",
+              "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+            }
+          ],
+          "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"reminders.md#0\",\n      \"quote\": \"Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#0",
+                "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+              }
+            ],
+            "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app."
+          }
+        }
+      ],
+      "D5": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "telehealth.md#0",
+              "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+            }
+          ],
+          "answer": "Patients should join 5 minutes before the start time to check their camera and microphone.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\", \"citations\": [{\"passage_id\": \"telehealth.md#0\", \"quote\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "telehealth.md#0",
+                "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+              }
+            ],
+            "answer": "Patients should join 5 minutes before the start time to check their camera and microphone."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "telehealth.md#0",
+              "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+            }
+          ],
+          "answer": "Patients should join 5 minutes before the start time to check their camera and microphone.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\", \"citations\": [{\"passage_id\": \"telehealth.md#0\", \"quote\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "telehealth.md#0",
+                "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+              }
+            ],
+            "answer": "Patients should join 5 minutes before the start time to check their camera and microphone."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "telehealth.md#0",
+              "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+            }
+          ],
+          "answer": "Patients should join 5 minutes before the start time to check their camera and microphone.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\", \"citations\": [{\"passage_id\": \"telehealth.md#0\", \"quote\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "telehealth.md#0",
+                "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+              }
+            ],
+            "answer": "Patients should join 5 minutes before the start time to check their camera and microphone."
+          }
+        }
+      ],
+      "D6": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "privacy.md#1",
+              "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+            }
+          ],
+          "answer": "The clinic responds to a patient's request for a copy of their data within 30 days.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"The clinic responds to a patient's request for a copy of their data within 30 days.\", \"citations\": [{\"passage_id\": \"privacy.md#1\", \"quote\": \"Patients can request a copy of their data through the patient app; the clinic responds within 30 days.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "privacy.md#1",
+                "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+              }
+            ],
+            "answer": "The clinic responds to a patient's request for a copy of their data within 30 days."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "privacy.md#1",
+              "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+            }
+          ],
+          "answer": "The clinic responds to a patient's request for a copy of their data within 30 days.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"The clinic responds to a patient's request for a copy of their data within 30 days.\", \"citations\": [{\"passage_id\": \"privacy.md#1\", \"quote\": \"Patients can request a copy of their data through the patient app; the clinic responds within 30 days.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "privacy.md#1",
+                "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+              }
+            ],
+            "answer": "The clinic responds to a patient's request for a copy of their data within 30 days."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "privacy.md#1",
+              "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+            }
+          ],
+          "answer": "The clinic responds within 30 days.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"The clinic responds within 30 days.\", \"citations\": [{\"passage_id\": \"privacy.md#1\", \"quote\": \"Patients can request a copy of their data through the patient app; the clinic responds within 30 days.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "privacy.md#1",
+                "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+              }
+            ],
+            "answer": "The clinic responds within 30 days."
+          }
+        }
+      ],
+      "D7": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "billing.md#1",
+              "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+            }
+          ],
+          "answer": "Refunds are paid back to the original payment method within 10 working days after approval.",
+          "groundedness": 0.9,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Refunds are paid back to the original payment method within 10 working days after approval.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"billing.md#1\",\n      \"quote\": \"Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "answer": "Refunds are paid back to the original payment method within 10 working days after approval."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "billing.md#1",
+              "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+            }
+          ],
+          "answer": "Refunds are paid back to the original payment method within 10 working days after approval.",
+          "groundedness": 0.9,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Refunds are paid back to the original payment method within 10 working days after approval.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"billing.md#1\",\n      \"quote\": \"Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "answer": "Refunds are paid back to the original payment method within 10 working days after approval."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "billing.md#1",
+              "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+            }
+          ],
+          "answer": "Refunds are paid back to the original payment method within 10 working days after approval.",
+          "groundedness": 0.9,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Refunds are paid back to the original payment method within 10 working days after approval.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"billing.md#1\",\n      \"quote\": \"Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "answer": "Refunds are paid back to the original payment method within 10 working days after approval."
+          }
+        }
+      ],
+      "D8": [
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        }
+      ],
+      "D9": [
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        }
+      ],
+      "D10": [
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        }
+      ],
+      "D11": [
+        {
+          "status": "refused",
+          "reason": "server medical-advice check",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "refused",
+          "reason": "server medical-advice check",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "refused",
+          "reason": "server medical-advice check",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        }
+      ],
+      "D12": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#1",
+              "quote": "Reminders never contain test results or details of the reason for the visit."
+            }
+          ],
+          "answer": "No, reminders do not include test results.",
+          "groundedness": 0.75,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"No, reminders do not include test results.\", \"citations\": [{\"passage_id\": \"reminders.md#1\", \"quote\": \"Reminders never contain test results or details of the reason for the visit.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#1",
+                "quote": "Reminders never contain test results or details of the reason for the visit."
+              }
+            ],
+            "answer": "No, reminders do not include test results."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#1",
+              "quote": "Reminders never contain test results or details of the reason for the visit."
+            }
+          ],
+          "answer": "No, reminders do not include test results.",
+          "groundedness": 0.75,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"No, reminders do not include test results.\", \"citations\": [{\"passage_id\": \"reminders.md#1\", \"quote\": \"Reminders never contain test results or details of the reason for the visit.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#1",
+                "quote": "Reminders never contain test results or details of the reason for the visit."
+              }
+            ],
+            "answer": "No, reminders do not include test results."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#1",
+              "quote": "Reminders never contain test results or details of the reason for the visit."
+            }
+          ],
+          "answer": "No, reminders do not include test results.",
+          "groundedness": 0.75,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"No, reminders do not include test results.\", \"citations\": [{\"passage_id\": \"reminders.md#1\", \"quote\": \"Reminders never contain test results or details of the reason for the visit.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#1",
+                "quote": "Reminders never contain test results or details of the reason for the visit."
+              }
+            ],
+            "answer": "No, reminders do not include test results."
+          }
+        }
+      ]
+    },
+    "4": {
+      "D2": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "cancellation.md#0",
+              "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+            }
+          ],
+          "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\", \"citations\": [{\"passage_id\": \"cancellation.md#0\", \"quote\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+              }
+            ],
+            "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "cancellation.md#0",
+              "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+            }
+          ],
+          "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\", \"citations\": [{\"passage_id\": \"cancellation.md#0\", \"quote\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+              }
+            ],
+            "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "cancellation.md#0",
+              "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+            }
+          ],
+          "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\", \"citations\": [{\"passage_id\": \"cancellation.md#0\", \"quote\": \"A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "cancellation.md#0",
+                "quote": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+              }
+            ],
+            "answer": "A late cancellation fee of 15 euros applies to the third late cancellation within 12 months, and to every late cancellation after that."
+          }
+        }
+      ],
+      "D3": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+            }
+          ],
+          "answer": "up to 2 hours before the visit can be moved to another time",
+          "groundedness": 0.6666666666666666,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"up to 2 hours before the visit can be moved to another time\", \"citations\": [{\"passage_id\": \"rescheduling.md#0\", \"quote\": \"An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+              }
+            ],
+            "answer": "up to 2 hours before the visit can be moved to another time"
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+            }
+          ],
+          "answer": "up to 2 hours before the visit can be moved to another time",
+          "groundedness": 0.6666666666666666,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"up to 2 hours before the visit can be moved to another time\", \"citations\": [{\"passage_id\": \"rescheduling.md#0\", \"quote\": \"An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+              }
+            ],
+            "answer": "up to 2 hours before the visit can be moved to another time"
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "rescheduling.md#0",
+              "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+            }
+          ],
+          "answer": "up to 2 hours before the visit can be moved to another time",
+          "groundedness": 0.6666666666666666,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"up to 2 hours before the visit can be moved to another time\", \"citations\": [{\"passage_id\": \"rescheduling.md#0\", \"quote\": \"An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "rescheduling.md#0",
+                "quote": "An appointment can be moved to a new date or time up to 2 hours before it starts, at no cost."
+              }
+            ],
+            "answer": "up to 2 hours before the visit can be moved to another time"
+          }
+        }
+      ],
+      "D4": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#0",
+              "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+            }
+          ],
+          "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"reminders.md#0\",\n      \"quote\": \"Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#0",
+                "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+              }
+            ],
+            "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#0",
+              "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+            }
+          ],
+          "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"reminders.md#0\",\n      \"quote\": \"Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#0",
+                "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+              }
+            ],
+            "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#0",
+              "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+            }
+          ],
+          "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Reminders are sent by text message by default, but patients can switch to email reminders in the patient app.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"reminders.md#0\",\n      \"quote\": \"Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#0",
+                "quote": "Reminders are sent by text message by default; patients can switch to email or turn reminders off in the patient app."
+              }
+            ],
+            "answer": "Reminders are sent by text message by default, but patients can switch to email reminders in the patient app."
+          }
+        }
+      ],
+      "D5": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "telehealth.md#0",
+              "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+            }
+          ],
+          "answer": "Patients should join 5 minutes before the start time to check their camera and microphone.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\", \"citations\": [{\"passage_id\": \"telehealth.md#0\", \"quote\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "telehealth.md#0",
+                "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+              }
+            ],
+            "answer": "Patients should join 5 minutes before the start time to check their camera and microphone."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "telehealth.md#0",
+              "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+            }
+          ],
+          "answer": "Patients should join 5 minutes before the start time to check their camera and microphone.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\", \"citations\": [{\"passage_id\": \"telehealth.md#0\", \"quote\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "telehealth.md#0",
+                "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+              }
+            ],
+            "answer": "Patients should join 5 minutes before the start time to check their camera and microphone."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "telehealth.md#0",
+              "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+            }
+          ],
+          "answer": "Patients should join 5 minutes before the start time to check their camera and microphone.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\", \"citations\": [{\"passage_id\": \"telehealth.md#0\", \"quote\": \"Patients should join 5 minutes before the start time to check their camera and microphone.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "telehealth.md#0",
+                "quote": "Patients should join 5 minutes before the start time to check their camera and microphone."
+              }
+            ],
+            "answer": "Patients should join 5 minutes before the start time to check their camera and microphone."
+          }
+        }
+      ],
+      "D6": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "privacy.md#1",
+              "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+            }
+          ],
+          "answer": "The clinic responds to a patient's request for a copy of their data within 30 days.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"The clinic responds to a patient's request for a copy of their data within 30 days.\", \"citations\": [{\"passage_id\": \"privacy.md#1\", \"quote\": \"Patients can request a copy of their data through the patient app; the clinic responds within 30 days.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "privacy.md#1",
+                "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+              }
+            ],
+            "answer": "The clinic responds to a patient's request for a copy of their data within 30 days."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "privacy.md#1",
+              "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+            }
+          ],
+          "answer": "The clinic responds to a patient's request for a copy of their data within 30 days.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"The clinic responds to a patient's request for a copy of their data within 30 days.\", \"citations\": [{\"passage_id\": \"privacy.md#1\", \"quote\": \"Patients can request a copy of their data through the patient app; the clinic responds within 30 days.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "privacy.md#1",
+                "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+              }
+            ],
+            "answer": "The clinic responds to a patient's request for a copy of their data within 30 days."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "privacy.md#1",
+              "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+            }
+          ],
+          "answer": "The clinic responds within 30 days.",
+          "groundedness": 1.0,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"The clinic responds within 30 days.\", \"citations\": [{\"passage_id\": \"privacy.md#1\", \"quote\": \"Patients can request a copy of their data through the patient app; the clinic responds within 30 days.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "privacy.md#1",
+                "quote": "Patients can request a copy of their data through the patient app; the clinic responds within 30 days."
+              }
+            ],
+            "answer": "The clinic responds within 30 days."
+          }
+        }
+      ],
+      "D7": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "billing.md#1",
+              "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+            }
+          ],
+          "answer": "Refunds are paid back to the original payment method within 10 working days after approval.",
+          "groundedness": 0.9,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Refunds are paid back to the original payment method within 10 working days after approval.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"billing.md#1\",\n      \"quote\": \"Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "answer": "Refunds are paid back to the original payment method within 10 working days after approval."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "billing.md#1",
+              "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+            }
+          ],
+          "answer": "Refunds are paid back to the original payment method within 10 working days after approval.",
+          "groundedness": 0.9,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Refunds are paid back to the original payment method within 10 working days after approval.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"billing.md#1\",\n      \"quote\": \"Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "answer": "Refunds are paid back to the original payment method within 10 working days after approval."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "billing.md#1",
+              "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+            }
+          ],
+          "answer": "Refunds are paid back to the original payment method within 10 working days after approval.",
+          "groundedness": 0.9,
+          "rejected_citations": 0,
+          "raw": "{\n  \"answer\": \"Refunds are paid back to the original payment method within 10 working days after approval.\",\n  \"citations\": [\n    {\n      \"passage_id\": \"billing.md#1\",\n      \"quote\": \"Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days.\"\n    }\n  ],\n  \"refused\": false\n}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "billing.md#1",
+                "quote": "Refunds are reviewed by the billing team and, if approved, paid back to the original payment method within 10 working days."
+              }
+            ],
+            "answer": "Refunds are paid back to the original payment method within 10 working days after approval."
+          }
+        }
+      ],
+      "D8": [
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        }
+      ],
+      "D9": [
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        }
+      ],
+      "D10": [
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "insufficient_information",
+          "reason": "below floor",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        }
+      ],
+      "D11": [
+        {
+          "status": "refused",
+          "reason": "server medical-advice check",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "refused",
+          "reason": "server medical-advice check",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        },
+        {
+          "status": "refused",
+          "reason": "server medical-advice check",
+          "citations": [],
+          "answer": "",
+          "raw": null
+        }
+      ],
+      "D12": [
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#1",
+              "quote": "Reminders never contain test results or details of the reason for the visit."
+            }
+          ],
+          "answer": "No, reminders do not include test results.",
+          "groundedness": 0.75,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"No, reminders do not include test results.\", \"citations\": [{\"passage_id\": \"reminders.md#1\", \"quote\": \"Reminders never contain test results or details of the reason for the visit.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#1",
+                "quote": "Reminders never contain test results or details of the reason for the visit."
+              }
+            ],
+            "answer": "No, reminders do not include test results."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#1",
+              "quote": "Reminders never contain test results or details of the reason for the visit."
+            }
+          ],
+          "answer": "No, reminders do not include test results.",
+          "groundedness": 0.75,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"No, reminders do not include test results.\", \"citations\": [{\"passage_id\": \"reminders.md#1\", \"quote\": \"Reminders never contain test results or details of the reason for the visit.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#1",
+                "quote": "Reminders never contain test results or details of the reason for the visit."
+              }
+            ],
+            "answer": "No, reminders do not include test results."
+          }
+        },
+        {
+          "status": "answered",
+          "reason": "",
+          "citations": [
+            {
+              "passage_id": "reminders.md#1",
+              "quote": "Reminders never contain test results or details of the reason for the visit."
+            }
+          ],
+          "answer": "No, reminders do not include test results.",
+          "groundedness": 0.75,
+          "rejected_citations": 0,
+          "raw": "{\"answer\": \"No, reminders do not include test results.\", \"citations\": [{\"passage_id\": \"reminders.md#1\", \"quote\": \"Reminders never contain test results or details of the reason for the visit.\"}], \"refused\": false}",
+          "polarity_blocked": false,
+          "without_polarity": {
+            "status": "answered",
+            "citations": [
+              {
+                "passage_id": "reminders.md#1",
+                "quote": "Reminders never contain test results or details of the reason for the visit."
+              }
+            ],
+            "answer": "No, reminders do not include test results."
+          }
+        }
+      ]
+    }
+  },
+  "chosen": {
+    "floor": 0.7,
+    "correct_by_top_k": {
+      "2": 11,
+      "3": 11,
+      "4": 11
+    },
+    "top_k": 2,
+    "groundedness_threshold": 0.61,
+    "polarity_blocked_runs": 0,
+    "polarity_blocked_correct": [],
+    "short_answer_runs": 0,
+    "effective_groundedness_threshold": 0.61,
+    "groundedness_correct": [
+      1.0,
+      1.0,
+      1.0,
+      0.6666666666666666,
+      0.6666666666666666,
+      0.6666666666666666,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      0.9,
+      0.9,
+      0.9,
+      0.75,
+      0.75,
+      0.75
+    ],
+    "groundedness_incorrect": [],
+    "incorrect_blocked": 0
+  }
+}

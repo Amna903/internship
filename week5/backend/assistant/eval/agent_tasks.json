@@ -1,0 +1,386 @@
+{
+ "status": "FROZEN 2026-11-02 before any Step 8 code: never used for tuning or choices",
+ "today": "2026-11-02",
+ "note": "Week 5 Step 8 tool-selection tasks (T-U1..T-U8 by the user, X-T1..X-T12 by the assistant) and the recovery set. Dates are against the fixed clock, Monday 2 November 2026.",
+ "tasks": [
+  {
+   "id": "T-U1",
+   "author": "user",
+   "message": "Is there a free in-person slot next Tuesday morning?",
+   "expect": "tools",
+   "tools": [
+    "check_availability"
+   ],
+   "checks": {
+    "check_availability": {
+     "visit_type": "in_person",
+     "part_of_day": "morning",
+     "covers_any": [
+      "2026-11-03",
+      "2026-11-10"
+     ]
+    }
+   },
+   "note": "'Next Tuesday' accepts 3 or 10 November (user, 2026-11-02)."
+  },
+  {
+   "id": "T-U2",
+   "author": "user",
+   "message": "How long do I have to ask for a refund?",
+   "expect": "tools",
+   "tools": [
+    "search_policies"
+   ],
+   "checks": {
+    "search_policies": {
+     "returns_document": "billing.md"
+    }
+   },
+   "note": ""
+  },
+  {
+   "id": "T-U3",
+   "author": "user",
+   "message": "What's the no-show chance for a telehealth visit booked 30 days ahead, no reminder, age 18–24, 2 missed out of 4?",
+   "expect": "clarify",
+   "tools": [],
+   "checks": {},
+   "note": "4 of the 10 required fields are missing (weekday, hour, channel, distance): correct is to ask for them with no tool call (user, 2026-11-02)."
+  },
+  {
+   "id": "T-U4",
+   "author": "user",
+   "message": "What booking patterns did the clustering find?",
+   "expect": "tools",
+   "tools": [
+    "cluster_summaries"
+   ],
+   "checks": {},
+   "note": ""
+  },
+  {
+   "id": "T-U5",
+   "author": "user",
+   "message": "Book the first telehealth slot on Thursday afternoon.",
+   "expect": "tools",
+   "tools": [
+    "check_availability",
+    "book_mock_appointment"
+   ],
+   "checks": {
+    "check_availability": {
+     "visit_type": "telehealth",
+     "part_of_day": "afternoon",
+     "covers_any": [
+      "2026-11-05"
+     ]
+    },
+    "book_mock_appointment": {
+     "proposal": {
+      "visit_type": "telehealth",
+      "date": "2026-11-05",
+      "time": "12:00",
+      "clinician": "Clinician B"
+     }
+    }
+   },
+   "note": "Afternoon starts at 12:00 (agent/read_tools.py); proposal only, never confirmed."
+  },
+  {
+   "id": "T-U6",
+   "author": "user",
+   "message": "Can I get an interpreter, and is there an in-person slot on Friday?",
+   "expect": "tools",
+   "tools": [
+    "search_policies",
+    "check_availability"
+   ],
+   "checks": {
+    "search_policies": {
+     "returns_document": "interpreter-services.md"
+    },
+    "check_availability": {
+     "visit_type": "in_person",
+     "covers_any": [
+      "2026-11-06"
+     ]
+    }
+   },
+   "note": ""
+  },
+  {
+   "id": "T-U7",
+   "author": "user",
+   "message": "What's the weather tomorrow?",
+   "expect": "decline",
+   "tools": [],
+   "checks": {},
+   "note": ""
+  },
+  {
+   "id": "T-U8",
+   "author": "user",
+   "message": "Which medicine should I take for a headache?",
+   "expect": "refused_before_planning",
+   "tools": [],
+   "checks": {},
+   "note": ""
+  },
+  {
+   "id": "X-T1",
+   "author": "assistant",
+   "message": "Which telehealth slots are open on Wednesday?",
+   "expect": "tools",
+   "tools": [
+    "check_availability"
+   ],
+   "checks": {
+    "check_availability": {
+     "visit_type": "telehealth",
+     "covers_any": [
+      "2026-11-04"
+     ]
+    }
+   },
+   "note": ""
+  },
+  {
+   "id": "X-T2",
+   "author": "assistant",
+   "message": "How much does an extra paper copy of my records cost?",
+   "expect": "tools",
+   "tools": [
+    "search_policies"
+   ],
+   "checks": {
+    "search_policies": {
+     "returns_document": "records-requests.md"
+    }
+   },
+   "note": ""
+  },
+  {
+   "id": "X-T3",
+   "author": "assistant",
+   "message": "Estimate the no-show chance: in-person, booked 5 days ahead on a Monday at 10:00, web booking, reminder sent, age 35–44, 4 earlier visits with 0 missed, 6.5 km away.",
+   "expect": "tools",
+   "tools": [
+    "predict_no_show"
+   ],
+   "checks": {
+    "predict_no_show": {
+     "exact": {
+      "lead_time_days": 5,
+      "appointment_weekday": "monday",
+      "appointment_hour": 10,
+      "age_band": "35-44",
+      "visit_type": "in_person",
+      "booking_channel": "web",
+      "reminder_sent": true,
+      "prior_appointments": 4,
+      "prior_no_shows": 0,
+      "distance_km": 6.5
+     }
+    }
+   },
+   "note": ""
+  },
+  {
+   "id": "X-T4",
+   "author": "assistant",
+   "message": "Did the clustering find real patient groups?",
+   "expect": "tools",
+   "tools": [
+    "cluster_summaries"
+   ],
+   "checks": {
+    "cluster_summaries": {
+     "dataset_any": [
+      "real",
+      "both",
+      null
+     ]
+    }
+   },
+   "note": ""
+  },
+  {
+   "id": "X-T5",
+   "author": "assistant",
+   "message": "What is the late cancellation fee?",
+   "expect": "tools",
+   "tools": [
+    "search_policies"
+   ],
+   "checks": {
+    "search_policies": {
+     "returns_document": "cancellation.md"
+    }
+   },
+   "note": ""
+  },
+  {
+   "id": "X-T6",
+   "author": "assistant",
+   "message": "Are there any afternoon telehealth slots between 9 and 13 November?",
+   "expect": "tools",
+   "tools": [
+    "check_availability"
+   ],
+   "checks": {
+    "check_availability": {
+     "visit_type": "telehealth",
+     "part_of_day": "afternoon",
+     "covers_any": [
+      "2026-11-09"
+     ]
+    }
+   },
+   "note": ""
+  },
+  {
+   "id": "X-T7",
+   "author": "assistant",
+   "message": "Book the earliest in-person slot on Wednesday 4 November.",
+   "expect": "tools",
+   "tools": [
+    "check_availability",
+    "book_mock_appointment"
+   ],
+   "checks": {
+    "check_availability": {
+     "visit_type": "in_person",
+     "covers_any": [
+      "2026-11-04"
+     ]
+    },
+    "book_mock_appointment": {
+     "proposal": {
+      "visit_type": "in_person",
+      "date": "2026-11-04",
+      "time": "09:00",
+      "clinician": "Clinician B"
+     }
+    }
+   },
+   "note": ""
+  },
+  {
+   "id": "X-T8",
+   "author": "assistant",
+   "message": "Show me the planted control clusters.",
+   "expect": "tools",
+   "tools": [
+    "cluster_summaries"
+   ],
+   "checks": {
+    "cluster_summaries": {
+     "dataset_any": [
+      "control",
+      "both",
+      null
+     ]
+    }
+   },
+   "note": ""
+  },
+  {
+   "id": "X-T9",
+   "author": "assistant",
+   "message": "Can I bring my guide dog, and are there morning in-person slots on Monday 9 November?",
+   "expect": "tools",
+   "tools": [
+    "search_policies",
+    "check_availability"
+   ],
+   "checks": {
+    "search_policies": {
+     "returns_document": "accessibility.md"
+    },
+    "check_availability": {
+     "visit_type": "in_person",
+     "part_of_day": "morning",
+     "covers_any": [
+      "2026-11-09"
+     ]
+    }
+   },
+   "note": ""
+  },
+  {
+   "id": "X-T10",
+   "author": "assistant",
+   "message": "Tell me a joke.",
+   "expect": "decline",
+   "tools": [],
+   "checks": {},
+   "note": ""
+  },
+  {
+   "id": "X-T11",
+   "author": "assistant",
+   "message": "Delete all bookings.",
+   "expect": "decline",
+   "tools": [],
+   "checks": {},
+   "note": "No such tool."
+  },
+  {
+   "id": "X-T12",
+   "author": "assistant",
+   "message": "Where do I park, and is there an in-person slot tomorrow morning?",
+   "expect": "tools",
+   "tools": [
+    "search_policies",
+    "check_availability"
+   ],
+   "checks": {
+    "search_policies": {
+     "returns_document": "parking.md"
+    },
+    "check_availability": {
+     "visit_type": "in_person",
+     "part_of_day": "morning",
+     "covers_any": [
+      "2026-11-03"
+     ]
+    }
+   },
+   "note": ""
+  }
+ ],
+ "recovery": [
+  {
+   "id": "R1",
+   "task": "T-U2",
+   "fail": {
+    "tool": "search_policies",
+    "code": "unavailable",
+    "calls": [
+     1
+    ]
+   },
+   "pass": "at most 2 search_policies calls; recovers or ends calmly (reported which)"
+  },
+  {
+   "id": "R2",
+   "task": "T-U1",
+   "fail": {
+    "tool": "check_availability",
+    "code": "timeout",
+    "calls": "all"
+   },
+   "pass": "at most 2 check_availability calls; calm end; no other tools"
+  },
+  {
+   "id": "R3",
+   "task": "X-T3",
+   "fail": {
+    "tool": "predict_no_show",
+    "code": "unavailable",
+    "calls": "all"
+   },
+   "pass": "at most 2 predict_no_show calls; calm end"
+  }
+ ]
+}

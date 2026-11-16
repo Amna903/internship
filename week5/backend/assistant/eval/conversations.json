@@ -1,0 +1,361 @@
+{
+ "status": "FROZEN 2026-11-02 before any Step 5 code: never used for tuning or choices",
+ "note": "Week 5 Step 5 follow-up conversations. Turn 2 is scored: retrieval (as-shipped hit, with and without history) and end to end (key facts, Step 4 matching with the negation rule). Turn-1 evidence is recorded to show whether turn 1 succeeded. Six evidence sentences are also evidence in the frozen evaluation set; harmless, since nothing is tuned on either.",
+ "cases": [
+  {
+   "id": "C1",
+   "author": "user",
+   "category": "follow_up",
+   "turns": [
+    {
+     "question": "Can I get an interpreter?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "interpreter-services.md",
+       "version": 1,
+       "quote": "The clinic provides a professional interpreter free of charge for any appointment."
+      }
+     ]
+    },
+    {
+     "question": "Does that work for video visits too?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "interpreter-services.md",
+       "version": 1,
+       "quote": "For telehealth visits, the interpreter joins the video call or takes part by phone."
+      }
+     ]
+    }
+   ],
+   "key": [
+    [
+     "video call",
+     "video"
+    ]
+   ]
+  },
+  {
+   "id": "C2",
+   "author": "user",
+   "category": "follow_up",
+   "turns": [
+    {
+     "question": "Where do I get my parking ticket validated?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "parking.md",
+       "version": 1,
+       "quote": "Parking tickets are validated at the front desk"
+      }
+     ]
+    },
+    {
+     "question": "And how long is parking free?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "parking.md",
+       "version": 1,
+       "quote": "Patients can park free of charge for up to 3 hours in the car park behind the clinic."
+      }
+     ]
+    }
+   ],
+   "key": [
+    [
+     "3 hours"
+    ]
+   ]
+  },
+  {
+   "id": "C3",
+   "author": "user",
+   "category": "follow_up",
+   "turns": [
+    {
+     "question": "I owe 300 euros, can I split it?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "payment-plans.md",
+       "version": 1,
+       "quote": "A balance of more than 120 euros can be split into up to 3 monthly payments."
+      }
+     ]
+    },
+    {
+     "question": "What happens if I miss one payment?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "payment-plans.md",
+       "version": 1,
+       "quote": "If a monthly payment is missed, the plan ends and the remaining balance is due within 30 days."
+      }
+     ]
+    }
+   ],
+   "key": [
+    [
+     "30 days"
+    ],
+    [
+     "end",
+     "ends",
+     "ended",
+     "cancelled",
+     "canceled",
+     "terminated",
+     "stops"
+    ]
+   ]
+  },
+  {
+   "id": "C4",
+   "author": "user",
+   "category": "follow_up",
+   "turns": [
+    {
+     "question": "How do I get my records sent to another clinic?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "records-requests.md",
+       "version": 1,
+       "quote": "The clinic can send a copy of a patient's records to another healthcare provider at the patient's request."
+      }
+     ]
+    },
+    {
+     "question": "Does that cost anything?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "records-requests.md",
+       "version": 1,
+       "quote": "The first copy sent to another provider is free"
+      }
+     ]
+    }
+   ],
+   "key": [
+    [
+     "free",
+     "free of charge",
+     "no charge",
+     "no cost"
+    ]
+   ]
+  },
+  {
+   "id": "C5",
+   "author": "user",
+   "category": "topic_switch",
+   "turns": [
+    {
+     "question": "When are reminders sent?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "reminders.md",
+       "version": 1,
+       "quote": "The clinic sends a reminder 48 hours before each appointment and a second reminder 2 hours before it."
+      }
+     ]
+    },
+    {
+     "question": "Separately, is there anywhere to leave my bike?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "parking.md",
+       "version": 1,
+       "quote": "Bicycle racks are available beside the side door."
+      }
+     ]
+    }
+   ],
+   "key": [
+    [
+     "bicycle racks",
+     "bicycle rack",
+     "bike racks",
+     "bike rack",
+     "racks"
+    ],
+    [
+     "side door"
+    ]
+   ]
+  },
+  {
+   "id": "C6",
+   "author": "assistant",
+   "category": "follow_up",
+   "turns": [
+    {
+     "question": "Can I cancel online?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "cancellation.md",
+       "version": 2,
+       "quote": "Cancellations can be made in the patient app, on the website"
+      }
+     ]
+    },
+    {
+     "question": "And what if I cancel late twice?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "cancellation.md",
+       "version": 2,
+       "quote": "a late cancellation fee of 20 euros applies to the second late cancellation within 12 months"
+      }
+     ]
+    }
+   ],
+   "key": [
+    [
+     "20 euros"
+    ],
+    [
+     "second",
+     "2nd"
+    ]
+   ]
+  },
+  {
+   "id": "C7",
+   "author": "assistant",
+   "category": "follow_up",
+   "turns": [
+    {
+     "question": "When do test results show up in the app?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "lab-results-admin.md",
+       "version": 1,
+       "quote": "Test results are released to the patient app within 5 working days of the clinic receiving them."
+      }
+     ]
+    },
+    {
+     "question": "Who explains what they mean?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "lab-results-admin.md",
+       "version": 1,
+       "quote": "Questions about what a result means are answered by a clinician at an appointment"
+      }
+     ]
+    }
+   ],
+   "key": [
+    [
+     "clinician"
+    ]
+   ]
+  },
+  {
+   "id": "C8",
+   "author": "assistant",
+   "category": "unanswerable",
+   "turns": [
+    {
+     "question": "Is there free parking?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "parking.md",
+       "version": 1,
+       "quote": "Patients can park free of charge for up to 3 hours in the car park behind the clinic."
+      }
+     ]
+    },
+    {
+     "question": "Can I charge my electric car there?",
+     "answerable": false,
+     "evidence": []
+    }
+   ],
+   "key": null
+  },
+  {
+   "id": "C9",
+   "author": "assistant",
+   "category": "follow_up",
+   "turns": [
+    {
+     "question": "Is the clinic step-free?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "accessibility.md",
+       "version": 1,
+       "quote": "The clinic has a step-free entrance and a lift to every floor."
+      }
+     ]
+    },
+    {
+     "question": "Can I ask for a longer slot too?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "accessibility.md",
+       "version": 1,
+       "quote": "Patients who need a longer appointment slot because of a disability can ask for one when booking, at no extra cost."
+      }
+     ]
+    }
+   ],
+   "key": [
+    [
+     "booking",
+     "book"
+    ]
+   ]
+  },
+  {
+   "id": "C10",
+   "author": "assistant",
+   "category": "topic_switch",
+   "turns": [
+    {
+     "question": "How long do refunds take?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "billing.md",
+       "version": 1,
+       "quote": "within 10 working days"
+      }
+     ]
+    },
+    {
+     "question": "Unrelated: how early should I arrive for an in-person visit?",
+     "answerable": true,
+     "evidence": [
+      {
+       "document": "parking.md",
+       "version": 1,
+       "quote": "Patients should arrive 10 minutes before an in-person appointment to check in at the front desk."
+      }
+     ]
+    }
+   ],
+   "key": [
+    [
+     "10 minutes"
+    ]
+   ]
+  }
+ ]
+}

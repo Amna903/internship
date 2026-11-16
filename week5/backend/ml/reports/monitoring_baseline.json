@@ -1,0 +1,36 @@
+{
+  "model_version": "no-show-1.0.0",
+  "dataset_sha256": "f458e62a1442a732194b813a3800bb059c656f164d47d485ad800085557e189e",
+  "split": "validation",
+  "rows": 3998,
+  "bins": [
+    0.0,
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.7,
+    0.8,
+    0.9,
+    1.0
+  ],
+  "shares": [
+    0.2471,
+    0.484,
+    0.2024,
+    0.0505,
+    0.0138,
+    0.002,
+    0.0003,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "latency_ms": {
+    "p50": 5.13,
+    "p95": 5.27,
+    "note": "single-row predictions timed on the build machine; machine-specific"
+  }
+}

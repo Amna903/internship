@@ -1,0 +1,1071 @@
+{
+  "rule": "1. Candidates: off, topic, type, topic+type, topic+type+coverage. The coverage threshold is the lowest coverage\n     of a correct dev answer minus COVERAGE_MARGIN, rounded down to 2 decimals.\n  2. A candidate that blocks ANY correct dev answer is out. Correct dev answers are the hand-written on-topic\n     cases and the real model answers recorded as correct in dev/dev_tuning.json.\n  3. Of the rest, the one that stops the most off-topic and reversal dev cases wins; ties go to fewer checks.\n  4. The frozen set is scored with the shipped constants in relevance.py, which a test pins to the dev choice.\n     Its result is reported as is; nothing is changed because of it.",
+  "coverage_threshold_candidate": 0.2,
+  "recorded_real_answers": 21,
+  "candidates": [
+    {
+      "variant": "off",
+      "threshold": null,
+      "rows": [
+        {
+          "id": "RD1",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD2",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD3",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD4",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD5",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD6",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD7",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD8",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD9",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD10",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD11",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD20",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD21",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD22",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD23",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD24",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD25",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD26",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD27",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD40",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD41",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD42",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD43",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "polarity mismatch",
+          "correct": true
+        },
+        {
+          "id": "RD44",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "polarity mismatch",
+          "correct": true
+        },
+        {
+          "id": "RD45",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        }
+      ],
+      "stopped_bad": 2,
+      "bad": 17,
+      "kept_good": 8,
+      "good": 8,
+      "real_blocked": [],
+      "allowed": true
+    },
+    {
+      "variant": "topic",
+      "threshold": null,
+      "rows": [
+        {
+          "id": "RD1",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer is about a different policy topic",
+          "correct": true
+        },
+        {
+          "id": "RD2",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD3",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD4",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD5",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer is about a different policy topic",
+          "correct": true
+        },
+        {
+          "id": "RD6",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD7",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD8",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD9",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer is about a different policy topic",
+          "correct": true
+        },
+        {
+          "id": "RD10",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD11",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD20",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD21",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD22",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD23",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD24",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD25",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD26",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD27",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD40",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD41",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD42",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD43",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "polarity mismatch",
+          "correct": true
+        },
+        {
+          "id": "RD44",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "polarity mismatch",
+          "correct": true
+        },
+        {
+          "id": "RD45",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        }
+      ],
+      "stopped_bad": 5,
+      "bad": 17,
+      "kept_good": 8,
+      "good": 8,
+      "real_blocked": [],
+      "allowed": true
+    },
+    {
+      "variant": "type",
+      "threshold": null,
+      "rows": [
+        {
+          "id": "RD1",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD2",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD3",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer does not give what the question asks for",
+          "correct": true
+        },
+        {
+          "id": "RD4",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD5",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD6",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD7",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer does not give what the question asks for",
+          "correct": true
+        },
+        {
+          "id": "RD8",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD9",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD10",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD11",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer does not give what the question asks for",
+          "correct": true
+        },
+        {
+          "id": "RD20",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD21",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD22",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD23",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD24",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD25",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD26",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD27",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD40",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD41",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD42",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD43",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "polarity mismatch",
+          "correct": true
+        },
+        {
+          "id": "RD44",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "polarity mismatch",
+          "correct": true
+        },
+        {
+          "id": "RD45",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        }
+      ],
+      "stopped_bad": 5,
+      "bad": 17,
+      "kept_good": 8,
+      "good": 8,
+      "real_blocked": [],
+      "allowed": true
+    },
+    {
+      "variant": "topic+type",
+      "threshold": null,
+      "rows": [
+        {
+          "id": "RD1",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer is about a different policy topic",
+          "correct": true
+        },
+        {
+          "id": "RD2",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD3",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer does not give what the question asks for",
+          "correct": true
+        },
+        {
+          "id": "RD4",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD5",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer is about a different policy topic",
+          "correct": true
+        },
+        {
+          "id": "RD6",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD7",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer does not give what the question asks for",
+          "correct": true
+        },
+        {
+          "id": "RD8",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD9",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer is about a different policy topic",
+          "correct": true
+        },
+        {
+          "id": "RD10",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD11",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer does not give what the question asks for",
+          "correct": true
+        },
+        {
+          "id": "RD20",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD21",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD22",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD23",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD24",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD25",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD26",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD27",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD40",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD41",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD42",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD43",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "polarity mismatch",
+          "correct": true
+        },
+        {
+          "id": "RD44",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "polarity mismatch",
+          "correct": true
+        },
+        {
+          "id": "RD45",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        }
+      ],
+      "stopped_bad": 8,
+      "bad": 17,
+      "kept_good": 8,
+      "good": 8,
+      "real_blocked": [],
+      "allowed": true
+    },
+    {
+      "variant": "topic+type+coverage",
+      "threshold": 0.2,
+      "rows": [
+        {
+          "id": "RD1",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer is about a different policy topic",
+          "correct": true
+        },
+        {
+          "id": "RD2",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD3",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer does not give what the question asks for",
+          "correct": true
+        },
+        {
+          "id": "RD4",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD5",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer is about a different policy topic",
+          "correct": true
+        },
+        {
+          "id": "RD6",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD7",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer does not give what the question asks for",
+          "correct": true
+        },
+        {
+          "id": "RD8",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD9",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer is about a different policy topic",
+          "correct": true
+        },
+        {
+          "id": "RD10",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD11",
+          "kind": "off_topic_overlap",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "answer does not give what the question asks for",
+          "correct": true
+        },
+        {
+          "id": "RD20",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD21",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD22",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD23",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD24",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD25",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD26",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD27",
+          "kind": "on_topic",
+          "expected": "answered",
+          "status": "answered",
+          "reason": "",
+          "correct": true
+        },
+        {
+          "id": "RD40",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD41",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD42",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        },
+        {
+          "id": "RD43",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "polarity mismatch",
+          "correct": true
+        },
+        {
+          "id": "RD44",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "insufficient_information",
+          "reason": "polarity mismatch",
+          "correct": true
+        },
+        {
+          "id": "RD45",
+          "kind": "reversal",
+          "expected": "insufficient_information",
+          "status": "answered",
+          "reason": "",
+          "correct": false
+        }
+      ],
+      "stopped_bad": 8,
+      "bad": 17,
+      "kept_good": 8,
+      "good": 8,
+      "real_blocked": [],
+      "allowed": true
+    }
+  ],
+  "chosen": {
+    "variant": "topic+type",
+    "threshold": null
+  }
+}
