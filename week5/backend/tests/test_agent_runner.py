@@ -240,6 +240,9 @@ def fake(monkeypatch):
     llm = FakeLLM()
     monkeypatch.setattr("assistant.llm.get_llm", lambda: llm)
     monkeypatch.setattr("assistant.embeddings.get_embedder", lambda: FakeEmbedder())
+    # The endpoint uses the real clock; pin it to the sets' "today" so the 2026-11-05 slots don't expire
+    # (these tests started failing on 2026-11-06, when that date fell outside the booking window).
+    monkeypatch.setattr("django.utils.timezone.localdate", lambda *a, **k: TODAY)
     return llm
 
 
