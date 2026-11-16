@@ -1,0 +1,248 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { FormEvent, useEffect, useState } from "react";
+import { DISCLAIMER, FieldError, Shell } from "@/components/Shell";
+import { Avatar } from "@/components/ui/Avatar";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { ApiError, Profile, SECTION_LABELS, userApi } from "@/lib/api";
+
+const AGE_RANGES = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"];
+const toLines = (items: string[]) => items.join("\n");
+const fromLines = (text: string) => text.split("\n").map((s) => s.trim()).filter(Boolean);
+
+type Form = {
+  full_name: string; ageMode: "dob" | "range"; date_of_birth: string; age_range: string;
+  contact_preference: Profile["contact_preference"]; goals: string; allergies: string;
+  ec_name: string; ec_phone: string; ec_rel: string; notes: string;
+};
+
+function toForm(p: Profile): Form {
+  return {
+    full_name: p.full_name, ageMode: p.age_range ? "range" : "dob", date_of_birth: p.date_of_birth ?? "",
+    age_range: p.age_range, contact_preference: p.contact_preference, goals: toLines(p.wellness_goals),
+    allergies: toLines(p.allergies), ec_name: p.emergency_contact_name, ec_phone: p.emergency_contact_phone,
+    ec_rel: p.emergency_contact_relationship, notes: p.lifestyle_notes,
+  };
+}
+
+export default function ProfilePage() {
+  const router = useRouter();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [form, setForm] = useState<Form | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [message, setMessage] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [noProfile, setNoProfile] = useState(false);
+  const [newName, setNewName] = useState("");
+
+  useEffect(() => {
+    userApi.getProfile()
+      .then((p) => { setProfile(p); setForm(toForm(p)); })
+      .catch((err) => {
+        if (err instanceof ApiError && err.status === 401) router.replace("/login");
+        else if (err instanceof ApiError && err.status === 404) setNoProfile(true);
+        else setMessage({ kind: "error", text: "Could not load your profile." });
+      });
+  }, [router]);
+
+  async function logout() {
+    try { await userApi.logout(); } finally { router.push("/login"); }
+  }
+
+  async function save(e: FormEvent) {
+    e.preventDefault();
+    if (!form) return;
+    setBusy(true); setErrors({}); setMessage(null);
+    try {
+      const updated = await userApi.updateProfile({
+        full_name: form.full_name,
+        // Only one of DOB / age range is sent (the API rejects both together).
+        ...(form.ageMode === "dob"
+          ? { date_of_birth: form.date_of_birth || null }
+          : { age_range: form.age_range }),
+        contact_preference: form.contact_preference,
+        wellness_goals: fromLines(form.goals),
+        allergies: fromLines(form.allergies),
+        emergency_contact_name: form.ec_name,
+        emergency_contact_phone: form.ec_phone,
+        emergency_contact_relationship: form.ec_rel,
+        lifestyle_notes: form.notes,
+      } as Partial<Profile>);
+      setProfile(updated); setForm(toForm(updated));
+      setMessage({ kind: "ok", text: "Profile saved." });
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 401) return router.replace("/login");
+        setErrors(err.fieldErrors);
+        setMessage({ kind: "error", text: err.code === "validation_error" ? "Please fix the highlighted fields." : err.message });
+      } else setMessage({ kind: "error", text: "Network error. Please try again." });
+    } finally { setBusy(false); }
+  }
+
+  async function deleteProfile() {
+    if (!confirm("Delete your profile? Your goals, preferences and emergency contact will be removed. Your account stays, and you can create a new profile later.")) return;
+    setBusy(true); setMessage(null);
+    try {
+      await userApi.deleteProfile();
+      setProfile(null); setForm(null); setNoProfile(true);
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) return router.replace("/login");
+      setMessage({ kind: "error", text: "Could not delete your profile. Please try again." });
+    } finally { setBusy(false); }
+  }
+
+  async function createProfile(e: FormEvent) {
+    e.preventDefault();
+    setBusy(true); setErrors({});
+    try {
+      const created = await userApi.createProfile(newName);
+      setProfile(created); setForm(toForm(created)); setNoProfile(false);
+      setMessage({ kind: "ok", text: "Profile created. Fill in the sections below to complete it." });
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 401) return router.replace("/login");
+      setErrors(err instanceof ApiError ? err.fieldErrors : {});
+    } finally { setBusy(false); }
+  }
+
+  const nav = <button className="btn ghost small" onClick={logout}>Sign out</button>;
+  if (noProfile) {
+    return (
+      <Shell nav={nav}>
+        <div className="auth">
+          <form className="card" onSubmit={createProfile} noValidate>
+            <div className="auth-head">
+              <h1>You don&apos;t have a profile</h1>
+              <p className="muted small">Your account is still active. Create a new profile to get started again.</p>
+            </div>
+            <label htmlFor="new_name">Full name</label>
+            <input id="new_name" value={newName} onChange={(e) => setNewName(e.target.value)} autoComplete="name" />
+            <FieldError errors={errors} name="full_name" />
+            <button className="btn block" disabled={busy}>{busy ? "Creating…" : "Create profile"}</button>
+          </form>
+        </div>
+      </Shell>
+    );
+  }
+  if (!profile || !form) {
+    return <Shell nav={nav}>{message ? <div className="alert error">{message.text}</div> : <p className="muted">Loading…</p>}</Shell>;
+  }
+  const set = <K extends keyof Form>(k: K, v: Form[K]) => setForm({ ...form, [k]: v });
+
+  return (
+    <Shell nav={nav}>
+      <PageHeader
+        eyebrow="Member"
+        leading={<Avatar name={profile.full_name || profile.email} size="lg" />}
+        title="My profile"
+        lead={<>Signed in as {profile.email} · <span className="badge">{profile.status}</span></>}
+      />
+      <p className="alert warn small">{DISCLAIMER}</p>
+
+      <section className="card" aria-labelledby="completion-heading">
+        <div className="completion">
+          <div className="ring" style={{ ["--p" as string]: profile.completion.percent }} aria-hidden="true"><span>{profile.completion.percent}%</span></div>
+          <div>
+            <h2 id="completion-heading" style={{ marginBottom: 4 }}>Profile completion</h2>
+            <div className="progress" role="progressbar" aria-valuenow={profile.completion.percent} aria-valuemin={0} aria-valuemax={100} aria-label="Profile completion">
+              <span style={{ width: `${profile.completion.percent}%` }} />
+            </div>
+            <p className="small" style={{ margin: 0 }}>
+              {profile.completion.percent}% complete ·{" "}
+              <span className={`badge ${profile.completion.status === "complete" ? "" : "tone-warn"}`}>{profile.completion.status}</span>
+            </p>
+            {profile.completion.missing_sections.length > 0 && (
+              <>
+                <p className="small muted" style={{ margin: "10px 0 0" }}>Still to fill in:</p>
+                <ul className="missing">{profile.completion.missing_sections.map((s) => <li key={s}>{SECTION_LABELS[s] ?? s}</li>)}</ul>
+              </>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <form className="card" onSubmit={save} noValidate>
+        {message && <div className={`alert ${message.kind}`} role="status">{message.text}</div>}
+
+        <div className="form-section first"><h2>About you</h2></div>
+        <label htmlFor="full_name">Full name</label>
+        <input id="full_name" value={form.full_name} onChange={(e) => set("full_name", e.target.value)} />
+        <FieldError errors={errors} name="full_name" />
+
+        <div className="grid">
+          <div>
+            <label htmlFor="agemode">Age information</label>
+            <select id="agemode" value={form.ageMode} onChange={(e) => set("ageMode", e.target.value as Form["ageMode"])}>
+              <option value="dob">Date of birth</option>
+              <option value="range">Age range</option>
+            </select>
+          </div>
+          <div>
+            {form.ageMode === "dob" ? (<>
+              <label htmlFor="dob">Date of birth</label>
+              <input id="dob" type="date" value={form.date_of_birth} onChange={(e) => set("date_of_birth", e.target.value)} />
+              <FieldError errors={errors} name="date_of_birth" />
+            </>) : (<>
+              <label htmlFor="range">Age range</label>
+              <select id="range" value={form.age_range} onChange={(e) => set("age_range", e.target.value)}>
+                <option value="">Select…</option>
+                {AGE_RANGES.map((r) => <option key={r}>{r}</option>)}
+              </select>
+              <FieldError errors={errors} name="age_range" />
+            </>)}
+          </div>
+        </div>
+
+        <label htmlFor="contact">Contact preference</label>
+        <select id="contact" value={form.contact_preference} onChange={(e) => set("contact_preference", e.target.value as Form["contact_preference"])}>
+          <option value="email">Email</option><option value="phone">Phone call</option>
+          <option value="sms">SMS</option><option value="none">Do not contact</option>
+        </select>
+        <FieldError errors={errors} name="contact_preference" />
+
+        <div className="form-section"><h2>Wellness</h2></div>
+        <label htmlFor="goals">Wellness goals</label>
+        <textarea id="goals" value={form.goals} onChange={(e) => set("goals", e.target.value)} />
+        <div className="hint">One per line, up to 10.</div>
+        <FieldError errors={errors} name="wellness_goals" />
+
+        <label htmlFor="allergies">Allergies (optional)</label>
+        <textarea id="allergies" value={form.allergies} onChange={(e) => set("allergies", e.target.value)} />
+        <div className="hint">One per line, up to 20.</div>
+        <FieldError errors={errors} name="allergies" />
+
+        <label htmlFor="notes">Lifestyle notes (optional)</label>
+        <textarea id="notes" value={form.notes} onChange={(e) => set("notes", e.target.value)} maxLength={1000} />
+        <FieldError errors={errors} name="lifestyle_notes" />
+
+        <div className="form-section"><h2>Emergency contact (fictional)</h2></div>
+        <div className="grid">
+          <div>
+            <label htmlFor="ecn">Name</label>
+            <input id="ecn" value={form.ec_name} onChange={(e) => set("ec_name", e.target.value)} />
+            <FieldError errors={errors} name="emergency_contact_name" />
+          </div>
+          <div>
+            <label htmlFor="ecr">Relationship</label>
+            <input id="ecr" value={form.ec_rel} onChange={(e) => set("ec_rel", e.target.value)} />
+            <FieldError errors={errors} name="emergency_contact_relationship" />
+          </div>
+        </div>
+        <label htmlFor="ecp">Phone</label>
+        <input id="ecp" inputMode="tel" value={form.ec_phone} onChange={(e) => set("ec_phone", e.target.value)} />
+        <FieldError errors={errors} name="emergency_contact_phone" />
+
+        <button className="btn block" disabled={busy}>{busy ? "Saving…" : "Save profile"}</button>
+      </form>
+
+      <section className="card danger-zone" aria-labelledby="delete-heading">
+        <h2 id="delete-heading">Delete profile</h2>
+        <p className="muted small">
+          Removes your wellness profile. Your account stays, so you can sign in and start a new profile. The audit
+          trail keeps a note that you deleted it, without any of your details.
+        </p>
+        <button type="button" className="btn danger small" onClick={deleteProfile} disabled={busy}>Delete my profile</button>
+      </section>
+    </Shell>
+  );
+}
