@@ -1,5 +1,8 @@
 # Loom script: Week 4 (about 9 minutes)
 
+> **Review follow-up (2026-11-16):** corrections to the recorded Loom, plus the relevance check and evidence
+> replay, are in [loom-corrections.md](loom-corrections.md). The lines below are updated to match.
+
 Simple spoken English. Read it, don't recite it. Each part gives the time, what to show on screen, and
 what to say. The one-word cue list at the end is for glancing at while recording.
 
@@ -41,8 +44,10 @@ what to say. The one-word cue list at the end is for glancing at while recording
 > than on shuffled data. On the right, I show the clusters K-Means made anyway, as a warning. K-Means
 > always gives you clusters, even when there are none.
 >
-> The table compares K-Means and Ward. On the control data, K-Means found the planted habits partly.
-> The agreement score is 0.52, where 1 is perfect.
+> On the real data, K-Means scored 0.169 silhouette against 0.173 on shuffled data, and Ward 0.130
+> against 0.163, so there are no supported patient clusters. The table compares K-Means and Ward on the
+> labelled control data only. There K-Means partly found the planted habits (ARI 0.518, where 1 is
+> perfect), and Ward 0.179. That's one control, not proof that K-Means is better in general.
 
 ## 4. Demo: Assistant tab (2:15–3:45)
 
@@ -123,8 +128,9 @@ what to say. The one-word cue list at the end is for glancing at while recording
 
 > Verification: the full test suite and the model release check run in CI on every push, and a browser
 > test clicks through all three tabs. And here are the known gaps. The biggest: the server checks that
-> an answer is supported, not that it answers the question. Right now that relies on the similarity
-> floor. That's next. Thanks for watching.
+> an answer is supported, not fully that it answers the question. A relevance check now stops 5 of 12
+> off-topic or reversed replies on a frozen set, but a valid citation still isn't proof the answer
+> means the same as its quote. Thanks for watching.
 
 ---
 

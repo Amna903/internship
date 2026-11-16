@@ -122,6 +122,26 @@ Next.js admin tabs ──► Django REST (admin session, CSRF, rate limits, audi
 3. **Draft until the evidence is in.** The PR stayed a draft through Steps 5–14. Each step was ticked
    in the PR checklist only after CI was green, with links to its code, report and tests.
 
+
+### Follow-up review (source c92dbb9): how each point was addressed
+
+4. **Relevance is now checked, on new data, without touching the benchmark.** 25 dev cases (same policy words,
+   different intent; clause/meaning reversals) and a separate 18-case relevance set frozen *before* the check
+   was written. `assistant/relevance.py` (topic + answer-type) was chosen on dev only; scored once on the
+   frozen set: bad replies stopped 1/12 → **5/12**, correct kept **6/6**
+   ([relevance_report.md](backend/assistant/eval/relevance_report.md)). The original 18 cases are unchanged.
+   **Not closed:** U1, U2 and U9b still pass this check (the floor stops them), and same-topic/different-intent
+   answers pass.
+5. **Citation validity is kept separate from entailment.** Five meaning changes with real, verified quotes are
+   still answered and kept as strict expected-failure tests (`tests/test_relevance.py::TestRemainingFailures`),
+   next to the negation flips that are caught. The assistant is described as *cited and word-checked*, not
+   verified.
+6. **Loom corrections and evidence.** [loom-corrections.md](docs/loom-corrections.md) re-records the clustering
+   explanation (silhouette vs shuffled bar, no supported clusters, PCA = labelled positive control, PR-AUC ≠
+   accuracy), replaces "no leakage/no overfitting" with the split guards and the 0.011 train/validation gap,
+   and replays the idiom fix (`scripts/demo_idiom_fix.py`). [evidence-replay.md](docs/evidence-replay.md) links
+   each metric to its report; a test keeps them in sync.
+
 ## Run and test
 
 Prerequisites: Python 3.14 and Node 20 (the versions CI uses), and [Ollama](https://ollama.com) for the assistant.
